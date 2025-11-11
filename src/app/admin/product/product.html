@@ -1,0 +1,1017 @@
+<div class="p-6">
+    <!-- Toast Notifications -->
+    <app-toast 
+        [toasts]="toasts$()" 
+        (close)="onToastClose($event)">
+    </app-toast>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">Product Management</h1>
+            <p class="text-base-content/70 mt-2">Manage products, inventory, and pricing</p>
+        </div>
+        <div class="flex gap-2">
+            @if (selectedProducts().length > 0) {
+                <button 
+                    (click)="deleteSelected()" 
+                    [disabled]="isLoading()"
+                    class="btn btn-error btn-sm">
+                    @if (isLoading()) {
+                        <span class="loading loading-spinner loading-xs"></span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    }
+                    Delete Selected ({{selectedProducts().length}})
+                </button>
+            }
+            <button (click)="showAddModal.set(true)" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Product
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+        <div class="alert alert-error mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{errorMessage()}}</span>
+            <button (click)="errorMessage.set('')" class="btn btn-sm btn-ghost">✕</button>
+        </div>
+    }
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Search Input -->
+                <div class="form-control">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            placeholder="Search products..." 
+                            class="input input-bordered flex-1" 
+                            [ngModel]="searchTerm()"
+                            (ngModelChange)="searchTerm.set($event)"
+                            (keyup.enter)="onSearch()" />
+                        <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                            @if (isLoading()) {
+                                <span class="loading loading-spinner loading-sm"></span>
+                            } @else {
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="categoryFilter()"
+                        (ngModelChange)="onCategoryFilterChange($event)">
+                        <option [value]="null">All Categories</option>
+                        @for (category of categories$ | async; track category.id) {
+                            <option [value]="category.id">{{category.name}}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Subcategory Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="subCategoryFilter()"
+                        (ngModelChange)="onSubCategoryFilterChange($event)">
+                        <option [value]="null">All Subcategories</option>
+                        @for (subCategory of subCategories$ | async; track subCategory.id) {
+                            <option [value]="subCategory.id">{{subCategory.name}}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="statusFilter()"
+                        (ngModelChange)="onStatusFilterChange($event)">
+                        <option [value]="null">All Status</option>
+                        <option [value]="true">Active</option>
+                        <option [value]="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Price Range Filters -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Min Price</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        placeholder="Min price" 
+                        class="input input-bordered" 
+                        [ngModel]="minPriceFilter()"
+                        (ngModelChange)="minPriceFilter.set($event); onPriceFilterChange()" />
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Max Price</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        placeholder="Max price" 
+                        class="input input-bordered" 
+                        [ngModel]="maxPriceFilter()"
+                        (ngModelChange)="maxPriceFilter.set($event); onPriceFilterChange()" />
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Page Size</span>
+                    </label>
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="pageSize()"
+                        (ngModelChange)="onPageSizeChange($event)">
+                        <option [value]="10">10 per page</option>
+                        <option [value]="20">20 per page</option>
+                        <option [value]="50">50 per page</option>
+                        <option [value]="100">100 per page</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Clear Filters -->
+            <div class="flex justify-end mt-4">
+                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox checkbox-sm" 
+                                            [checked]="selectedProducts().length === getProductsLength() && getProductsLength() > 0"
+                                            [disabled]="isLoading()"
+                                            (change)="toggleSelectAll()" />
+                                    </label>
+                                </th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Rating</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of products$ | async; track product.id) {
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                class="checkbox checkbox-sm" 
+                                                [checked]="selectedProducts().includes(product.id)"
+                                                [disabled]="isLoading()"
+                                                (change)="toggleProductSelection(product.id)" />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            @if (product.images && product.images.length > 0) {
+                                                <div class="avatar">
+                                                    <div class="mask mask-squircle w-12 h-12">
+                                                        <img [src]="product.images[0]" [alt]="product.title" />
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="font-bold">{{product.title}}</div>
+                                                <div class="text-sm opacity-50" dir="rtl">{{product.titleAr}}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="font-semibold">{{product.categoryName}}</div>
+                                            <div class="text-sm opacity-50">{{product.subCategoryName}}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="font-bold text-success">{{product.newPrice|currency:'KWD'}}</div>
+                                            @if (product.oldPrice > product.newPrice) {
+                                                <div class="text-sm line-through opacity-50">${{product.oldPrice|currency:'KWD'}}</div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="badge" [class.badge-success]="product.isInStock" [class.badge-error]="!product.isInStock">
+                                                {{product.isInStock ? 'In Stock' : 'Out of Stock'}}
+                                            </div>
+                                            <div class="text-sm">{{product.totalInStock}} units</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class.badge-success]="product.isActive" [class.badge-error]="!product.isActive">
+                                            {{product.isActive ? 'Active' : 'Inactive'}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-1">
+                                            <div class="rating rating-sm">
+                                                @for (star of [1,2,3,4,5]; track star) {
+                                                    <input type="radio" [checked]="star <= product.averageRating" class="mask mask-star-2 bg-orange-400" disabled />
+                                                }
+                                            </div>
+                                            <span class="text-sm">({{product.totalReviews}})</span>
+                                        </div>
+                                    </td>
+                                    <th>
+                                        <div class="flex gap-1">
+                                            <button 
+                                                (click)="viewProductDetails(product.id)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Details
+                                            </button>
+                                            <button 
+                                                (click)="toggleProductStatus(product.id)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs"
+                                                [class.btn-success]="!product.isActive"
+                                                [class.btn-error]="product.isActive">
+                                                @if (isLoading()) {
+                                                    <span class="loading loading-spinner loading-xs"></span>
+                                                } @else {
+                                                    {{product.isActive ? 'Deactivate' : 'Activate'}}
+                                                }
+                                            </button>
+                                            <button 
+                                                (click)="editProductStart(product)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Edit
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            @if (getProductsLength() === 0 && !isLoading()) {
+                                <tr>
+                                    <td colspan="8" class="text-center py-8 text-base-content/50">
+                                        No products found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center mt-6">
+            <div class="join">
+                <!-- Previous Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() - 1)" 
+                    [disabled]="getCurrentPage() === 1 || isLoading()"
+                    class="join-item btn">
+                    «
+                </button>
+
+                <!-- Page Numbers -->
+                @for (page of pageNumbers$ | async; track page) {
+                    @if (page === '...') {
+                        <button class="join-item btn btn-disabled">...</button>
+                    } @else {
+                        <button 
+                            (click)="onPageChange(+page)" 
+                            [disabled]="isLoading()"
+                            [class.btn-active]="getCurrentPage() === page"
+                            class="join-item btn">
+                            {{page}}
+                        </button>
+                    }
+                }
+
+                <!-- Next Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() + 1)" 
+                    [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+                    class="join-item btn">
+                    »
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-4 text-sm text-base-content/70">
+            @if (pagination$ | async; as pagination) {
+                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} products
+            }
+        </div>
+    }
+
+    <!-- Add Product Modal -->
+    @if (showAddModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Add New Product</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- English Title -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Product Title (English) *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter product title in English" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newProduct.title" />
+                    </div>
+
+                    <!-- Arabic Title -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Product Title (Arabic) *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="أدخل عنوان المنتج بالعربية" 
+                            class="input input-bordered w-full" 
+                            dir="rtl"
+                            [(ngModel)]="newProduct.titleAr" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- English Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description (English) *</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter product description in English"
+                            [(ngModel)]="newProduct.description"></textarea>
+                    </div>
+
+                    <!-- Arabic Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description (Arabic) *</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="أدخل وصف المنتج بالعربية"
+                            dir="rtl"
+                            [(ngModel)]="newProduct.descriptionAr"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Subcategory Selection -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Subcategory *</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                placeholder="Search subcategory..." 
+                                class="input input-bordered w-full" 
+                                [ngModel]="subCategorySearchTerm()"
+                                (ngModelChange)="onSubCategorySearch($event)"
+                                (focus)="showSubCategoryDropdown.set(true)"
+                                (blur)="onSubCategoryBlur()" />
+                            @if (showSubCategoryDropdown()) {
+                                <div class="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    @for (subCategory of filteredSubCategories$ | async; track subCategory.id) {
+                                        <div 
+                                            class="p-2 hover:bg-base-200 cursor-pointer"
+                                            (click)="selectSubCategory(subCategory)">
+                                            <div class="font-semibold">{{subCategory.name}}</div>
+                                            <div class="text-sm opacity-70" dir="rtl">{{subCategory.nameAr}}</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Stock Quantity -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Stock Quantity *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter stock quantity" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newProduct.totalInStock" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <!-- Old Price -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Old Price</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter old price" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newProduct.oldPrice" />
+                    </div>
+
+                    <!-- New Price -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">New Price *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter new price" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newProduct.newPrice" />
+                    </div>
+
+                    <!-- In Stock -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Stock Status</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="newProduct.isInStock">
+                            <option [value]="true">In Stock</option>
+                            <option [value]="false">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Product Details Section -->
+                <div class="mt-6">
+                    <h4 class="font-bold text-md mb-3">Product Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Label (English)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter detail label" 
+                                class="input input-bordered" 
+                                [(ngModel)]="newProductDetail.label" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Label (Arabic)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="أدخل تسمية التفصيل" 
+                                class="input input-bordered" 
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.labelAr" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Value (English)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter detail value" 
+                                class="input input-bordered" 
+                                [(ngModel)]="newProductDetail.value" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Value (Arabic)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="أدخل قيمة التفصيل" 
+                                class="input input-bordered" 
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.valueAr" />
+                        </div>
+                    </div>
+                    <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
+                        Add Detail
+                    </button>
+                    
+                    <!-- Product Details List -->
+                    @if (productDetails().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">Added Details:</h5>
+                            @for (detail of productDetails(); track $index; let i = $index) {
+                                <div class="flex items-center justify-between p-2 bg-base-200 rounded mb-2">
+                                    <div>
+                                        <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
+                                        <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
+                                    </div>
+                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">Remove</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="mt-6">
+                    <h4 class="font-bold text-md mb-3">Product Images</h4>
+                    <input 
+                        type="file" 
+                        multiple 
+                        accept="image/*"
+                        class="file-input file-input-bordered w-full" 
+                        (change)="onImageSelected($event)" />
+                    
+                    <!-- Selected Images Preview -->
+                    @if (selectedImages().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">Selected Images:</h5>
+                            <div class="flex flex-wrap gap-2">
+                                @for (image of selectedImages(); track $index; let i = $index) {
+                                    <div class="relative">
+                                        <img [src]="getImagePreview(image)" class="w-20 h-20 object-cover rounded" />
+                                        <button (click)="removeSelectedImage(i)" class="absolute -top-2 -right-2 btn btn-xs btn-circle btn-error">×</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="addProduct()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Add Product
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Edit Product Modal -->
+    @if (showEditModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Edit Product</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- English Title -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Product Title (English) *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter product title in English" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editProduct.title" />
+                    </div>
+
+                    <!-- Arabic Title -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Product Title (Arabic) *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="أدخل عنوان المنتج بالعربية" 
+                            class="input input-bordered w-full" 
+                            dir="rtl"
+                            [(ngModel)]="editProduct.titleAr" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- English Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description (English) *</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter product description in English"
+                            [(ngModel)]="editProduct.description"></textarea>
+                    </div>
+
+                    <!-- Arabic Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description (Arabic) *</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="أدخل وصف المنتج بالعربية"
+                            dir="rtl"
+                            [(ngModel)]="editProduct.descriptionAr"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Subcategory Selection -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Subcategory *</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                placeholder="Search subcategory..." 
+                                class="input input-bordered w-full" 
+                                [ngModel]="editSubCategorySearchTerm()"
+                                (ngModelChange)="onEditSubCategorySearch($event)"
+                                (focus)="showEditSubCategoryDropdown.set(true)"
+                                (blur)="onEditSubCategoryBlur()" />
+                            @if (showEditSubCategoryDropdown()) {
+                                <div class="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    @for (subCategory of filteredEditSubCategories$ | async; track subCategory.id) {
+                                        <div 
+                                            class="p-2 hover:bg-base-200 cursor-pointer"
+                                            (click)="selectEditSubCategory(subCategory)">
+                                            <div class="font-semibold">{{subCategory.name}}</div>
+                                            <div class="text-sm opacity-70" dir="rtl">{{subCategory.nameAr}}</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Stock Quantity -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Stock Quantity *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter stock quantity" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editProduct.totalInStock" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <!-- Old Price -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Old Price</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter old price" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editProduct.oldPrice" />
+                    </div>
+
+                    <!-- New Price -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">New Price *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter new price" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editProduct.newPrice" />
+                    </div>
+
+                    <!-- In Stock -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Stock Status</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="editProduct.isInStock">
+                            <option [value]="true">In Stock</option>
+                            <option [value]="false">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Product Details Section -->
+                <div class="mt-6">
+                    <h4 class="font-bold text-md mb-3">Product Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Label (English)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter detail label" 
+                                class="input input-bordered" 
+                                [(ngModel)]="newProductDetail.label" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Label (Arabic)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="أدخل تسمية التفصيل" 
+                                class="input input-bordered" 
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.labelAr" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Value (English)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter detail value" 
+                                class="input input-bordered" 
+                                [(ngModel)]="newProductDetail.value" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Detail Value (Arabic)</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                placeholder="أدخل قيمة التفصيل" 
+                                class="input input-bordered" 
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.valueAr" />
+                        </div>
+                    </div>
+                    <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
+                        Add Detail
+                    </button>
+                    
+                    <!-- Product Details List -->
+                    @if (productDetails().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">Product Details:</h5>
+                            @for (detail of productDetails(); track $index; let i = $index) {
+                                <div class="flex items-center justify-between p-2 bg-base-200 rounded mb-2">
+                                    <div>
+                                        <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
+                                        <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
+                                    </div>
+                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">Remove</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="mt-6">
+                    <h4 class="font-bold text-md mb-3">Product Images</h4>
+                    <input 
+                        type="file" 
+                        multiple 
+                        accept="image/*"
+                        class="file-input file-input-bordered w-full" 
+                        (change)="onImageSelected($event)" />
+                    
+                    <!-- Selected Images Preview -->
+                    @if (selectedImages().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">New Images:</h5>
+                            <div class="flex flex-wrap gap-2">
+                                @for (image of selectedImages(); track $index; let i = $index) {
+                                    <div class="relative">
+                                        <img [src]="getImagePreview(image)" class="w-20 h-20 object-cover rounded" />
+                                        <button (click)="removeSelectedImage(i)" class="absolute -top-2 -right-2 btn btn-xs btn-circle btn-error">×</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="updateProduct()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Update Product
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Product Details Modal -->
+    @if (showDetailsModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-6xl">
+                <h3 class="font-bold text-lg mb-4">Product Details</h3>
+                
+                @if (isLoading()) {
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg"></span>
+                    </div>
+                } @else if (selectedProductDetails()) {
+                    <div class="space-y-6">
+                        <!-- Product Header -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Product Images -->
+                            <div>
+                                <h4 class="font-semibold mb-3">Product Images</h4>
+                                @if (selectedProductDetails()!.images && selectedProductDetails()!.images.length > 0) {
+                                    <div class="grid grid-cols-2 gap-2">
+                                        @for (image of selectedProductDetails()!.images; track $index) {
+                                            <div class="aspect-square">
+                                                <img [src]="image" [alt]="selectedProductDetails()!.title" class="w-full h-full object-cover rounded-lg" />
+                                            </div>
+                                        }
+                                    </div>
+                                } @else {
+                                    <div class="text-center py-8 text-base-content/50">
+                                        No images available
+                                    </div>
+                                }
+                            </div>
+                            
+                            <!-- Basic Information -->
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">Basic Information</h4>
+                                    <div class="space-y-2">
+                                        <div>
+                                            <span class="font-medium">Title (English):</span>
+                                            <p class="text-base-content/80">{{selectedProductDetails()!.title}}</p>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Title (Arabic):</span>
+                                            <p class="text-base-content/80" dir="rtl">{{selectedProductDetails()!.titleAr}}</p>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Category:</span>
+                                            <p class="text-base-content/80">{{selectedProductDetails()!.categoryName}}</p>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Subcategory:</span>
+                                            <p class="text-base-content/80">{{selectedProductDetails()!.subCategoryName}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-semibold mb-2">Pricing & Stock</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="font-medium">New Price:</span>
+                                            <span class="text-success font-bold">{{selectedProductDetails()!.newPrice|currency:'KWD'}}</span>
+                                        </div>
+                                        @if (selectedProductDetails()!.oldPrice > selectedProductDetails()!.newPrice) {
+                                            <div class="flex justify-between">
+                                                <span class="font-medium">Old Price:</span>
+                                                <span class="text-base-content/50 line-through">{{selectedProductDetails()!.oldPrice|currency:'KWD'}}</span>
+                                            </div>
+                                        }
+                                        <div class="flex justify-between">
+                                            <span class="font-medium">Stock Status:</span>
+                                            <span class="badge" [class.badge-success]="selectedProductDetails()!.isInStock" [class.badge-error]="!selectedProductDetails()!.isInStock">
+                                                {{selectedProductDetails()!.isInStock ? 'In Stock' : 'Out of Stock'}}
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="font-medium">Stock Quantity:</span>
+                                            <span class="font-medium">{{selectedProductDetails()!.totalInStock}} units</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="font-medium">Status:</span>
+                                            <span class="badge" [class.badge-success]="selectedProductDetails()!.isActive" [class.badge-error]="!selectedProductDetails()!.isActive">
+                                                {{selectedProductDetails()!.isActive ? 'Active' : 'Inactive'}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descriptions -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold mb-2">Description (English)</h4>
+                                <p class="text-base-content/80 whitespace-pre-wrap">{{selectedProductDetails()!.description}}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">Description (Arabic)</h4>
+                                <p class="text-base-content/80 whitespace-pre-wrap" dir="rtl">{{selectedProductDetails()!.descriptionAr}}</p>
+                            </div>
+                        </div>
+
+                        <!-- Product Details -->
+                        @if (selectedProductDetails()!.productDetails && selectedProductDetails()!.productDetails.length > 0) {
+                            <div>
+                                <h4 class="font-semibold mb-3">Product Details</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @for (detail of selectedProductDetails()!.productDetails; track $index) {
+                                        <div class="card bg-base-200 p-4">
+                                            <div class="space-y-2">
+                                                <div>
+                                                    <span class="font-medium">{{detail.label}}:</span>
+                                                    <p class="text-base-content/80">{{detail.value}}</p>
+                                                </div>
+                                                <div>
+                                                    <span class="font-medium" dir="rtl">{{detail.labelAr}}:</span>
+                                                    <p class="text-base-content/80" dir="rtl">{{detail.valueAr}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Ratings & Reviews -->
+                        <div>
+                            <h4 class="font-semibold mb-3">Ratings & Reviews</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="card bg-base-200 p-4 text-center">
+                                    <div class="text-2xl font-bold text-warning">{{selectedProductDetails()!.averageRating}}</div>
+                                    <div class="rating rating-sm justify-center">
+                                        @for (star of [1,2,3,4,5]; track star) {
+                                            <input type="radio" [checked]="star <= selectedProductDetails()!.averageRating" class="mask mask-star-2 bg-orange-400" disabled />
+                                        }
+                                    </div>
+                                    <div class="text-sm text-base-content/70">Average Rating</div>
+                                </div>
+                                <div class="card bg-base-200 p-4 text-center">
+                                    <div class="text-2xl font-bold">{{selectedProductDetails()!.totalReviews}}</div>
+                                    <div class="text-sm text-base-content/70">Total Reviews</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timestamps -->
+                        <div>
+                            <h4 class="font-semibold mb-3">Timestamps</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <span class="font-medium">Created:</span>
+                                    <p class="text-base-content/80">{{selectedProductDetails()!.createdAt | date:'medium'}}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium">Last Updated:</span>
+                                    <p class="text-base-content/80">{{selectedProductDetails()!.updatedAt | date:'medium'}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                } @else {
+                    <div class="text-center py-8 text-base-content/50">
+                        No product details available
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+        

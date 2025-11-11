@@ -1,0 +1,199 @@
+
+<div class="min-h-screen bg-base-200">
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-primary to-primary-focus text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+        <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
+          We're here to help! Get in touch with us for any questions or concerns
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Contact Information -->
+      <div class="lg:col-span-1">
+        <div class="bg-base-100 rounded-xl shadow-lg p-6 sticky top-8">
+          <h2 class="text-2xl font-bold mb-6 text-base-content">Get in Touch</h2>
+          
+          <!-- Address -->
+          <div class="mb-6">
+            <div class="flex items-start space-x-4 mb-4">
+              <div class="text-2xl">📍</div>
+              <div>
+                <h3 class="font-semibold text-base-content mb-1">Address</h3>
+                <p class="text-base-content/70">{{contactInfo.address}}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="mb-6">
+            <div class="flex items-start space-x-4 mb-4">
+              <div class="text-2xl">📞</div>
+              <div>
+                <h3 class="font-semibold text-base-content mb-1">Phone</h3>
+                <a href="tel:{{contactInfo.phone}}" class="text-primary hover:underline">
+                  {{contactInfo.phone}}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-6">
+            <div class="flex items-start space-x-4 mb-4">
+              <div class="text-2xl">✉️</div>
+              <div>
+                <h3 class="font-semibold text-base-content mb-1">Email</h3>
+                <a href="mailto:{{contactInfo.email}}" class="text-primary hover:underline">
+                  {{contactInfo.email}}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Working Hours -->
+          <div class="mb-6">
+            <div class="flex items-start space-x-4 mb-4">
+              <div class="text-2xl">🕐</div>
+              <div>
+                <h3 class="font-semibold text-base-content mb-1">Working Hours</h3>
+                <p class="text-base-content/70">{{contactInfo.workingHours}}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Media -->
+          <div class="border-t border-base-300 pt-6">
+            <h3 class="font-semibold text-base-content mb-4">Follow Us</h3>
+            <div class="flex flex-wrap gap-3">
+              @for (social of socialLinks; track social.name) {
+              <a [href]="social.url" target="_blank" rel="noopener noreferrer"
+                class="flex items-center space-x-2 px-4 py-2 bg-base-200 hover:bg-primary hover:text-white rounded-lg transition-colors duration-200">
+                <span>{{social.icon}}</span>
+                <span class="text-sm font-medium">{{social.name}}</span>
+              </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="lg:col-span-2">
+        <div class="bg-base-100 rounded-xl shadow-lg p-8">
+          <h2 class="text-2xl font-bold mb-6 text-base-content">Send us a Message</h2>
+          
+          @if (isSubmitted()) {
+          <div class="alert alert-success mb-6">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Thank you! Your message has been sent successfully. We'll get back to you soon.</span>
+          </div>
+          }
+
+          <form (ngSubmit)="onSubmit()" #contactForm="ngForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <!-- Name -->
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Name <span class="text-error">*</span>
+                </label>
+                <input type="text" [(ngModel)]="formData.name" name="name" required
+                  class="input input-bordered w-full focus:input-primary"
+                  placeholder="Your name">
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Email <span class="text-error">*</span>
+                </label>
+                <input type="email" [(ngModel)]="formData.email" name="email" required
+                  class="input input-bordered w-full focus:input-primary"
+                  placeholder="your.email@example.com">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <!-- Phone -->
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Phone
+                </label>
+                <input type="tel" [(ngModel)]="formData.phone" name="phone"
+                  class="input input-bordered w-full focus:input-primary"
+                  placeholder="+963 11 123 4567">
+              </div>
+
+              <!-- Subject -->
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Subject <span class="text-error">*</span>
+                </label>
+                <select [(ngModel)]="formData.subject" name="subject" required
+                  class="select select-bordered w-full focus:select-primary">
+                  <option value="">Select a subject</option>
+                  <option value="general">General Inquiry</option>
+                  <option value="support">Technical Support</option>
+                  <option value="sales">Sales Question</option>
+                  <option value="partnership">Partnership Opportunity</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-base-content mb-2">
+                Message <span class="text-error">*</span>
+              </label>
+              <textarea [(ngModel)]="formData.message" name="message" required rows="6"
+                class="textarea textarea-bordered w-full focus:textarea-primary"
+                placeholder="Tell us how we can help you..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+              <button type="submit" [disabled]="isSubmitting() || contactForm.invalid"
+                class="btn btn-primary btn-lg" [class.loading]="isSubmitting()">
+                @if (isSubmitting()) {
+                <span>Sending...</span>
+                } @else {
+                <span>Send Message</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Section (Placeholder) -->
+    <div class="mt-12">
+      <div class="bg-base-100 rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6 text-base-content">Find Us on Map</h2>
+        <div class="bg-base-200 rounded-lg h-96 flex items-center justify-center">
+          <div class="text-center text-base-content/60">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <p class="text-lg">Map will be displayed here</p>
+            <p class="text-sm">{{contactInfo.address}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

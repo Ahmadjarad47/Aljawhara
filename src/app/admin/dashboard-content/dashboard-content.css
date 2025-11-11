@@ -1,0 +1,653 @@
+/* Dashboard Content Styles */
+
+/* Custom Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(var(--fallback-p,oklch(var(--p))), 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(var(--fallback-p,oklch(var(--p))), 0);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0,0,0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in-up {
+    animation: slideInUp 0.8s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+}
+
+/* Staggered animations for cards */
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+.chart-card:nth-child(1) { animation-delay: 0.5s; }
+.chart-card:nth-child(2) { animation-delay: 0.6s; }
+
+.activity-card:nth-child(1) { animation-delay: 0.7s; }
+.activity-card:nth-child(2) { animation-delay: 0.8s; }
+
+/* Stat Cards */
+.stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(78, 78, 78, 0.151);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(109, 109, 109, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover::after {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.stat-card:focus {
+    outline: 2px solid var(--fallback-p,oklch(var(--p)));
+    outline-offset: 2px;
+}
+
+/* Chart Cards */
+.chart-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInUp 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chart-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.chart-card:hover::before {
+    opacity: 1;
+}
+
+.chart-card:hover::after {
+    opacity: 1;
+}
+
+.chart-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* Activity Cards */
+.activity-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInUp 1s ease-out forwards;
+    opacity: 0;
+}
+
+.activity-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.activity-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.activity-card:hover::before {
+    opacity: 1;
+}
+
+.activity-card:hover::after {
+    opacity: 1;
+}
+
+.activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* Activity Items */
+.activity-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.activity-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.activity-item:hover::before {
+    left: 100%;
+}
+
+.activity-item:hover {
+    background-color: rgba(var(--fallback-b2,oklch(var(--b2))), 0.5);
+    transform: translateX(4px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 320px;
+    width: 100%;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+}
+
+canvas {
+    max-height: 320px;
+    border-radius: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.chart-container:hover canvas {
+    transform: scale(1.02);
+}
+
+/* Card Body */
+.card-body {
+    padding: 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* Enhanced Button Styles */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(var(--fallback-b2,oklch(var(--b2))), 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(var(--fallback-p,oklch(var(--p))), 0.3), rgba(var(--fallback-s,oklch(var(--s))), 0.3));
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(var(--fallback-p,oklch(var(--p))), 0.5), rgba(var(--fallback-s,oklch(var(--s))), 0.5));
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(var(--fallback-b2,oklch(var(--b2))), 0.1);
+}
+
+/* Loading States */
+.loading-shimmer {
+    background: linear-gradient(90deg, 
+        rgba(var(--fallback-b2,oklch(var(--b2))), 0.1) 25%, 
+        rgba(var(--fallback-b2,oklch(var(--b2))), 0.2) 50%, 
+        rgba(var(--fallback-b2,oklch(var(--b2))), 0.1) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+.skeleton-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+/* Focus States for Accessibility */
+.stat-card:focus-visible,
+.chart-card:focus-visible,
+.activity-card:focus-visible {
+    outline: 2px solid var(--fallback-p,oklch(var(--p)));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(var(--fallback-p,oklch(var(--p))), 0.2);
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .stat-card,
+    .chart-card,
+    .activity-card {
+        border: 2px solid var(--fallback-bc,oklch(var(--bc)));
+        background: var(--fallback-b1,oklch(var(--b1)));
+    }
+    
+    .stat-card:hover,
+    .chart-card:hover,
+    .activity-card:hover {
+        border-color: var(--fallback-p,oklch(var(--p)));
+        background: var(--fallback-b2,oklch(var(--b2)));
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .stat-card,
+    .chart-card,
+    .activity-card,
+    .activity-item,
+    .btn {
+        animation: none;
+        transition: none;
+    }
+    
+    .stat-card:hover,
+    .chart-card:hover,
+    .activity-card:hover,
+    .activity-item:hover,
+    .btn:hover {
+        transform: none;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .stat-card {
+        padding: 1.25rem;
+    }
+    
+    .chart-container {
+        height: 280px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 1rem;
+        animation-delay: 0s !important;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem !important;
+    }
+    
+    .card-title {
+        font-size: 1.125rem !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .activity-item {
+        padding: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem !important;
+    }
+    
+    .card-title {
+        font-size: 1rem !important;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        padding: 0.5rem;
+    }
+    
+    .chart-container {
+        height: 180px;
+    }
+    
+    .card-body {
+        padding: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem !important;
+    }
+    
+    .card-title {
+        font-size: 0.875rem !important;
+    }
+    
+    .btn {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+/* Dark mode enhancements */
+[data-theme="dark-admin"] .stat-card,
+[data-theme="dark-admin"] .chart-card,
+[data-theme="dark-admin"] .activity-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    border-color: rgba(255,255,255,0.1);
+}
+
+[data-theme="dark-admin"] .stat-card::after,
+[data-theme="dark-admin"] .chart-card::after,
+[data-theme="dark-admin"] .activity-card::after {
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+}
+
+[data-theme="dark-admin"] .activity-item:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+[data-theme="dark-admin"] .chart-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+}
+
+/* Print Styles */
+@media print {
+    .stat-card,
+    .chart-card,
+    .activity-card {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    .chart-container {
+        height: 200px !important;
+    }
+}

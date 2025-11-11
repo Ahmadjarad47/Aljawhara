@@ -1,0 +1,7 @@
+.card {
+  border-radius: var(--radius-box);
+}
+
+.input-error {
+  border-color: var(--color-error);
+}

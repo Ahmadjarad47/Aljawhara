@@ -1,0 +1,99 @@
+/* User Management Component Styles */
+
+/* Action buttons styling */
+.btn-xs {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  min-height: 1.5rem;
+}
+
+/* Table responsive styling */
+.table th {
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* Badge styling for status indicators */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Modal styling */
+.modal-box {
+  max-width: 500px;
+}
+
+/* Alert styling */
+.alert {
+  margin-bottom: 1rem;
+}
+
+/* Loading spinner alignment */
+.loading {
+  margin: 0 auto;
+}
+
+/* Form control spacing */
+.form-control {
+  margin-bottom: 1rem;
+}
+
+/* Button group spacing */
+.flex.gap-1 {
+  gap: 0.25rem;
+}
+
+/* Responsive table actions */
+@media (max-width: 768px) {
+  .table th:nth-child(n+6),
+  .table td:nth-child(n+6) {
+    display: none;
+  }
+  
+  .flex-wrap {
+    flex-wrap: wrap;
+  }
+  
+  .btn-xs {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.25rem;
+  }
+}
+
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #2a2a2a;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
+  }
+}

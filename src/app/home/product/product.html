@@ -1,0 +1,767 @@
+<div class="drawer lg:drawer-open min-h-screen bg-base-200">
+  <input id="filters-drawer" type="checkbox" class="drawer-toggle" />
+  
+  <div class="drawer-content flex flex-col">
+    <!-- Header Section -->
+    <div class="bg-base-100 shadow-sm border-b border-base-300">
+      <div class="container mx-auto px-4 py-6">
+        <!-- Mobile Header -->
+        <div class="lg:hidden space-y-3">
+          <!-- Title Row -->
+          <div class="flex items-center gap-2">
+           
+            <h1 class="text-xl font-bold text-base-content">Products</h1>
+          </div>
+          
+          <!-- Search Row -->
+          <div class="form-control flex ">
+            <input type="text" placeholder="Search products..." 
+                   class="input input-bordered input-sm w-full" 
+                   [ngModel]="searchQuery()"
+                   (ngModelChange)="searchQuery.set($event); onSearchChange()">
+                 &nbsp;
+                    <label for="filters-drawer" class="btn btn-sm btn-primary drawer-button">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                      </svg>
+                    </label>
+                
+          </div>
+          
+          <!-- View Toggle Row -->
+           <div class="hidden lg:hidden">
+          <div class="flex justify-end">
+            <div class="btn-group btn-group-sm">
+              <button class="btn" [class.btn-active]="viewMode() === 'list'" (click)="setViewMode('list')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+              <button class="btn" [class.btn-active]="viewMode() === 'grid'" (click)="setViewMode('grid')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+        </div>
+        </div>
+       
+        <!-- Desktop Header -->
+        <div class="hidden lg:flex lg:items-center lg:justify-between gap-6">
+          <!-- Left Section: Title -->
+          <div class="flex-shrink-0">
+            <h1 class="text-3xl font-bold text-base-content">Products</h1>
+            <p class="text-base-content/70 mt-1">Discover amazing products tailored for you</p>
+          </div>
+          <!-- Right Section: Search and View Toggle -->
+          <div class="flex items-center gap-4 flex-1 justify-end">
+            <div class="form-control max-w-md w-full">
+              <div class="input-group">
+                <input type="text" placeholder="Search products..." 
+                       class="input input-bordered" 
+                       [ngModel]="searchQuery()"
+                       (ngModelChange)="searchQuery.set($event); onSearchChange()">
+                <button class="btn btn-square btn-primary">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </button>
+                
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-sm" [class.btn-active]="viewMode() === 'list'" (click)="setViewMode('list')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+              <button class="btn btn-sm" [class.btn-active]="viewMode() === 'grid'" (click)="setViewMode('grid')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 flex-1">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Desktop Left Sidebar - Hidden on Mobile -->
+        <div class="hidden lg:block lg:w-80 lg:flex-shrink-0">
+        <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-6 sticky top-6">
+          <h2 class="text-xl font-semibold text-base-content mb-6">Filters</h2>
+          
+          <!-- Category Filter -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Categories
+            </div>
+            <div class="collapse-content">
+              <div class="space-y-2">
+                @for (category of categories$ | async; track category.id) {
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" 
+                           class="checkbox checkbox-sm checkbox-primary" 
+                           [checked]="selectedCategories().includes(category.id)"
+                           (change)="toggleCategory(category.id)">
+                    <span class="text-sm">{{ category.name }}</span>
+                    <span class="badge badge-ghost badge-sm">{{ category.productCount }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Subcategory Filter -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Subcategories
+            </div>
+            <div class="collapse-content">
+              <div class="space-y-2">
+                @for (subCategory of subCategories$ | async; track subCategory.id) {
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" 
+                           class="checkbox checkbox-sm checkbox-primary" 
+                           [checked]="selectedSubCategories().includes(subCategory.id)"
+                           (change)="toggleSubCategory(subCategory.id)">
+                    <span class="text-sm">{{ subCategory.name }}</span>
+                    <span class="badge badge-ghost badge-sm">{{ subCategory.productCount }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Price Range
+            </div>
+            <div class="collapse-content">
+              <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                  <input type="number" 
+                         placeholder="Min" 
+                         class="input input-sm input-bordered flex-1"
+                         [ngModel]="priceRange().min"
+                         (ngModelChange)="updatePriceRange('min', $event)">
+                  <span class="text-sm">to</span>
+                  <input type="number" 
+                         placeholder="Max" 
+                         class="input input-sm input-bordered flex-1"
+                         [ngModel]="priceRange().max"
+                         (ngModelChange)="updatePriceRange('max', $event)">
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn btn-sm btn-primary flex-1" style="color: var(--color-primary-content);" (click)="applyPriceFilter()">Apply</button>
+                  <button class="btn btn-sm btn-ghost" (click)="clearPriceFilter()">Clear</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rating Filter -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Rating
+            </div>
+            <div class="collapse-content">
+              <div class="space-y-2">
+                @for (rating of ratingOptions; track rating.value) {
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" 
+                           name="rating" 
+                           class="radio radio-sm radio-primary" 
+                           [value]="rating.value"
+                           [ngModel]="selectedRating()"
+                           (ngModelChange)="selectedRating.set($event); onRatingChange()">
+                    <div class="flex items-center gap-1">
+                      <div class="rating rating-sm">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= rating.value">
+                        }
+                      </div>
+                      <span class="text-sm">& up</span>
+                    </div>
+                    <span class="badge badge-ghost badge-sm">{{ rating.count }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Availability Filter -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Availability
+            </div>
+            <div class="collapse-content">
+              <div class="space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" 
+                         class="checkbox checkbox-sm checkbox-primary" 
+                         [ngModel]="filters().inStock"
+                         (ngModelChange)="updateFilter('inStock', $event)">
+                  <span class="text-sm">In Stock</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" 
+                         class="checkbox checkbox-sm checkbox-primary" 
+                         [ngModel]="filters().onSale"
+                         (ngModelChange)="updateFilter('onSale', $event)">
+                  <span class="text-sm">On Sale</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" 
+                         class="checkbox checkbox-sm checkbox-primary" 
+                         [ngModel]="filters().newArrival"
+                         (ngModelChange)="updateFilter('newArrival', $event)">
+                  <span class="text-sm">New Arrivals</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sort Options -->
+          <div class="collapse collapse-arrow bg-base-200 mb-4">
+            <input type="checkbox" class="collapse-toggle" />
+            <div class="collapse-title text-sm font-medium">
+              Sort By
+            </div>
+            <div class="collapse-content">
+              <select class="select select-bordered select-sm w-full" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event); onSortChange()">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="highRating">Rating High to Low</option>
+                <option value="lowRating">Rating Low to High</option>
+                <option value="priceAsc">Price Low to High</option>
+                <option value="priceDesc">Price High to Low</option>
+                <option value="nameAsc">Name A-Z</option>
+                <option value="nameDesc">Name Z-A</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Clear All Filters -->
+          <button class="btn btn-outline btn-sm w-full" (click)="clearAllFilters()">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Clear All Filters
+          </button>
+        </div>
+      </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1">
+        <!-- Results Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <h3 class="text-lg font-semibold text-base-content">
+              {{ getProductsLength() }} Products Found
+            </h3>
+            @if (selectedCategories().length > 0) {
+              <div class="badge badge-primary badge-outline">
+                {{ selectedCategories().length }} Categories
+              </div>
+            }
+            @if (selectedSubCategories().length > 0) {
+              <div class="badge badge-secondary badge-outline">
+                {{ selectedSubCategories().length }} Subcategories
+              </div>
+            }
+            @if (selectedRating() > 0) {
+              <div class="badge badge-accent badge-outline">
+                {{ selectedRating() }}+ Stars
+              </div>
+            }
+          </div>
+          <div class="text-sm text-base-content/70">
+            Showing {{ (getCurrentPage() - 1) * pageSize() + 1 }} - {{ Math.min(getCurrentPage() * pageSize(), getProductsLength()) }} of {{ getProductsLength() }}
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading()) {
+          <div class="flex justify-center items-center py-12">
+            <div class="loading loading-spinner loading-lg text-primary"></div>
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (errorMessage()) {
+          <div class="alert alert-error">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <!-- Products List -->
+        @if (viewMode() === 'list' && !isLoading()) {
+          <div class="space-y-6">
+            @for (product of products$ | async; track product.id) {
+              <div class="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <!-- Product Card Container -->
+                <div class="flex flex-col sm:flex-row h-full">
+                  
+                  <!-- Product Image Section -->
+                  <div class="relative w-full sm:w-80 lg:w-96 h-64 sm:h-auto bg-base-200 flex-shrink-0">
+                    <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                         [alt]="product.title"
+                         class="w-full h-full object-cover">
+                    <!-- Badges on Image -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                      @if (product.isActive) {
+                        <div class="badge badge-primary shadow-lg">Active</div>
+                      }
+                      @if (product.oldPrice > product.newPrice) {
+                        <div class="badge badge-secondary shadow-lg">Sale</div>
+                      }
+                    </div>
+                    <!-- Wishlist Button on Image -->
+                    <button class="absolute top-4 right-4 btn btn-sm btn-circle glass"
+                            [class.btn-error]="product.isInWishlist"
+                            (click)="toggleWishlist(product)"
+                            [attr.aria-label]="(product.isInWishlist ? 'Remove from' : 'Add to') + ' wishlist'">
+                      <svg class="w-5 h-5" 
+                           [class.fill-error]="product.isInWishlist"
+                           fill="none" 
+                           stroke="currentColor" 
+                           viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <!-- Product Info Section -->
+                  <div class="flex-1 flex flex-col justify-between p-6">
+                    
+                    <!-- Top Section: Title, Category, Description -->
+                    <div>
+                      <!-- Product Title and Category -->
+                      <div class="mb-3">
+                        <h3 class="text-2xl font-bold text-base-content mb-2 hover:text-primary transition-colors cursor-pointer">
+                          {{ product.title }}
+                        </h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="badge badge-outline">{{ product.subCategoryName }}</span>
+                          <span class="text-base-content/50">•</span>
+                          <span class="text-sm text-base-content/70">{{ product.subCategoryNameAr }}</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Description -->
+                      <p class="text-base-content/70 text-sm mb-4 line-clamp-2">
+                        {{ product.description || 'No description available' }}
+                      </p>
+                      
+                      <!-- Rating and Stock -->
+                      <div class="flex items-center gap-4 mb-4">
+                        @if (product.averageRating > 0) {
+                          <div class="flex items-center gap-2">
+                            <div class="rating rating-sm">
+                              @for (star of [1,2,3,4,5]; track star) {
+                                <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.averageRating">
+                              }
+                            </div>
+                            <span class="text-sm text-base-content/70">{{ product.averageRating | number:'1.1-1' }}</span>
+                          </div>
+                        }
+                        <div class="h-4 w-px bg-base-content/20"></div>
+                        @if (product.isInStock) {
+                          <div class="badge badge-success badge-sm gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            In Stock ({{ product.totalInStock }})
+                          </div>
+                        }
+                        @if (!product.isInStock) {
+                          <div class="badge badge-error badge-sm">Out of Stock</div>
+                        }
+                      </div>
+                    </div>
+                    
+                    <!-- Bottom Section: Price and Actions -->
+                    <div class="border-t border-base-300 pt-4 mt-auto">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        
+                        <!-- Price -->
+                        <div class="flex-shrink-0">
+                          @if (product.oldPrice <= product.newPrice) {
+                            <div class="text-3xl font-bold text-primary">
+                              ${{ product.newPrice | number:'1.2-2' }}
+                            </div>
+                          }
+                          @if (product.oldPrice > product.newPrice) {
+                            <div>
+                              <div class="text-3xl font-bold text-primary">${{ product.newPrice | number:'1.2-2' }}</div>
+                              <div class="text-xl text-base-content/50 line-through">${{ product.oldPrice | number:'1.2-2' }}</div>
+                              <div class="badge badge-error badge-lg mt-1">
+                                {{ Math.round((1 - product.newPrice / product.oldPrice) * 100) }}% OFF
+                              </div>
+                            </div>
+                          }
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3">
+                          <button class="btn btn-secondary flex-1 sm:flex-initial group" 
+                                  (click)="viewProductDetails(product.id)"
+                                  [attr.aria-label]="'View details for ' + product.title">
+                            <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <span>Details</span>
+                          </button>
+                          <button class="btn btn-primary flex-1 sm:flex-initial group relative overflow-hidden" 
+                                  [disabled]="!product.isInStock"
+                                  (click)="addToCart(product)"
+                                  [attr.aria-label]="'Add ' + product.title + ' to cart'">
+                            <svg class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.5 5h13m-10.5 0a1.5 1.5 0 11-3 0m13 0a1.5 1.5 0 11-3 0" />
+                            </svg>
+                            <span>Add to Cart</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                  
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Products Grid (Alternative View) -->
+        @if (viewMode() === 'grid' && !isLoading()) {
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            @for (product of products$ | async; track product.id) {
+              <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-all duration-300">
+            <div class="card-body p-4">
+              <div class="aspect-square bg-base-200 rounded-lg overflow-hidden mb-4">
+                <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                     [alt]="product.title"
+                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+              </div>
+              <h4 class="text-lg font-semibold text-base-content mb-2">{{ product.title }}</h4>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge badge-outline badge-sm">{{ product.subCategoryName }}</span>
+              </div>
+              <p class="text-base-content/70 text-sm mb-3 line-clamp-2">
+                {{ product.description || 'No description available' }}
+              </p>
+              @if (product.averageRating > 0) {
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="rating rating-sm">
+                    @for (star of [1,2,3,4,5]; track star) {
+                      <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.averageRating">
+                    }
+                  </div>
+                  <span class="text-sm text-base-content/70">{{ product.averageRating | number:'1.1-1' }}/5</span>
+                </div>
+              }
+              <div class="text-xl font-bold text-primary mb-4">
+                @if (product.oldPrice <= product.newPrice) {
+                  <span>${{ product.newPrice | number:'1.2-2' }}</span>
+                }
+                @if (product.oldPrice > product.newPrice) {
+                  <span>
+                    <span class="text-primary">${{ product.newPrice | number:'1.2-2' }}</span>
+                    <span class="text-base-content/50 line-through text-sm ml-2">${{ product.oldPrice | number:'1.2-2' }}</span>
+                  </span>
+                }
+              </div>
+              <button class="btn btn-primary w-full group relative overflow-hidden" 
+                      [disabled]="!product.isInStock" 
+                      (click)="addToCart(product)"
+                      [attr.aria-label]="'Add ' + product.title + ' to cart'"
+                      (mouseenter)="addBounceClass($event)"
+                      (mouseleave)="removeBounceClass($event)">
+                <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
+                <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                </svg>
+                <span class="relative z-10">Add to Cart</span>
+              </button>
+              <div class="flex gap-2">
+                <button class="btn btn-outline btn-sm wishlist-btn tooltip tooltip-top flex-1" 
+                        [attr.data-tip]="'Add to wishlist'"
+                        [class.btn-error]="product.isInWishlist"
+                        [class.bg-error/10]="product.isInWishlist"
+                        (click)="toggleWishlist(product)"
+                        [attr.aria-label]="(product.isInWishlist ? 'Remove from' : 'Add to') + ' wishlist'"
+                        [attr.aria-pressed]="product.isInWishlist">
+                  <svg class="w-4 h-4 transition-all duration-300" 
+                       [class.fill-error]="product.isInWishlist"
+                       fill="none" 
+                       stroke="currentColor" 
+                       viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
+                </button>
+                <button class="btn btn-secondary btn-sm flex-1 group" 
+                        (click)="viewProductDetails(product.id)"
+                        [attr.aria-label]="'View details for ' + product.title"
+                        (mouseenter)="addSlideClass($event)"
+                        (mouseleave)="removeSlideClass($event)">
+                  <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <span>Details</span>
+                </button>
+              </div>
+            </div>
+          </div>
+            }
+          </div>
+        }
+
+        <!-- Pagination -->
+        @if (getTotalPages() > 1) {
+          <div class="flex justify-center mt-8">
+            <div class="btn-group">
+              <button class="btn btn-sm" 
+                      [disabled]="getCurrentPage() === 1"
+                      (click)="goToPage(getCurrentPage() - 1)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              @for (page of getPageNumbers(); track page) {
+                <button class="btn btn-sm" 
+                        [class.btn-active]="page === getCurrentPage()"
+                        (click)="goToPage(typeof page === 'number' ? page : 1)"
+                        [disabled]="page === '...'">
+                  {{ page }}
+                </button>
+              }
+              <button class="btn btn-sm" 
+                      [disabled]="getCurrentPage() === getTotalPages()"
+                      (click)="goToPage(getCurrentPage() + 1)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- No Results -->
+        <div class="text-center py-12" *ngIf="getProductsLength() === 0 && !isLoading()">
+          <svg class="w-16 h-16 mx-auto text-base-content/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.334A7.96 7.96 0 0012 5c-2.34 0-4.29 1.009-5.824 2.57"></path>
+          </svg>
+          <h3 class="text-xl font-semibold text-base-content mb-2">No products found</h3>
+          <p class="text-base-content/70 mb-4">Try adjusting your filters or search terms</p>
+          <button class="btn btn-primary" (click)="clearAllFilters()">Clear All Filters</button>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Side -->
+  <div class="drawer-side lg:hidden">
+    <label for="filters-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+    <div class="min-h-full w-80 bg-base-200 p-6 overflow-y-auto" style="scroll-behavior: smooth; will-change: scroll-position;">
+      <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-6" style="contain: layout style paint;">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-base-content">Filters</h2>
+          <label for="filters-drawer" class="btn btn-sm btn-circle btn-ghost">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </label>
+        </div>
+        
+        <!-- Category Filter -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Categories
+          </div>
+          <div class="collapse-content">
+            <div class="space-y-2">
+              @for (category of categories$ | async; track category.id) {
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" 
+                         class="checkbox checkbox-sm checkbox-primary" 
+                         [checked]="selectedCategories().includes(category.id)"
+                         (change)="toggleCategory(category.id)">
+                  <span class="text-sm">{{ category.name }}</span>
+                  <span class="badge badge-ghost badge-sm">{{ category.productCount }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Subcategory Filter -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Subcategories
+          </div>
+          <div class="collapse-content">
+            <div class="space-y-2">
+              @for (subCategory of subCategories$ | async; track subCategory.id) {
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" 
+                         class="checkbox checkbox-sm checkbox-primary" 
+                         [checked]="selectedSubCategories().includes(subCategory.id)"
+                         (change)="toggleSubCategory(subCategory.id)">
+                  <span class="text-sm">{{ subCategory.name }}</span>
+                  <span class="badge badge-ghost badge-sm">{{ subCategory.productCount }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Price Range
+          </div>
+          <div class="collapse-content">
+            <div class="space-y-4">
+              <div class="flex items-center gap-2">
+                <input type="number" 
+                       placeholder="Min" 
+                       class="input input-sm input-bordered flex-1"
+                       [ngModel]="priceRange().min"
+                       (ngModelChange)="updatePriceRange('min', $event)">
+                <span class="text-sm">to</span>
+                <input type="number" 
+                       placeholder="Max" 
+                       class="input input-sm input-bordered flex-1"
+                       [ngModel]="priceRange().max"
+                       (ngModelChange)="updatePriceRange('max', $event)">
+              </div>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-primary flex-1" style="color: var(--color-primary-content);" (click)="applyPriceFilter()">Apply</button>
+                <button class="btn btn-sm btn-ghost" (click)="clearPriceFilter()">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Filter -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Rating
+          </div>
+          <div class="collapse-content">
+            <div class="space-y-2">
+              @for (rating of ratingOptions; track rating.value) {
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" 
+                         name="rating" 
+                         class="radio radio-sm radio-primary" 
+                         [value]="rating.value"
+                         [ngModel]="selectedRating()"
+                         (ngModelChange)="selectedRating.set($event); onRatingChange()">
+                  <div class="flex items-center gap-1">
+                    <div class="rating rating-sm">
+                      @for (star of [1,2,3,4,5]; track star) {
+                        <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= rating.value">
+                      }
+                    </div>
+                    <span class="text-sm">& up</span>
+                  </div>
+                  <span class="badge badge-ghost badge-sm">{{ rating.count }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Availability Filter -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Availability
+          </div>
+          <div class="collapse-content">
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" 
+                       class="checkbox checkbox-sm checkbox-primary" 
+                       [ngModel]="filters().inStock"
+                       (ngModelChange)="updateFilter('inStock', $event)">
+                <span class="text-sm">In Stock</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" 
+                       class="checkbox checkbox-sm checkbox-primary" 
+                       [ngModel]="filters().onSale"
+                       (ngModelChange)="updateFilter('onSale', $event)">
+                <span class="text-sm">On Sale</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" 
+                       class="checkbox checkbox-sm checkbox-primary" 
+                       [ngModel]="filters().newArrival"
+                       (ngModelChange)="updateFilter('newArrival', $event)">
+                <span class="text-sm">New Arrivals</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="collapse collapse-arrow bg-base-200 mb-4">
+          <input type="checkbox" class="collapse-toggle" />
+          <div class="collapse-title text-sm font-medium">
+            Sort By
+          </div>
+          <div class="collapse-content">
+            <select class="select select-bordered select-sm w-full" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event); onSortChange()">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highRating">Rating High to Low</option>
+              <option value="lowRating">Rating Low to High</option>
+              <option value="priceAsc">Price Low to High</option>
+              <option value="priceDesc">Price High to Low</option>
+              <option value="nameAsc">Name A-Z</option>
+              <option value="nameDesc">Name Z-A</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Clear All Filters -->
+        <button class="btn btn-outline btn-sm w-full" (click)="clearAllFilters()">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Clear All Filters
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Component -->
+<app-toast 
+  [toasts]="toasts" 
+  (close)="onToastClose($event)">
+</app-toast>

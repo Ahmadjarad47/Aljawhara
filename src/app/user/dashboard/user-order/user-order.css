@@ -1,0 +1,45 @@
+/* Custom styles for user orders */
+
+/* Ensure proper spacing for order cards */
+.card-body {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects for order rows */
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Status badge animations */
+.badge {
+  transition: all 0.2s ease;
+}
+
+/* Modal animations are handled by DaisyUI */
+
+/* Responsive table improvements */
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .btn-xs {
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Order item image styling */
+.avatar .mask {
+  object-fit: cover;
+}
+
+/* Loading state opacity */
+[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

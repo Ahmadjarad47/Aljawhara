@@ -1,0 +1,5 @@
+/* Minimal overrides for layout niceties */
+.no-pointer-events {
+  pointer-events: none;
+}
+

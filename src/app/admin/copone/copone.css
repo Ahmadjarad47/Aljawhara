@@ -1,0 +1,311 @@
+/* Coupon Management Styles */
+
+/* Table responsive design */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .table th,
+    .table td {
+        white-space: nowrap;
+        min-width: 120px;
+    }
+}
+
+/* Coupon code styling */
+.font-mono {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* Badge styling for coupon status */
+.badge-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.badge-error {
+    background-color: #ef4444;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.badge-info {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.badge-outline {
+    background-color: transparent;
+    border: 1px solid currentColor;
+}
+
+/* Modal styling */
+.modal-box {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Form styling */
+.form-control {
+    margin-bottom: 1rem;
+}
+
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group .input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Loading states */
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Button states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Table hover effects */
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Pagination styling */
+.join .btn {
+    border-radius: 0;
+}
+
+.join .btn:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.join .btn:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Toast positioning */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+/* Responsive grid */
+@media (max-width: 640px) {
+    .grid-cols-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .md\\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .md\\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\\:flex-row {
+        flex-direction: row;
+    }
+}
+
+/* Custom scrollbar for modal */
+.modal-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-box::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-box::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Status indicators */
+.status-active {
+    color: #10b981;
+}
+
+.status-inactive {
+    color: #ef4444;
+}
+
+.status-expired {
+    color: #f59e0b;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Filter section */
+.filter-section {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Header section */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-section h1 {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 700;
+}
+
+.header-section p {
+    margin: 0.5rem 0 0 0;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+/* Button groups */
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Table container */
+.table-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Loading state */
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+}
+
+/* Responsive text */
+@media (max-width: 640px) {
+    .text-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .header-section h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Focus states */
+.input:focus,
+.select:focus,
+.textarea:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Checkbox styling */
+.checkbox {
+    accent-color: #3b82f6;
+}
+
+/* Select styling */
+.select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Animation for modals */
+.modal {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-box {
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

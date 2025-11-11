@@ -1,0 +1,579 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">User Management</h1>
+            <p class="text-base-content/70 mt-2">Manage users, block/unblock accounts, and handle user settings</p>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                placeholder="Search users by username, email..." 
+                                class="input input-bordered flex-1" 
+                                [ngModel]="searchTerm()"
+                                (ngModelChange)="searchTerm.set($event)"
+                                (keyup.enter)="onSearch()" />
+                            <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                                @if (isLoading()) {
+                                    <span class="loading loading-spinner loading-sm"></span>
+                                } @else {
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blocked Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="isBlockedFilter()"
+                        (ngModelChange)="isBlockedFilter.set($event); onFilterChange()">
+                        <option [value]="null">All Users</option>
+                        <option [value]="true">Blocked</option>
+                        <option [value]="false">Not Blocked</option>
+                    </select>
+                </div>
+
+                <!-- Email Confirmed Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="emailConfirmedFilter()"
+                        (ngModelChange)="emailConfirmedFilter.set($event); onFilterChange()">
+                        <option [value]="null">All Email Status</option>
+                        <option [value]="true">Email Confirmed</option>
+                        <option [value]="false">Email Not Confirmed</option>
+                    </select>
+                </div>
+
+                <!-- Active Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="isActiveFilter()"
+                        (ngModelChange)="isActiveFilter.set($event); onFilterChange()">
+                        <option [value]="null">All Status</option>
+                        <option [value]="true">Active</option>
+                        <option [value]="false">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Page Size -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="pageSize()"
+                        (ngModelChange)="pageSize.set($event); onPageSizeChange($event)">
+                        <option [value]="10">10 per page</option>
+                        <option [value]="20">20 per page</option>
+                        <option [value]="50">50 per page</option>
+                        <option [value]="100">100 per page</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox checkbox-sm" 
+                                            [checked]="selectedUsers().length === getUsersLength() && getUsersLength() > 0"
+                                            [disabled]="isLoading()"
+                                            (change)="toggleSelectAll()" />
+                                    </label>
+                                </th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Email Confirmed</th>
+                                <th>Status</th>
+                                <th>Blocked</th>
+                                <th>Block Until</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (user of users$| async; track $index) {
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                class="checkbox checkbox-sm" 
+                                                [checked]="selectedUsers().includes(user.id)"
+                                                [disabled]="isLoading()"
+                                                (change)="toggleUserSelection(user.id)" />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div class="font-semibold">{{user.username}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{user.email}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{user.phoneNumber || 'N/A'}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class.badge-success]="user.emailConfirmed" [class.badge-warning]="!user.emailConfirmed">
+                                            {{user.emailConfirmed ? 'Confirmed' : 'Not Confirmed'}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class.badge-success]="user.isActive" [class.badge-error]="!user.isActive">
+                                            {{user.isActive ? 'Active' : 'Inactive'}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class.badge-error]="user.isBlocked" [class.badge-success]="!user.isBlocked">
+                                            {{user.isBlocked ? 'Blocked' : 'Not Blocked'}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (user.isBlocked && user.lockoutEnd) {
+                                            <div class="text-sm text-base-content/70">{{user.lockoutEnd | date:'dd/MM/yyyy HH:mm'}}</div>
+                                        } @else if (user.isBlocked) {
+                                            <div class="text-sm text-error font-semibold">Permanent</div>
+                                        } @else {
+                                            <div class="text-sm text-base-content/50">-</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="text-sm text-base-content/70">{{user.createdAt | date:'dd/MM/yyyy HH:mm'}}</div>
+                                    </td>
+                                    <th>
+                                        <div class="flex gap-1 flex-wrap">
+                                            @if (user.isBlocked) {
+                                                <button 
+                                                    (click)="unblockUser(user)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-success btn-xs">
+                                                    Unblock
+                                                </button>
+                                            } @else {
+                                                <button 
+                                                    (click)="blockUser(user)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-error btn-xs">
+                                                    Block
+                                                </button>
+                                            }
+                                            
+                                            <button 
+                                                (click)="changePassword(user)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-warning btn-xs">
+                                                Change Password
+                                            </button>
+                                            
+                                            <button 
+                                                (click)="changeEmail(user)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-info btn-xs">
+                                                Change Email
+                                            </button>
+                                            
+                                            @if (!user.emailConfirmed) {
+                                                <button 
+                                                    (click)="sendEmailConfirmation(user)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-secondary btn-xs">
+                                                    Send Email Confirmation
+                                                </button>
+                                            }
+                                            
+                                            <button 
+                                                (click)="resetUserPassword(user)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-accent btn-xs">
+                                                Reset Password
+                                            </button>
+                                            
+                                            <button 
+                                                (click)="viewUserAddresses(user)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-primary btn-xs">
+                                                View Addresses
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            @if (getUsersLength() === 0 && !isLoading()) {
+                                <tr>
+                                    <td colspan="11" class="text-center py-8 text-base-content/50">
+                                        No users found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center mt-6">
+            <div class="join">
+                <!-- Previous Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() - 1)" 
+                    [disabled]="getCurrentPage() === 1 || isLoading()"
+                    class="join-item btn">
+                    «
+                </button>
+
+                <!-- Page Numbers -->
+                @for (page of pageNumbers$ | async; track page) {
+                    @if (page === '...') {
+                        <button class="join-item btn btn-disabled">...</button>
+                    } @else {
+                        <button 
+                            (click)="onPageChange(+page)" 
+                            [disabled]="isLoading()"
+                            [class.btn-active]="getCurrentPage() === page"
+                            class="join-item btn">
+                            {{page}}
+                        </button>
+                    }
+                }
+
+                <!-- Next Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() + 1)" 
+                    [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+                    class="join-item btn">
+                    »
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-4 text-sm text-base-content/70">
+            @if (pagination$ | async; as pagination) {
+                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} users
+            }
+        </div>
+    }
+
+    <!-- Block User Modal -->
+    @if (showBlockModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Block User</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Blocking user: <strong>{{selectedUser.username}}</strong> ({{selectedUser.email}})</p>
+                    </div>
+                    
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Block Duration</span>
+                        </label>
+                        <select 
+                            class="select select-bordered w-full" 
+                            [(ngModel)]="blockDuration"
+                            (ngModelChange)="onBlockDurationChange($event)">
+                            <option value="permanent">Permanent Block</option>
+                            <option value="1hour">1 Hour</option>
+                            <option value="6hours">6 Hours</option>
+                            <option value="1day">1 Day</option>
+                            <option value="3days">3 Days</option>
+                            <option value="1week">1 Week</option>
+                            <option value="2weeks">2 Weeks</option>
+                            <option value="1month">1 Month</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Reason for blocking</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter reason for blocking this user..."
+                            [(ngModel)]="blockUserDto.reason"></textarea>
+                    </div>
+                    
+                    @if (blockDuration !== 'permanent' && blockUntilDate) {
+                        <div class="alert alert-info">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>User will be automatically unblocked on: <strong>{{blockUntilDate | date:'dd/MM/yyyy HH:mm'}}</strong></span>
+                        </div>
+                    }
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="confirmBlockUser()" [disabled]="isLoading()" class="btn btn-error">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Block User
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Unblock User Modal -->
+    @if (showUnblockModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Unblock User</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Unblocking user: <strong>{{selectedUser.username}}</strong> ({{selectedUser.email}})</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <span>Are you sure you want to unblock this user?</span>
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="confirmUnblockUser()" [disabled]="isLoading()" class="btn btn-success">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Unblock User
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Change Password Modal -->
+    @if (showChangePasswordModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Change User Password</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Changing password for: <strong>{{selectedUser.username}}</strong> ({{selectedUser.email}})</p>
+                    </div>
+                    
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">New Password</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            placeholder="Enter new password (minimum 6 characters)" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="changePasswordDto.newPassword" />
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="confirmChangePassword()" [disabled]="isLoading()" class="btn btn-warning">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Change Email Modal -->
+    @if (showChangeEmailModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Change User Email</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Changing email for: <strong>{{selectedUser.username}}</strong></p>
+                        <p class="text-sm text-base-content/70">Current email: <strong>{{selectedUser.email}}</strong></p>
+                    </div>
+                    
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">New Email Address</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            placeholder="Enter new email address" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="changeEmailDto.newEmail" />
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>A confirmation email will be sent to the new email address.</span>
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="confirmChangeEmail()" [disabled]="isLoading()" class="btn btn-info">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Change Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Send Email Confirmation Modal -->
+    @if (showSendEmailModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Send Email Confirmation</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Sending email confirmation to: <strong>{{selectedUser.username}}</strong> ({{selectedUser.email}})</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>An email confirmation will be sent to the user's email address.</span>
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="confirmSendEmailConfirmation()" [disabled]="isLoading()" class="btn btn-secondary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Send Confirmation
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- User Addresses Modal -->
+    @if (showAddressesModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">User Addresses</h3>
+                
+                @if (selectedUser) {
+                    <div class="mb-4">
+                        <p class="text-sm text-base-content/70">Addresses for: <strong>{{selectedUser.username}}</strong> ({{selectedUser.email}})</p>
+                    </div>
+                    
+                    @if (isLoading()) {
+                        <div class="flex justify-center items-center py-8">
+                            <span class="loading loading-spinner loading-lg"></span>
+                        </div>
+                    } @else {
+                        @if (userAddresses.length === 0) {
+                            <div class="text-center py-8 text-base-content/50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <p>No addresses found for this user</p>
+                            </div>
+                        } @else {
+                            <div class="space-y-4">
+                                @for (address of userAddresses; track address.id) {
+                                    <div class="card bg-base-200 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <div class="flex justify-between items-start">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <h4 class="font-semibold text-lg">{{address.fullName}}</h4>
+                                                        @if (address.isDefault) {
+                                                            <div class="badge badge-primary">Default</div>
+                                                        }
+                                                    </div>
+                                                    
+                                                    <div class="space-y-1 text-sm">
+                                                        <p><strong>Address:</strong> {{address.addressLine1}}</p>
+                                                        @if (address.addressLine2) {
+                                                            <p>{{address.addressLine2}}</p>
+                                                        }
+                                                        <p>{{address.city}}, {{address.state}} {{address.postalCode}}</p>
+                                                        <p><strong>Country:</strong> {{address.country}}</p>
+                                                        <p><strong>Phone:</strong> {{address.phoneNumber}}</p>
+                                                    </div>
+                                                    
+                                                    <div class="text-xs text-base-content/50 mt-2">
+                                                        <p>Created: {{address.createdAt | date:'dd/MM/yyyy HH:mm'}}</p>
+                                                        <p>Updated: {{address.updatedAt | date:'dd/MM/yyyy HH:mm'}}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex flex-col gap-2">
+                                                    <div class="badge badge-outline">ID: {{address.id}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Toast Component -->
+    <app-toast 
+        [toasts]="toasts" 
+        (close)="onToastClose($event)">
+    </app-toast>
+</div>

@@ -1,0 +1,190 @@
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content">My Transactions</h1>
+      <p class="text-base-content/70 mt-2">View and filter your payment transactions</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+    <div class="card-body p-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">Order ID</span></label>
+          <input type="number" class="input input-bordered" [ngModel]="orderId()" (ngModelChange)="orderId.set($event ? +$event : null)" (keyup.enter)="onSearch()" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Order Number</span></label>
+          <input type="text" class="input input-bordered" [ngModel]="orderNumber()" (ngModelChange)="orderNumber.set($event)" (keyup.enter)="onSearch()" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Payment Method</span></label>
+          <select class="select select-bordered" [ngModel]="paymentMethod()" (ngModelChange)="paymentMethod.set($event ? +$event : null)">
+            <option [ngValue]="null">All</option>
+            <option [ngValue]="PaymentMethod.Card">Card</option>
+            <option [ngValue]="PaymentMethod.Cod">Cash on Delivery</option>
+            <option [ngValue]="PaymentMethod.Paypal">Paypal</option>
+            <option [ngValue]="PaymentMethod.Bank">Bank</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Status</span></label>
+          <input type="text" class="input input-bordered" [ngModel]="status()" (ngModelChange)="status.set($event)" (keyup.enter)="onSearch()" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Start Date</span></label>
+          <input type="date" class="input input-bordered" [ngModel]="startDate()" (ngModelChange)="startDate.set($event || null)" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">End Date</span></label>
+          <input type="date" class="input input-bordered" [ngModel]="endDate()" (ngModelChange)="endDate.set($event || null)" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Min Amount</span></label>
+          <input type="number" class="input input-bordered" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event !== null && $event !== '' ? +$event : null)" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Max Amount</span></label>
+          <input type="number" class="input input-bordered" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event !== null && $event !== '' ? +$event : null)" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Refunded</span></label>
+          <select class="select select-bordered" [ngModel]="isRefunded()" (ngModelChange)="isRefunded.set($event === '' ? null : ($event === 'true'))">
+            <option value="">All</option>
+            <option [ngValue]="true">Yes</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Page Size</span></label>
+          <select class="select select-bordered" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+            <option [value]="100">100</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Sort By</span></label>
+          <select class="select select-bordered" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
+            <option value="TransactionDate">Transaction Date</option>
+            <option value="Amount">Amount</option>
+            <option value="Status">Status</option>
+            <option value="PaymentMethod">Payment Method</option>
+            <option value="OrderNumber">Order Number</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Direction</span></label>
+          <select class="select select-bordered" [ngModel]="sortDirection()" (ngModelChange)="onSortDirectionChange($event)">
+            <option value="desc">Desc</option>
+            <option value="asc">Asc</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 flex gap-2">
+        <button class="btn btn-primary" (click)="onSearch()" [disabled]="isLoading()">
+          @if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> }
+          Apply
+        </button>
+        <button class="btn btn-outline" (click)="clearFilters()" [disabled]="isLoading()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body p-0">
+      @if (isLoading()) {
+        <div class="flex justify-center items-center py-12">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Transaction Date</th>
+                <th>Processed</th>
+                <th>Reference</th>
+                <th>Refunded</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of transactions$ | async; track t.id) {
+                <tr>
+                  <td>
+                    <div class="font-semibold">#{{t.orderNumber}}</div>
+                    <div class="text-xs opacity-60">ID: {{t.orderId}}</div>
+                  </td>
+                  <td>
+                    <div class="font-semibold">{{t.customerName || '-'}}</div>
+                    <div class="text-xs opacity-60">{{t.customerEmail || '-'}}</div>
+                  </td>
+                  <td><div class="badge badge-outline">{{t.amount | number:'1.2-2'}}</div></td>
+                  <td>{{t.paymentMethodName}}</td>
+                  <td>
+                    <div class="badge" [class.badge-success]="t.status.toLowerCase()==='succeeded' || t.status.toLowerCase()==='paid'" [class.badge-error]="t.status.toLowerCase()==='failed'" [class.badge-warning]="t.status.toLowerCase()==='pending'">
+                      {{t.status}}
+                    </div>
+                  </td>
+                  <td>{{t.transactionDate | date:'medium'}}</td>
+                  <td>{{t.processedDate ? (t.processedDate | date:'medium') : '-'}}</td>
+                  <td class="truncate max-w-[180px]" title="{{t.transactionReference}}">{{t.transactionReference || '-'}}</td>
+                  <td>
+                    <div class="badge" [class.badge-error]="t.isRefunded" [class.badge-success]="!t.isRefunded">
+                      {{t.isRefunded ? 'Yes' : 'No'}}
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if ((transactions$ | async)?.length === 0) {
+                <tr>
+                  <td colspan="9" class="text-center py-8 text-base-content/50">No transactions found</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  @if (getTotalPages() > 1) {
+    <div class="flex justify-center items-center mt-6">
+      <div class="join">
+        <button class="join-item btn" (click)="onPageChange(getCurrentPage() - 1)" [disabled]="getCurrentPage() === 1 || isLoading()">«</button>
+        @for (page of pageNumbers$ | async; track page) {
+          @if (page === '...') {
+            <button class="join-item btn btn-disabled">...</button>
+          } @else {
+            <button class="join-item btn" [class.btn-active]="getCurrentPage() === page" (click)="onPageChange(+page)" [disabled]="isLoading()">{{page}}</button>
+          }
+        }
+        <button class="join-item btn" (click)="onPageChange(getCurrentPage() + 1)" [disabled]="getCurrentPage() === getTotalPages() || isLoading()">»</button>
+      </div>
+    </div>
+  }
+
+  <!-- Toasts -->
+  <app-toast [toasts]="toasts" (close)="onToastClose($event)"></app-toast>
+</div>

@@ -1,0 +1,194 @@
+<div>
+  <h2 class="text-2xl font-bold text-base-content mb-6">Payment Information</h2>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Payment Form -->
+    <div>
+      <div class="card bg-base-200 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-lg font-semibold text-base-content mb-4">Card Details</h3>
+          
+          <div class="space-y-4">
+            <!-- Card Number -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Card Number</span>
+              </label>
+              <input 
+                type="text" 
+                class="input input-bordered w-full" 
+                placeholder="1234 5678 9012 3456"
+                [value]="cardNumber()"
+                (input)="formatCardNumber($any($event.target).value)"
+                maxlength="19"
+              />
+            </div>
+            
+            <!-- Cardholder Name -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Cardholder Name</span>
+              </label>
+              <input 
+                type="text" 
+                class="input input-bordered w-full" 
+                placeholder="John Doe"
+                [value]="cardName()"
+                (input)="cardName.set($any($event.target).value)"
+              />
+            </div>
+            
+            <!-- Expiry Date and CVV -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">Expiry Date</span>
+                </label>
+                <div class="flex gap-2">
+                  <select 
+                    class="select select-bordered flex-1"
+                    [value]="expiryMonth()"
+                    (change)="expiryMonth.set($any($event.target).value)"
+                  >
+                    <option value="">MM</option>
+                    @for (month of getMonths(); track month) {
+                      <option [value]="month">{{ month }}</option>
+                    }
+                  </select>
+                  <select 
+                    class="select select-bordered flex-1"
+                    [value]="expiryYear()"
+                    (change)="expiryYear.set($any($event.target).value)"
+                  >
+                    <option value="">YYYY</option>
+                    @for (year of getYears(); track year) {
+                      <option [value]="year">{{ year }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">CVV</span>
+                </label>
+                <input 
+                  type="text" 
+                  class="input input-bordered w-full" 
+                  placeholder="123"
+                  [value]="cvv()"
+                  (input)="cvv.set($any($event.target).value)"
+                  maxlength="3"
+                />
+              </div>
+            </div>
+            
+            <!-- Security Note -->
+            <div class="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm">Your payment information is secure and encrypted.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Summary -->
+      <div class="card bg-base-200 shadow-sm mt-6">
+        <div class="card-body">
+          <h3 class="text-lg font-semibold text-base-content mb-4">Order Summary</h3>
+          
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-base-content/70">Subtotal</span>
+              <span class="font-medium">{{ subtotal() | currency }}</span>
+            </div>
+            
+            <div class="flex justify-between text-sm">
+              <span class="text-base-content/70">Tax</span>
+              <span class="font-medium">{{ tax() | currency }}</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="flex justify-between text-lg font-bold">
+              <span>Total</span>
+              <span>{{ total() | currency }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Details -->
+    <div>
+      <div class="card bg-base-200 shadow-sm mb-6">
+        <div class="card-body">
+          <h3 class="text-lg font-semibold text-base-content mb-4">Shipping To</h3>
+          
+          @if (address) {
+            <div class="space-y-2">
+              <p class="font-medium text-base-content">{{ address.fullName }}</p>
+              <p class="text-sm text-base-content/70">{{ address.addressLine1 }}</p>
+              @if (address.addressLine2) {
+                <p class="text-sm text-base-content/70">{{ address.addressLine2 }}</p>
+              }
+              <p class="text-sm text-base-content/70">
+                {{ address.city }}, {{ address.state }} {{ address.postalCode }}
+              </p>
+              <p class="text-sm text-base-content/70">{{ address.country }}</p>
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="card bg-base-200 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-lg font-semibold text-base-content mb-4">Order Items</h3>
+          
+          @if (cartItems().length === 0) {
+            <p class="text-center text-base-content/70 py-4">Your cart is empty</p>
+          } @else {
+            <div class="space-y-3">
+              @for (item of cartItems(); track item.id) {
+                <div class="flex items-center gap-3 py-3 border-b border-base-300 last:border-0">
+                  <img [src]="item.image" [alt]="item.name" class="w-16 h-16 rounded-lg object-cover" />
+                  <div class="flex-1">
+                    <p class="font-medium text-sm">{{ item.name }}</p>
+                    <p class="text-xs text-base-content/70">Quantity: {{ item.quantity }}</p>
+                  </div>
+                  <p class="font-semibold text-sm">{{ item.price * item.quantity | currency }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Complete Order Button -->
+  <div class="mt-8">
+    <button 
+      class="btn btn-primary btn-lg w-full"
+      [disabled]="!isFormValid() || isProcessing()"
+      (click)="processPayment()"
+    >
+      @if (isProcessing()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Processing...
+      } @else {
+        Complete Order
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ml-2">
+          <path fill-rule="evenodd" d="M16.5 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zm-1.5 4.5a.75.75 0 01-1.5 0v-.752l-.93 1.118a.75.75 0 11-1.14-.948l1.121-1.348V9.375a.75.75 0 111.5 0v2.625zM12 3c-1.5 0-2.25 0-3.024.051-.813.054-1.43.167-1.98.44-.535.268-.964.624-1.237 1.057-.265.42-.422.893-.515 1.62-.05.39-.1.825-.127 1.332a48.678 48.678 0 00-.05 4.408c.002.085.007.17.014.255.028.507.077.942.127 1.332.093.727.25 1.2.515 1.62.273.433.702.789 1.237 1.057.55.273 1.167.386 1.98.44C9.75 21 10.5 21 12 21s2.25 0 3.024-.051c.813-.054 1.43-.167 1.98-.44.535-.268.964-.624 1.237-1.057.265-.42.422-.893.515-1.62.05-.39.1-.825.127-1.332.007-.085.012-.17.014-.255a48.678 48.678 0 00.05-4.408c-.002-.085-.007-.17-.014-.255-.028-.507-.077-.942-.127-1.332-.093-.727-.25-1.2-.515-1.62-.273-.433-.702-.789-1.237-1.057-.55-.273-1.167-.386-1.98-.44C14.25 3 13.5 3 12 3z" clip-rule="evenodd" />
+        </svg>
+      }
+    </button>
+    
+    <p class="text-center text-sm text-base-content/70 mt-4">
+      By completing your order, you agree to our Terms of Service and Privacy Policy.
+    </p>
+  </div>
+</div>
+

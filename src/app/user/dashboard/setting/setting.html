@@ -1,0 +1,226 @@
+<div class="p-6">
+  <div class="mb-6">
+    <h2 class="text-2xl font-semibold">Account Settings</h2>
+    <p class="text-base-content/70">Manage your profile and addresses</p>
+  </div>
+
+  <div role="tablist" class="tabs tabs-boxed mb-4">
+    <a role="tab" class="tab" [class.tab-active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">Profile</a>
+    <a role="tab" class="tab" [class.tab-active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">Addresses</a>
+  </div>
+
+  @if (activeTab() === 'profile') {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+          <h3 class="card-title">User info</h3>
+          @if (isLoadingUser()) {
+            <span class="loading loading-spinner"></span>
+          } @else {
+            @if (currentUser(); as user) {
+              <div class="space-y-2">
+                <div><span class="font-medium">Username:</span> {{user.username}}</div>
+                <div><span class="font-medium">Email:</span> {{user.email}}</div>
+                <div><span class="font-medium">Phone:</span> {{user.phoneNumber}}</div>
+                <div><span class="font-medium">Created:</span> {{user.createdAt | date:'medium'}}</div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+          <h3 class="card-title">Update username</h3>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Username</span></label>
+            <input class="input input-bordered" type="text" [(ngModel)]="updateUsernameModel.username" />
+          </div>
+          <div class="card-actions justify-end mt-3">
+            <button class="btn btn-primary" (click)="onUpdateUsername()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-sm border border-base-300 lg:col-span-2">
+        <div class="card-body">
+          <h3 class="card-title">Update phone number</h3>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Phone number</span></label>
+            <input class="input input-bordered" type="tel" [(ngModel)]="updatePhoneModel.phoneNumber" />
+          </div>
+          <div class="card-actions justify-end mt-3">
+            <button class="btn btn-primary" (click)="onUpdatePhone()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (activeTab() === 'addresses') {
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+      <div class="card-body p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="card-title">Your addresses</h3>
+          @if ((addresses() || []).length === 0) {
+            <button class="btn btn-primary btn-sm" (click)="openAddAddress()">Add address</button>
+          }
+        </div>
+
+        @if (isLoadingAddresses()) {
+          <div class="flex justify-center py-8">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        } @else {
+          @if ((addresses() || []).length === 0) {
+            <div class="text-center text-base-content/60 py-6">No addresses found</div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="table table-zebra">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>City/State</th>
+                    <th>Postal</th>
+                    <th>Default</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (addr of addresses(); track addr.id) {
+                    <tr>
+                      <td>{{addr.fullName}}</td>
+                      <td>{{addr.phoneNumber}}</td>
+                      <td>{{addr.addressLine1}} <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span></td>
+                      <td>{{addr.city}} <span *ngIf="addr.state">/ {{addr.state}}</span></td>
+                      <td>{{addr.postalCode}}</td>
+                      <td>
+                        <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">{{addr.isDefault ? 'Yes' : 'No'}}</div>
+                      </td>
+                      <td class="text-right">
+                        <div class="flex gap-2 justify-end">
+                          <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">Edit</button>
+                          <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Add Address Modal -->
+    @if (showAddAddress()) {
+      <div class="modal modal-open">
+        <div class="modal-box max-w-3xl">
+          <h3 class="font-bold text-lg mb-4">Add address</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Full name</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.fullName" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Phone</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.phoneNumber" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text">Address line 1</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.addressLine1" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text">Address line 2</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.addressLine2" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Country</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.country" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">City</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.city" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">State</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.state" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Postal code</span></label>
+              <input class="input input-bordered" [(ngModel)]="newAddress.postalCode" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="cursor-pointer label justify-start gap-3">
+                <input type="checkbox" class="checkbox" [(ngModel)]="newAddress.isDefault">
+                <span class="label-text">Set as default address</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-action">
+            <button class="btn btn-ghost" (click)="showAddAddress.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="addAddress()">Save</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Edit Address Modal -->
+    @if (showEditAddress()) {
+      <div class="modal modal-open">
+        <div class="modal-box max-w-3xl">
+          <h3 class="font-bold text-lg mb-4">Edit address</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Full name</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.fullName" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Phone</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.phoneNumber" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text">Address line 1</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.addressLine1" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="label"><span class="label-text">Address line 2</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.addressLine2" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Country</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.country" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">City</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.city" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">State</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.state" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">Postal code</span></label>
+              <input class="input input-bordered" [(ngModel)]="editAddress.postalCode" />
+            </div>
+            <div class="form-control md:col-span-2">
+              <label class="cursor-pointer label justify-start gap-3">
+                <input type="checkbox" class="checkbox" [(ngModel)]="editAddress.isDefault">
+                <span class="label-text">Set as default address</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-action">
+            <button class="btn btn-ghost" (click)="showEditAddress.set(false)">Cancel</button>
+            <button class="btn btn-primary" (click)="updateAddress()">Save</button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <app-toast [toasts]="toastService.toasts$()" (close)="toastService.removeToast($event)"></app-toast>
+</div>

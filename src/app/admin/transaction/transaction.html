@@ -1,0 +1,1023 @@
+<div class="p-6">
+    <!-- Toast Component -->
+    <app-toast 
+        [toasts]="toasts" 
+        (close)="onToastClose($event)">
+    </app-toast>
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">Transaction Management</h1>
+            <p class="text-base-content/70 mt-2">Manage payment transactions and refunds</p>
+        </div>
+        <div class="flex gap-2">
+            <button (click)="toggleCharts()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {{showCharts() ? 'Hide' : 'Show'}} Charts
+            </button>
+            @if (selectedTransactions().length > 0) {
+                <button 
+                    (click)="deleteSelected()" 
+                    [disabled]="isLoading()"
+                    class="btn btn-error btn-sm">
+                    @if (isLoading()) {
+                        <span class="loading loading-spinner loading-xs"></span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    }
+                    Delete Selected ({{selectedTransactions().length}})
+                </button>
+            }
+            <button (click)="viewAnalytics()" [disabled]="isLoading()" class="btn btn-info btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Analytics
+            </button>
+            <button (click)="exportToCsv()" [disabled]="isLoading()" class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export CSV
+            </button>
+            <button (click)="exportToExcel()" [disabled]="isLoading()" class="btn btn-outline btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Excel
+            </button>
+            <button (click)="showAddModal.set(true)" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Transaction
+            </button>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    @if (showCharts()) {
+        <div class="mb-6 space-y-6">
+            <!-- Chart Filters -->
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4">
+                    <h3 class="font-semibold text-base-content mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Chart Filters
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <!-- Start Date Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Start Date</span>
+                            </label>
+                            <input 
+                                type="date" 
+                                class="input input-bordered input-sm" 
+                                [ngModel]="chartStartDate()"
+                                (ngModelChange)="chartStartDate.set($event)" />
+                        </div>
+
+                        <!-- End Date Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">End Date</span>
+                            </label>
+                            <input 
+                                type="date" 
+                                class="input input-bordered input-sm" 
+                                [ngModel]="chartEndDate()"
+                                (ngModelChange)="chartEndDate.set($event)" />
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Status</span>
+                            </label>
+                            <select 
+                                class="select select-bordered select-sm" 
+                                [ngModel]="chartStatusFilter()"
+                                (ngModelChange)="chartStatusFilter.set($event)">
+                                <option [value]="null">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Failed">Failed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Refunded">Refunded</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Method Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Payment Method</span>
+                            </label>
+                            <select 
+                                class="select select-bordered select-sm" 
+                                [ngModel]="chartPaymentMethodFilter()"
+                                (ngModelChange)="chartPaymentMethodFilter.set($event)">
+                                <option [value]="null">All Methods</option>
+                                <option [value]="PaymentMethod.Card">Card</option>
+                                <option [value]="PaymentMethod.Cod">Cash on Delivery</option>
+                                <option [value]="PaymentMethod.Paypal">PayPal</option>
+                                <option [value]="PaymentMethod.Bank">Bank Transfer</option>
+                            </select>
+                        </div>
+
+                        <!-- Filter Actions -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">&nbsp;</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <button (click)="applyChartFilters()" [disabled]="isLoading()" class="btn btn-primary btn-sm flex-1">
+                                    @if (isLoading()) {
+                                        <span class="loading loading-spinner loading-xs"></span>
+                                    } @else {
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    }
+                                    Apply
+                                </button>
+                                <button (click)="clearChartFilters()" [disabled]="isLoading()" class="btn btn-ghost btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Transactions by Status Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Transactions by Status</h2>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="transactionsByStatusChartData"
+                                [options]="transactionsByStatusChartOptions"
+                                type="doughnut">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions by Payment Method Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Transactions by Payment Method</h2>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="transactionsByPaymentMethodChartData"
+                                [options]="transactionsByPaymentMethodChartOptions"
+                                type="doughnut">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time-based Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Transactions Over Time Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Transactions Over Time</h2>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="transactionsOverTimeChartData"
+                                [options]="transactionsOverTimeChartOptions"
+                                type="line">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Amount Over Time Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Transaction Amount Over Time</h2>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="amountOverTimeChartData"
+                                [options]="amountOverTimeChartOptions"
+                                type="bar">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Search Input -->
+                <div class="form-control">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            placeholder="Search order number..." 
+                            class="input input-bordered flex-1" 
+                            [ngModel]="orderNumberFilter()"
+                            (ngModelChange)="orderNumberFilter.set($event)"
+                            (keyup.enter)="onSearch()" />
+                        <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                            @if (isLoading()) {
+                                <span class="loading loading-spinner loading-sm"></span>
+                            } @else {
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order ID Filter -->
+                <div class="form-control">
+                    <input 
+                        type="number" 
+                        placeholder="Order ID" 
+                        class="input input-bordered" 
+                        [ngModel]="orderIdFilter()"
+                        (ngModelChange)="orderIdFilter.set($event ? +$event : null)" />
+                </div>
+
+                <!-- Payment Method Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="paymentMethodFilter()"
+                        (ngModelChange)="paymentMethodFilter.set($event); onSearch()">
+                        <option [value]="null">All Payment Methods</option>
+                        <option [value]="PaymentMethod.Card">Card</option>
+                        <option [value]="PaymentMethod.Cod">Cash on Delivery</option>
+                        <option [value]="PaymentMethod.Paypal">PayPal</option>
+                        <option [value]="PaymentMethod.Bank">Bank Transfer</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="statusFilter()"
+                        (ngModelChange)="statusFilter.set($event); onSearch()">
+                        <option [value]="null">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Failed">Failed</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Refunded">Refunded</option>
+                    </select>
+                </div>
+
+                <!-- Start Date Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Start Date</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        class="input input-bordered" 
+                        [ngModel]="startDateFilter()"
+                        (ngModelChange)="startDateFilter.set($event); onSearch()" />
+                </div>
+
+                <!-- End Date Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">End Date</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        class="input input-bordered" 
+                        [ngModel]="endDateFilter()"
+                        (ngModelChange)="endDateFilter.set($event); onSearch()" />
+                </div>
+
+                <!-- Min Amount Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Min Amount</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        placeholder="Min amount" 
+                        class="input input-bordered" 
+                        [ngModel]="minAmountFilter()"
+                        (ngModelChange)="minAmountFilter.set($event ? +$event : null); onSearch()" />
+                </div>
+
+                <!-- Max Amount Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Max Amount</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        placeholder="Max amount" 
+                        class="input input-bordered" 
+                        [ngModel]="maxAmountFilter()"
+                        (ngModelChange)="maxAmountFilter.set($event ? +$event : null); onSearch()" />
+                </div>
+
+                <!-- Refunded Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Refund Status</span>
+                    </label>
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="isRefundedFilter()"
+                        (ngModelChange)="isRefundedFilter.set($event); onSearch()">
+                        <option [value]="null">All</option>
+                        <option [value]="true">Refunded</option>
+                        <option [value]="false">Not Refunded</option>
+                    </select>
+                </div>
+
+                <!-- Page Size -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Page Size</span>
+                    </label>
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="pageSize()"
+                        (ngModelChange)="onPageSizeChange($event)">
+                        <option [value]="10">10 per page</option>
+                        <option [value]="20">20 per page</option>
+                        <option [value]="50">50 per page</option>
+                        <option [value]="100">100 per page</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">&nbsp;</span>
+                    </label>
+                    <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox checkbox-sm" 
+                                            [checked]="selectedTransactions().length === getTransactionsLength() && getTransactionsLength() > 0"
+                                            [disabled]="isLoading()"
+                                            (change)="toggleSelectAll()" />
+                                    </label>
+                                </th>
+                                <th>Transaction ID</th>
+                                <th>Order Info</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Transaction Date</th>
+                                <th>Refunded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (transaction of transactions$ | async; track transaction.id) {
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                class="checkbox checkbox-sm" 
+                                                [checked]="selectedTransactions().includes(transaction.id)"
+                                                [disabled]="isLoading()"
+                                                (change)="toggleTransactionSelection(transaction.id)" />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div class="font-semibold">#{{transaction.id}}</div>
+                                        @if (transaction.transactionReference) {
+                                            <div class="text-xs opacity-50">{{transaction.transactionReference}}</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold">Order #{{transaction.orderNumber}}</div>
+                                        <div class="text-xs opacity-50">ID: {{transaction.orderId}}</div>
+                                    </td>
+                                    <td>
+                                        @if (transaction.customerName) {
+                                            <div class="font-semibold">{{transaction.customerName}}</div>
+                                            <div class="text-xs opacity-50">{{transaction.customerEmail}}</div>
+                                        } @else {
+                                            <div class="text-xs opacity-50">Guest</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="font-bold text-success">{{transaction.amount | currency:'KWD'}}</div>
+                                        @if (transaction.isRefunded && transaction.refundAmount) {
+                                            <div class="text-xs text-error">Refunded: {{transaction.refundAmount | currency:'KWD'}}</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-outline">{{getPaymentMethodName(transaction.paymentMethod)}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class]="getStatusBadgeClass(transaction.status)">
+                                            {{transaction.status}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{transaction.transactionDate | date:'short'}}</div>
+                                        @if (transaction.processedDate) {
+                                            <div class="text-xs opacity-50">Processed: {{transaction.processedDate | date:'short'}}</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (transaction.isRefunded) {
+                                            <div class="badge badge-error">Yes</div>
+                                            @if (transaction.refundDate) {
+                                                <div class="text-xs opacity-50">{{transaction.refundDate | date:'short'}}</div>
+                                            }
+                                        } @else {
+                                            <div class="badge badge-success">No</div>
+                                        }
+                                    </td>
+                                    <th>
+                                        <div class="flex flex-wrap gap-1">
+                                            <button 
+                                                (click)="viewDetails(transaction)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Details
+                                            </button>
+                                            <button 
+                                                (click)="updateStatusStart(transaction)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Status
+                                            </button>
+                                            @if (transaction.status === 'Pending') {
+                                                <button 
+                                                    (click)="markAsCompleted(transaction)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-success btn-xs">
+                                                    Complete
+                                                </button>
+                                            }
+                                            @if (transaction.status !== 'Failed' && transaction.status !== 'Cancelled') {
+                                                <button 
+                                                    (click)="markAsFailed(transaction)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-error btn-xs">
+                                                    Fail
+                                                </button>
+                                            }
+                                            @if (!transaction.isRefunded && (transaction.status === 'Completed' || transaction.status === 'Success')) {
+                                                <button 
+                                                    (click)="refundTransactionStart(transaction)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-warning btn-xs">
+                                                    Refund
+                                                </button>
+                                            }
+                                            <button 
+                                                (click)="editTransactionStart(transaction)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Edit
+                                            </button>
+                                            <button 
+                                                (click)="deleteTransaction(transaction.id)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-error btn-xs">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            @if (getTransactionsLength() === 0 && !isLoading()) {
+                                <tr>
+                                    <td colspan="10" class="text-center py-8 text-base-content/50">
+                                        No transactions found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center mt-6">
+            <div class="join">
+                <!-- Previous Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() - 1)" 
+                    [disabled]="getCurrentPage() === 1 || isLoading()"
+                    class="join-item btn">
+                    «
+                </button>
+
+                <!-- Page Numbers -->
+                @for (page of pageNumbers$ | async; track page) {
+                    @if (page === '...') {
+                        <button class="join-item btn btn-disabled">...</button>
+                    } @else {
+                        <button 
+                            (click)="onPageChange(+page)" 
+                            [disabled]="isLoading()"
+                            [class.btn-active]="getCurrentPage() === page"
+                            class="join-item btn">
+                            {{page}}
+                        </button>
+                    }
+                }
+
+                <!-- Next Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() + 1)" 
+                    [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+                    class="join-item btn">
+                    »
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-4 text-sm text-base-content/70">
+            @if (pagination$ | async; as pagination) {
+                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} transactions
+            }
+        </div>
+    }
+
+    <!-- Add Transaction Modal -->
+    @if (showAddModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Add New Transaction</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Order ID -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Order ID *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter order ID" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newTransaction.orderId" />
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Amount *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newTransaction.amount" />
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Payment Method *</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="newTransaction.paymentMethod">
+                            <option [value]="PaymentMethod.Card">Card</option>
+                            <option [value]="PaymentMethod.Cod">Cash on Delivery</option>
+                            <option [value]="PaymentMethod.Paypal">PayPal</option>
+                            <option [value]="PaymentMethod.Bank">Bank Transfer</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Status *</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="newTransaction.status">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <!-- Transaction Reference -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Transaction Reference</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter transaction reference" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newTransaction.transactionReference" />
+                    </div>
+
+                    <!-- Gateway Response -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Gateway Response</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter gateway response" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newTransaction.paymentGatewayResponse" />
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Notes</span>
+                    </label>
+                    <textarea 
+                        class="textarea textarea-bordered h-24" 
+                        placeholder="Enter notes"
+                        [(ngModel)]="newTransaction.notes"></textarea>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="addTransaction()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Add Transaction
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Edit Transaction Modal -->
+    @if (showEditModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Edit Transaction</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Status -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Status *</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="editTransaction.status">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Refunded">Refunded</option>
+                        </select>
+                    </div>
+
+                    <!-- Transaction Reference -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Transaction Reference</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter transaction reference" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editTransaction.transactionReference" />
+                    </div>
+
+                    <!-- Gateway Response -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Gateway Response</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter gateway response" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editTransaction.paymentGatewayResponse" />
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Notes</span>
+                    </label>
+                    <textarea 
+                        class="textarea textarea-bordered h-24" 
+                        placeholder="Enter notes"
+                        [(ngModel)]="editTransaction.notes"></textarea>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="updateTransaction()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Update Transaction
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Refund Modal -->
+    @if (showRefundModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Process Refund</h3>
+                
+                @if (selectedTransaction(); as transaction) {
+                    <div class="alert alert-info mb-4">
+                        <div>
+                            <h4 class="font-bold">Transaction Details</h4>
+                            <p>Order: #{{transaction.orderNumber}}</p>
+                            <p>Amount: {{transaction.amount | currency:'KWD'}}</p>
+                            <p>Max Refund: {{transaction.amount | currency:'KWD'}}</p>
+                        </div>
+                    </div>
+                }
+
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- Refund Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Refund Amount *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Enter refund amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="refundTransaction.refundAmount" />
+                    </div>
+
+                    <!-- Refund Reason -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Refund Reason *</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter refund reason"
+                            [(ngModel)]="refundTransaction.refundReason"></textarea>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Notes</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter notes"
+                            [(ngModel)]="refundTransaction.notes"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="processRefund()" [disabled]="isLoading()" class="btn btn-warning">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Process Refund
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Status Update Modal -->
+    @if (showStatusModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Update Transaction Status</h3>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- Status -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Status *</span>
+                        </label>
+                        <select class="select select-bordered" [(ngModel)]="statusUpdate.status">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Refunded">Refunded</option>
+                        </select>
+                    </div>
+
+                    <!-- Gateway Response -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Gateway Response</span>
+                        </label>
+                        <textarea 
+                            class="textarea textarea-bordered h-24" 
+                            placeholder="Enter gateway response"
+                            [(ngModel)]="statusUpdate.gatewayResponse"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="updateStatus()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Update Status
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Analytics Modal -->
+    @if (showAnalyticsModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Transaction Analytics</h3>
+                
+                @if (isLoading()) {
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg"></span>
+                    </div>
+                } @else if (analytics(); as analyticsData) {
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Total Transactions</div>
+                            <div class="stat-value text-primary">{{analyticsData.totalTransactions}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Total Amount</div>
+                            <div class="stat-value text-success">{{analyticsData.totalAmount | currency:'KWD'}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Average Amount</div>
+                            <div class="stat-value text-info">{{analyticsData.averageTransactionAmount | currency:'KWD'}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Successful</div>
+                            <div class="stat-value text-success">{{analyticsData.successfulTransactions}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Failed</div>
+                            <div class="stat-value text-error">{{analyticsData.failedTransactions}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Pending</div>
+                            <div class="stat-value text-warning">{{analyticsData.pendingTransactions}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Refunded Amount</div>
+                            <div class="stat-value text-error">{{analyticsData.refundedAmount | currency:'KWD'}}</div>
+                        </div>
+                        <div class="stat bg-base-200 rounded-lg p-4">
+                            <div class="stat-title">Net Amount</div>
+                            <div class="stat-value text-success">{{analyticsData.netAmount | currency:'KWD'}}</div>
+                        </div>
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Transaction Details Modal -->
+    @if (showDetailsModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Transaction Details</h3>
+                
+                @if (selectedTransaction(); as transaction) {
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Transaction Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">ID:</span> #{{transaction.id}}</div>
+                                    <div><span class="font-medium">Reference:</span> {{transaction.transactionReference || 'N/A'}}</div>
+                                    <div><span class="font-medium">Amount:</span> {{transaction.amount | currency:'KWD'}}</div>
+                                    <div><span class="font-medium">Status:</span> 
+                                        <span class="badge" [class]="getStatusBadgeClass(transaction.status)">
+                                            {{transaction.status}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Order Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">Order ID:</span> {{transaction.orderId}}</div>
+                                    <div><span class="font-medium">Order Number:</span> #{{transaction.orderNumber}}</div>
+                                    <div><span class="font-medium">Payment Method:</span> {{getPaymentMethodName(transaction.paymentMethod)}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (transaction.customerName || transaction.customerEmail) {
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Customer Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">Name:</span> {{transaction.customerName || 'N/A'}}</div>
+                                    <div><span class="font-medium">Email:</span> {{transaction.customerEmail || 'N/A'}}</div>
+                                </div>
+                            </div>
+                        }
+                        <div class="card bg-base-200 p-4">
+                            <h4 class="font-semibold mb-2">Timestamps</h4>
+                            <div class="space-y-1 text-sm">
+                                <div><span class="font-medium">Transaction Date:</span> {{transaction.transactionDate | date:'medium'}}</div>
+                                @if (transaction.processedDate) {
+                                    <div><span class="font-medium">Processed Date:</span> {{transaction.processedDate | date:'medium'}}</div>
+                                }
+                                @if (transaction.refundDate) {
+                                    <div><span class="font-medium">Refund Date:</span> {{transaction.refundDate | date:'medium'}}</div>
+                                }
+                            </div>
+                        </div>
+                        @if (transaction.isRefunded) {
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Refund Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">Refunded:</span> Yes</div>
+                                    @if (transaction.refundAmount) {
+                                        <div><span class="font-medium">Refund Amount:</span> {{transaction.refundAmount | currency:'KWD'}}</div>
+                                    }
+                                    @if (transaction.refundReason) {
+                                        <div><span class="font-medium">Reason:</span> {{transaction.refundReason}}</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (transaction.notes) {
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Notes</h4>
+                                <p class="text-sm">{{transaction.notes}}</p>
+                            </div>
+                        }
+                        @if (transaction.paymentGatewayResponse) {
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Gateway Response</h4>
+                                <pre class="text-xs bg-base-300 p-2 rounded overflow-auto">{{transaction.paymentGatewayResponse}}</pre>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

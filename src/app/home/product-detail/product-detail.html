@@ -1,0 +1,598 @@
+<!-- Product Detail Page -->
+<div class="min-h-screen bg-base-200">
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <nav class="flex items-center space-x-2 text-sm">
+        <a href="/" class="text-gray-500 hover:text-primary">Home</a>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <a href="/category/electronics" class="text-gray-500 hover:text-primary">Electronics</a>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class=" font-medium">{{product()?.title || 'Product'}}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="loading loading-spinner loading-lg text-primary"></div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Product Content -->
+    @if (product() && !isLoading()) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Product Images -->
+      <div class="space-y-4">
+        <!-- Main Image -->
+        <div class="relative group">
+          <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
+            <img [src]="(product()?.images && product()!.images.length > 0) ? product()!.images[selectedImageIndex] : 'https://via.placeholder.com/400x400?text=No+Image'" 
+                 [alt]="product()?.title || 'Product'"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          
+          <!-- Image Navigation -->
+          @if ((product()?.images?.length || 0) > 1) {
+          <button (click)="previousImage()" 
+                  class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <button (click)="nextImage()" 
+                  class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <svg class="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+          }
+
+          <!-- Discount Badge -->
+          @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
+          <div class="absolute top-4 left-4">
+            <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+              -{{getDiscountPercentage()}}%
+            </span>
+          </div>
+          }
+        </div>
+
+        <!-- Thumbnail Images -->
+        @if ((product()?.images?.length || 0) > 1) {
+        <div class="grid grid-cols-4 gap-3">
+          @for (image of product()?.images || []; track $index; let i = $index) {
+          <button (click)="selectImage(i)"
+                  class="aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200"
+                  [class.border-primary]="selectedImageIndex === i"
+                  [class.border-gray-200]="selectedImageIndex !== i">
+            <img [src]="image" 
+                 [alt]="(product()?.title || 'Product') + ' ' + (i + 1)"
+                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-200">
+          </button>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Product Info -->
+      <div class="space-y-6">
+        <!-- Brand and Name -->
+        <div>
+          <p class="text-sm text-gray-500 mb-2">{{product()?.categoryName || 'Category'}}</p>
+          <h1 class="text-3xl font-bold  mb-4">{{product()?.title || 'Product'}}</h1>
+          
+          <!-- Rating and Reviews -->
+          <div class="flex items-center space-x-4 mb-4">
+            <div class="flex items-center space-x-1">
+              @for (star of getStarsArray(floor(product()?.averageRating || 0)); track $index) {
+              <svg class="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+              </svg>
+              }
+              @if ((product()?.averageRating || 0) % 1 !== 0) {
+              <svg class="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                <defs>
+                  <linearGradient id="half-star">
+                    <stop offset="50%" stop-color="currentColor"/>
+                    <stop offset="50%" stop-color="transparent"/>
+                  </linearGradient>
+                </defs>
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" fill="url(#half-star)"/>
+              </svg>
+              }
+              <span class="text-sm text-gray-600 ml-1">{{product()?.averageRating || 0}}</span>
+            </div>
+            <span class="text-sm text-gray-500">({{product()?.totalReviews || 0}} reviews)</span>
+            <span class="text-sm text-green-600 font-medium">✓ Verified Purchase</span>
+          </div>
+        </div>
+
+        <!-- Price -->
+        <div class="flex items-center space-x-4">
+          <span class="text-3xl font-bold text-primary">{{(product()?.newPrice |currency)}}</span>
+          @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
+          <span class="text-xl text-gray-400 line-through">{{product()?.oldPrice|currency}}</span>
+          }
+          @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
+          <span class="text-sm text-green-600 font-medium">You save {{((product()?.oldPrice || 0) - (product()?.newPrice || 0)|currency)}}</span>
+          }
+        </div>
+
+        <!-- Stock Status -->
+        <div class="flex flex-col space-y-2">
+          <div class="flex items-center space-x-2">
+            @if (product()?.isInStock) {
+            <div class="flex items-center space-x-2 text-green-600">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-medium">In Stock</span>
+              <span class="text-sm">({{product()?.totalInStock || 0}} available)</span>
+            </div>
+            } @else {
+            <div class="flex items-center space-x-2 text-red-600">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-medium">Out of Stock</span>
+            </div>
+            }
+          </div>
+          
+          <!-- Cart Status Badge -->
+          @if (isProductInCart()) {
+          <div class="flex items-center justify-between bg-primary/10 text-primary px-3 py-2 rounded-lg gap-2">
+            <div class="flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+              </svg>
+              <span class="text-sm font-medium">In cart:</span>
+              <span class="text-sm font-bold">{{getCartQuantity()}}</span>
+            </div>
+            
+            <!-- Cart Quantity Controls -->
+            <div class="flex items-center gap-1">
+              <button (click)="decrementCartQuantity()" 
+                      class="w-7 h-7 bg-primary/20 hover:bg-primary/30 rounded flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                </svg>
+              </button>
+              <button (click)="incrementCartQuantity()" 
+                      class="w-7 h-7 bg-primary/20 hover:bg-primary/30 rounded flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </button>
+              <button (click)="removeFromCart()" 
+                      class="w-7 h-7 bg-red-500/20 hover:bg-red-500/30 text-red-600 rounded flex items-center justify-center transition-colors"
+                      title="Remove from cart">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="space-y-2">
+          <p class="">{{product()?.description || 'No description available'}}</p>
+          @if (showFullDescription) {
+          <p class="text-gray-600">{{product()?.descriptionAr || product()?.description || ''}}</p>
+          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+            Show Less
+          </button>
+          } @else {
+          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+            Read More
+          </button>
+          }
+        </div>
+
+
+        <!-- Quantity -->
+        <div class="space-y-3">
+          <h3 class="text-lg font-semibold ">Quantity</h3>
+          <div class="flex items-center space-x-3">
+            <button (click)="decreaseQuantity()" 
+                    [disabled]="quantity <= 1"
+                    class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+              </svg>
+            </button>
+            <span class="w-16 text-center font-semibold">{{quantity}}</span>
+            <button (click)="increaseQuantity()" 
+                    [disabled]="quantity >= (product()?.totalInStock || 0)"
+                    class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+          <div class="flex space-x-4">
+            <button (click)="addToCart()" 
+                    [disabled]="!product()?.isInStock"
+                    class="flex-1 bg-primary text-white py-3 px-6 rounded-xl font-semibold hover:bg-primary-focus transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+              Add to Cart
+            </button>
+            <button (click)="addToWishlist()" 
+                    class="w-12 h-12 border border-gray-300 rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors duration-200">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <button (click)="buyNow()" 
+                  [disabled]="!product()?.isInStock"
+                  class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            Buy Now
+          </button>
+        </div>
+
+        <!-- Features -->
+        <div class="space-y-3">
+          <h3 class="text-lg font-semibold ">Key Features</h3>
+          <ul class="space-y-2">
+            @for (detail of product()?.productDetails || []; track detail.id) {
+            <li class="flex items-center space-x-2">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="">{{detail.label}}: {{detail.value}}</span>
+            </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details Tabs -->
+    <div class="mt-12">
+      <div class="border-b border-gray-200">
+        <nav class="flex space-x-8">
+          <button (click)="toggleSpecifications()" 
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+                  [class.border-primary]="showSpecifications"
+                  [class.text-primary]="showSpecifications"
+                  [class.border-transparent]="!showSpecifications"
+                  [class.text-gray-500]="!showSpecifications">
+            Specifications
+          </button>
+          <button (click)="toggleReviews()" 
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+                  [class.border-primary]="showReviews"
+                  [class.text-primary]="showReviews"
+                  [class.border-transparent]="!showReviews"
+                  [class.text-gray-500]="!showReviews">
+            Reviews ({{product()?.totalReviews || 0}})
+          </button>
+          <button (click)="toggleShippingInfo()" 
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+                  [class.border-primary]="showShippingInfo"
+                  [class.text-primary]="showShippingInfo"
+                  [class.border-transparent]="!showShippingInfo"
+                  [class.text-gray-500]="!showShippingInfo">
+            Shipping Info
+          </button>
+          <button (click)="toggleReturnPolicy()" 
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+                  [class.border-primary]="showReturnPolicy"
+                  [class.text-primary]="showReturnPolicy"
+                  [class.border-transparent]="!showReturnPolicy"
+                  [class.text-gray-500]="!showReturnPolicy">
+            Return Policy
+          </button>
+        </nav>
+      </div>
+
+      <!-- Specifications Tab -->
+      @if (showSpecifications) {
+      <div class="py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          @for (detail of product()?.productDetails || []; track detail.id) {
+          <div class="flex justify-between py-3 border-b border-gray-100">
+            <span class="font-medium ">{{detail.label}}</span>
+            <span class="text-gray-600">{{detail.value}}</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Reviews Tab -->
+      @if (showReviews) {
+      <div class="py-8">
+        <!-- Review Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div class="text-center">
+            <div class="text-4xl font-bold  mb-2">{{getAverageRating().toFixed(1)}}</div>
+            <div class="flex items-center justify-center space-x-1 mb-2">
+              @for (star of getStarsArray(floor(getAverageRating())); track $index) {
+              <svg class="w-6 h-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+              </svg>
+              }
+            </div>
+            <p class="text-gray-600">Based on {{product()?.totalReviews || 0}} reviews</p>
+          </div>
+          
+          <div class="space-y-2">
+            @for (rating of [5,4,3,2,1]; track rating) {
+            <div class="flex items-center space-x-3">
+              <span class="text-sm font-medium w-8">{{rating}}</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2">
+                <div class="bg-yellow-400 h-2 rounded-full" 
+                     [style.width.%]="getRatingPercentage(rating)"></div>
+              </div>
+              <span class="text-sm text-gray-600 w-8">{{getRatingCount(rating)}}</span>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Write Review Form / Login Prompt / Existing Rating -->
+        <div class="bg-base-200 rounded-xl p-6 mb-8">
+          @if (!authService.isAuthenticated) {
+            <!-- Not Logged In -->
+            <div class="text-center py-4">
+              <svg class="w-16 h-16 text-base-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <h3 class="text-lg font-semibold text-base-content mb-2">Login Required</h3>
+              <p class="text-base-content/70 mb-4">Please login first to write a review</p>
+              <button (click)="navigateToLogin()"
+                      class="bg-primary text-primary-content px-6 py-2 rounded-lg hover:bg-primary-focus transition-colors duration-200">
+                Login
+              </button>
+            </div>
+          } @else if (isCheckingRating()) {
+            <!-- Checking Rating -->
+            <div class="text-center py-4">
+              <span class="loading loading-spinner loading-lg text-primary"></span>
+              <p class="text-base-content/70 mt-2">Checking your rating...</p>
+            </div>
+          } @else if (userRating()) {
+            <!-- User Already Rated -->
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-base-content">Your Review</h3>
+                <span class="badge badge-primary">Submitted</span>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-base-content mb-2">Rating</label>
+                  <div class="flex items-center space-x-1">
+                    @for (star of [1,2,3,4,5]; track star) {
+                    <div class="w-8 h-8"
+                         [class.text-warning]="star <= (userRating()?.ratingNumber || 0)"
+                         [class.text-base-300]="star > (userRating()?.ratingNumber || 0)">
+                      <svg class="w-full h-full fill-current" viewBox="0 0 20 20">
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                      </svg>
+                    </div>
+                    }
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-base-content mb-2">Your Review</label>
+                  <div class="w-full px-3 py-2 border border-base-300 rounded-lg bg-base-100 text-base-content">
+                    {{userRating()?.content || 'No content'}}
+                  </div>
+                </div>
+                <div class="text-sm text-base-content/70">
+                  Submitted on {{userRating()?.createdAt | date:'short'}}
+                </div>
+              </div>
+            </div>
+          } @else {
+            <!-- Write Review Form -->
+            <h3 class="text-lg font-semibold text-base-content mb-4">Write a Review</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">Rating</label>
+                <div class="flex items-center space-x-1">
+                  @for (star of [1,2,3,4,5]; track star) {
+                  <button (click)="newReview.rating = star"
+                          class="w-8 h-8 transition-colors duration-200"
+                          [class.text-warning]="star <= newReview.rating"
+                          [class.text-base-300]="star > newReview.rating">
+                    <svg class="w-full h-full fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  </button>
+                  }
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">Title</label>
+                <input type="text" 
+                       [(ngModel)]="newReview.title"
+                       placeholder="Summarize your review"
+                       class="w-full px-3 py-2 border border-base-300 rounded-lg bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">Review</label>
+                <textarea [(ngModel)]="newReview.comment"
+                          placeholder="Tell us about your experience with this product"
+                          rows="4"
+                          class="w-full px-3 py-2 border border-base-300 rounded-lg bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+              </div>
+              
+              <button (click)="submitReview()"
+                      class="bg-primary text-primary-content px-6 py-2 rounded-lg hover:bg-primary-focus transition-colors duration-200">
+                Submit Review
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Reviews List -->
+        <div class="space-y-6">
+          @for (review of product()?.ratings || []; track review.id) {
+          <div class="border border-gray-200 rounded-xl p-6">
+            <div class="flex items-start space-x-4">
+              <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
+                {{review.id}}
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center space-x-2 mb-2">
+                  <h4 class="font-semibold ">User {{review.ratingName}}</h4>
+                  <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified Purchase</span>
+                </div>
+                
+                <div class="flex items-center space-x-2 mb-2">
+                  <div class="flex items-center space-x-1">
+                    @for (star of getStarsArray(review.ratingNumber); track $index) {
+                    <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                    }
+                  </div>
+                  <span class="text-sm text-gray-500">{{review.createdAt | date:'short'}}</span>
+                </div>
+                
+                <p class=" mb-4">{{review.content}}</p>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+      <!-- Shipping Info Tab -->
+      @if (showShippingInfo) {
+      <div class="py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <svg class="w-12 h-12 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <h3 class="font-semibold  mb-2">Free Shipping</h3>
+            <p class="text-sm text-gray-600">On orders over $50</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <svg class="w-12 h-12 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="font-semibold  mb-2">Fast Delivery</h3>
+            <p class="text-sm text-gray-600">2-3 business days</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <svg class="w-12 h-12 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="font-semibold  mb-2">Easy Returns</h3>
+            <p class="text-sm text-gray-600">30-day return policy</p>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Return Policy Tab -->
+      @if (showReturnPolicy) {
+      <div class="py-8">
+        <div class="prose max-w-none">
+          <h3 class="text-lg font-semibold  mb-4">Return Policy</h3>
+          <div class="space-y-4 ">
+            <p>We want you to be completely satisfied with your purchase. If you're not happy with your order, you can return it within 30 days of delivery.</p>
+            
+            <h4 class="font-semibold ">Return Conditions:</h4>
+            <ul class="list-disc list-inside space-y-2">
+              <li>Items must be in original condition with all tags attached</li>
+              <li>Items must be unused and in original packaging</li>
+              <li>Electronics must be returned with all accessories and documentation</li>
+              <li>Personalized or custom items cannot be returned</li>
+            </ul>
+            
+            <h4 class="font-semibold ">How to Return:</h4>
+            <ol class="list-decimal list-inside space-y-2">
+              <li>Contact our customer service team to initiate a return</li>
+              <li>We'll provide you with a return shipping label</li>
+              <li>Package your items securely and ship them back</li>
+              <li>Once received, we'll process your refund within 5-7 business days</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Related Products -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold  mb-8">Related Products</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (relatedProduct of relatedProducts; track relatedProduct.id) {
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+          <div class="relative">
+            <img [src]="relatedProduct.image" 
+                 [alt]="relatedProduct.name"
+                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+            @if (relatedProduct.discount > 0) {
+            <div class="absolute top-4 left-4">
+              <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                -{{relatedProduct.discount}}%
+              </span>
+            </div>
+            }
+          </div>
+          <div class="p-4">
+            <h3 class="font-semibold  mb-2">{{relatedProduct.name}}</h3>
+            <div class="flex items-center space-x-2 mb-2">
+              <div class="flex items-center space-x-1">
+                @for (star of getStarsArray(floor(relatedProduct.rating)); track $index) {
+                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+                }
+              </div>
+              <span class="text-sm text-gray-600">{{relatedProduct.rating}}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-lg font-bold text-primary">${{relatedProduct.price}}</span>
+              @if (relatedProduct.originalPrice) {
+              <span class="text-sm text-gray-400 line-through">{{relatedProduct.originalPrice|currency:'KWD'}}</span>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Toast Component -->
+<app-toast 
+  [toasts]="toasts" 
+  (close)="onToastClose($event)">
+</app-toast>

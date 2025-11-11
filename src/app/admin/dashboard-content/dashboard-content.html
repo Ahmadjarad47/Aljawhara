@@ -1,0 +1,447 @@
+<div class="min-h-screen bg-gradient-to-br from-base-200/30 to-base-300/20 p-6 relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-5">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
+    </div>
+    
+    <!-- Header Section -->
+    <div class="mb-8 animate-fade-in relative z-10">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="space-y-2">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-2 h-8 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                    <h1 class="text-4xl lg:text-5xl font-bold text-base-content bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent leading-tight">
+                        Dashboard Overview
+                    </h1>
+                </div>
+                <p class="text-base-content/70 text-lg lg:text-xl font-medium max-w-2xl leading-relaxed">
+                    Welcome to the admin dashboard for Aljawhara platform - Your gateway to managing the Syrian freelance ecosystem
+                </p>
+                <div class="flex items-center gap-4 mt-4">
+                    <div class="flex items-center gap-2 text-sm text-base-content/60">
+                        <div class="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                        <span>System Status: Online</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-base-content/60">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Last updated: 2 minutes ago</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button class="btn btn-primary btn-sm gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current relative z-10">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    <span class="relative z-10">Export Report</span>
+                </button>
+                <button (click)="refreshData()" class="btn btn-outline btn-sm gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg group relative overflow-hidden" [class.loading]="isLoading()">
+                    <div class="absolute inset-0 bg-gradient-to-r from-base-200/50 to-base-300/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current relative z-10 group-hover:rotate-180 transition-transform duration-500">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span class="relative z-10">Refresh</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 relative z-10">
+        <!-- Total Users -->
+        <div class="stat-card group transition-all duration-300 hover:shadow-xl cursor-pointer" role="button" tabindex="0" aria-label="Total Users Statistics">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="stat-figure text-primary  transition-transform duration-300">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:shadow-lg transition-shadow duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-base-content/50 font-medium uppercase tracking-wide">Total</div>
+                        <div class="text-xs font-semibold flex items-center gap-1" [class.text-success]="userGrowth() >= 0" [class.text-error]="userGrowth() < 0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+                            </svg>
+                            {{ userGrowth() >= 0 ? '+' : '' }}{{ userGrowth() }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="stat-title text-base-content/70 text-sm font-medium">Total Users</div>
+                    <div class="stat-value text-primary text-3xl lg:text-4xl font-bold tracking-tight">{{ totalUsers() | number }}</div>
+                    <div class="stat-desc flex items-center gap-2 text-sm">
+                        <span [class]="userGrowth() >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'">
+                            {{ userGrowth() >= 0 ? '↗︎' : '↘︎' }} {{ userGrowth() }}%
+                        </span>
+                        <span class="text-base-content/50">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Jobs -->
+        <div class="stat-card group transition-all duration-300 hover:shadow-xl cursor-pointer" role="button" tabindex="0" aria-label="Active Jobs Statistics">
+            <div class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="stat-figure text-secondary  transition-transform duration-300">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center group-hover:shadow-lg transition-shadow duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-secondary rounded-full animate-pulse shadow-lg"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-base-content/50 font-medium uppercase tracking-wide">Total</div>
+                        <div class="text-xs font-semibold flex items-center gap-1" [class.text-success]="orderGrowth() >= 0" [class.text-error]="orderGrowth() < 0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+                            </svg>
+                            {{ orderGrowth() >= 0 ? '+' : '' }}{{ orderGrowth() }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="stat-title text-base-content/70 text-sm font-medium">Total Orders</div>
+                    <div class="stat-value text-secondary text-3xl lg:text-4xl font-bold tracking-tight">{{ totalOrders() | number }}</div>
+                    <div class="stat-desc flex items-center gap-2 text-sm">
+                        <span [class]="orderGrowth() >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'">
+                            {{ orderGrowth() >= 0 ? '↗︎' : '↘︎' }} {{ orderGrowth() }}%
+                        </span>
+                        <span class="text-base-content/50">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Companies -->
+        <div class="stat-card group transition-all duration-300 hover:shadow-xl cursor-pointer" role="button" tabindex="0" aria-label="Companies Statistics">
+            <div class="absolute inset-0 bg-gradient-to-br from-accent/5 to-accent/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="stat-figure text-accent  transition-transform duration-300">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center group-hover:shadow-lg transition-shadow duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse shadow-lg"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-base-content/50 font-medium uppercase tracking-wide">Total</div>
+                        <div class="text-xs font-semibold flex items-center gap-1" [class.text-success]="transactionGrowth() >= 0" [class.text-error]="transactionGrowth() < 0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+                            </svg>
+                            {{ transactionGrowth() >= 0 ? '+' : '' }}{{ transactionGrowth() }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="stat-title text-base-content/70 text-sm font-medium">Transactions</div>
+                    <div class="stat-value text-accent text-3xl lg:text-4xl font-bold tracking-tight">{{ totalTransactions() | number }}</div>
+                    <div class="stat-desc flex items-center gap-2 text-sm">
+                        <span [class]="transactionGrowth() >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'">
+                            {{ transactionGrowth() >= 0 ? '↗︎' : '↘︎' }} {{ transactionGrowth() }}%
+                        </span>
+                        <span class="text-base-content/50">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue -->
+        <div class="stat-card group transition-all duration-300 hover:shadow-xl cursor-pointer" role="button" tabindex="0" aria-label="Revenue Statistics">
+            <div class="absolute inset-0 bg-gradient-to-br from-success/5 to-success/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="stat-figure text-success  transition-transform duration-300">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center group-hover:shadow-lg transition-shadow duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 stroke-current">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full animate-pulse shadow-lg"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-base-content/50 font-medium uppercase tracking-wide">Total</div>
+                        <div class="text-xs font-semibold flex items-center gap-1" [class.text-success]="salesGrowth() >= 0" [class.text-error]="salesGrowth() < 0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"></path>
+                            </svg>
+                            {{ salesGrowth() >= 0 ? '+' : '' }}{{ salesGrowth() }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="stat-title text-base-content/70 text-sm font-medium">Total Sales</div>
+                    <div class="stat-value text-success text-3xl lg:text-4xl font-bold tracking-tight">${{ totalSales() | number:'1.2-2' }}</div>
+                    <div class="stat-desc flex items-center gap-2 text-sm">
+                        <span [class]="salesGrowth() >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'">
+                            {{ salesGrowth() >= 0 ? '↗︎' : '↘︎' }} {{ salesGrowth() }}%
+                        </span>
+                        <span class="text-base-content/50">vs last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8 relative z-10">
+        <!-- User Growth Chart -->
+        <div class="chart-card group hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-body relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                            <h2 class="card-title text-xl font-bold text-base-content">User Growth Analytics</h2>
+                        </div>
+                        <p class="text-sm text-base-content/60 font-medium">Track user registration trends and engagement</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button 
+                            *ngFor="let period of displayPeriods"
+                            (click)="onPeriodChange(period)"
+                            [class.btn-primary]="selectedPeriod() === period"
+                            [class.btn-ghost]="selectedPeriod() !== period"
+                            class="btn btn-xs hover:bg-primary/10 hover:text-primary transition-all duration-200">
+                            {{ period.toUpperCase() }}
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas baseChart
+                        [data]="userGrowthChartDataDisplay"
+                        [options]="userGrowthChartOptions"
+                        [type]="userGrowthChartType">
+                    </canvas>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-primary rounded-full"></div>
+                            <span class="text-base-content/70">Total Users</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-success rounded-full"></div>
+                            <span class="text-base-content/70">Active Users</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div [class]="userChartGrowthRate() >= 0 ? 'text-success font-semibold' : 'text-error font-semibold'">
+                            {{ userChartGrowthRate() >= 0 ? '+' : '' }}{{ userChartGrowthRate() }}% Growth
+                        </div>
+                        <div class="text-xs text-base-content/50">vs first period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
+
+    <!-- Revenue Chart -->
+    <div class="chart-card group hover:shadow-xl transition-all duration-300 mb-8 relative z-10">
+        <div class="absolute inset-0 bg-gradient-to-br from-success/5 to-success/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="card-body relative z-10">
+            <div class="flex items-center justify-between mb-6">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-6 bg-gradient-to-b from-success to-primary rounded-full"></div>
+                        <h2 class="card-title text-xl font-bold text-base-content">Revenue Analytics</h2>
+                    </div>
+                    <p class="text-sm text-base-content/60 font-medium">Transaction revenue performance and trends</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex gap-2 flex-wrap">
+                        <button 
+                            *ngFor="let period of displayPeriods"
+                            (click)="onPeriodChange(period)"
+                            [class.btn-success]="selectedPeriod() === period"
+                            [class.btn-ghost]="selectedPeriod() !== period"
+                            class="btn btn-xs hover:bg-success/10 hover:text-success transition-all duration-200">
+                            {{ period.toUpperCase() }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas baseChart
+                    [data]="revenueChartDataDisplay"
+                    [options]="revenueChartOptions"
+                    [type]="revenueChartType">
+                </canvas>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
+                <div class="text-center p-3 bg-base-200/50 rounded-lg">
+                    <div class="text-success font-bold text-lg">${{ revenueFirstValue() | number:'1.0-0' }}</div>
+                    <div class="text-xs text-base-content/60">First Period</div>
+                </div>
+                <div class="text-center p-3 bg-base-200/50 rounded-lg">
+                    <div class="text-success font-bold text-lg">${{ revenueLastValue() | number:'1.0-0' }}</div>
+                    <div class="text-xs text-base-content/60">Latest Period</div>
+                </div>
+                <div class="text-center p-3 bg-base-200/50 rounded-lg">
+                    <div [class]="revenueGrowthRate() >= 0 ? 'text-success font-bold text-lg' : 'text-error font-bold text-lg'">
+                        {{ revenueGrowthRate() >= 0 ? '+' : '' }}{{ revenueGrowthRate() }}%
+                    </div>
+                    <div class="text-xs text-base-content/60">Growth Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+        <!-- Recent Users -->
+        <div class="activity-card group hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-body relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                            <h2 class="card-title text-xl font-bold text-base-content">Recent Registrations</h2>
+                        </div>
+                        <p class="text-sm text-base-content/60 font-medium">Latest user signups and verifications</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="badge badge-primary badge-sm animate-pulse">Live</div>
+                        <div class="text-xs text-base-content/50">Real-time</div>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    @if (lastUsers().length === 0) {
+                        <div class="text-center py-8 text-base-content/50">
+                            <p>No recent users found</p>
+                        </div>
+                    }
+                    @for (user of lastUsers(); track user.id) {
+                        <div class="activity-item group/item hover:bg-base-200/50 transition-all duration-200 rounded-lg p-4 border border-transparent hover:border-primary/20">
+                            <div class="flex items-center gap-4">
+                                <div class="avatar">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-content flex items-center justify-center shadow-lg group-hover/item:scale-105 transition-transform duration-200">
+                                        <span class="text-sm font-bold">{{ (user.username || user.email || 'U')[0].toUpperCase() }}{{ (user.username || user.email || 'U')[1]?.toUpperCase() || '' }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-semibold text-base-content group-hover/item:text-primary transition-colors duration-200">{{ user.username || user.email || 'Unknown User' }}</div>
+                                    <div class="text-sm text-base-content/70 flex items-center gap-2">
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            User
+                                        </span>
+                                        <span class="text-base-content/40">•</span>
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            {{ getTimeAgo(user.createdAt) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div [class]="user.emailConfirmed ? 'badge badge-success badge-sm' : 'badge badge-warning badge-sm'" class="group-hover/item:scale-105 transition-transform duration-200 shadow-sm">
+                                    {{ user.emailConfirmed ? 'Verified' : 'Pending' }}
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-actions justify-end mt-6">
+                    <button class="btn btn-primary btn-sm gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg group">
+                        <span>View All</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current group-hover:translate-x-1 transition-transform duration-200">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Jobs -->
+        <div class="activity-card group hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-body relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-gradient-to-b from-secondary to-accent rounded-full"></div>
+                            <h2 class="card-title text-xl font-bold text-base-content">Recent Order</h2>
+                        </div>
+                        <p class="text-sm text-base-content/60 font-medium">Latest job opportunities and applications</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="badge badge-info badge-sm animate-pulse">Active</div>
+                        <div class="text-xs text-base-content/50">Live</div>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    @if (lastOrders().length === 0) {
+                        <div class="text-center py-8 text-base-content/50">
+                            <p>No recent orders found</p>
+                        </div>
+                    }
+                    @for (order of lastOrders(); track order.id) {
+                        <div class="activity-item group/item hover:bg-base-200/50 transition-all duration-200 rounded-lg p-4 border border-transparent hover:border-primary/20">
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-base-content group-hover/item:text-primary transition-colors duration-200">Order #{{ order.orderNumber }}</div>
+                                    <div class="text-sm text-base-content/70 flex items-center gap-2 mt-2">
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            {{ order.customerName }}
+                                        </span>
+                                        <span class="text-base-content/40">•</span>
+                                        <span class="text-success font-semibold flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-3 h-3 stroke-current">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                            </svg>
+                                            ${{ order.total | number:'1.2-2' }}
+                                        </span>
+                                        <span class="text-base-content/40">•</span>
+                                        <span class="text-xs text-base-content/60">{{ order.itemCount }} items</span>
+                                    </div>
+                                </div>
+                                <div [class]="'badge badge-sm group-hover/item:scale-105 transition-transform duration-200 shadow-sm ' + getOrderStatusBadgeClass(order.status)">
+                                    {{ getOrderStatusText(order.status) }}
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-actions justify-end mt-6">
+                    <button class="btn btn-primary btn-sm gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg group">
+                        <span>View All</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current group-hover:translate-x-1 transition-transform duration-200">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

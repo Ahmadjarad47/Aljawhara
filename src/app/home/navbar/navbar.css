@@ -1,0 +1,459 @@
+/* Navbar Component Styles */
+
+/* Custom animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Dropdown animations */
+.dropdown-enter {
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.dropdown-item-enter {
+  animation: slideInRight 0.15s ease-out;
+}
+
+/* Custom hover effects */
+.hover-lift {
+  transition: box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  box-shadow: 0 4px 12px oklch(from var(--color-base-content) l c h / 0.15);
+}
+
+/* Search bar enhancements */
+.search-input {
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary) l c h / 0.1);
+}
+
+/* Button hover effects */
+.btn-primary {
+  background: var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-focus, var(--color-primary));
+  box-shadow: 0 4px 12px oklch(from var(--color-primary) l c h / 0.3);
+}
+
+/* Badge animations */
+.badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Mobile menu styles */
+.mobile-menu {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+
+/* Language and currency dropdowns */
+.dropdown-menu {
+  backdrop-filter: blur(10px);
+  background: oklch(from var(--color-base-100) l c h / 0.95);
+  border: 1px solid oklch(from var(--color-base-300) l c h / 0.1);
+}
+
+.dropdown-item {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dropdown-item:hover::before {
+  opacity: 1;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(90deg, oklch(from var(--color-primary) l c h / 0.1) 0%, transparent 100%);
+  padding-left: 1rem;
+}
+
+/* Category dropdown special styling */
+.category-dropdown {
+  box-shadow: 0 20px 25px -5px oklch(from var(--color-base-content) l c h / 0.1), 0 10px 10px -5px oklch(from var(--color-base-content) l c h / 0.04);
+}
+
+/* Special offer badges */
+.offer-badge {
+  background: linear-gradient(45deg, var(--color-error), oklch(from var(--color-error) calc(l - 0.1) c h));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive design enhancements */
+@media (max-width: 768px) {
+  .navbar-brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-container {
+    margin: 1rem 0;
+  }
+  
+  .action-buttons {
+    gap: 0.5rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dropdown-menu {
+    background: oklch(from var(--color-base-100) l c h / 0.95);
+    border-color: oklch(from var(--color-base-300) l c h / 0.3);
+  }
+  
+  .dropdown-item {
+    color: var(--color-base-content);
+  }
+  
+  .dropdown-item:hover {
+    background: linear-gradient(90deg, oklch(from var(--color-primary) l c h / 0.2) 0%, transparent 100%);
+  }
+}
+
+/* Accessibility improvements */
+.focus-visible:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Custom scrollbar for dropdowns */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: var(--color-base-200);
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--color-base-300);
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-content);
+}
+
+/* RTL support */
+[dir="rtl"] .dropdown-menu {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .dropdown-item::before {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .dropdown-item:hover {
+  padding-left: 0.5rem;
+  padding-right: 1rem;
+}
+
+/* Mobile Bottom Navigation Styles */
+.mobile-bottom-nav {
+  backdrop-filter: blur(10px);
+  background: oklch(from var(--color-base-100) l c h / 0.95);
+  border-top: 1px solid oklch(from var(--color-base-content) l c h / 0.1);
+}
+
+.mobile-bottom-nav button {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-bottom-nav button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, oklch(from var(--color-base-100) l c h / 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.mobile-bottom-nav button:active::before {
+  transform: translateX(100%);
+}
+
+/* Mobile Overlay Animations */
+.mobile-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.mobile-overlay-content {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Enhanced Mobile Overlay Animations */
+.mobile-search-overlay,
+.mobile-categories-overlay,
+.mobile-account-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.mobile-search-content,
+.mobile-categories-content,
+.mobile-account-content {
+  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(0);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.mobile-search-content.closing,
+.mobile-categories-content.closing,
+.mobile-account-content.closing {
+  animation: slideDown 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Mobile Search Overlay */
+
+.mobile-search-content {
+  background: linear-gradient(135deg, var(--color-base-100) 0%, var(--color-base-200) 100%);
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+  box-shadow: 0 -10px 25px -5px oklch(from var(--color-base-content) l c h / 0.1), 0 -4px 6px -2px oklch(from var(--color-base-content) l c h / 0.05);
+}
+
+/* Mobile Categories Grid */
+.mobile-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.mobile-category-item {
+  background: linear-gradient(135deg, var(--color-base-200) 0%, var(--color-base-100) 100%);
+  border: 1px solid oklch(from var(--color-base-content) l c h / 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-category-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px oklch(from var(--color-base-content) l c h / 0.1), 0 4px 6px -2px oklch(from var(--color-base-content) l c h / 0.05);
+  border-color: oklch(from var(--color-primary) l c h / 0.2);
+}
+
+/* Mobile Account Styles */
+.mobile-account-avatar {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-focus));
+  box-shadow: 0 4px 12px oklch(from var(--color-primary) l c h / 0.3);
+}
+
+.mobile-account-item {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.mobile-account-item:hover {
+  background: linear-gradient(90deg, oklch(from var(--color-primary) l c h / 0.05) 0%, transparent 100%);
+  transform: translateX(4px);
+}
+
+/* Mobile Badge Animations */
+.mobile-badge {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* Mobile Tab Active States */
+.mobile-tab-active {
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.1) 0%, oklch(from var(--color-primary) l c h / 0.05) 100%);
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.mobile-tab-active svg {
+  filter: drop-shadow(0 2px 4px oklch(from var(--color-primary) l c h / 0.3));
+}
+
+/* Mobile Popular Searches */
+.mobile-popular-search {
+  background: linear-gradient(135deg, var(--color-base-200) 0%, var(--color-base-300) 100%);
+  border: 1px solid oklch(from var(--color-base-content) l c h / 0.05);
+  transition: all 0.2s ease;
+}
+
+.mobile-popular-search:hover {
+  background: linear-gradient(135deg, var(--color-base-300) 0%, var(--color-base-content) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px oklch(from var(--color-base-content) l c h / 0.1);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .mobile-overlay-content {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}
+.bg-3d-grid-pattern {
+  background-image: 
+    linear-gradient(oklch(from var(--color-base-content) l c h / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(from var(--color-base-content) l c h / 0.1) 1px, transparent 1px),
+    linear-gradient(45deg, oklch(from var(--color-base-content) l c h / 0.05) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px, 30px 30px;
+  transform: perspective(1000px) rotateX(60deg);
+}
+.bg-black{
+  background-color: oklch(from var(--color-base-content) l c h / 0.4);
+  
+}
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) {
+  .mobile-bottom-nav {
+    background: var(--color-base-100);
+    border-top-color: var(--color-base-300);
+  }
+  
+  .mobile-search-content {
+    background: linear-gradient(135deg, var(--color-base-100) 0%, var(--color-base-100) 100%);
+  }
+  
+  .mobile-category-item {
+    background: linear-gradient(135deg, var(--color-base-300) 0%, var(--color-base-200) 100%);
+    border-color: oklch(from var(--color-base-content) l c h / 0.1);
+  }
+  
+  .mobile-popular-search {
+    background: linear-gradient(135deg, var(--color-base-300) 0%, var(--color-base-200) 100%);
+    border-color: oklch(from var(--color-base-content) l c h / 0.1);
+  }
+}

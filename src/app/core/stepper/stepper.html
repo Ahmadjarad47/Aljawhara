@@ -1,0 +1,72 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-base-content mb-2">Checkout</h1>
+    <p class="text-base-content/70">Complete your order in {{ currentStep() }} step{{ currentStep() === 1 ? '' : 's' }}</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="mb-8">
+    <div class="bg-base-200 rounded-full h-3 overflow-hidden">
+      <div 
+        class="bg-primary h-full transition-all duration-500 rounded-full"
+        [style.width.%]="getProgress()"
+      ></div>
+    </div>
+    <div class="flex justify-between mt-2 text-sm text-base-content/70">
+      <span>Shipping</span>
+      <span>Review</span>
+      <span>Payment</span>
+    </div>
+  </div>
+
+  <!-- Steps Indicator (Breadcrumbs) -->
+  <ul class="steps steps-horizontal w-full mb-8">
+    <li class="step" [class.step-primary]="currentStep() >= 1">Shipping</li>
+    <li class="step" [class.step-primary]="currentStep() >= 2">Review Order</li>
+    <li class="step" [class.step-primary]="currentStep() >= 3">Payment</li>
+  </ul>
+
+  <!-- Step Content -->
+  <div class="bg-base-100 rounded-2xl shadow-lg border border-base-300 p-6 md:p-8 min-h-[400px]">
+    @switch (currentStep()) {
+      @case (1) {
+        <app-shipping-step></app-shipping-step>
+      }
+      @case (2) {
+        <app-review-step></app-review-step>
+      }
+      @case (3) {
+        <app-payment-step></app-payment-step>
+      }
+    }
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="flex justify-between mt-6">
+    <button 
+      class="btn btn-ghost"
+      [disabled]="currentStep() === 1"
+      (click)="previousStep()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-2">
+        <path fill-rule="evenodd" d="M11.03 3.97a.75.75 0 010 1.06l-6.22 6.22H21a.75.75 0 010 1.5H4.81l6.22 6.22a.75.75 0 11-1.06 1.06l-7.5-7.5a.75.75 0 010-1.06l7.5-7.5a.75.75 0 011.06 0z" clip-rule="evenodd" />
+      </svg>
+      Previous
+    </button>
+
+    @if (currentStep() !== 3) {
+      <button 
+        class="btn btn-soft btn-primary ml-auto"
+        (click)="nextStep()"
+        [disabled]="!canProceed()"
+      >
+        Continue to {{ getNextStepName() }}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ml-2">
+          <path fill-rule="evenodd" d="M12.97 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06l6.22-6.22H3a.75.75 0 010-1.5h16.19l-6.22-6.22a.75.75 0 010-1.06z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    }
+  </div>
+</div>
+

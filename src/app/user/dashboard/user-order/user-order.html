@@ -1,0 +1,391 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">My Orders</h1>
+            <p class="text-base-content/70 mt-2">View and manage your order history</p>
+        </div>
+        <button (click)="loadOrders()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+            @if (isLoading()) {
+                <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            }
+            Refresh
+        </button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                placeholder="Search by order number or customer name..." 
+                                class="input input-bordered flex-1" 
+                                [ngModel]="searchTerm()"
+                                (ngModelChange)="searchTerm.set($event)"
+                                (keyup.enter)="onSearch()" />
+                            <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                                @if (isLoading()) {
+                                    <span class="loading loading-spinner loading-sm"></span>
+                                } @else {
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="statusFilter()"
+                        (ngModelChange)="onStatusFilterChange($event)">
+                        <option [ngValue]="null">All Status</option>
+                        <option [ngValue]="OrderStatus.Pending">Pending</option>
+                        <option [ngValue]="OrderStatus.Processing">Processing</option>
+                        <option [ngValue]="OrderStatus.Shipped">Shipped</option>
+                        <option [ngValue]="OrderStatus.Delivered">Delivered</option>
+                        <option [ngValue]="OrderStatus.Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Order Number</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Order Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (order of filteredOrders$(); track order.id) {
+                                <tr>
+                                    <td>
+                                        <div class="font-semibold text-primary">{{order.orderNumber}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-medium">{{order.customerName}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-outline">{{order.itemCount}} items</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold">${{order.total.toFixed(2)}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
+                                            {{getOrderStatusText(order.status)}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{order.createdAt | date:'short'}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-1">
+                                            <button 
+                                                (click)="viewOrderDetails(order.id)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                View
+                                            </button>
+                                            @if (canCancelOrder(order)) {
+                                                <button 
+                                                    (click)="cancelOrder(order.id)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-ghost btn-xs btn-error">
+                                                    Cancel
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr>
+                                    <td colspan="7" class="text-center py-8 text-base-content/50">
+                                        No orders found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    @if (showDetailsModal() && selectedOrderDetails()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Order Details - {{selectedOrderDetails()!.orderNumber}}</h3>
+                
+                <!-- Order Status -->
+                <div class="mb-4">
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <span class="text-sm text-base-content/70">Status:</span>
+                            <div class="badge badge-lg ml-2" [ngClass]="getOrderStatusClass(selectedOrderDetails()!.status)">
+                                {{getOrderStatusText(selectedOrderDetails()!.status)}}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-sm text-base-content/70">Order Date:</span>
+                            <span class="font-medium ml-2">{{selectedOrderDetails()!.createdAt | date:'medium'}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Shipping Address -->
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Shipping Address</h4>
+                    <div class="bg-base-200 p-4 rounded-lg">
+                        <p class="font-medium">{{selectedOrderDetails()!.shippingAddress.fullName}}</p>
+                        <p class="text-sm text-base-content/70">{{selectedOrderDetails()!.shippingAddress.phone}}</p>
+                        <p class="text-sm text-base-content/70">
+                            {{selectedOrderDetails()!.shippingAddress.street}}<br>
+                            {{selectedOrderDetails()!.shippingAddress.city}}@if (selectedOrderDetails()!.shippingAddress.state) {, {{selectedOrderDetails()!.shippingAddress.state}}} {{selectedOrderDetails()!.shippingAddress.postalCode}}<br>
+                            {{selectedOrderDetails()!.shippingAddress.country}}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Order Items -->
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Order Items</h4>
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of selectedOrderDetails()!.items; track item.id) {
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center gap-3">
+                                                @if (item.image) {
+                                                    <div class="avatar">
+                                                        <div class="mask mask-squircle w-12 h-12">
+                                                            <img [src]="item.image" [alt]="item.name" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div class="font-medium">{{item.name}}</div>
+                                            </div>
+                                        </td>
+                                        <td>${{item.price.toFixed(2)}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td class="font-semibold">${{item.total.toFixed(2)}}</td>
+                                        <td>
+                                            @if (checkingRatings()) {
+                                                <span class="loading loading-spinner loading-xs"></span>
+                                            } @else {
+                                                @if (hasRatedProduct(item.productId)) {
+                                                    @let rating = getProductRating(item.productId);
+                                                    @if (rating) {
+                                                        <div class="flex flex-col gap-1">
+                                                            <div class="rating rating-xs">
+                                                                @for (star of [1, 2, 3, 4, 5]; track star) {
+                                                                    <input 
+                                                                        type="radio" 
+                                                                        name="rating-display-{{item.productId}}" 
+                                                                        class="mask mask-star-2 bg-orange-400" 
+                                                                        [checked]="rating.ratingNumber === star"
+                                                                        disabled />
+                                                                }
+                                                            </div>
+                                                            @if (rating.content) {
+                                                                <div class="text-xs text-base-content/70 max-w-xs truncate" [title]="rating.content">
+                                                                    {{rating.content}}
+                                                                </div>
+                                                            }
+                                                            <div class="badge badge-success badge-xs">Rated</div>
+                                                        </div>
+                                                    }
+                                                } @else {
+                                                    <button 
+                                                        (click)="openRatingModal(item.productId, item.name)"
+                                                        [disabled]="isLoading()"
+                                                        class="btn btn-primary btn-xs">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                        </svg>
+                                                        Rate
+                                                    </button>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Order Summary -->
+                <div class="bg-base-200 p-4 rounded-lg">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-base-content/70">Subtotal:</span>
+                        <span class="font-medium">${{selectedOrderDetails()!.subtotal.toFixed(2)}}</span>
+                    </div>
+                    @if (selectedOrderDetails()!.couponDiscountAmount && selectedOrderDetails()!.couponDiscountAmount! > 0) {
+                        <div class="flex justify-between mb-2 text-success">
+                            <span>Discount ({{selectedOrderDetails()!.couponCode}}):</span>
+                            <span class="font-medium">-${{selectedOrderDetails()!.couponDiscountAmount!.toFixed(2)}}</span>
+                        </div>
+                    }
+                    <div class="flex justify-between mb-2">
+                        <span class="text-base-content/70">Shipping:</span>
+                        <span class="font-medium">${{selectedOrderDetails()!.shipping.toFixed(2)}}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-base-content/70">Tax:</span>
+                        <span class="font-medium">${{selectedOrderDetails()!.tax.toFixed(2)}}</span>
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>Total:</span>
+                        <span>${{selectedOrderDetails()!.total.toFixed(2)}}</span>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    @if (canCancelOrder(selectedOrderDetails()!)) {
+                        <button 
+                            (click)="cancelOrder(selectedOrderDetails()!.id)" 
+                            [disabled]="isLoading()" 
+                            class="btn btn-error">
+                            @if (isLoading()) {
+                                <span class="loading loading-spinner loading-sm"></span>
+                            }
+                            Cancel Order
+                        </button>
+                    }
+                    <button (click)="closeDetailsModal()" [disabled]="isLoading()" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Rating Modal -->
+    @if (showRatingModal() && selectedProductForRating()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Rate Product: {{selectedProductForRating()!.productName}}</h3>
+                
+                <!-- Rating Stars -->
+                <div class="mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Your Rating</span>
+                    </label>
+                    <div class="rating rating-lg">
+                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                            <input 
+                                type="radio" 
+                                name="rating" 
+                                class="mask mask-star-2 bg-orange-400" 
+                                [checked]="ratingForm().ratingNumber === star"
+                                (click)="updateRatingNumber(star)" />
+                        }
+                    </div>
+                    <div class="label">
+                        <span class="label-text-alt text-base-content/70">
+                            Selected: {{ratingForm().ratingNumber}} out of 5 stars
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Review Comment -->
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Your Review</span>
+                        <span class="label-text-alt text-base-content/70">Required</span>
+                    </label>
+                    <textarea 
+                        class="textarea textarea-bordered h-32" 
+                        placeholder="Share your experience with this product..."
+                        [ngModel]="ratingForm().content"
+                        (ngModelChange)="updateRatingContent($event)"
+                        maxlength="1000">
+                    </textarea>
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/70">
+                            {{ratingForm().content.length}} / 1000 characters
+                        </span>
+                    </label>
+                </div>
+
+                <div class="modal-action">
+                    <button 
+                        (click)="closeRatingModal()" 
+                        [disabled]="isLoading()" 
+                        class="btn btn-ghost">
+                        Cancel
+                    </button>
+                    <button 
+                        (click)="submitRating()" 
+                        [disabled]="isLoading() || !ratingForm().content.trim()" 
+                        class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Submit Rating
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Toast Component -->
+    <app-toast 
+        [toasts]="toasts" 
+        (close)="onToastClose($event)">
+    </app-toast>
+</div>

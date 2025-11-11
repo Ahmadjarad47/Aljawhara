@@ -1,0 +1,653 @@
+<div class="p-6">
+    <!-- Toast Component -->
+    <app-toast 
+        [toasts]="toasts" 
+        (close)="onToastClose($event)">
+    </app-toast>
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">Order Management</h1>
+            <p class="text-base-content/70 mt-2">Manage orders and track status</p>
+        </div>
+        <div class="flex gap-2">
+            <button (click)="toggleCharts()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {{showCharts() ? 'Hide' : 'Show'}} Charts
+            </button>
+            <button (click)="viewStatistics()" [disabled]="isLoading()" class="btn btn-info btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Statistics
+            </button>
+            <button (click)="viewSales()" [disabled]="isLoading()" class="btn btn-success btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Sales Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    @if (showCharts()) {
+        <div class="mb-6 space-y-6">
+            <!-- Chart Filters -->
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Chart Filters</h3>
+                        <button 
+                            (click)="clearChartFilters()" 
+                            [disabled]="isLoading()"
+                            class="btn btn-ghost btn-sm">
+                            Clear Filters
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Time Range Quick Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Time Range</span>
+                            </label>
+                            <select 
+                                class="select select-bordered select-sm" 
+                                [ngModel]="chartTimeRange()"
+                                (ngModelChange)="onChartTimeRangeChange($event)">
+                                <option value="all">All Time</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                                <option value="90days">Last 90 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+
+                        <!-- Start Date Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Start Date</span>
+                            </label>
+                            <input 
+                                type="date" 
+                                class="input input-bordered input-sm" 
+                                [ngModel]="chartStartDate()"
+                                (ngModelChange)="chartStartDate.set($event); chartTimeRange.set('custom'); applyChartFilters()" />
+                        </div>
+
+                        <!-- End Date Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">End Date</span>
+                            </label>
+                            <input 
+                                type="date" 
+                                class="input input-bordered input-sm" 
+                                [ngModel]="chartEndDate()"
+                                (ngModelChange)="chartEndDate.set($event); chartTimeRange.set('custom'); applyChartFilters()" />
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Status</span>
+                            </label>
+                            <select 
+                                class="select select-bordered select-sm" 
+                                [ngModel]="chartStatusFilter()"
+                                (ngModelChange)="chartStatusFilter.set($event === 'null' || $event === '' ? null : +$event); applyChartFilters()">
+                                <option [value]="null">All Status</option>
+                                <option [value]="0">Pending</option>
+                                <option [value]="1">Processing</option>
+                                <option [value]="2">Shipped</option>
+                                <option [value]="3">Delivered</option>
+                                <option [value]="4">Cancelled</option>
+                                <option [value]="5">Refunded</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Summary -->
+                    <div class="mt-4 text-sm text-base-content/70">
+                        @if (chartStartDate() || chartEndDate() || chartStatusFilter() !== null) {
+                            <div class="flex flex-wrap gap-2">
+                                <span class="font-semibold">Active Filters:</span>
+                                @if (chartStartDate()) {
+                                    <span class="badge badge-sm">From: {{chartStartDate()}}</span>
+                                }
+                                @if (chartEndDate()) {
+                                    <span class="badge badge-sm">To: {{chartEndDate()}}</span>
+                                }
+                                @if (chartStatusFilter() !== null) {
+                                    <span class="badge badge-sm">Status: {{getStatusName(chartStatusFilter()!)}}</span>
+                                }
+                            </div>
+                        } @else {
+                            <span>Showing all data</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Orders by Status Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="card-title">Orders by Status</h2>
+                            <span class="badge badge-primary badge-sm">
+                                {{getFilteredOrdersForChart().length}} orders
+                            </span>
+                        </div>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="ordersByStatusChartData"
+                                [options]="ordersByStatusChartOptions"
+                                type="doughnut">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Over Time Chart -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="card-title">Orders Over Time</h2>
+                            <span class="badge badge-primary badge-sm">
+                                {{getFilteredOrdersForChart().length}} orders
+                            </span>
+                        </div>
+                        <div class="h-80">
+                            <canvas baseChart
+                                [data]="ordersOverTimeChartData"
+                                [options]="ordersOverTimeChartOptions"
+                                type="line">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Over Time Chart -->
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title">Revenue Over Time</h2>
+                        <span class="badge badge-success badge-sm">
+                            {{getFilteredOrdersForChart().length}} orders
+                        </span>
+                    </div>
+                    <div class="h-80">
+                        <canvas baseChart
+                            [data]="revenueOverTimeChartData"
+                            [options]="revenueOverTimeChartOptions"
+                            type="bar">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Search Input -->
+                <div class="form-control">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            placeholder="Search by order number..." 
+                            class="input input-bordered flex-1" 
+                            [ngModel]="searchTerm()"
+                            (ngModelChange)="searchTerm.set($event)"
+                            (keyup.enter)="searchByOrderNumber()" />
+                        <button (click)="searchByOrderNumber()" [disabled]="isLoading()" class="btn btn-square">
+                            @if (isLoading()) {
+                                <span class="loading loading-spinner loading-sm"></span>
+                            } @else {
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="statusFilter()"
+                        (ngModelChange)="statusFilter.set($event === 'null' || $event === '' ? null : +$event); onSearch()">
+                        <option [value]="null">All Status</option>
+                        <option [value]="0">Pending</option>
+                        <option [value]="1">Processing</option>
+                        <option [value]="2">Shipped</option>
+                        <option [value]="3">Delivered</option>
+                        <option [value]="4">Cancelled</option>
+                        <option [value]="5">Refunded</option>
+                    </select>
+                </div>
+
+                <!-- User ID Filter -->
+                <div class="form-control">
+                    <input 
+                        type="text" 
+                        placeholder="Filter by User ID" 
+                        class="input input-bordered" 
+                        [ngModel]="userIdFilter()"
+                        (ngModelChange)="userIdFilter.set($event)" />
+                </div>
+
+                <!-- Page Size -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="pageSize()"
+                        (ngModelChange)="onPageSizeChange($event)">
+                        <option [value]="10">10 per page</option>
+                        <option [value]="20">20 per page</option>
+                        <option [value]="50">50 per page</option>
+                        <option [value]="100">100 per page</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="form-control">
+                    <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox checkbox-sm" 
+                                            [checked]="selectedOrders().length === getOrdersLength() && getOrdersLength() > 0"
+                                            [disabled]="isLoading()"
+                                            (change)="toggleSelectAll()" />
+                                    </label>
+                                </th>
+                                <th>Order Number</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (order of orders$ | async; track order.id) {
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                class="checkbox checkbox-sm" 
+                                                [checked]="selectedOrders().includes(order.id)"
+                                                [disabled]="isLoading()"
+                                                (change)="toggleOrderSelection(order.id)" />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div class="font-semibold">#{{order.orderNumber}}</div>
+                                        <div class="text-xs opacity-50">ID: {{order.id}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold">{{order.customerName}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge" [class]="getStatusBadgeClass(order.status)">
+                                            {{getStatusName(order.status)}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold">{{order.itemCount}} items</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-bold text-success">{{order.total | currency:'KWD'}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{order.createdAt | date:'short'}}</div>
+                                    </td>
+                                    <th>
+                                        <div class="flex flex-wrap gap-1">
+                                            <button 
+                                                (click)="viewDetails(order)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Details
+                                            </button>
+                                            <button 
+                                                (click)="updateStatusStart(order)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-info btn-xs">
+                                                Update Status
+                                            </button>
+                                            @if (order.status !== OrderStatus.Cancelled && order.status !== OrderStatus.Refunded && order.status !== OrderStatus.Delivered) {
+                                                <button 
+                                                    (click)="cancelOrder(order)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-error btn-xs">
+                                                    Cancel
+                                                </button>
+                                            }
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            @if (getOrdersLength() === 0 && !isLoading()) {
+                                <tr>
+                                    <td colspan="8" class="text-center py-8 text-base-content/50">
+                                        No orders found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center mt-6">
+            <div class="join">
+                <!-- Previous Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() - 1)" 
+                    [disabled]="getCurrentPage() === 1 || isLoading()"
+                    class="join-item btn">
+                    «
+                </button>
+
+                <!-- Page Numbers -->
+                @for (page of pageNumbers$ | async; track page) {
+                    @if (page === '...') {
+                        <button class="join-item btn btn-disabled">...</button>
+                    } @else {
+                        <button 
+                            (click)="onPageChange(+page)" 
+                            [disabled]="isLoading()"
+                            [class.btn-active]="getCurrentPage() === page"
+                            class="join-item btn">
+                            {{page}}
+                        </button>
+                    }
+                }
+
+                <!-- Next Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() + 1)" 
+                    [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+                    class="join-item btn">
+                    »
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-4 text-sm text-base-content/70">
+            @if (pagination$ | async; as pagination) {
+                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} orders
+            }
+        </div>
+    }
+
+    <!-- Status Update Modal -->
+    @if (showStatusModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-md">
+                <h3 class="font-bold text-lg mb-4">Update Order Status</h3>
+                
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">Status *</span>
+                    </label>
+                    <select class="select select-bordered" [ngModel]="statusUpdate.status" (ngModelChange)="statusUpdate.status = +$event">
+                        <option [value]="0">Pending</option>
+                        <option [value]="1">Processing</option>
+                        <option [value]="2">Shipped</option>
+                        <option [value]="3">Delivered</option>
+                        <option [value]="4">Cancelled</option>
+                        <option [value]="5">Refunded</option>
+                    </select>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="updateStatus()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Update Status
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Statistics Modal -->
+    @if (showStatisticsModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Order Statistics</h3>
+                
+                @if (isLoading()) {
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg"></span>
+                    </div>
+                } @else if (statistics(); as stats) {
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @for (stat of getStatisticsEntries(stats); track stat.key) {
+                            <div class="stat bg-base-200 rounded-lg p-4">
+                                <div class="stat-title">{{stat.label}}</div>
+                                <div class="stat-value text-primary">{{stat.value}}</div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Sales Report Modal -->
+    @if (showSalesModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <h3 class="font-bold text-lg mb-4">Sales Report</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Start Date</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="input input-bordered" 
+                            [ngModel]="salesStartDate()"
+                            (ngModelChange)="salesStartDate.set($event)" />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">End Date</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            class="input input-bordered" 
+                            [ngModel]="salesEndDate()"
+                            (ngModelChange)="salesEndDate.set($event)" />
+                    </div>
+                </div>
+
+                <button (click)="viewSales()" [disabled]="isLoading()" class="btn btn-primary mb-4">
+                    @if (isLoading()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                    } @else {
+                        Load Sales Data
+                    }
+                </button>
+                
+                @if (isLoading()) {
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg"></span>
+                    </div>
+                } @else if (totalSales(); as sales) {
+                    <div class="stat bg-base-200 rounded-lg p-4">
+                        <div class="stat-title">Total Sales</div>
+                        <div class="stat-value text-success">{{sales.totalSales | currency:'KWD'}}</div>
+                        @if (sales.startDate || sales.endDate) {
+                            <div class="stat-desc">
+                                @if (sales.startDate && sales.endDate) {
+                                    From {{sales.startDate | date:'short'}} to {{sales.endDate | date:'short'}}
+                                } @else if (sales.startDate) {
+                                    From {{sales.startDate | date:'short'}}
+                                } @else if (sales.endDate) {
+                                    Until {{sales.endDate | date:'short'}}
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Order Details Modal -->
+    @if (showDetailsModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
+                <h3 class="font-bold text-lg mb-4">Order Details</h3>
+                
+                @if (selectedOrder(); as order) {
+                    <div class="space-y-4">
+                        <!-- Order Information -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Order Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">Order Number:</span> #{{order.orderNumber}}</div>
+                                    <div><span class="font-medium">Status:</span> 
+                                        <span class="badge" [class]="getStatusBadgeClass(order.status)">
+                                            {{getStatusName(order.status)}}
+                                        </span>
+                                    </div>
+                                    <div><span class="font-medium">Customer:</span> {{order.customerName}}</div>
+                                    @if (order.appUserId) {
+                                        <div><span class="font-medium">User ID:</span> {{order.appUserId}}</div>
+                                    }
+                                    <div><span class="font-medium">Created:</span> {{order.createdAt | date:'medium'}}</div>
+                                </div>
+                            </div>
+                            <div class="card bg-base-200 p-4">
+                                <h4 class="font-semibold mb-2">Financial Information</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div><span class="font-medium">Subtotal:</span> {{order.subtotal | currency:'KWD'}}</div>
+                                    <div><span class="font-medium">Shipping:</span> {{order.shipping | currency:'KWD'}}</div>
+                                    <div><span class="font-medium">Tax:</span> {{order.tax | currency:'KWD'}}</div>
+                                    @if (order.couponCode && order.couponDiscountAmount) {
+                                        <div><span class="font-medium">Coupon:</span> {{order.couponCode}} (-{{order.couponDiscountAmount | currency:'KWD'}})</div>
+                                    }
+                                    <div class="font-bold text-success text-lg"><span class="font-medium">Total:</span> {{order.total | currency:'KWD'}}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        <div class="card bg-base-200 p-4">
+                            <h4 class="font-semibold mb-2">Shipping Address</h4>
+                            <div class="space-y-1 text-sm">
+                                <div><span class="font-medium">Full Name:</span> {{order.shippingAddress.fullName}}</div>
+                                <div><span class="font-medium">Phone:</span> {{order.shippingAddress.phone}}</div>
+                                <div><span class="font-medium">Address:</span> {{order.shippingAddress.street}}</div>
+                                <div><span class="font-medium">City:</span> {{order.shippingAddress.city}}</div>
+                                @if (order.shippingAddress.state) {
+                                    <div><span class="font-medium">State:</span> {{order.shippingAddress.state}}</div>
+                                }
+                                <div><span class="font-medium">Postal Code:</span> {{order.shippingAddress.postalCode}}</div>
+                                <div><span class="font-medium">Country:</span> {{order.shippingAddress.country}}</div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="card bg-base-200 p-4">
+                            <h4 class="font-semibold mb-2">Order Items</h4>
+                            <div class="overflow-x-auto">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Image</th>
+                                            <th>Price</th>
+                                            <th>Quantity</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (item of order.items; track item.id) {
+                                            <tr>
+                                                <td>
+                                                    <div class="font-semibold">{{item.name}}</div>
+                                                    <div class="text-xs opacity-50">ID: {{item.productId}}</div>
+                                                </td>
+                                                <td>
+                                                    @if (item.image) {
+                                                        <img [src]="item.image" alt="{{item.name}}" class="w-16 h-16 object-cover rounded" />
+                                                    } @else {
+                                                        <div class="w-16 h-16 bg-base-300 rounded flex items-center justify-center text-xs">No Image</div>
+                                                    }
+                                                </td>
+                                                <td>{{item.price | currency:'KWD'}}</td>
+                                                <td>{{item.quantity}}</td>
+                                                <td class="font-semibold">{{item.total | currency:'KWD'}}</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

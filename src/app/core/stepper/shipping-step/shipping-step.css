@@ -1,0 +1,6 @@
+/* Shipping step styles */
+.border-primary {
+  border-color: hsl(var(--primary));
+  border-width: 2px;
+}
+

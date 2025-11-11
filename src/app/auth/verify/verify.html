@@ -1,0 +1,107 @@
+<div>
+<div class="min-h-screen flex items-center justify-center px-4" style="background: var(--color-base-100)">
+  <div class="card w-full max-w-md shadow-2xl" style="background: var(--color-base-200)">
+    <div class="card-body">
+      <h2 class="card-title justify-center text-2xl font-bold mb-2">
+        Verify Your Account
+      </h2>
+      <p class="text-center text-sm opacity-70 mb-6">
+        Please enter the 6-digit code sent to your email
+      </p>
+
+      <!-- Email Display -->
+      @if (email()) {
+        <div class="alert" style="background: var(--color-base-300)">
+          <span class="text-sm">Verification code sent to: <strong>{{ email() }}</strong></span>
+        </div>
+      } @else {
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text font-semibold">Email</span>
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            class="input input-bordered w-full"
+            [class.input-error]="getError('email')"
+            placeholder="Enter your email"
+          />
+          @if (getError('email')) {
+            <label class="label">
+              <span class="label-text-alt text-error">{{ getError('email') }}</span>
+            </label>
+          }
+        </div>
+      }
+
+      <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()">
+        <!-- OTP Input -->
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text font-semibold">Verification Code</span>
+          </label>
+          <input
+            type="text"
+            formControlName="otp"
+            class="input input-bordered w-full text-center text-2xl font-mono tracking-widest"
+            [class.input-error]="getError('otp')"
+            placeholder="000000"
+            maxlength="6"
+          />
+          @if (getError('otp')) {
+            <label class="label">
+              <span class="label-text-alt text-error">{{ getError('otp') }}</span>
+            </label>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-control mt-6">
+          <button
+            type="submit"
+            class="btn w-full"
+            style="background: var(--color-primary); color: var(--color-primary-content)"
+            [disabled]="isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              Verifying...
+            } @else {
+              Verify Account
+            }
+          </button>
+        </div>
+
+        <!-- Resend OTP -->
+        <div class="text-center mt-4">
+          <p class="text-sm opacity-70 mb-2">Didn't receive the code?</p>
+          <button
+            type="button"
+            class="btn btn-link"
+            [disabled]="isResending()"
+            (click)="resendVerification()"
+          >
+            @if (isResending()) {
+              <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+              Resend Code
+            }
+          </button>
+        </div>
+
+        <!-- Back to Login -->
+        <div class="text-center mt-4">
+          <a routerLink="/auth/login" class="link link-hover text-sm" style="color: var(--color-primary)">
+            Back to Login
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<app-toast 
+  [toasts]="toasts" 
+  (close)="onToastClose($event)">
+</app-toast>
+</div>

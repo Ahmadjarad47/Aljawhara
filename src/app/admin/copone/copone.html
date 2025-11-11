@@ -1,0 +1,754 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">Coupon Management</h1>
+            <p class="text-base-content/70 mt-2">Manage discount coupons and their settings</p>
+        </div>
+        <div class="flex gap-2">
+            @if (selectedCoupons().length > 0) {
+                <button 
+                    (click)="deleteSelected()" 
+                    [disabled]="isLoading()"
+                    class="btn btn-error btn-sm">
+                    @if (isLoading()) {
+                        <span class="loading loading-spinner loading-xs"></span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    }
+                    Delete Selected ({{selectedCoupons().length}})
+                </button>
+            }
+            <button 
+                (click)="cleanupExpiredCoupons()" 
+                [disabled]="isLoading()" 
+                class="btn btn-warning btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Cleanup Expired
+            </button>
+            <button 
+                (click)="showValidationModal.set(true)" 
+                [disabled]="isLoading()" 
+                class="btn btn-info btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Validate Coupon
+            </button>
+            <button (click)="showAddModal.set(true)" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Coupon
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+        <div class="card-body p-4">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                placeholder="Search coupons..." 
+                                class="input input-bordered flex-1" 
+                                [ngModel]="searchTerm()"
+                                (ngModelChange)="searchTerm.set($event)"
+                                (keyup.enter)="onSearch()" />
+                            <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                                @if (isLoading()) {
+                                    <span class="loading loading-spinner loading-sm"></span>
+                                } @else {
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="statusFilter()"
+                        (ngModelChange)="statusFilter.set($event); onStatusFilterChange($event)">
+                        <option [value]="null">All Status</option>
+                        <option [value]="true">Active</option>
+                        <option [value]="false">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Type Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="typeFilter()"
+                        (ngModelChange)="typeFilter.set($event); onTypeFilterChange($event)">
+                        <option [value]="null">All Types</option>
+                        @for (type of getCouponTypes(); track type) {
+                            <option [value]="type">{{getCouponTypeName(type)}}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Expired Filter -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="expiredFilter()"
+                        (ngModelChange)="expiredFilter.set($event); onExpiredFilterChange($event)">
+                        <option [value]="null">All</option>
+                        <option [value]="true">Expired</option>
+                        <option [value]="false">Not Expired</option>
+                    </select>
+                </div>
+
+                <!-- Page Size -->
+                <div class="form-control">
+                    <select 
+                        class="select select-bordered" 
+                        [ngModel]="pageSize()"
+                        (ngModelChange)="pageSize.set($event); onPageSizeChange($event)">
+                        <option [value]="10">10 per page</option>
+                        <option [value]="20">20 per page</option>
+                        <option [value]="50">50 per page</option>
+                        <option [value]="100">100 per page</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupons Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+            @if (isLoading()) {
+                <div class="flex justify-center items-center py-12">
+                    <span class="loading loading-spinner loading-lg"></span>
+                </div>
+            } @else {
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox checkbox-sm" 
+                                            [checked]="selectedCoupons().length === getCouponsLength() && getCouponsLength() > 0"
+                                            [disabled]="isLoading()"
+                                            (change)="toggleSelectAll()" />
+                                    </label>
+                                </th>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Min Order</th>
+                                <th>Max Discount</th>
+                                <th>Usage</th>
+                                <th>Validity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (coupon of coupons$| async; track $index) {
+                                <tr>
+                                    <th>
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                class="checkbox checkbox-sm" 
+                                                [checked]="selectedCoupons().includes(coupon.id)"
+                                                [disabled]="isLoading()"
+                                                (change)="toggleCouponSelection(coupon.id)" />
+                                        </label>
+                                    </th>
+                                    <td>
+                                        <div class="font-mono font-semibold">{{coupon.code}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm text-base-content/70 max-w-xs truncate">{{coupon.description}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-outline">{{getCouponTypeName(coupon.type)}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold">
+                                            @if (coupon.type === 1) {
+                                                {{coupon.value}}%
+                                            } @else if (coupon.type === 2) {
+                                                ${{coupon.value}}
+                                            } @else {
+                                                Free
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">
+                                            @if (coupon.minimumOrderAmount) {
+                                                ${{coupon.minimumOrderAmount}}
+                                            } @else {
+                                                <span class="text-base-content/50">None</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">
+                                            @if (coupon.maximumDiscountAmount) {
+                                                ${{coupon.maximumDiscountAmount}}
+                                            } @else {
+                                                <span class="text-base-content/50">None</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">
+                                            {{coupon.usedCount}}
+                                            @if (coupon.usageLimit) {
+                                                / {{coupon.usageLimit}}
+                                            } @else {
+                                                / ∞
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">
+                                            <div>{{coupon.startDate|date}}</div>
+                                            <div class="text-base-content/70">to</div>
+                                            <div [class.text-error]="isCouponExpired(coupon.endDate)">
+                                                {{coupon.endDate|date}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="badge" [class.badge-success]="coupon.isActive" [class.badge-error]="!coupon.isActive">
+                                                {{coupon.isActive ? 'Active' : 'Inactive'}}
+                                            </div>
+                                            @if (isCouponExpired(coupon.endDate)) {
+                                                <div class="badge badge-warning">Expired</div>
+                                            }
+                                            @if (coupon.isFullyUsed) {
+                                                <div class="badge badge-info">Fully Used</div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <th>
+                                        <div class="flex gap-1 flex-wrap">
+                                            @if (coupon.isActive) {
+                                                <button 
+                                                    (click)="deactivateCoupon(coupon.id)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-ghost btn-xs btn-error">
+                                                    @if (isLoading()) {
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    } @else {
+                                                        Deactivate
+                                                    }
+                                                </button>
+                                            } @else {
+                                                <button 
+                                                    (click)="toggleCouponStatus(coupon.id)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-ghost btn-xs btn-success">
+                                                    @if (isLoading()) {
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    } @else {
+                                                        Activate
+                                                    }
+                                                </button>
+                                            }
+                                            <button 
+                                                (click)="editCouponStart(coupon)"
+                                                [disabled]="isLoading()"
+                                                class="btn btn-ghost btn-xs">
+                                                Edit
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            @if (getCouponsLength() === 0 && !isLoading()) {
+                                <tr>
+                                    <td colspan="11" class="text-center py-8 text-base-content/50">
+                                        No coupons found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center mt-6">
+            <div class="join">
+                <!-- Previous Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() - 1)" 
+                    [disabled]="getCurrentPage() === 1 || isLoading()"
+                    class="join-item btn">
+                    «
+                </button>
+
+                <!-- Page Numbers -->
+                @for (page of pageNumbers$ | async; track page) {
+                    @if (page === '...') {
+                        <button class="join-item btn btn-disabled">...</button>
+                    } @else {
+                        <button 
+                            (click)="onPageChange(+page)" 
+                            [disabled]="isLoading()"
+                            [class.btn-active]="getCurrentPage() === page"
+                            class="join-item btn">
+                            {{page}}
+                        </button>
+                    }
+                }
+
+                <!-- Next Button -->
+                <button 
+                    (click)="onPageChange(getCurrentPage() + 1)" 
+                    [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+                    class="join-item btn">
+                    »
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="text-center mt-4 text-sm text-base-content/70">
+            @if (pagination$ | async; as pagination) {
+                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} coupons
+            }
+        </div>
+    }
+
+    <!-- Add Coupon Modal -->
+    @if (showAddModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Add New Coupon</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Code -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Coupon Code *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter coupon code" 
+                            class="input input-bordered w-full font-mono" 
+                            [(ngModel)]="newCoupon.code" />
+                    </div>
+
+                    <!-- Type -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Coupon Type *</span>
+                        </label>
+                        <select 
+                            class="select select-bordered w-full" 
+                            [(ngModel)]="newCoupon.type">
+                            @for (type of getCouponTypes(); track type) {
+                                <option [value]="type">{{getCouponTypeName(type)}}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Value -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Value *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter value" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.value"
+                            min="0"
+                            step="0.01" />
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter description" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.description" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Minimum Order Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Minimum Order Amount</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter minimum order amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.minimumOrderAmount"
+                            min="0"
+                            step="0.01" />
+                    </div>
+
+                    <!-- Maximum Discount Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Maximum Discount Amount</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter maximum discount amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.maximumDiscountAmount"
+                            min="0"
+                            step="0.01" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Start Date -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Start Date *</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.startDate" />
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">End Date *</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.endDate" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <!-- Usage Limit -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Usage Limit</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter usage limit" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="newCoupon.usageLimit"
+                            min="1" />
+                    </div>
+
+                    <!-- Is Active -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Status</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox" 
+                                [(ngModel)]="newCoupon.isActive" />
+                            <span class="label-text">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Is Single Use -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Single Use</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox" 
+                                [(ngModel)]="newCoupon.isSingleUse" />
+                            <span class="label-text">Single Use Only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="addCoupon()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Add Coupon
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Edit Coupon Modal -->
+    @if (showEditModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-4xl">
+                <h3 class="font-bold text-lg mb-4">Edit Coupon</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Code -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Coupon Code *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter coupon code" 
+                            class="input input-bordered w-full font-mono" 
+                            [(ngModel)]="editCoupon.code" />
+                    </div>
+
+                    <!-- Type -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Coupon Type *</span>
+                        </label>
+                        <select 
+                            class="select select-bordered w-full" 
+                            [(ngModel)]="editCoupon.type">
+                            @for (type of getCouponTypes(); track type) {
+                                <option [value]="type">{{getCouponTypeName(type)}}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Value -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Value *</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter value" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.value"
+                            min="0"
+                            step="0.01" />
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Description *</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter description" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.description" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Minimum Order Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Minimum Order Amount</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter minimum order amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.minimumOrderAmount"
+                            min="0"
+                            step="0.01" />
+                    </div>
+
+                    <!-- Maximum Discount Amount -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Maximum Discount Amount</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter maximum discount amount" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.maximumDiscountAmount"
+                            min="0"
+                            step="0.01" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Start Date -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Start Date *</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.startDate" />
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">End Date *</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.endDate" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <!-- Usage Limit -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Usage Limit</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            placeholder="Enter usage limit" 
+                            class="input input-bordered w-full" 
+                            [(ngModel)]="editCoupon.usageLimit"
+                            min="1" />
+                    </div>
+
+                    <!-- Is Active -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Status</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox" 
+                                [(ngModel)]="editCoupon.isActive" />
+                            <span class="label-text">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Is Single Use -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Single Use</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox" 
+                                [(ngModel)]="editCoupon.isSingleUse" />
+                            <span class="label-text">Single Use Only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="updateCoupon()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Update Coupon
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Validation Modal -->
+    @if (showValidationModal()) {
+        <div class="modal modal-open">
+            <div class="modal-box max-w-md">
+                <h3 class="font-bold text-lg mb-4">Validate Coupon</h3>
+                
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">Coupon Code *</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        placeholder="Enter coupon code" 
+                        class="input input-bordered w-full font-mono" 
+                        [ngModel]="validationCode()"
+                        (ngModelChange)="validationCode.set($event)" />
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">Order Amount *</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        placeholder="Enter order amount" 
+                        class="input input-bordered w-full" 
+                        [ngModel]="validationOrderAmount()"
+                        (ngModelChange)="validationOrderAmount.set($event)"
+                        min="0"
+                        step="0.01" />
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">User ID (Optional)</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        placeholder="Enter user ID" 
+                        class="input input-bordered w-full" 
+                        [ngModel]="validationUserId()"
+                        (ngModelChange)="validationUserId.set($event)" />
+                </div>
+
+                <div class="modal-action">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="validateCoupon()" [disabled]="isLoading()" class="btn btn-primary">
+                        @if (isLoading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Validate
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Toast Component -->
+    <app-toast 
+        [toasts]="toasts" 
+        (close)="onToastClose($event)">
+    </app-toast>
+</div>

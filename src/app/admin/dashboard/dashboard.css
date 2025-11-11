@@ -1,0 +1,45 @@
+/* Active Router Link Styles */
+.menu li a.active {
+  background-color:#0095ff;
+  color: #ffffff;
+  border-left: 3px solid hsl(var(--p));
+  font-weight: 600;
+}
+
+.menu li a.active svg {
+  color: hsl(var(--p));
+}
+
+/* Hover effects for navigation items */
+.menu li a:hover:not(.active) {
+  background-color: hsl(var(--b2));
+  transform: translateX(2px);
+}
+
+/* Smooth transitions */
+.menu li a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Drawer responsive styles */
+@media (max-width: 768px) {
+  .is-drawer-close .menu li a span {
+    display: none;
+  }
+}
+
+/* User profile section styling */
+.border-t {
+  border-top: 1px solid hsl(var(--bc) / 0.1);
+}
+
+/* Language switcher dropdown */
+.dropdown-content {
+  z-index: 50;
+}
+
+/* Logout button hover effect */
+.btn-error:hover {
+  background-color: hsl(var(--er) / 0.9);
+  transform: translateY(-1px);
+}
