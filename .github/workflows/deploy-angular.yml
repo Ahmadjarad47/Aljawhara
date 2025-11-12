@@ -24,6 +24,18 @@ jobs:
           npm run build -- --configuration production
 
       - name: Deploy build to VPS via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: 72.61.187.165
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "===== Cleaning old files ====="
+            rm -rf /var/www/html/*
+
+            echo "===== Uploading new build ====="
+            exit
+      - name: Copy new build files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 72.61.187.165
