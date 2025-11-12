@@ -30,6 +30,7 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "Removing old files..."
             rm -rf /var/www/html/*
 
       - name: Copy Angular build files
@@ -38,5 +39,6 @@ jobs:
           host: 72.61.187.165
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: dist/Aljawhara.new.Angular/browser/*
+          source: "dist/Aljawhara.new.Angular/browser/**"
           target: /var/www/html/
+          strip_components: 3
