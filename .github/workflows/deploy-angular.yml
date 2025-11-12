@@ -1,0 +1,34 @@
+name: Auto Deploy Angular Frontend to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and build Angular
+        run: |
+          cd frontend
+          npm ci
+          npm run build -- --configuration production
+
+      - name: Deploy build to VPS via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 72.61.187.165
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: frontend/dist/
+          target: /var/www/html/
