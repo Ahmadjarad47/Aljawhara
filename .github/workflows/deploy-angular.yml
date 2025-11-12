@@ -20,7 +20,6 @@ jobs:
 
       - name: Install dependencies and build Angular
         run: |
-          cd Aljawhara.NET/frontend
           npm ci
           npm run build -- --configuration production
 
@@ -30,5 +29,5 @@ jobs:
           host: 72.61.187.165
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: Aljawhara.NET/frontend/dist/
+          source: dist/Aljawhara.new.Angular/browser/*
           target: /var/www/html/
