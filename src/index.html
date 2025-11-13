@@ -5,15 +5,52 @@
   <meta charset="utf-8">
   <title>AljawharaNewAngular</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Viewport and Mobile Optimization -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Security Headers -->
+  <!-- Note: CSP with nonces should be set via server headers in production for better security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https://api.aljawharaplus.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()">
+  <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
+  
+  <!-- Performance: Resource Hints -->
+  <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin>
+  <link rel="dns-prefetch" href="https://api.aljawharaplus.com">
+  <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin="anonymous">
+  
+  <!-- Favicon and Icons -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <script>
+  <link rel="apple-touch-icon" href="logo.png">
+  
+  <!-- Performance: Preload Critical Resources -->
+  <!-- These will be automatically injected by Angular build process for production -->
+  
+  <!-- Disable automatic translation -->
+  <meta name="google" content="notranslate">
+  
+  <!-- Prevent indexing in development (remove in production if needed) -->
+  <!-- <meta name="robots" content="noindex, nofollow"> -->
 
-  </script>
 </head>
 
 <body>
   <app-root></app-root>
+  <noscript>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+      <h1>JavaScript Required</h1>
+      <p>This application requires JavaScript to be enabled. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
 </body>
 
 </html>
