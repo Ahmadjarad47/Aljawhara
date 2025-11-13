@@ -70,13 +70,28 @@ export class CartService {
   addItem(product: OrderItemCreateDto): void {
     const items = this.cartItems();
     
-    // Check if product already exists in cart
-    const existingItem = items.find(item => item.productId === product.productId);
+    // Check if product already exists in cart with same variants
+    const existingItem = items.find(item => {
+      if (item.productId !== product.productId) return false;
+      
+      // Compare selected variants
+      const itemVariants = item.selectedVariants || {};
+      const productVariants = product.selectedVariants || {};
+      
+      const itemVariantKeys = Object.keys(itemVariants).sort();
+      const productVariantKeys = Object.keys(productVariants).sort();
+      
+      if (itemVariantKeys.length !== productVariantKeys.length) return false;
+      
+      return itemVariantKeys.every(key => 
+        itemVariants[+key] === productVariants[+key]
+      );
+    });
     
     if (existingItem) {
-      // Update quantity if product already exists
+      // Update quantity if product with same variants already exists
       const updatedItems = items.map(item =>
-        item.productId === product.productId
+        item.id === existingItem.id
           ? { ...item, quantity: item.quantity + product.quantity }
           : item
       );
@@ -90,7 +105,8 @@ export class CartService {
         image: product.image,
         price: product.price,
         quantity: product.quantity,
-        addedAt: new Date()
+        addedAt: new Date(),
+        selectedVariants: product.selectedVariants
       };
       const updatedItems = [...items, newItem];
       this.saveCartToStorage(updatedItems);

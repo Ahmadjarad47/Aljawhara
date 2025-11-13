@@ -12,7 +12,9 @@ import {
   ProductDetailCreateDto,
   RatingDto,
   PagedResult, 
-  ProductFilters 
+  ProductFilters,
+  ProductVariantCreateDto,
+  ProductVariantUpdateDto
 } from './product.models';
 
 @Injectable({
@@ -127,6 +129,8 @@ export class ServiceProduct {
       subCategoryId: product.subCategoryId,
       newPrice: product.newPrice,
       productDetailsCount: product.productDetails?.length || 0,
+      variantsCount: product.variants?.length || 0,
+      variants: product.variants,
       imagesCount: product.images?.length || 0
     });
     
@@ -156,6 +160,32 @@ export class ServiceProduct {
           formData.append(`productDetails[${index}].valueAr`, detail.valueAr);
         });
         console.log('✅ Product details added to FormData');
+      }
+      
+      // Add variants
+      console.log('🔍 Checking variants before adding to FormData:', {
+        hasVariants: !!product.variants,
+        variantsLength: product.variants?.length || 0,
+        variants: product.variants
+      });
+      
+      if (product.variants && product.variants.length > 0) {
+        console.log('Adding variants:', product.variants.length);
+        product.variants.forEach((variant, variantIndex) => {
+          formData.append(`variants[${variantIndex}].name`, variant.name);
+          formData.append(`variants[${variantIndex}].nameAr`, variant.nameAr);
+          
+          if (variant.values && variant.values.length > 0) {
+            variant.values.forEach((value, valueIndex) => {
+              formData.append(`variants[${variantIndex}].values[${valueIndex}].value`, value.value);
+              formData.append(`variants[${variantIndex}].values[${valueIndex}].valueAr`, value.valueAr);
+              formData.append(`variants[${variantIndex}].values[${valueIndex}].price`, value.price.toString());
+            });
+          }
+        });
+        console.log('✅ Variants added to FormData');
+      } else {
+        console.log('⚠️ No variants to add (variants is empty or undefined)');
       }
       
       // Add images
@@ -203,6 +233,40 @@ export class ServiceProduct {
       formData.append(`productDetails[${index}].value`, detail.value);
       formData.append(`productDetails[${index}].valueAr`, detail.valueAr);
     });
+    
+    // Add variants
+    console.log('🔍 Checking variants before adding to FormData (Update):', {
+      hasVariants: !!product.variants,
+      variantsLength: product.variants?.length || 0,
+      variants: product.variants
+    });
+    
+    if (product.variants && product.variants.length > 0) {
+      console.log('Adding variants (Update):', product.variants.length);
+      product.variants.forEach((variant, variantIndex) => {
+        // Include id if it exists (for updates)
+        if (variant.id !== undefined && variant.id !== null) {
+          formData.append(`variants[${variantIndex}].id`, variant.id.toString());
+        }
+        formData.append(`variants[${variantIndex}].name`, variant.name);
+        formData.append(`variants[${variantIndex}].nameAr`, variant.nameAr);
+        
+        if (variant.values && variant.values.length > 0) {
+          variant.values.forEach((value, valueIndex) => {
+            // Include id if it exists (for updates)
+            if (value.id !== undefined && value.id !== null) {
+              formData.append(`variants[${variantIndex}].values[${valueIndex}].id`, value.id.toString());
+            }
+            formData.append(`variants[${variantIndex}].values[${valueIndex}].value`, value.value);
+            formData.append(`variants[${variantIndex}].values[${valueIndex}].valueAr`, value.valueAr);
+            formData.append(`variants[${variantIndex}].values[${valueIndex}].price`, value.price.toString());
+          });
+        }
+      });
+      console.log('✅ Variants added to FormData (Update)');
+    } else {
+      console.log('⚠️ No variants to add (Update) - variants is empty or undefined');
+    }
     
     // Add images
     if (product.images && product.images.length > 0) {

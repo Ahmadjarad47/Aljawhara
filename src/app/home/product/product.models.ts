@@ -1,5 +1,5 @@
 import { BaseDto } from "../../admin/base.dto";
-import { ProductDetailDto, RatingDto } from "../../admin/product/product.models";
+import { ProductDetailDto, RatingDto, ProductVariantDto } from "../../admin/product/product.models";
 
 export interface CategoryDto extends BaseDto {
     name: string;
@@ -39,6 +39,7 @@ export interface ProductDto extends BaseDto {
     ratings: RatingDto[];
     averageRating: number;
     totalReviews: number;
+    variants?: ProductVariantDto[];
 }
 export interface ProductSummaryDto {
     id: number;

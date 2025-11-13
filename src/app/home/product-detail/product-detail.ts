@@ -43,6 +43,10 @@ export class ProductDetail implements OnInit {
   showReviews = false;
   showShippingInfo = false;
   showReturnPolicy = false;
+  
+  // Variants state
+  selectedVariants = signal<{ [variantId: number]: number }>({}); // { variantId: valueId }
+  currentPrice = signal<number>(0);
 
   // Toast data
   get toasts() {
@@ -156,6 +160,12 @@ export class ProductDetail implements OnInit {
         // Reset selected image index when product changes
         this.selectedImageIndex = 0;
         
+        // Initialize price with base price
+        this.currentPrice.set(product.newPrice);
+        
+        // Reset selected variants
+        this.selectedVariants.set({});
+        
         // Check if product is already in cart and set quantity
         const cartItem = this.cartService.getItemByProductId(product.id);
         if (cartItem) {
@@ -240,6 +250,36 @@ export class ProductDetail implements OnInit {
     this.selectedSize = size;
   }
 
+  // Variants selection methods
+  selectVariantValue(variantId: number, valueId: number, price: number) {
+    const current = this.selectedVariants();
+    this.selectedVariants.set({ ...current, [variantId]: valueId });
+    this.currentPrice.set(price);
+  }
+
+  isVariantValueSelected(variantId: number, valueId: number): boolean {
+    return this.selectedVariants()[variantId] === valueId;
+  }
+
+  getSelectedVariantValueId(variantId: number): number | undefined {
+    return this.selectedVariants()[variantId];
+  }
+
+  areAllVariantsSelected(): boolean {
+    const product = this.product();
+    if (!product || !product.variants || product.variants.length === 0) {
+      return true; // No variants required
+    }
+    
+    return product.variants.every(variant => 
+      this.selectedVariants()[variant.id!] !== undefined
+    );
+  }
+
+  getFinalPrice(): number {
+    return this.currentPrice();
+  }
+
   // Quantity controls
   increaseQuantity() {
     const product = this.product();
@@ -269,6 +309,12 @@ export class ProductDetail implements OnInit {
       return;
     }
 
+    // Check if variants are required and all are selected
+    if (product.variants && product.variants.length > 0 && !this.areAllVariantsSelected()) {
+      this.toastService.warning('Selection Required', 'Please select all variant options');
+      return;
+    }
+
     if (this.quantity > product.totalInStock) {
       this.toastService.warning('Stock Limit', `Only ${product.totalInStock} items available`);
       this.quantity = product.totalInStock;
@@ -276,15 +322,17 @@ export class ProductDetail implements OnInit {
     }
 
     try {
+      const finalPrice = this.getFinalPrice();
       const cartItem = {
         productId: product.id,
         name: product.title,
         image: (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/400x400?text=No+Image',
-        price: product.newPrice,
-        quantity: this.quantity
+        price: finalPrice,
+        quantity: this.quantity,
+        selectedVariants: this.selectedVariants()
       };
 
-      // Check if item is already in cart
+      // Check if item is already in cart (with same variants)
       const existingItem = this.cartService.getItemByProductId(product.id);
       
       this.cartService.addItem(cartItem);

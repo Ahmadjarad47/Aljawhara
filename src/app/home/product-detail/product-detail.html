@@ -126,14 +126,41 @@
 
         <!-- Price -->
         <div class="flex items-center space-x-4">
-          <span class="text-3xl font-bold text-primary">{{(product()?.newPrice |currency)}}</span>
+          <span class="text-3xl font-bold text-primary">{{(getFinalPrice() |currency)}}</span>
           @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
           <span class="text-xl text-gray-400 line-through">{{product()?.oldPrice|currency}}</span>
           }
           @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
-          <span class="text-sm text-green-600 font-medium">You save {{((product()?.oldPrice || 0) - (product()?.newPrice || 0)|currency)}}</span>
+          <span class="text-sm text-green-600 font-medium">You save {{((product()?.oldPrice || 0) - (getFinalPrice() || 0)|currency)}}</span>
           }
         </div>
+
+        <!-- Variants Selection -->
+        @if (product()?.variants && product()?.variants?.length) {
+        <div class="space-y-4">
+          @for (variant of (product()?.variants || []); track variant.id ?? $index) {
+          <div class="space-y-2">
+            <h3 class="text-lg font-semibold">{{variant.name}} / {{variant.nameAr}}</h3>
+            <div class="flex flex-wrap gap-2">
+              @for (value of variant.values; track value.id ?? $index) {
+              <button 
+                (click)="selectVariantValue(variant.id!, value.id!, value.price)"
+                [class.bg-primary]="isVariantValueSelected(variant.id!, value.id!)"
+                [class.text-white]="isVariantValueSelected(variant.id!, value.id!)"
+                [class.border-primary]="isVariantValueSelected(variant.id!, value.id!)"
+                [class.bg-base-200]="!isVariantValueSelected(variant.id!, value.id!)"
+                class="px-4 py-2 rounded-lg border-2 border-base-300 hover:border-primary transition-colors">
+                <span>{{value.value}} / {{value.valueAr}}</span>
+                @if (value.price !== product()!.newPrice) {
+                <span class="text-xs ml-1">({{(value.price |currency)}})</span>
+                }
+              </button>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        }
 
         <!-- Stock Status -->
         <div class="flex flex-col space-y-2">
@@ -235,7 +262,7 @@
         <div class="space-y-4">
           <div class="flex space-x-4">
             <button (click)="addToCart()" 
-                    [disabled]="!product()?.isInStock"
+                    [disabled]="!product()?.isInStock || (product()?.variants && product()?.variants?.length && !areAllVariantsSelected())"
                     class="flex-1 bg-primary text-white py-3 px-6 rounded-xl font-semibold hover:bg-primary-focus transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
               Add to Cart
             </button>

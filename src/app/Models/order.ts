@@ -4,6 +4,7 @@ export interface OrderItemCreateDto {
   image: string;
   price: number;
   quantity: number;
+  selectedVariants?: { [variantId: number]: number }; // { variantId: valueId }
 }
 
 export interface CartItem extends OrderItemCreateDto {

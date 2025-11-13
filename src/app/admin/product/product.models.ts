@@ -1,5 +1,48 @@
 import { BaseDto } from "../base.dto";
 
+// Product Variant Interfaces
+export interface ProductVariantValueDto {
+    id?: number;
+    value: string;
+    valueAr: string;
+    price: number;
+    productVariantId?: number;
+}
+
+export interface ProductVariantDto {
+    id?: number;
+    name: string;
+    nameAr: string;
+    productId?: number;
+    values: ProductVariantValueDto[];
+}
+
+export interface ProductVariantCreateDto {
+    name: string;
+    nameAr: string;
+    values: ProductVariantValueCreateDto[];
+}
+
+export interface ProductVariantValueCreateDto {
+    value: string;
+    valueAr: string;
+    price: number;
+}
+
+export interface ProductVariantUpdateDto {
+    id?: number;
+    name: string;
+    nameAr: string;
+    values: ProductVariantValueUpdateDto[];
+}
+
+export interface ProductVariantValueUpdateDto {
+    id?: number;
+    value: string;
+    valueAr: string;
+    price: number;
+}
+
 export interface ProductDto extends BaseDto {
     title: string;
     titleAr: string;
@@ -19,6 +62,7 @@ export interface ProductDto extends BaseDto {
     ratings: RatingDto[];
     averageRating: number;
     totalReviews: number;
+    variants?: ProductVariantDto[];
 }
 export interface RatingDto extends BaseDto {
     content: string;
@@ -55,6 +99,7 @@ export interface ProductCreateWithFilesDto {
     subCategoryId: number;
     productDetails: ProductDetailCreateDto[];
     images: File[] | null;
+    variants?: ProductVariantCreateDto[];
 }
 
 export interface ProductUpdateWithFilesDto {
@@ -71,6 +116,7 @@ export interface ProductUpdateWithFilesDto {
     productDetails: ProductDetailCreateDto[];
     images: File[] | null;
     imagesToDelete: string[];
+    variants?: ProductVariantUpdateDto[];
 }
 export interface ProductDetailDto extends BaseDto {
     label: string;
