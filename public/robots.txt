@@ -1,0 +1,45 @@
+# robots.txt for الجوهرة - متجر إلكتروني للمنتجات البلاستيكية والورقية
+
+User-agent: *
+Allow: /
+Allow: /product
+Allow: /product/*
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /cart
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /user/
+Disallow: /auth/
+Disallow: /checkout/
+Disallow: /checkout/success
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Allow common assets
+Allow: /favicon.ico
+Allow: /logo.png
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.ico$
+Allow: /*.woff$
+Allow: /*.woff2$
+Allow: /*.ttf$
+Allow: /*.eot$
+
+# Sitemap location
+Sitemap: https://aljawharaplus.com/sitemap.xml
+
+# Crawl-delay (optional - adjust as needed)
+# Crawl-delay: 1
+

@@ -1,10 +1,43 @@
 <!doctype html>
-<html lang="en" data-theme="light-user">
+<html lang="ar" dir="rtl" data-theme="light-user">
 
 <head>
   <meta charset="utf-8">
-  <title>AljawharaNewAngular</title>
+  <title>الجوهرة - متجر إلكتروني للمنتجات البلاستيكية والورقية | مطهرات، صحون، بخاخات</title>
   <base href="/">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="متجر الجوهرة الإلكتروني - تسوق أونلاين أفضل المنتجات البلاستيكية والورقية: مطهرات، صحون بلاستيكية، بخاخات، أرضيات، وأكثر. توصيل سريع وأسعار منافسة.">
+  <meta name="keywords" content="متجر إلكتروني، منتجات بلاستيكية، منتجات ورقية، مطهرات، صحون بلاستيكية، بخاخات، أرضيات، أدوات منزلية، تسوق أونلاين، الجوهرة">
+  <meta name="author" content="الجوهرة">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="language" content="Arabic">
+  <meta name="revisit-after" content="7 days">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://aljawharaplus.com/">
+  <meta property="og:title" content="الجوهرة - متجر إلكتروني للمنتجات البلاستيكية والورقية">
+  <meta property="og:description" content="تسوق أونلاين أفضل المنتجات البلاستيكية والورقية: مطهرات، صحون بلاستيكية، بخاخات، أرضيات، وأكثر. توصيل سريع وأسعار منافسة.">
+  <meta property="og:image" content="https://aljawharaplus.com/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ar_SA">
+  <meta property="og:site_name" content="الجوهرة">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://aljawharaplus.com/">
+  <meta name="twitter:title" content="الجوهرة - متجر إلكتروني للمنتجات البلاستيكية والورقية">
+  <meta name="twitter:description" content="تسوق أونلاين أفضل المنتجات البلاستيكية والورقية: مطهرات، صحون بلاستيكية، بخاخات، أرضيات، وأكثر.">
+  <meta name="twitter:image" content="https://aljawharaplus.com/logo.png">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://aljawharaplus.com/">
+  
+  <!-- Alternate Languages -->
+  <link rel="alternate" hreflang="ar" href="https://aljawharaplus.com/">
+  <link rel="alternate" hreflang="x-default" href="https://aljawharaplus.com/">
   
   <!-- Viewport and Mobile Optimization -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
@@ -12,6 +45,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="الجوهرة">
   
   <!-- Security Headers -->
   <!-- Note: CSP with nonces should be set via server headers in production for better security -->
@@ -29,17 +63,83 @@
   <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin="anonymous">
   
   <!-- Favicon and Icons -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
+  <meta name="description" content="الجوهرة - متجر إلكتروني للمنتجات البلاستيكية والورقية: مطهرات، صحون بلاستيكية، بخاخات، أرضيات، وأدوات منزلية">
   
   <!-- Performance: Preload Critical Resources -->
   <!-- These will be automatically injected by Angular build process for production -->
   
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "الجوهرة",
+    "description": "متجر إلكتروني متخصص في بيع المنتجات البلاستيكية والورقية: مطهرات، صحون بلاستيكية، بخاخات، أرضيات، وأدوات منزلية",
+    "url": "https://aljawharaplus.com",
+    "logo": "https://aljawharaplus.com/logo.png",
+    "image": "https://aljawharaplus.com/logo.png",
+    "telephone": "",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "SA"
+    },
+    "priceRange": "$$",
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "00:00",
+      "closes": "23:59"
+    },
+    "sameAs": [],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://aljawharaplus.com/product?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "الجوهرة",
+    "url": "https://aljawharaplus.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://aljawharaplus.com/product?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "الجوهرة",
+    "url": "https://aljawharaplus.com",
+    "logo": "https://aljawharaplus.com/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": "Arabic"
+    }
+  }
+  </script>
+  
   <!-- Disable automatic translation -->
   <meta name="google" content="notranslate">
-  
-  <!-- Prevent indexing in development (remove in production if needed) -->
-  <!-- <meta name="robots" content="noindex, nofollow"> -->
 
 </head>
 
