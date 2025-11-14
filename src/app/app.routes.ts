@@ -26,6 +26,18 @@ export const routes: Routes = [
         loadComponent: () => import('./home/contact/contact').then(m => m.Contact)
     },
     {
+        path: 'privacy',
+        loadComponent: () => import('./home/privacy-policy/privacy-policy').then(m => m.PrivacyPolicy)
+    },
+    {
+        path: 'terms',
+        loadComponent: () => import('./home/terms-of-service/terms-of-service').then(m => m.TermsOfService)
+    },
+    {
+        path: 'cookies',
+        loadComponent: () => import('./home/cookie-policy/cookie-policy').then(m => m.CookiePolicy)
+    },
+    {
         path: 'cart',
         loadComponent: () => import('./core/components/cart/cart').then(m => m.Cart)
     },

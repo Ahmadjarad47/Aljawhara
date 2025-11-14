@@ -58,4 +58,4 @@ export interface ProductSummaryDto {
     totalReviews: number;
     isActive: boolean;
     isInWishlist?: boolean;
-}
+}   

@@ -91,9 +91,15 @@
         <div class="relative bg-base-100 rounded-3xl shadow-2xl border border-base-300 overflow-hidden backdrop-blur-xl">
           <!-- Product Image -->
           <div class="relative h-80 overflow-hidden bg-base-200">
-            <img [src]="featuredProducts[0].image" 
-                 [alt]="featuredProducts[0].name"
-                 class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+            <div class="img-container w-full h-full">
+              <img [src]="featuredProducts[0].image" 
+                   [alt]="featuredProducts[0].name"
+                   loading="lazy"
+                   (load)="$event.target.classList.add('loaded')"
+                   (error)="$event.target.classList.add('loaded')"
+                   class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+              <div class="img-loading"></div>
+            </div>
             
             <!-- Discount Badge -->
             <div class="absolute top-6 left-6">
@@ -318,9 +324,15 @@
         <div class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden">
           <!-- Product Image -->
           <figure class="relative overflow-hidden cursor-pointer" (click)="goToProduct(product)">
-            <img [src]="product.image" 
-                 [alt]="product.name" 
-                 class="w-full h-48 lg:h-56 object-cover group-hover:scale-110 transition-transform duration-500">
+            <div class="img-container w-full h-48 lg:h-56">
+              <img [src]="product.image" 
+                   [alt]="product.name"
+                   loading="lazy"
+                   (load)="$event.target.classList.add('loaded')"
+                   (error)="$event.target.classList.add('loaded')"
+                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+              <div class="img-loading"></div>
+            </div>
             
             <!-- Wishlist Button -->
             <div class="absolute top-4 right-4">

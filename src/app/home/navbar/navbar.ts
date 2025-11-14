@@ -96,31 +96,7 @@ export class Navbar implements OnInit, OnDestroy {
   // Categories - using signal for reactive updates
   categories = signal<Array<{ name: string; icon: string; href: string; id: number; subCategories?: any[] }>>([]);
   
-  // Icon mapping for categories (fallback if no icon provided)
-  private categoryIconMap: { [key: string]: string } = {
-    'electronics': '💻',
-    'fashion': '👕',
-    'home & garden': '🏠',
-    'books': '📚',
-    'sports & games': '🎮',
-    'beauty & health': '💄',
-    'clothing': '👔',
-    'shoes': '👟',
-    'accessories': '👜',
-    'furniture': '🛋️',
-    'kitchen': '🍳',
-    'garden': '🌳',
-    'toys': '🧸',
-    'automotive': '🚗',
-    'health': '💊',
-    'beauty': '💄',
-    'sports': '⚽',
-    'computers': '💻',
-    'phones': '📱',
-    'tablets': '📱',
-    'laptops': '💻'
-  };
-
+ 
   constructor(
     public router: Router,
     private authService: ServiceAuth
@@ -156,7 +132,7 @@ export class Navbar implements OnInit, OnDestroy {
     
     // Set up debounced search subscription
     this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(300), // Wait for 300ms pause in events
+      debounceTime(150), // Wait for 150ms pause in events (faster search)
       distinctUntilChanged(), // Only proceed if the value has changed
       switchMap(query => {
         if (!query || query.length < 2) {
@@ -177,17 +153,19 @@ export class Navbar implements OnInit, OnDestroy {
     ).subscribe(products => {
       this.isSearching.set(false);
       
-      // Update search suggestions based on product titles
-      const suggestions = products
+      // Store products directly (we'll show products with images instead of just titles)
+      const limitedProducts = products.slice(0, 5); // Limit to 5 results
+      
+      // Keep suggestions for backward compatibility, but we'll primarily use products
+      const suggestions = limitedProducts
         .map(p => p.title)
-        .filter((title, index, self) => self.indexOf(title) === index) // Remove duplicates
-        .slice(0, 5);
+        .filter((title, index, self) => self.indexOf(title) === index); // Remove duplicates
       
       this.searchSuggestions.set(suggestions);
-      this.searchProducts.set(products);
+      this.searchProducts.set(limitedProducts);
       
       // Show suggestions if we have results and query is still active
-      if (suggestions.length > 0 && this.searchQuery().trim()) {
+      if (limitedProducts.length > 0 && this.searchQuery().trim()) {
         this.showSearchSuggestions.set(true);
       }
     });
@@ -222,19 +200,19 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   onSearchKeyPress(event: KeyboardEvent) {
-    const suggestions = this.searchSuggestions();
+    const products = this.searchProducts();
     const currentIndex = this.selectedSuggestionIndex();
     
     if (event.key === 'Enter') {
       event.preventDefault();
-      if (currentIndex >= 0 && currentIndex < suggestions.length) {
-        this.selectSuggestion(suggestions[currentIndex]);
+      if (currentIndex >= 0 && currentIndex < products.length) {
+        this.selectProductSuggestion(products[currentIndex]);
       } else {
         this.onSearch();
       }
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
-      const newIndex = Math.min(currentIndex + 1, suggestions.length - 1);
+      const newIndex = Math.min(currentIndex + 1, products.length - 1);
       this.selectedSuggestionIndex.set(newIndex);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
@@ -248,7 +226,7 @@ export class Navbar implements OnInit, OnDestroy {
 
   onSearchFocus() {
     const query = this.searchQuery().trim();
-    if (query && this.searchSuggestions().length > 0) {
+    if (query && this.searchProducts().length > 0) {
       this.showSearchSuggestions.set(true);
     }
   }
@@ -479,19 +457,12 @@ export class Navbar implements OnInit, OnDestroy {
           const categoryName = this.selectedLanguage === 'العربية' ? cat.nameAr : cat.name;
           const categoryNameLower = categoryName.toLowerCase();
           
-          // Find matching icon from map or use default
-          let icon = '📦'; // Default icon
-          for (const [key, value] of Object.entries(this.categoryIconMap)) {
-            if (categoryNameLower.includes(key)) {
-              icon = value;
-              break;
-            }
-          }
+        
           
           return {
             id: cat.id,
             name: categoryName,
-            icon: icon,
+            icon: '',
             href: `/product?categoryId=${cat.id}`,
             subCategories: cat.subCategories || []
           };

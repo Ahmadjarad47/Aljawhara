@@ -1,0 +1,10 @@
+/* Footer specific styles */
+footer {
+  position: relative;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+

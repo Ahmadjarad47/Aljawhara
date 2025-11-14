@@ -318,9 +318,15 @@
                   
                   <!-- Product Image Section -->
                   <div class="relative w-full sm:w-80 lg:w-96 h-64 sm:h-auto bg-base-200 flex-shrink-0">
-                    <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
-                         [alt]="product.title"
-                         class="w-full h-full object-cover">
+                    <div class="img-container w-full h-full">
+                      <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                           [alt]="product.title"
+                           loading="lazy"
+                           (load)="$event.target.classList.add('loaded')"
+                           (error)="$event.target.classList.add('loaded')"
+                           class="w-full h-full object-cover">
+                      <div class="img-loading"></div>
+                    </div>
                     <!-- Badges on Image -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
                       @if (product.isActive) {
@@ -455,9 +461,15 @@
               <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-all duration-300">
             <div class="card-body p-4">
               <div class="aspect-square bg-base-200 rounded-lg overflow-hidden mb-4">
-                <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
-                     [alt]="product.title"
-                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                <div class="img-container w-full h-full">
+                  <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                       [alt]="product.title"
+                       loading="lazy"
+                       (load)="$event.target.classList.add('loaded')"
+                       (error)="$event.target.classList.add('loaded')"
+                       class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                  <div class="img-loading"></div>
+                </div>
               </div>
               <h4 class="text-lg font-semibold text-base-content mb-2">{{ product.title }}</h4>
               <div class="flex items-center gap-2 mb-2">

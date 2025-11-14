@@ -1,11 +1,12 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Navbar } from "./home/navbar/navbar";
+import { Footer } from "./home/footer/footer";
 import { ServiceAuth } from './auth/service-auth';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar],
+  imports: [RouterOutlet, Navbar, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

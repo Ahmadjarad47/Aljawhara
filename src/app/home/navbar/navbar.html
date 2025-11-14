@@ -64,16 +64,16 @@
         <div class="flex items-center space-x-4">
           <a routerLink="/" routerLinkActive="opacity-80" [routerLinkActiveOptions]="{exact: true}" class="flex items-center space-x-3 group cursor-pointer">
             <div class="relative">
-              <img src="/logo.png" alt="Aljawhara Logo"
-                class="h-12 w-12 object-contain transition-opacity duration-300 group-hover:opacity-80">
+              <div class="h-12 w-full">
+                <img src="/logo.png"  style="opacity: 1 !important;"
+                     alt="Aljawhara Logo"
+                     loading="lazy"
+                    
+                     class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80">
+              </div>
               <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             </div>
-            <div class="flex flex-col">
-              <h1
-                class="text-2xl font-bold bg-gradient-to-r from-primary to-primary-focus bg-clip-text text-base group-hover:opacity-80 transition-opacity duration-300">
-                Aljawhara</h1>
-              <p class="text-xs text-base-content/60 -mt-1 font-medium">Marketplace</p>
-            </div>
+            
           </a>
         </div>
 
@@ -93,31 +93,39 @@
               autocomplete="off" role="searchbox" aria-label="Search products">
 
             <!-- Search Suggestions Dropdown -->
-            @if (showSearchSuggestions() && (searchSuggestions().length > 0 || isSearching())) {
-            <div
-              class="absolute top-full left-0 right-0 mt-2 bg-base-100 rounded-xl shadow-xl border border-base-300 z-50 max-h-80 overflow-y-auto">
-              <div class="p-2">
-                @if (isSearching()) {
-                <div class="flex items-center justify-center px-4 py-6">
-                  <span class="loading loading-spinner loading-md text-primary"></span>
-                  <span class="ml-3 text-sm text-base-content/60">Searching...</span>
-                </div>
-                } @else {
-                  @for (suggestion of searchSuggestions(); track suggestion; let i = $index) {
-                  <div (click)="selectSuggestion(suggestion)"
-                    class="flex items-center px-4 py-3 hover:bg-base-200 rounded-lg cursor-pointer transition-colors duration-150"
-                    [class.bg-primary/5]="selectedSuggestionIndex() === i">
-                    <svg class="w-4 h-4 text-base-content/40 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <span class="text-sm text-base-content">{{suggestion}}</span>
+            @if (showSearchSuggestions() && (searchProducts().length > 0 || isSearching())) {
+              <div
+                class="absolute top-full left-0 right-0 mt-2 bg-base-100 rounded-xl shadow-xl border border-base-300 z-50 max-h-80 overflow-y-auto">
+                <div class="p-2">
+                  @if (isSearching()) {
+                  <div class="flex items-center justify-center px-4 py-6">
+                    <span class="loading loading-spinner loading-md text-primary"></span>
+                    <span class="ml-3 text-sm text-base-content/60">Searching...</span>
                   </div>
+                  } @else {
+                    @for (product of searchProducts(); track product.id; let i = $index) {
+                    <div (click)="selectProductSuggestion(product)"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-lg cursor-pointer transition-colors duration-150"
+                      [class.bg-primary]="selectedSuggestionIndex() === i">
+                      <div class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-base-200">
+                        <img [src]="product.mainImage" 
+                             [alt]="product.title"
+                             class="w-full h-full " style="opacity: 1 !important;"
+                             loading="lazy"
+                            >
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-base-content block truncate">{{product.title}}</span>
+                        @if (product.newPrice) {
+                        <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
+                        }
+                      </div>
+                    </div>
+                    }
                   }
-                }
+                </div>
               </div>
-            </div>
-            }
+              }
 
             <button (click)="onSearch()"
               class="absolute inset-y-0 right-0 px-6 bg-gradient-to-r from-primary to-primary-focus text-white rounded-r-xl hover:from-primary-focus hover:to-primary transition-colors duration-300 btn-primary flex items-center space-x-2 font-medium">
@@ -464,7 +472,15 @@
       <!-- Menu Header -->
       <div class="flex items-center justify-between p-4 border-b border-base-300">
         <div class="flex items-center space-x-3">
-          <img src="/logo.png" alt="Aljawhara Logo" class="h-8 w-8 object-contain">
+          <div class="img-container h-8 w-8">
+            <img src="/logo.png" 
+                 alt="Aljawhara Logo" 
+                 loading="lazy"
+                 (load)="$event.target.classList.add('loaded')"
+                 (error)="$event.target.classList.add('loaded')"
+                 class="h-full w-full object-contain">
+            <div class="img-loading"></div>
+          </div>
           <div>
             <h2 class="text-lg font-bold text-primary">Aljawhara</h2>
             <p class="text-xs text-base-content/60">Marketplace</p>
@@ -787,16 +803,25 @@
       <span class="loading loading-spinner loading-md text-primary"></span>
       <span class="ml-3 text-sm text-base-content/60">Searching...</span>
     </div>
-    } @else if (searchSuggestions().length > 0) {
+    } @else if (searchProducts().length > 0) {
     <div class="space-y-2 max-h-60 overflow-y-auto">
-      @for (suggestion of searchSuggestions(); track suggestion) {
-      <div (click)="selectSuggestion(suggestion); closeMobileSearch()"
-        class="flex items-center p-3 bg-base-200 rounded-lg hover:bg-base-200 cursor-pointer transition-colors duration-150">
-        <svg class="w-4 h-4 text-base-content/40 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <span class="text-sm text-gray-700">{{suggestion}}</span>
+      @for (product of searchProducts(); track product.id; let i = $index) {
+      <div (click)="selectProductSuggestion(product); closeMobileSearch()"
+        class="flex items-center gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer transition-colors duration-150"
+        [class.bg-primary]="selectedSuggestionIndex() === i">
+        <div class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-base-100">
+          <img [src]="product.mainImage " 
+               [alt]="product.title"
+               class="w-full h-full object-cover" style="opacity: 1 !important;"
+               loading="lazy"
+             >
+        </div>
+        <div class="flex-1 min-w-0">
+          <span class="text-sm font-medium text-gray-700 block truncate">{{product.title}}</span>
+          @if (product.newPrice) {
+          <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
+          }
+        </div>
       </div>
       }
     </div>

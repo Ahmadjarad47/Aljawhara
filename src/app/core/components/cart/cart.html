@@ -32,7 +32,15 @@
             <div class="p-4 md:p-5">
               <div class="flex items-start gap-4">
                 <a [routerLink]="['/product', item.productId]" class="shrink-0">
-                  <img [src]="item.image" [alt]="item.name" class="rounded-xl object-cover w-24 h-24 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity" />
+                  <div class="img-container rounded-xl w-24 h-24 md:w-28 md:h-28">
+                    <img [src]="item.image" 
+                         [alt]="item.name" 
+                         loading="lazy"
+                         (load)="$event.target.classList.add('loaded')"
+                         (error)="$event.target.classList.add('loaded')"
+                         class="rounded-xl object-cover w-full h-full cursor-pointer hover:opacity-80 transition-opacity" />
+                    <div class="img-loading"></div>
+                  </div>
                 </a>
 
                 <div class="flex-1 min-w-0">

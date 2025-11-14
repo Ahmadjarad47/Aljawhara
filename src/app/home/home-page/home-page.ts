@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,7 +14,9 @@ import { Navbar } from "../navbar/navbar";
   templateUrl: './home-page.html',
   styleUrl: './home-page.css'
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
+  private countdownInterval?: ReturnType<typeof setInterval>;
+
   constructor(private router: Router) {}
 
   // Loading states
@@ -153,23 +155,32 @@ export class HomePage implements OnInit {
 
   // Countdown timer
   startCountdown() {
-    setInterval(() => {
-      if (this.countdown.seconds > 0) {
-        this.countdown.seconds--;
-      } else if (this.countdown.minutes > 0) {
-        this.countdown.minutes--;
-        this.countdown.seconds = 59;
-      } else if (this.countdown.hours > 0) {
-        this.countdown.hours--;
-        this.countdown.minutes = 59;
-        this.countdown.seconds = 59;
-      } else if (this.countdown.days > 0) {
-        this.countdown.days--;
-        this.countdown.hours = 23;
-        this.countdown.minutes = 59;
-        this.countdown.seconds = 59;
-      }
+    this.countdownInterval = setInterval(() => {
+      // Defer update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        if (this.countdown.seconds > 0) {
+          this.countdown.seconds--;
+        } else if (this.countdown.minutes > 0) {
+          this.countdown.minutes--;
+          this.countdown.seconds = 59;
+        } else if (this.countdown.hours > 0) {
+          this.countdown.hours--;
+          this.countdown.minutes = 59;
+          this.countdown.seconds = 59;
+        } else if (this.countdown.days > 0) {
+          this.countdown.days--;
+          this.countdown.hours = 23;
+          this.countdown.minutes = 59;
+          this.countdown.seconds = 59;
+        }
+      }, 0);
     }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
   }
 
   // Product actions

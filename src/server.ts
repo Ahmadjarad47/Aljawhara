@@ -7,6 +7,11 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+// Allow self-signed certificates in development for localhost API
+if (process.env['NODE_ENV'] !== 'production') {
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+}
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
@@ -22,13 +27,16 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
-  
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+  );
+
   // HSTS - Only enable in production with HTTPS
   if (process.env['NODE_ENV'] === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
-  
+
   // Content Security Policy - Adjust based on your needs
   // Note: For production, use nonces for better security
   const cspHeader = [
@@ -37,19 +45,19 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline'", // Angular requires unsafe-inline for styles
     "img-src 'self' data: https: blob:",
     "font-src 'self' data: https:",
-    "connect-src 'self' https://api.aljawharaplus.com",
+    "connect-src 'self' https://api.aljawharaplus.com https://localhost:7130 http://localhost:7130",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
-    "upgrade-insecure-requests",
-    "block-all-mixed-content"
+    'upgrade-insecure-requests',
+    'block-all-mixed-content',
   ].join('; ');
-  
+
   res.setHeader('Content-Security-Policy', cspHeader);
-  
+
   // Remove server information
   res.removeHeader('X-Powered-By');
-  
+
   next();
 });
 
@@ -88,7 +96,7 @@ app.use(
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       }
     },
-  }),
+  })
 );
 
 /**
@@ -97,9 +105,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

@@ -1134,7 +1134,15 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         @for (image of selectedProductDetails()!.images; track $index) {
                                             <div class="aspect-square">
-                                                <img [src]="image" [alt]="selectedProductDetails()!.title" class="w-full h-full object-cover rounded-lg" />
+                                                <div class="img-container w-full h-full rounded-lg">
+                                                    <img [src]="image" 
+                                                         [alt]="selectedProductDetails()!.title" 
+                                                         loading="lazy"
+                                                         (load)="$event.target.classList.add('loaded')"
+                                                         (error)="$event.target.classList.add('loaded')"
+                                                         class="w-full h-full object-cover rounded-lg" />
+                                                    <div class="img-loading"></div>
+                                                </div>
                                             </div>
                                         }
                                     </div>

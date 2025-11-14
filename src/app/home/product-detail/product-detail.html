@@ -43,9 +43,15 @@
         <!-- Main Image -->
         <div class="relative group">
           <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
-            <img [src]="(product()?.images && product()!.images.length > 0) ? product()!.images[selectedImageIndex] : 'https://via.placeholder.com/400x400?text=No+Image'" 
-                 [alt]="product()?.title || 'Product'"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="img-container w-full h-full">
+              <img [src]="(product()?.images && product()!.images.length > 0) ? product()!.images[selectedImageIndex] : 'https://via.placeholder.com/400x400?text=No+Image'" 
+                   [alt]="product()?.title || 'Product'"
+                   loading="lazy"
+                   (load)="$event.target.classList.add('loaded')"
+                   (error)="$event.target.classList.add('loaded')"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="img-loading"></div>
+            </div>
           </div>
           
           <!-- Image Navigation -->
@@ -82,9 +88,15 @@
                   class="aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200"
                   [class.border-primary]="selectedImageIndex === i"
                   [class.border-gray-200]="selectedImageIndex !== i">
-            <img [src]="image" 
-                 [alt]="(product()?.title || 'Product') + ' ' + (i + 1)"
-                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-200">
+            <div class="img-container w-full h-full">
+              <img [src]="image" 
+                   [alt]="(product()?.title || 'Product') + ' ' + (i + 1)"
+                   loading="lazy"
+                   (load)="$event.target.classList.add('loaded')"
+                   (error)="$event.target.classList.add('loaded')"
+                   class="w-full h-full object-cover hover:scale-105 transition-transform duration-200">
+              <div class="img-loading"></div>
+            </div>
           </button>
           }
         </div>
@@ -580,9 +592,15 @@
         @for (relatedProduct of relatedProducts; track relatedProduct.id) {
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
           <div class="relative">
-            <img [src]="relatedProduct.image" 
-                 [alt]="relatedProduct.name"
-                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="img-container w-full h-48">
+              <img [src]="relatedProduct.image" 
+                   [alt]="relatedProduct.name"
+                   loading="lazy"
+                   (load)="$event.target.classList.add('loaded')"
+                   (error)="$event.target.classList.add('loaded')"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <div class="img-loading"></div>
+            </div>
             @if (relatedProduct.discount > 0) {
             <div class="absolute top-4 left-4">
               <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">

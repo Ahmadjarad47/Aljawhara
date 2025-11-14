@@ -40,6 +40,7 @@ export class CartService {
   // Load cart from localStorage
   private loadCartFromStorage(): void {
     try {
+      if(typeof localStorage == 'undefined') {return;}
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const items = JSON.parse(stored);
@@ -59,6 +60,7 @@ export class CartService {
   // Save cart to localStorage
   private saveCartToStorage(items: CartItem[]): void {
     try {
+      if(typeof localStorage == 'undefined') {return;}
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
       this.cartItems.set(items);
     } catch (error) {
@@ -177,6 +179,7 @@ export class CartService {
   // Load coupon from localStorage
   private loadCouponFromStorage(): void {
     try {
+      if(typeof localStorage == 'undefined') {return;}
       const stored = localStorage.getItem(this.COUPON_STORAGE_KEY);
       if (stored) {
         const couponData = JSON.parse(stored);
