@@ -17,10 +17,17 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     // Initialize authentication state on app startup (non-blocking)
-    // Use setTimeout to defer auth check and allow initial render
-    setTimeout(() => {
-      this.authService.autoAuthUser();
-    }, 0);
+    // Use requestIdleCallback for better performance, fallback to setTimeout
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        this.authService.autoAuthUser();
+      }, { timeout: 2000 });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        this.authService.autoAuthUser();
+      }, 0);
+    }
   }
 
   hideNavbar() {

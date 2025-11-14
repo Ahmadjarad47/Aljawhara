@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch, withInterceptors, withJsonpSupport } from '@angular/common/http';
 import { routes } from './app.routes';
@@ -19,25 +19,22 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(), // Enable component input binding from route params
       withViewTransitions(), // Enable view transitions for smoother navigation
-      // Preload all modules for faster navigation (can be customized for selective preloading)
-      // Note: For very large apps, consider using PreloadSelectedModules instead
+      withPreloading(PreloadAllModules) // Preload routes after initial load for faster navigation
     ),
     
     // SSR optimizations
     provideClientHydration(
-      withEventReplay() // Replay user events after hydration
+      withEventReplay() // Replay user events after hydration for better UX
     ),
     
     // HTTP Client with security and performance optimizations
     provideHttpClient(
-      withFetch(), // Use Fetch API instead of XHR for better performance
-      withInterceptors([authInterceptor]),
-      withJsonpSupport(), // Support JSONP if needed
-      // Performance: Enable request deduplication and caching
-      // Note: Request timeouts are handled in the auth interceptor
+      withFetch(), // Use Fetch API instead of XHR for better performance and modern browser support
+      withInterceptors([authInterceptor]), // Auth interceptor with retry logic and token refresh
+      withJsonpSupport() // Support JSONP if needed
     ),
     
-    // Animations (async for better initial load)
+    // Animations (async for better initial load - loads animations after app bootstrap)
     provideAnimationsAsync(),
   ]
 };
