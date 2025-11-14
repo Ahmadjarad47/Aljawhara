@@ -1,15 +1,20 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading, PreloadAllModules } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch, withInterceptors, withJsonpSupport } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { SelectivePreloadingStrategy } from './core/strategies/selective-preloading.strategy';
+import { PerformanceService } from './core/services/performance.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     // Error handling
     provideBrowserGlobalErrorListeners(),
+    
+    // Performance monitoring service
+    PerformanceService,
     
     // Performance: Zoneless change detection for better performance
     provideZonelessChangeDetection(),
@@ -19,7 +24,7 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(), // Enable component input binding from route params
       withViewTransitions(), // Enable view transitions for smoother navigation
-      withPreloading(PreloadAllModules) // Preload routes after initial load for faster navigation
+      withPreloading(SelectivePreloadingStrategy) // Smart preloading based on connection and priority
     ),
     
     // SSR optimizations

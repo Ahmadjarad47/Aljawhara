@@ -39,13 +39,21 @@
   <link rel="alternate" hreflang="ar" href="https://aljawharaplus.com/">
   <link rel="alternate" hreflang="x-default" href="https://aljawharaplus.com/">
   
-  <!-- Viewport and Mobile Optimization -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  <!-- Viewport and Mobile Optimization - Enhanced for Performance -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="الجوهرة">
+  
+  <!-- Performance: Mobile-specific optimizations -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-TileColor" content="#000000">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  
+  <!-- Performance: Reduce render-blocking resources -->
+  <meta http-equiv="x-dns-prefetch-control" content="on">
   
   <!-- Performance: Reduce layout shift -->
   <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
@@ -61,18 +69,20 @@
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()">
   <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains; preload">
   
-  <!-- Performance: Resource Hints -->
+  <!-- Performance: Resource Hints - Critical for mobile -->
   <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin>
   <link rel="dns-prefetch" href="https://api.aljawharaplus.com">
-  <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin="anonymous">
   
-  <!-- Performance: Prefetch critical resources -->
-  <link rel="prefetch" href="/logo.png" as="image">
-  <link rel="preload" href="/logo.png" as="image" type="image/png">
+  <!-- Performance: Preload critical resources with proper priorities -->
+  <link rel="preload" href="/logo.png" as="image" type="image/png" fetchpriority="high">
   
-  <!-- Performance: Preconnect to external domains -->
+  <!-- Performance: Preconnect to external domains (defer non-critical) -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
   <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  
+  <!-- Performance: Prefetch likely next pages (mobile-optimized) -->
+  <link rel="prefetch" href="/product" as="document">
+  <link rel="prefetch" href="/cart" as="document">
   
   <!-- Performance: Preload critical fonts if using custom fonts -->
   <!-- <link rel="preload" href="/fonts/custom-font.woff2" as="font" type="font/woff2" crossorigin> -->
@@ -96,10 +106,28 @@
       padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
     }
-    /* Optimize image loading */
+    /* Optimize image loading - Mobile Performance */
     img {
       content-visibility: auto;
       contain-intrinsic-size: 1px 1000px;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+    
+    /* Performance: Reduce paint complexity */
+    * {
+      will-change: auto;
+    }
+    
+    /* Performance: Optimize scrolling on mobile */
+    html {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    /* Performance: Reduce layout shifts */
+    body {
+      overflow-x: hidden;
     }
   </style>
   

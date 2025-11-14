@@ -60,18 +60,18 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "300kB",
+                  "maximumError": "500kB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "8kB",
-                  "maximumError": "12kB"
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
                 },
                 {
                   "type": "bundle",
-                  "maximumWarning": "2MB",
-                  "maximumError": "5MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 }
               ],
               "outputHashing": "all",
@@ -83,10 +83,19 @@
                 },
                 "fonts": {
                   "inline": true
+                },
+                "define": {
+                  "ngDevMode": false,
+                  "ngI18nClosureMode": false
                 }
               },
               "sourceMap": false,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "namedChunks": false,
+              "aot": true,
+              "buildOptimizer": true,
+              "vendorChunk": false,
+              "commonChunk": false
             },
             "development": {
               "optimization": false,

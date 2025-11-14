@@ -93,11 +93,23 @@ function addTokenToRequest(request: HttpRequest<any>, token: string): HttpReques
 }
 
 function addSecurityHeaders(request: HttpRequest<any>): HttpRequest<any> {
-  return request.clone({
-    setHeaders: {
-      'X-Requested-With': 'XMLHttpRequest',
-      // Add other security headers as needed
+  const headers: { [key: string]: string } = {
+    'X-Requested-With': 'XMLHttpRequest',
+  };
+
+  // Add cache headers for GET requests (mobile performance optimization)
+  if (request.method === 'GET' && !request.url.includes('/auth/')) {
+    // Cache static resources longer
+    if (request.url.match(/\.(jpg|jpeg|png|gif|webp|svg|woff|woff2|ttf|eot)$/i)) {
+      headers['Cache-Control'] = 'public, max-age=31536000, immutable';
+    } else {
+      // Cache API responses for a short time (mobile data savings)
+      headers['Cache-Control'] = 'public, max-age=300, stale-while-revalidate=600';
     }
+  }
+
+  return request.clone({
+    setHeaders: headers
   });
 }
 
