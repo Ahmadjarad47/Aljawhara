@@ -115,11 +115,13 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Initialize component
+    // Initialize component - defer non-critical operations
     this.loadUserData();
     
-    // Load categories from API
-    this.loadCategories();
+    // Load categories from API (defer to avoid blocking initial render)
+    setTimeout(() => {
+      this.loadCategories();
+    }, 100);
     
     // Subscribe to authentication state changes
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {

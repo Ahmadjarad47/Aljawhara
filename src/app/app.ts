@@ -16,8 +16,11 @@ export class App implements OnInit {
   private readonly authService = inject(ServiceAuth);
 
   ngOnInit(): void {
-    // Initialize authentication state on app startup
-    this.authService.autoAuthUser();
+    // Initialize authentication state on app startup (non-blocking)
+    // Use setTimeout to defer auth check and allow initial render
+    setTimeout(() => {
+      this.authService.autoAuthUser();
+    }, 0);
   }
 
   hideNavbar() {

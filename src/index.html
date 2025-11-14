@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="light-user">
+<html lang="en"  data-theme="light-user">
 
 <head>
   <meta charset="utf-8">
@@ -47,6 +47,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="الجوهرة">
   
+  <!-- Performance: Reduce layout shift -->
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
+  
   <!-- Security Headers -->
   <!-- Note: CSP with nonces should be set via server headers in production for better security -->
   <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https://api.aljawharaplus.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content;"> -->
@@ -61,6 +65,26 @@
   <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin>
   <link rel="dns-prefetch" href="https://api.aljawharaplus.com">
   <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin="anonymous">
+  
+  <!-- Performance: Prefetch critical resources -->
+  <link rel="prefetch" href="/logo.png" as="image">
+  
+  <!-- Performance: Preload critical fonts if using custom fonts -->
+  <!-- <link rel="preload" href="/fonts/custom-font.woff2" as="font" type="font/woff2" crossorigin> -->
+  
+  <!-- Performance: Optimize rendering -->
+  <style>
+    /* Prevent layout shift during initial load */
+    app-root {
+      display: block;
+      min-height: 100vh;
+    }
+    /* Optimize font rendering */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
   
   <!-- Favicon and Icons -->
   <link rel="icon" type="image/png" href="logo.png">

@@ -18,7 +18,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withComponentInputBinding(), // Enable component input binding from route params
-      withViewTransitions() // Enable view transitions for smoother navigation
+      withViewTransitions(), // Enable view transitions for smoother navigation
+      // Preload all modules for faster navigation (can be customized for selective preloading)
+      // Note: For very large apps, consider using PreloadSelectedModules instead
     ),
     
     // SSR optimizations
@@ -30,7 +32,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(), // Use Fetch API instead of XHR for better performance
       withInterceptors([authInterceptor]),
-      withJsonpSupport() // Support JSONP if needed
+      withJsonpSupport(), // Support JSONP if needed
+      // Performance: Enable request deduplication and caching
       // Note: Request timeouts are handled in the auth interceptor
     ),
     

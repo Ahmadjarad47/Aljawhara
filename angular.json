@@ -78,11 +78,18 @@
                 },
                 "fonts": {
                   "inline": true
+                },
+                "images": {
+                  "inline": false
                 }
               },
               "sourceMap": false,
               "namedChunks": false,
-              "extractLicenses": true
+              "extractLicenses": true,
+              "aot": true,
+              "buildOptimizer": true,
+              "vendorChunk": false,
+              "commonChunk": false
             },
             "development": {
               "optimization": true,

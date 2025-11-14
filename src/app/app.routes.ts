@@ -1,17 +1,15 @@
 import { Routes } from '@angular/router';
-import { HomePage } from './home/home-page/home-page';
-import { Product } from './home/product/product';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     {
         path: '',
-        component: HomePage
+        loadComponent: () => import('./home/home-page/home-page').then(m => m.HomePage)
     },
     {
         path: 'product',
-        component: Product
+        loadComponent: () => import('./home/product/product').then(m => m.Product)
     },
     {
         path: 'product/:id',
