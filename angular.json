@@ -85,8 +85,8 @@
               "extractLicenses": true
             },
             "development": {
-              "optimization": false,
-              "extractLicenses": false,
+              "optimization": true,
+              "extractLicenses": true,
               "sourceMap": true,
               "fileReplacements": [
                 {
