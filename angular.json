@@ -83,19 +83,11 @@
                 },
                 "fonts": {
                   "inline": true
-                },
-                "define": {
-                  "ngDevMode": false,
-                  "ngI18nClosureMode": false
                 }
               },
               "sourceMap": false,
               "extractLicenses": true,
-              "namedChunks": false,
-              "aot": true,
-              "buildOptimizer": true,
-              "vendorChunk": false,
-              "commonChunk": false
+              "namedChunks": false
             },
             "development": {
               "optimization": false,
