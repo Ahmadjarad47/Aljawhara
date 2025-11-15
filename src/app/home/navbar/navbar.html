@@ -1,5 +1,5 @@
 <!-- Main Navigation Header -->
-<header  class="bg-base-100 shadow-lg hidden sm:block sticky top-0 z-50 backdrop-blur-sm bg-base-100/95">
+<header class="bg-base-100 shadow-lg hidden sm:block sticky top-0 z-50 backdrop-blur-sm bg-base-100/95">
   <!-- Top Bar -->
   <div class="bg-primary text-primary-content py-2 px-4">
     <div class="max-w-7xl mx-auto flex justify-between items-center text-sm">
@@ -29,21 +29,24 @@
         <div class="flex items-center space-x-3">
           <span class="hidden sm:block text-sm font-medium">Follow us:</span>
           <div class="flex items-center space-x-2">
-            <a href="#" class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
+            <a href="#"
+              class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
               aria-label="Facebook">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
                   d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </a>
-            <a href="#" class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
+            <a href="#"
+              class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
               aria-label="Instagram">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
                   d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
               </svg>
             </a>
-            <a href="#" class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
+            <a href="#"
+              class="p-1.5 rounded-full bg-primary-content/10 hover:bg-primary-content/20 transition-colors duration-200"
               aria-label="Twitter">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -62,18 +65,16 @@
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
         <div class="flex items-center space-x-4">
-          <a routerLink="/" routerLinkActive="opacity-80" [routerLinkActiveOptions]="{exact: true}" class="flex items-center space-x-3 group cursor-pointer">
+          <a routerLink="/" routerLinkActive="opacity-80" [routerLinkActiveOptions]="{exact: true}"
+            class="flex items-center space-x-3 group cursor-pointer">
             <div class="relative">
               <div class="h-12 w-full">
-                <img src="/logo.png"  style="opacity: 1 !important;"
-                     alt="Aljawhara Logo"
-                     loading="lazy"
-                    
-                     class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80">
+                <img src="/logo.png" style="opacity: 1 !important;" alt="Aljawhara Logo" loading="lazy"
+                  class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80">
               </div>
               <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             </div>
-            
+
           </a>
         </div>
 
@@ -87,45 +88,43 @@
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keypress)="onSearchKeyPress($event)" (focus)="onSearchFocus()"
-              (blur)="onSearchBlur()" placeholder="Search products, brands, categories..."
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              (keypress)="onSearchKeyPress($event)" (focus)="onSearchFocus()" (blur)="onSearchBlur()"
+              placeholder="Search products, brands, categories..."
               class="block w-full pl-12 pr-16 py-3 border-2 border-base-300 rounded-xl focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 search-input bg-base-200 focus:bg-base-100 shadow-sm focus:shadow-lg"
               autocomplete="off" role="searchbox" aria-label="Search products">
 
             <!-- Search Suggestions Dropdown -->
             @if (showSearchSuggestions() && (searchProducts().length > 0 || isSearching())) {
-              <div
-                class="absolute top-full left-0 right-0 mt-2 bg-base-100 rounded-xl shadow-xl border border-base-300 z-50 max-h-80 overflow-y-auto">
-                <div class="p-2">
-                  @if (isSearching()) {
-                  <div class="flex items-center justify-center px-4 py-6">
-                    <span class="loading loading-spinner loading-md text-primary"></span>
-                    <span class="ml-3 text-sm text-base-content/60">Searching...</span>
-                  </div>
-                  } @else {
-                    @for (product of searchProducts(); track product.id; let i = $index) {
-                    <div (click)="selectProductSuggestion(product)"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-lg cursor-pointer transition-colors duration-150"
-                      [class.bg-primary]="selectedSuggestionIndex() === i">
-                      <div class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-base-200">
-                        <img [src]="product.mainImage" 
-                             [alt]="product.title"
-                             class="w-full h-full " style="opacity: 1 !important;"
-                             loading="lazy"
-                            >
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <span class="text-sm font-medium text-base-content block truncate">{{product.title}}</span>
-                        @if (product.newPrice) {
-                        <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
-                        }
-                      </div>
-                    </div>
-                    }
-                  }
+            <div
+              class="absolute top-full left-0 right-0 mt-2 bg-base-100 rounded-xl shadow-xl border border-base-300 z-50 max-h-80 overflow-y-auto">
+              <div class="p-2">
+                @if (isSearching()) {
+                <div class="flex items-center justify-center px-4 py-6">
+                  <span class="loading loading-spinner loading-md text-primary"></span>
+                  <span class="ml-3 text-sm text-base-content/60">Searching...</span>
                 </div>
+                } @else {
+                @for (product of searchProducts(); track product.id; let i = $index) {
+                <div (click)="selectProductSuggestion(product)"
+                  class="flex items-center gap-3 px-4 py-3 hover:bg-base-200 rounded-lg cursor-pointer transition-colors duration-150"
+                  [class.bg-primary]="selectedSuggestionIndex() === i">
+                  <div class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-base-200">
+                    <img [src]="product.mainImage" [alt]="product.title" class="w-full h-full "
+                      style="opacity: 1 !important;" loading="lazy">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-sm font-medium text-base-content block truncate">{{product.title}}</span>
+                    @if (product.newPrice) {
+                    <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
+                    }
+                  </div>
+                </div>
+                }
+                }
               </div>
-              }
+            </div>
+            }
 
             <button (click)="onSearch()"
               class="absolute inset-y-0 right-0 px-6 bg-gradient-to-r from-primary to-primary-focus text-white rounded-r-xl hover:from-primary-focus hover:to-primary transition-colors duration-300 btn-primary flex items-center space-x-2 font-medium">
@@ -185,7 +184,7 @@
             }
           </div>
 
-       
+
           <!-- Wishlist -->
           <a routerLink="/wishlist" routerLinkActive="text-red-500 bg-red-50" [routerLinkActiveOptions]="{exact: false}"
             class="relative p-3 text-gray-700 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-300 group"
@@ -208,13 +207,12 @@
           <a routerLink="/cart" routerLinkActive="text-primary bg-primary/10" [routerLinkActiveOptions]="{exact: false}"
             class="relative p-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors duration-300 group"
             aria-label="Shopping Cart" [attr.aria-label]="'Shopping cart with ' + cartCount + ' items'">
-            <svg class="w-6 h-6 text-base-content/70 transition-colors duration-200 group-hover:text-primary" 
-            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" 
-            xmlns="http://www.w3.org/2000/svg">
-         <path stroke-linecap="round" stroke-linejoin="round" 
-               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
-       </svg>
-       
+            <svg class="w-6 h-6 text-base-content/70 transition-colors duration-200 group-hover:text-primary"
+              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
+            </svg>
+
             @if (cartCount > 0) {
             <span
               class="absolute -top-1 -right-1 bg-black   text-white text-xs rounded-full h-6 w-6 flex items-center justify-center badge font-bold shadow-lg animate-bounce">
@@ -238,7 +236,8 @@
                 <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 }
               </div>
-              <span class="hidden sm:block text-sm font-medium">{{isLoggedIn ? userProfile?.username : 'Sign In'}}</span>
+              <span class="hidden sm:block text-sm font-medium">{{isLoggedIn ? userProfile?.username : 'Sign
+                In'}}</span>
               <svg class="w-4 h-4 transition-transform duration-200" [class.rotate-180]="isUserDropdownOpen" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -253,7 +252,8 @@
                 @if (!isLoggedIn) {
                 <div class="px-4 py-3 border-b border-base-200">
                   <h3 class="text-sm font-semibold text-base-content mb-2">Welcome to Aljawhara</h3>
-                  <p class="text-xs text-base-content/60">Sign in to access your account and enjoy personalized shopping</p>
+                  <p class="text-xs text-base-content/60">Sign in to access your account and enjoy personalized shopping
+                  </p>
                 </div>
                 <div class="px-2 py-2">
                   <button (click)="login()"
@@ -297,17 +297,21 @@
                   </div>
                 </div>
                 <div class="px-2 py-2">
-                  <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
+                  <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                    [routerLinkActiveOptions]="{exact: false}"
                     class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium">
-                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     <span>My Profile</span>
                   </a>
-                  <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
+                  <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                    [routerLinkActiveOptions]="{exact: false}"
                     class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium">
-                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
                       </path>
@@ -315,14 +319,16 @@
                     <span>My Orders</span>
                     <span class="ml-auto bg-primary text-white text-xs px-2 py-1 rounded-full">3</span>
                   </a>
-                  <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
+                  <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                    [routerLinkActiveOptions]="{exact: false}"
                     class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium">
-                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
                       </path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">                      </path>
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"> </path>
                     </svg>
                     <span>Settings</span>
                   </a>
@@ -361,8 +367,8 @@
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
-          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keypress)="onSearchKeyPress($event)"
-            placeholder="Search products..."
+          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            (keypress)="onSearchKeyPress($event)" placeholder="Search products..."
             class="block w-full pl-10 pr-3 py-2 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent search-input">
         </div>
       </div>
@@ -404,42 +410,48 @@
           <a routerLink="/" routerLinkActive="text-primary font-semibold" [routerLinkActiveOptions]="{exact: true}"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             Home
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url === '/'"></span>
           </a>
           <a routerLink="/product" routerLinkActive="text-primary font-semibold"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             Products
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url.startsWith('/product') && !router.url.includes('sortBy=mostRating') && !router.url.includes('bestDiscount=true') && !router.url.includes('product/')"></span>
           </a>
-          <a [routerLink]="['/product']" [queryParams]="{sortBy: 'mostRating'}" 
+          <a [routerLink]="['/product']" [queryParams]="{sortBy: 'mostRating'}"
             routerLinkActive="text-primary font-semibold"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             Most Rating
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url.includes('sortBy=mostRating')"></span>
           </a>
-          <a [routerLink]="['/product']" [queryParams]="{bestDiscount: 'true', sortBy: 'bestDiscount'}" 
+          <a [routerLink]="['/product']" [queryParams]="{bestDiscount: 'true', sortBy: 'bestDiscount'}"
             routerLinkActive="text-primary font-semibold"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             Best Discount
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url.includes('bestDiscount=true')"></span>
           </a>
           <a routerLink="/about" routerLinkActive="text-primary font-semibold"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             About
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url === '/about'"></span>
           </a>
           <a routerLink="/contact" routerLinkActive="text-primary font-semibold"
             class="text-gray-700 hover:text-primary transition-colors font-medium cursor-pointer relative pb-1">
             Contact
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200"
               [class.scale-x-100]="router.url === '/contact'"></span>
           </a>
-         
+
         </nav>
 
         <!-- Special Offers -->
@@ -473,12 +485,8 @@
       <div class="flex items-center justify-between p-4 border-b border-base-300">
         <div class="flex items-center space-x-3">
           <div class="img-container h-8 w-8">
-            <img src="/logo.png" 
-                 alt="Aljawhara Logo" 
-                 loading="lazy"
-                 (load)="$event.target.classList.add('loaded')"
-                 (error)="$event.target.classList.add('loaded')"
-                 class="h-full w-full object-contain">
+            <img src="/logo.png" alt="Aljawhara Logo" loading="lazy" (load)="$event.target.classList.add('loaded')"
+              (error)="$event.target.classList.add('loaded')" class="h-full w-full object-contain">
             <div class="img-loading"></div>
           </div>
           <div>
@@ -504,8 +512,8 @@
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keypress)="onSearchKeyPress($event)"
-              placeholder="Search products..."
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              (keypress)="onSearchKeyPress($event)" placeholder="Search products..."
               class="block w-full pl-10 pr-3 py-2 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
           </div>
         </div>
@@ -528,21 +536,24 @@
         <div class="p-4 border-b border-base-300">
           <h3 class="text-sm font-semibold text-base-content mb-3">Pages</h3>
           <div class="space-y-2">
-            <a routerLink="/" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: true}"
-              (click)="toggleMobileMenu()"
+            <a routerLink="/" routerLinkActive="bg-primary/10 text-primary font-semibold"
+              [routerLinkActiveOptions]="{exact: true}" (click)="toggleMobileMenu()"
               class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Home</a>
             <a routerLink="/product" routerLinkActive="bg-primary/10 text-primary font-semibold"
               (click)="toggleMobileMenu()"
               class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Products</a>
-            <a [routerLink]="['/product']" [queryParams]="{sortBy: 'mostRating'}" routerLinkActive="bg-primary/10 text-primary font-semibold"
-              (click)="toggleMobileMenu()"
-              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Most Rating</a>
-            <a [routerLink]="['/product']" [queryParams]="{bestDiscount: 'true', sortBy: 'bestDiscount'}" routerLinkActive="bg-primary/10 text-primary font-semibold"
-              (click)="toggleMobileMenu()"
-              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Best Discount</a>
+            <a [routerLink]="['/product']" [queryParams]="{sortBy: 'mostRating'}"
+              routerLinkActive="bg-primary/10 text-primary font-semibold" (click)="toggleMobileMenu()"
+              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Most
+              Rating</a>
+            <a [routerLink]="['/product']" [queryParams]="{bestDiscount: 'true', sortBy: 'bestDiscount'}"
+              routerLinkActive="bg-primary/10 text-primary font-semibold" (click)="toggleMobileMenu()"
+              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Best
+              Discount</a>
             <a routerLink="/about" routerLinkActive="bg-primary/10 text-primary font-semibold"
               (click)="toggleMobileMenu()"
-              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">About Us</a>
+              class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">About
+              Us</a>
             <a routerLink="/contact" routerLinkActive="bg-primary/10 text-primary font-semibold"
               (click)="toggleMobileMenu()"
               class="block px-3 py-2 text-sm text-gray-700 hover:bg-base-200 rounded-lg cursor-pointer transition-colors">Contact</a>
@@ -566,7 +577,7 @@
                 }
               </select>
             </div>
-          
+
           </div>
         </div>
 
@@ -575,8 +586,8 @@
           <div class="space-y-2">
             <!-- Cart & Wishlist -->
             <div class="flex space-x-2">
-              <a routerLink="/wishlist" routerLinkActive="bg-red-50 text-red-600" [routerLinkActiveOptions]="{exact: false}"
-                (click)="toggleMobileMenu()"
+              <a routerLink="/wishlist" routerLinkActive="bg-red-50 text-red-600"
+                [routerLinkActiveOptions]="{exact: false}" (click)="toggleMobileMenu()"
                 class="flex-1 flex items-center justify-center px-4 py-2 bg-base-200 text-gray-700 rounded-lg hover:bg-base-300 transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -614,18 +625,18 @@
             <!-- User Menu -->
             @if (isLoggedIn) {
             <div class="space-y-2">
-              <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-                (click)="toggleMobileMenu()"
+              <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                [routerLinkActiveOptions]="{exact: false}" (click)="toggleMobileMenu()"
                 class="w-full px-4 py-2 text-left text-gray-700 hover:bg-base-200 rounded-lg transition-colors">
                 My Profile
               </a>
-              <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-                (click)="toggleMobileMenu()"
+              <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                [routerLinkActiveOptions]="{exact: false}" (click)="toggleMobileMenu()"
                 class="w-full px-4 py-2 text-left text-gray-700 hover:bg-base-200 rounded-lg transition-colors">
                 My Orders
               </a>
-              <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-                (click)="toggleMobileMenu()"
+              <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                [routerLinkActiveOptions]="{exact: false}" (click)="toggleMobileMenu()"
                 class="w-full px-4 py-2 text-left text-gray-700 hover:bg-base-200 rounded-lg transition-colors">
                 Settings
               </a>
@@ -646,7 +657,7 @@
 <!-- Mobile Bottom Navigation -->
 <div class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-base-100 border-t border-base-300 shadow-lg">
   <div class="flex items-center justify-around py-2">
-            <!-- Home -->
+    <!-- Home -->
     <a routerLink="/" routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: true}"
       class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group">
       <div class="relative">
@@ -768,8 +779,7 @@
 @if (showMobileSearch) {
 <div class="fixed inset-0 z-50 md:hidden bg-black/50 mobile-search-overlay" (click)="closeMobileSearch()">
   <div class="fixed bottom-0 left-0 right-0 bg-base-100 rounded-t-3xl p-6 mobile-search-content"
-    [class.closing]="!showMobileSearch"
-    (click)="$event.stopPropagation()">
+    [class.closing]="!showMobileSearch" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-base-content">Search Products</h3>
       <button (click)="closeMobileSearch()"
@@ -787,14 +797,9 @@
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
       </div>
-      <input #mobileSearchInput
-             type="text" 
-             [ngModel]="searchQuery()" 
-             (ngModelChange)="searchQuery.set($event)" 
-             (keypress)="onSearchKeyPress($event)"
-             placeholder="Search products, brands, categories..."
-             autofocus
-             class="w-full pl-12 pr-4 py-3 border-2 border-base-300 rounded-xl focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 bg-base-200 focus:bg-base-100">
+      <input #mobileSearchInput type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        (keypress)="onSearchKeyPress($event)" placeholder="Search products, brands, categories..." autofocus
+        class="w-full pl-12 pr-4 py-3 border-2 border-base-300 rounded-xl focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 bg-base-200 focus:bg-base-100">
     </div>
 
     <!-- Search Suggestions -->
@@ -810,11 +815,8 @@
         class="flex items-center gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer transition-colors duration-150"
         [class.bg-primary]="selectedSuggestionIndex() === i">
         <div class="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-base-100">
-          <img [src]="product.mainImage " 
-               [alt]="product.title"
-               class="w-full h-full object-cover" style="opacity: 1 !important;"
-               loading="lazy"
-             >
+          <img [src]="product.mainImage " [alt]="product.title" class="w-full h-full object-cover"
+            style="opacity: 1 !important;" loading="lazy">
         </div>
         <div class="flex-1 min-w-0">
           <span class="text-sm font-medium text-gray-700 block truncate">{{product.title}}</span>
@@ -914,8 +916,8 @@
       </div>
 
       <div class="space-y-2">
-        <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-          (click)="closeMobileAccount()"
+        <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+          [routerLinkActiveOptions]="{exact: false}" (click)="closeMobileAccount()"
           class="w-full flex items-center p-3 text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150">
           <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -923,8 +925,8 @@
           </svg>
           My Profile
         </a>
-        <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-          (click)="closeMobileAccount()"
+        <a routerLink="/user/orders" routerLinkActive="bg-primary/10 text-primary font-semibold"
+          [routerLinkActiveOptions]="{exact: false}" (click)="closeMobileAccount()"
           class="w-full flex items-center p-3 text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150">
           <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -933,8 +935,8 @@
           </svg>
           My Orders
         </a>
-        <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold" [routerLinkActiveOptions]="{exact: false}"
-          (click)="closeMobileAccount()"
+        <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
+          [routerLinkActiveOptions]="{exact: false}" (click)="closeMobileAccount()"
           class="w-full flex items-center p-3 text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150">
           <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -956,7 +958,7 @@
         </button>
       </div>
     </div>
-  }
+    }
   </div>
 </div>
 }

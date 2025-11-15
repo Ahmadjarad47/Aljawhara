@@ -1,4 +1,48 @@
-/* Product Detail Page Styles */
+/* Product Detail Page Styles - Unified Theme */
+
+/* Theme Variables - Matching site-wide theme */
+:host {
+  --product-detail-color-bg: #ffffff;
+  --product-detail-color-surface: rgba(5, 66, 57, 0.05);
+  --product-detail-color-surface-strong: rgba(185, 167, 121, 0.18);
+  --product-detail-color-primary: #054239;
+  --product-detail-color-accent: #b9a779;
+  --product-detail-color-text: #161616;
+  --product-detail-color-muted: rgba(22, 22, 22, 0.65);
+  --product-detail-color-border: rgba(5, 66, 57, 0.2);
+}
+
+.product-detail-theme {
+  --p: 167 86% 21%;
+  --pc: 0 0% 100%;
+  --s: 43 31% 60%;
+  --sc: 167 15% 18%;
+  --a: 43 31% 60%;
+  --ac: 167 15% 18%;
+}
+
+/* Primary color overrides */
+.text-primary {
+  color: #054239 !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+.border-primary {
+  border-color: #054239 !important;
+}
+
+.hover\:text-primary:hover {
+  color: #054239 !important;
+}
+
+.hover\:bg-primary:hover {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
 
 /* Image Gallery */
 .aspect-square {
@@ -64,6 +108,9 @@
 
 /* Button hover effects */
 .btn-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  border: none !important;
+  color: white !important;
   transition: all 0.3s ease-in-out;
   position: relative;
   overflow: hidden;
@@ -78,6 +125,12 @@
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(5, 66, 57, 0.35) !important;
+  filter: brightness(1.1);
 }
 
 .btn-primary:hover::before {
@@ -157,8 +210,10 @@
 
 /* Custom focus styles */
 .focus\:ring-primary:focus {
-  --tw-ring-color: rgba(59, 130, 246, 0.5);
+  --tw-ring-color: rgba(5, 66, 57, 0.5);
   --tw-ring-offset-width: 2px;
+  border-color: #054239 !important;
+  box-shadow: 0 0 0 3px rgba(5, 66, 57, 0.1) !important;
 }
 
 /* Smooth scrolling for anchor links */
@@ -207,8 +262,8 @@ html {
 /* Form input focus styles */
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #054239;
+  box-shadow: 0 0 0 3px rgba(5, 66, 57, 0.1);
 }
 
 /* Custom checkbox styles */
@@ -225,8 +280,8 @@ html {
 }
 
 .custom-checkbox:checked {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
+  background-color: #054239;
+  border-color: #054239;
 }
 
 .custom-checkbox:checked::after {

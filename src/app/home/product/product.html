@@ -1,3 +1,4 @@
+<div class="product-theme">
 <div class="drawer lg:drawer-open min-h-screen bg-base-200">
   <input id="filters-drawer" type="checkbox" class="drawer-toggle" />
   
@@ -10,7 +11,7 @@
           <!-- Title Row -->
           <div class="flex items-center gap-2">
            
-            <h1 class="text-xl font-bold text-base-content">Products</h1>
+            <h1 class="text-xl font-bold" style="color: #054239;">Products</h1>
           </div>
           
           <!-- Search Row -->
@@ -52,8 +53,8 @@
         <div class="hidden lg:flex lg:items-center lg:justify-between gap-6">
           <!-- Left Section: Title -->
           <div class="flex-shrink-0">
-            <h1 class="text-3xl font-bold text-base-content">Products</h1>
-            <p class="text-base-content/70 mt-1">Discover amazing products tailored for you</p>
+            <h1 class="text-3xl font-bold" style="color: #054239;">Products</h1>
+            <p class="mt-1" style="color: rgba(22, 22, 22, 0.75); font-weight: 500;">Discover amazing products tailored for you</p>
           </div>
           <!-- Right Section: Search and View Toggle -->
           <div class="flex items-center gap-4 flex-1 justify-end">
@@ -93,7 +94,7 @@
         <!-- Desktop Left Sidebar - Hidden on Mobile -->
         <div class="hidden lg:block lg:w-80 lg:flex-shrink-0">
         <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-6 sticky top-6">
-          <h2 class="text-xl font-semibold text-base-content mb-6">Filters</h2>
+          <h2 class="text-xl font-semibold mb-6" style="color: #054239;">Filters</h2>
           
           <!-- Category Filter -->
           <div class="collapse collapse-arrow bg-base-200 mb-4">
@@ -267,8 +268,8 @@
         <!-- Results Header -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-4">
-            <h3 class="text-lg font-semibold text-base-content">
-              {{ getProductsLength() }} Products Found
+            <h3 class="text-lg font-semibold" style="color: #161616;">
+              {{ getProductsLength() }} <span style="color: #054239;">Products Found</span>
             </h3>
             @if (selectedCategories().length > 0) {
               <div class="badge badge-primary badge-outline">
@@ -286,7 +287,7 @@
               </div>
             }
           </div>
-          <div class="text-sm text-base-content/70">
+          <div class="text-sm" style="color: rgba(22, 22, 22, 0.7); font-weight: 500;">
             Showing {{ (getCurrentPage() - 1) * pageSize() + 1 }} - {{ Math.min(getCurrentPage() * pageSize(), getProductsLength()) }} of {{ getProductsLength() }}
           </div>
         </div>
@@ -358,7 +359,10 @@
                     <div>
                       <!-- Product Title and Category -->
                       <div class="mb-3">
-                        <h3 class="text-2xl font-bold text-base-content mb-2 hover:text-primary transition-colors cursor-pointer">
+                        <h3 class="text-2xl font-bold mb-2 transition-colors cursor-pointer" 
+                            style="color: #161616;"
+                            onmouseover="this.style.color='#054239'"
+                            onmouseout="this.style.color='#161616'">
                           {{ product.title }}
                         </h3>
                         <div class="flex items-center gap-2 flex-wrap">
@@ -471,7 +475,10 @@
                   <div class="img-loading"></div>
                 </div>
               </div>
-              <h4 class="text-lg font-semibold text-base-content mb-2">{{ product.title }}</h4>
+              <h4 class="text-lg font-semibold mb-2 transition-colors cursor-pointer" 
+                  style="color: #161616;"
+                  onmouseover="this.style.color='#054239'"
+                  onmouseout="this.style.color='#161616'">{{ product.title }}</h4>
               <div class="flex items-center gap-2 mb-2">
                 <span class="badge badge-outline badge-sm">{{ product.subCategoryName }}</span>
               </div>
@@ -580,8 +587,8 @@
           <svg class="w-16 h-16 mx-auto text-base-content/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.334A7.96 7.96 0 0012 5c-2.34 0-4.29 1.009-5.824 2.57"></path>
           </svg>
-          <h3 class="text-xl font-semibold text-base-content mb-2">No products found</h3>
-          <p class="text-base-content/70 mb-4">Try adjusting your filters or search terms</p>
+          <h3 class="text-xl font-semibold mb-2" style="color: #161616;">No products found</h3>
+          <p class="mb-4" style="color: rgba(22, 22, 22, 0.7);">Try adjusting your filters or search terms</p>
           <button class="btn btn-primary" (click)="clearAllFilters()">Clear All Filters</button>
         </div>
         </div>
@@ -595,7 +602,7 @@
     <div class="min-h-full w-80 bg-base-200 p-6 overflow-y-auto" style="scroll-behavior: smooth; will-change: scroll-position;">
       <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-6" style="contain: layout style paint;">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-semibold text-base-content">Filters</h2>
+          <h2 class="text-xl font-semibold" style="color: #054239;">Filters</h2>
           <label for="filters-drawer" class="btn btn-sm btn-circle btn-ghost">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -777,3 +784,4 @@
   [toasts]="toasts" 
   (close)="onToastClose($event)">
 </app-toast>
+</div>

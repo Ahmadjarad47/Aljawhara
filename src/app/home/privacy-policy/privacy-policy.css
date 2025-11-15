@@ -1,0 +1,76 @@
+/* Privacy Policy Page Styles - Unified Theme */
+
+/* Theme Variables - Matching site-wide theme */
+:host {
+  --privacy-color-bg: #ffffff;
+  --privacy-color-surface: rgba(5, 66, 57, 0.05);
+  --privacy-color-surface-strong: rgba(185, 167, 121, 0.18);
+  --privacy-color-primary: #054239;
+  --privacy-color-accent: #b9a779;
+  --privacy-color-text: #161616;
+  --privacy-color-muted: rgba(22, 22, 22, 0.65);
+  --privacy-color-border: rgba(5, 66, 57, 0.2);
+}
+
+.privacy-theme {
+  --p: 167 86% 21%;
+  --pc: 0 0% 100%;
+  --s: 43 31% 60%;
+  --sc: 167 15% 18%;
+  --a: 43 31% 60%;
+  --ac: 167 15% 18%;
+  background: linear-gradient(135deg, rgba(5, 66, 57, 0.02) 0%, #ffffff 50%, rgba(185, 167, 121, 0.03) 100%);
+}
+
+/* Primary color overrides */
+.text-primary {
+  color: #054239 !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+.border-primary {
+  border-color: #054239 !important;
+}
+
+.hover\:text-primary:hover {
+  color: #054239 !important;
+}
+
+/* Links */
+a {
+  color: #054239;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #076d5f;
+  text-decoration: underline;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: #054239;
+}
+
+/* Accent colors */
+.text-accent {
+  color: #b9a779 !important;
+}
+
+.bg-accent {
+  background-color: #b9a779 !important;
+}
+
+/* Background decorations */
+.bg-primary\/5 {
+  background: rgba(5, 66, 57, 0.05) !important;
+}
+
+.bg-primary\/10 {
+  background: rgba(5, 66, 57, 0.1) !important;
+}
+

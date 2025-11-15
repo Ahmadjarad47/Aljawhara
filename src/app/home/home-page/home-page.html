@@ -1,164 +1,154 @@
 
-<!-- Hero Section - Modern Design -->
-<section class="hero-section relative min-h-screen flex items-center justify-center overflow-hidden bg-base-100">
-  <!-- Animated Background Grid -->
-  <div class="absolute inset-0 opacity-30">
-    <div class="absolute inset-0 bg-grid-pattern"></div>
-  </div>
-  <!-- Gradient Orbs -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-0 -right-20 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-    <div class="absolute -bottom-20 -left-20 w-96 h-96 bg-secondary rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-  </div>
-
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-    <div class="grid lg:grid-cols-2 gap-16 items-center">
-      <!-- Left Content -->
-      <div class="text-center lg:text-left space-y-8">
-        <!-- Trust Badge -->
-        <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-base-200 border border-base-300 backdrop-blur-sm shadow-sm">
-          <div class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            <span class="text-sm font-semibold text-base-content">Trusted by 25,000+</span>
-          </div>
-        </div>
-
-        <!-- Main Heading -->
-        <div class="space-y-4">
-          <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-base-content leading-tight">
-            Discover Amazing
-            <span class="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Products
-            </span>
-            at Great Prices
-          </h1>
-        </div>
-
-        <!-- Subheading -->
-        <p class="text-lg sm:text-xl text-base-content/70 max-w-2xl leading-relaxed">
-          Shop from thousands of verified sellers and find exactly what you're looking for. 
-          Fast delivery, secure payments, and excellent customer service guaranteed.
-        </p>
-
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4">
-          <button (click)="shopNow()" 
-                  class="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-primary-content bg-primary rounded-2xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:scale-105">
-            <svg class="w-5 h-5 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-            </svg>
-            Shop Now
-          </button>
-          <button (click)="learnMore()" 
-                  class="group inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-base-content bg-base-200 border-2 border-base-300 rounded-2xl hover:bg-base-300 hover:border-primary/30 transition-all duration-300 hover:scale-105">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Learn More
-          </button>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8">
-          <div class="group p-4 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-base-300 hover:border-primary/30 transition-all duration-300 hover:scale-105">
-            <div class="text-3xl sm:text-4xl font-bold text-primary mb-1">{{stats.activeUsers | number}}</div>
-            <div class="text-xs sm:text-sm text-base-content/60 font-medium">Active Users</div>
-          </div>
-          <div class="group p-4 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-base-300 hover:border-secondary/30 transition-all duration-300 hover:scale-105">
-            <div class="text-3xl sm:text-4xl font-bold text-secondary mb-1">{{stats.productsSold | number}}</div>
-            <div class="text-xs sm:text-sm text-base-content/60 font-medium">Products Sold</div>
-          </div>
-          <div class="group p-4 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-base-300 hover:border-accent/30 transition-all duration-300 hover:scale-105">
-            <div class="text-3xl sm:text-4xl font-bold text-accent mb-1">{{stats.merchants | number}}</div>
-            <div class="text-xs sm:text-sm text-base-content/60 font-medium">Merchants</div>
-          </div>
-          <div class="group p-4 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-base-300 hover:border-success/30 transition-all duration-300 hover:scale-105">
-            <div class="text-3xl sm:text-4xl font-bold text-success mb-1">{{stats.satisfactionRate}}%</div>
-            <div class="text-xs sm:text-sm text-base-content/60 font-medium">Satisfaction</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Content - Featured Product Card -->
-      <div class="relative">
-        <!-- Glow Effect -->
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30 rounded-3xl blur-2xl scale-110 opacity-50"></div>
+<div class="home-page-theme">
+<!-- Hero Carousel Section - Full Width -->
+<section class="hero-carousel-section relative w-full h-screen overflow-hidden" 
+         (mouseenter)="pauseCarousel()" 
+         (mouseleave)="resumeCarousel()">
+  
+  <!-- Carousel Slides -->
+  <div class="carousel-container relative w-full h-full">
+    @for (slide of heroSlides; track slide.id; let i = $index) {
+      <div class="carousel-slide absolute inset-0 w-full h-full transition-all duration-700 ease-in-out"
+           [class.active]="currentSlide === i"
+           [class.prev]="currentSlide === (i + 1) % heroSlides.length"
+           [class.next]="currentSlide === (i - 1 + heroSlides.length) % heroSlides.length">
         
-        <!-- Product Card -->
-        <div class="relative bg-base-100 rounded-3xl shadow-2xl border border-base-300 overflow-hidden backdrop-blur-xl">
-          <!-- Product Image -->
-          <div class="relative h-80 overflow-hidden bg-base-200">
-            <div class="img-container w-full h-full">
-              <img [src]="featuredProducts[0].image" 
-                   [alt]="featuredProducts[0].name"
-                   loading="lazy"
-                   (load)="$event.target.classList.add('loaded')"
-                   (error)="$event.target.classList.add('loaded')"
-                   class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
-              <div class="img-loading"></div>
-            </div>
-            
-            <!-- Discount Badge -->
-            <div class="absolute top-6 left-6">
-              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-error-content bg-error shadow-lg">
-                -{{featuredProducts[0].discount}}% OFF
-              </span>
-            </div>
-
-            <!-- Wishlist Button -->
-            <button class="absolute top-6 right-6 w-12 h-12 rounded-full bg-base-100/90 backdrop-blur-sm border border-base-300 flex items-center justify-center shadow-lg hover:bg-base-100 hover:scale-110 transition-all duration-300 group">
-              <svg class="w-6 h-6 text-error transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-            </button>
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 w-full h-full">
+          <div class="img-container w-full h-full">
+            <img [src]="slide.image" 
+                 [alt]="slide.title"
+                 loading="lazy"
+                 (load)="$event.target.classList.add('loaded')"
+                 (error)="$event.target.classList.add('loaded')"
+                 class="w-full h-full object-cover">
+            <div class="img-loading"></div>
           </div>
-
-          <!-- Product Info -->
-          <div class="p-6 space-y-4">
-            <div>
-              <h3 class="text-2xl font-bold text-base-content mb-2">{{featuredProducts[0].name}}</h3>
-              <p class="text-sm text-base-content/60 line-clamp-2">{{featuredProducts[0].description}}</p>
-            </div>
-            
-            <!-- Price & Rating Row -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-bold text-primary">${{featuredProducts[0].price}}</span>
-                <span class="text-lg text-base-content/40 line-through">${{featuredProducts[0].originalPrice}}</span>
-              </div>
-              <div class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-warning/10 border border-warning/20">
-                <svg class="w-4 h-4 text-warning fill-current" viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                </svg>
-                <span class="text-sm font-semibold text-base-content">{{featuredProducts[0].rating}}</span>
-              </div>
-            </div>
-
-            <!-- Add to Cart Button -->
-            <button (click)="addToCart(featuredProducts[0])" 
-                    class="w-full py-3.5 px-6 rounded-xl font-semibold text-primary-content bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] flex items-center justify-center gap-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-              </svg>
-              Add to Cart
-            </button>
-          </div>
+          <!-- Dark overlay for better text readability -->
+          <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
         </div>
 
-        <!-- Floating Decorative Elements -->
-        <div class="absolute -top-6 -right-6 w-24 h-24 bg-primary/20 rounded-full blur-2xl animate-pulse"></div>
-        <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-secondary/20 rounded-full blur-2xl animate-pulse" style="animation-delay: 1s;"></div>
+        <!-- Slide Content -->
+        <div class="relative z-10 h-full flex items-center py-20 sm:py-0">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="max-w-3xl space-y-4 sm:space-y-6 md:space-y-8">
+              
+              <!-- Trust Badge -->
+              <div class="slide-content-animate" style="animation-delay: 0.1s;">
+                <div class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+                  <div class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs sm:text-sm font-semibold text-white">Trusted by 25,000+</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Heading -->
+              <div class="slide-content-animate" style="animation-delay: 0.2s;">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-tight">
+                  {{slide.title}}
+                  <span class="block text-[#b9a779] mt-1 sm:mt-2" style="text-shadow: 0 0 20px rgba(185, 167, 121, 0.5);">
+                    {{slide.titleHighlight}}
+                  </span>
+                  <span class="block mt-1 sm:mt-2">{{slide.titleEnd}}</span>
+                </h1>
+              </div>
+
+              <!-- Subtitle -->
+              <div class="slide-content-animate" style="animation-delay: 0.3s;">
+                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-2xl leading-relaxed">
+                  {{slide.subtitle}}
+                </p>
+              </div>
+
+              <!-- CTA Buttons -->
+              <div class="slide-content-animate flex flex-col sm:flex-row gap-3 sm:gap-4" style="animation-delay: 0.4s;">
+                <button (click)="shopNow()" 
+                        class="group relative inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 sm:hover:scale-105"
+                        style="background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.85) 100%); box-shadow: 0 4px 20px rgba(5, 66, 57, 0.4);">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                  </svg>
+                  {{slide.ctaPrimary}}
+                </button>
+                <button (click)="learnMore()" 
+                        class="group inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white bg-white/10 backdrop-blur-md border-2 rounded-xl sm:rounded-2xl hover:bg-white/20 transition-all duration-300 active:scale-95 sm:hover:scale-105"
+                        style="border-color: #b9a779;">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  {{slide.ctaSecondary}}
+                </button>
+              </div>
+
+              <!-- Stats Grid -->
+              <div class="slide-content-animate grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6 pt-3 sm:pt-6 md:pt-8" style="animation-delay: 0.5s;">
+                <div class="p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-colors">
+                  <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{stats.activeUsers | number}}</div>
+                  <div class="text-[10px] sm:text-xs md:text-sm text-white/80 font-medium leading-tight">Active Users</div>
+                </div>
+                <div class="p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-colors">
+                  <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{stats.productsSold | number}}</div>
+                  <div class="text-[10px] sm:text-xs md:text-sm text-white/80 font-medium leading-tight">Products Sold</div>
+                </div>
+                <div class="p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-colors">
+                  <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{stats.merchants | number}}</div>
+                  <div class="text-[10px] sm:text-xs md:text-sm text-white/80 font-medium leading-tight">Merchants</div>
+                </div>
+                <div class="p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-colors">
+                  <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1">{{stats.satisfactionRate}}%</div>
+                  <div class="text-[10px] sm:text-xs md:text-sm text-white/80 font-medium leading-tight">Satisfaction</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    }
+  </div>
+
+  <!-- Carousel Controls -->
+  <div class="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between px-2 sm:px-4 md:px-8 pointer-events-none">
+    <!-- Previous Button -->
+    <button (click)="prevSlide()" 
+            class="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/30 active:bg-white/40 transition-all duration-300 active:scale-95 sm:hover:scale-110 group shadow-lg">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <!-- Next Button -->
+    <button (click)="nextSlide()" 
+            class="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/30 active:bg-white/40 transition-all duration-300 active:scale-95 sm:hover:scale-110 group shadow-lg">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Slide Indicators -->
+  <div class="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 md:gap-3 px-4 py-2 sm:py-2.5 rounded-full bg-black/20 backdrop-blur-sm">
+    @for (slide of heroSlides; track slide.id; let i = $index) {
+      <button (click)="goToSlide(i)" 
+              class="group relative h-1.5 sm:h-2 rounded-full transition-all duration-300 hover:bg-white/80"
+              [class.w-6]="currentSlide === i"
+              [class.sm:w-8]="currentSlide === i"
+              [class.w-1.5]="currentSlide !== i"
+              [class.sm:w-2]="currentSlide !== i"
+              [class.bg-white]="currentSlide === i"
+              [class.bg-white/40]="currentSlide !== i"
+              [attr.aria-label]="'Go to slide ' + (i + 1)">
+        <span class="sr-only">Slide {{i + 1}}</span>
+      </button>
+    }
   </div>
 
   <!-- Scroll Indicator -->
-  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-    <div class="flex flex-col items-center gap-2 text-base-content/50">
-      <span class="text-xs font-medium">Scroll to explore</span>
+  <div class="absolute bottom-4 sm:bottom-6 md:bottom-8 right-4 sm:right-6 md:right-8 z-10 hidden lg:block">
+    <div class="flex flex-col items-center gap-2 text-white/70">
+      <span class="text-xs font-medium">Scroll</span>
       <div class="w-6 h-10 border-2 border-current rounded-full flex justify-center p-1">
         <div class="w-1.5 h-3 bg-current rounded-full animate-bounce"></div>
       </div>
@@ -167,23 +157,19 @@
 </section>
 
 <!-- Categories Section -->
-<section class="py-20 bg-base-100 relative overflow-hidden">
-  <!-- Background decoration -->
-  <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
-  <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
-  
+<section class="categories-section py-20 relative overflow-hidden">
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <!-- Section Header -->
     <div class="text-center mb-16">
-      <div class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+      <div class="accent-chip mb-4">
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         Browse Categories
       </div>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content mb-6">
-        Shop by <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Category</span>
+        Shop by <span class="gradient-text">Category</span>
       </h2>
       <p class="text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed">
         Discover our carefully curated categories and find exactly what you're looking for
@@ -244,7 +230,8 @@
 
     <!-- View All Categories Button -->
     <div class="text-center mt-12">
-      <button class="btn btn-outline btn-lg group" (click)="viewAllCategories()">
+      <button class="btn btn-lg group accent-outline" (click)="viewAllCategories()" 
+              style="border: 2px solid #054239; color: #054239; background: transparent;">
         <span>View All Categories</span>
         <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -255,30 +242,28 @@
 </section>
 
 <!-- Featured Products Section -->
-<section class="py-20 bg-base-200 relative overflow-hidden">
+<section class="featured-section py-20 relative overflow-hidden">
   <!-- Background decoration -->
-  <div class="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-primary/5"></div>
-  <div class="absolute top-1/4 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-  <div class="absolute bottom-1/4 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
-  
+ 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <!-- Section Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-16">
       <div class="mb-8 sm:mb-0">
-        <div class="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-sm font-medium mb-4">
+        <div class="accent-chip mb-4">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
           </svg>
           Featured Collection
         </div>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content mb-4">
-          Handpicked <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary">Products</span>
+          Handpicked <span class="gradient-text">Products</span>
         </h2>
         <p class="text-lg text-base-content/70 max-w-2xl">
           Discover our carefully selected premium products, chosen just for you
         </p>
       </div>
-      <button (click)="viewAllProducts()" class="btn btn-outline btn-lg group self-start sm:self-center">
+      <button (click)="viewAllProducts()" class="btn btn-lg group accent-outline self-start sm:self-center"
+              style="border: 2px solid #054239; color: #054239; background: transparent;">
         <span>View All Products</span>
         <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -357,7 +342,8 @@
             
             <!-- Quick View Overlay -->
             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <button class="btn btn-primary btn-sm" (click)="goToProduct(product); $event.stopPropagation()">
+              <button class="btn btn-sm" (click)="goToProduct(product); $event.stopPropagation()"
+                      style="background: #054239; color: white; border: none;">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -370,8 +356,11 @@
           <!-- Product Info -->
           <div class="card-body p-4 lg:p-6">
             <!-- Product Name -->
-            <h3 class="card-title text-lg font-bold text-base-content mb-2 cursor-pointer hover:text-primary transition-colors duration-300" 
-                (click)="goToProduct(product)">
+            <h3 class="card-title text-lg font-bold text-base-content mb-2 cursor-pointer transition-colors duration-300" 
+                (click)="goToProduct(product)"
+                style="--hover-color: #054239;"
+                onmouseover="this.style.color='#054239'"
+                onmouseout="this.style.color=''">
               {{product.name}}
             </h3>
             
@@ -392,13 +381,13 @@
             <div class="card-actions justify-between items-center">
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
-                  <span class="text-2xl font-bold text-primary">${{product.price}}</span>
+                  <span class="text-2xl font-bold" style="color: #054239;">${{product.price}}</span>
                   @if (product.originalPrice) {
                   <span class="text-lg text-base-content/40 line-through">${{product.originalPrice}}</span>
                   }
                 </div>
                 @if (product.originalPrice) {
-                <div class="text-xs text-success font-medium">
+                <div class="text-xs font-medium" style="color: #054239;">
                   Save ${{product.originalPrice - product.price}}
                 </div>
                 }
@@ -406,7 +395,8 @@
               
               <!-- Add to Cart Button -->
               <button (click)="addToCart(product)" 
-                      class="btn btn-primary btn-sm group/btn">
+                      class="btn btn-sm group/btn"
+                      style="background: #054239; color: white; border: none;">
                 <svg class="w-4 h-4 mr-1 group-hover/btn:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
                 </svg>
@@ -444,35 +434,35 @@
       } @else {
         <div class="stats shadow-lg bg-base-100 border border-base-300/50">
           <div class="stat">
-            <div class="stat-figure text-primary">
+            <div class="stat-figure" style="color: #054239;">
               <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
               </svg>
             </div>
             <div class="stat-title">Total Products</div>
-            <div class="stat-value text-primary">10,000+</div>
+            <div class="stat-value" style="color: #054239;">10,000+</div>
             <div class="stat-desc">Available in our store</div>
           </div>
           
           <div class="stat">
-            <div class="stat-figure text-secondary">
+            <div class="stat-figure" style="color: #054239;">
               <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
             <div class="stat-title">Quality Guarantee</div>
-            <div class="stat-value text-secondary">100%</div>
+            <div class="stat-value" style="color: #054239;">100%</div>
             <div class="stat-desc">Satisfaction guaranteed</div>
           </div>
           
           <div class="stat">
-            <div class="stat-figure text-accent">
+            <div class="stat-figure" style="color: #054239;">
               <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
               </svg>
             </div>
             <div class="stat-title">Support</div>
-            <div class="stat-value text-accent">24/7</div>
+            <div class="stat-value" style="color: #054239;">24/7</div>
             <div class="stat-desc">Customer service</div>
           </div>
         </div>
@@ -482,46 +472,48 @@
 </section>
 
 <!-- Special Offers Section -->
-<section class="py-20 bg-gradient-to-r from-primary to-secondary">
+<section class="special-offers-section py-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid lg:grid-cols-2 gap-12 items-center">
       <!-- Left Content -->
-      <div class="text-white">
-        <h2 class="text-3xl sm:text-4xl font-bold mb-6">
+      <div class="special-offers-copy">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-6 accent-text">
           Special Offer
         </h2>
-        <p class="text-xl text-white/90 mb-8 leading-relaxed">
+        <p class="text-xl special-offers-muted mb-8 leading-relaxed">
           Get up to 50% off on selected items. Limited time offer! Don't miss out on these amazing deals.
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
-          <button (click)="shopSale()" class="btn btn-white btn-lg px-8 py-4 text-lg font-semibold rounded-xl hover:scale-105 transition-transform duration-200">
+          <button (click)="shopSale()" class="btn btn-lg px-8 py-4 text-lg font-semibold rounded-xl hover:scale-105 transition-transform duration-200"
+                  style="background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.85) 100%); color: white; border: none;">
             Shop Sale
           </button>
-          <button (click)="learnMore()" class="btn btn-outline btn-white btn-lg px-8 py-4 text-lg font-semibold rounded-xl hover:scale-105 transition-transform duration-200">
+          <button (click)="learnMore()" class="btn btn-lg px-8 py-4 text-lg font-semibold rounded-xl hover:scale-105 transition-transform duration-200"
+                  style="border: 2px solid #054239; color: #054239; background: transparent;">
             Learn More
           </button>
         </div>
       </div>
 
       <!-- Right Content - Countdown Timer -->
-      <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 text-center">
-        <h3 class="text-2xl font-bold text-white mb-6">Offer Ends In</h3>
+      <div class="special-offers-timer bg-white/10 backdrop-blur-sm rounded-3xl p-8 text-center">
+        <h3 class="text-2xl font-bold mb-6 accent-text">Offer Ends In</h3>
         <div class="grid grid-cols-4 gap-4">
           <div class="bg-white/20 rounded-2xl p-4 countdown-item">
-            <div class="text-3xl font-bold text-white">{{countdown.days | number:'2.0-0'}}</div>
-            <div class="text-sm text-white/80">Days</div>
+            <div class="text-3xl font-bold">{{countdown.days | number:'2.0-0'}}</div>
+            <div class="text-sm special-offers-muted">Days</div>
           </div>
           <div class="bg-white/20 rounded-2xl p-4 countdown-item">
-            <div class="text-3xl font-bold text-white">{{countdown.hours | number:'2.0-0'}}</div>
-            <div class="text-sm text-white/80">Hours</div>
+            <div class="text-3xl font-bold">{{countdown.hours | number:'2.0-0'}}</div>
+            <div class="text-sm special-offers-muted">Hours</div>
           </div>
           <div class="bg-white/20 rounded-2xl p-4 countdown-item">
-            <div class="text-3xl font-bold text-white">{{countdown.minutes | number:'2.0-0'}}</div>
-            <div class="text-sm text-white/80">Minutes</div>
+            <div class="text-3xl font-bold">{{countdown.minutes | number:'2.0-0'}}</div>
+            <div class="text-sm special-offers-muted">Minutes</div>
           </div>
           <div class="bg-white/20 rounded-2xl p-4 countdown-item">
-            <div class="text-3xl font-bold text-white">{{countdown.seconds | number:'2.0-0'}}</div>
-            <div class="text-sm text-white/80">Seconds</div>
+            <div class="text-3xl font-bold">{{countdown.seconds | number:'2.0-0'}}</div>
+            <div class="text-sm special-offers-muted">Seconds</div>
           </div>
         </div>
       </div>
@@ -530,7 +522,7 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-20 bg-base-100">
+<section class="testimonials-section py-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Section Header -->
     <div class="text-center mb-16">
@@ -572,9 +564,9 @@
 </section>
 
 <!-- Newsletter Section -->
-<section class="py-20 bg-base-200">
+<section class="newsletter-section py-20">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <h2 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">
+    <h2 class="text-3xl sm:text-4xl font-bold text-base-content mb-4 accent-text">
       Stay Updated
     </h2>
     <p class="text-lg text-base-content/60 mb-8">
@@ -585,10 +577,14 @@
       <input type="email" 
              [(ngModel)]="newsletterEmail"
              placeholder="Enter your email address" 
-             class="flex-1 px-6 py-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 newsletter-input">
+             class="flex-1 px-6 py-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-0 transition-colors duration-300 newsletter-input"
+             style="--focus-border-color: #054239;"
+             onfocus="this.style.borderColor='#054239'"
+             onblur="this.style.borderColor=''">
       <button (click)="subscribeNewsletter()" 
               [disabled]="isNewsletterSubscribed"
-              class="btn btn-primary btn-lg px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform duration-200 disabled:opacity-50">
+              class="btn btn-lg px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-transform duration-200 disabled:opacity-50"
+              style="background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.85) 100%); color: white; border: none;">
         {{isNewsletterSubscribed ? 'Subscribed!' : 'Subscribe'}}
       </button>
     </div>
@@ -598,15 +594,17 @@
     </p>
   </div>
 </section>
+</div>
 
 <!-- Features Section -->
-<section class="py-20 bg-base-100">
+<section class="features-section py-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-3 gap-8">
       <!-- Feature 1 -->
       <div class="text-center">
-        <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
-          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon"
+             style="background: rgba(5, 66, 57, 0.1);">
+          <svg class="w-8 h-8" style="color: #054239;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
           </svg>
         </div>
@@ -616,8 +614,9 @@
 
       <!-- Feature 2 -->
       <div class="text-center">
-        <div class="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
-          <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon"
+             style="background: rgba(5, 66, 57, 0.1);">
+          <svg class="w-8 h-8" style="color: #054239;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
@@ -627,8 +626,9 @@
 
       <!-- Feature 3 -->
       <div class="text-center">
-        <div class="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
-          <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon"
+             style="background: rgba(5, 66, 57, 0.1);">
+          <svg class="w-8 h-8" style="color: #054239;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
           </svg>
         </div>

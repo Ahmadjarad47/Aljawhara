@@ -1,2 +1,87 @@
-/* Contact Page Styles */
+/* Contact Page Styles - Unified Theme */
 
+/* Theme Variables - Matching site-wide theme */
+:host {
+  --contact-color-bg: #ffffff;
+  --contact-color-surface: rgba(5, 66, 57, 0.05);
+  --contact-color-surface-strong: rgba(185, 167, 121, 0.18);
+  --contact-color-primary: #054239;
+  --contact-color-accent: #b9a779;
+  --contact-color-text: #161616;
+  --contact-color-muted: rgba(22, 22, 22, 0.65);
+  --contact-color-border: rgba(5, 66, 57, 0.2);
+}
+
+.contact-theme {
+  --p: 167 86% 21%;
+  --pc: 0 0% 100%;
+  --s: 43 31% 60%;
+  --sc: 167 15% 18%;
+  --a: 43 31% 60%;
+  --ac: 167 15% 18%;
+  background: linear-gradient(135deg, rgba(5, 66, 57, 0.02) 0%, #ffffff 50%, rgba(185, 167, 121, 0.03) 100%);
+}
+
+/* Primary color overrides */
+.text-primary {
+  color: #054239 !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+.border-primary {
+  border-color: #054239 !important;
+}
+
+.hover\:text-primary:hover {
+  color: #054239 !important;
+}
+
+.hover\:bg-primary:hover {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(5, 66, 57, 0.35) !important;
+  filter: brightness(1.1);
+}
+
+/* Form inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #054239 !important;
+  box-shadow: 0 0 0 3px rgba(5, 66, 57, 0.1) !important;
+  outline: none;
+}
+
+/* Accent colors */
+.text-accent {
+  color: #b9a779 !important;
+}
+
+.bg-accent {
+  background-color: #b9a779 !important;
+}
+
+/* Background decorations */
+.bg-primary\/5 {
+  background: rgba(5, 66, 57, 0.05) !important;
+}
+
+.bg-primary\/10 {
+  background: rgba(5, 66, 57, 0.1) !important;
+}

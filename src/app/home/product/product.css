@@ -1,0 +1,441 @@
+/* Product Page Styles - Unified Theme */
+
+/* Theme Variables - Matching site-wide theme */
+:host {
+  --product-color-bg: #ffffff;
+  --product-color-surface: rgba(5, 66, 57, 0.05);
+  --product-color-surface-strong: rgba(185, 167, 121, 0.18);
+  --product-color-primary: #054239;
+  --product-color-accent: #b9a779;
+  --product-color-text: #161616;
+  --product-color-muted: rgba(22, 22, 22, 0.65);
+  --product-color-border: rgba(5, 66, 57, 0.2);
+}
+
+.product-theme {
+  --p: 167 86% 21%;
+  --pc: 0 0% 100%;
+  --s: 43 31% 60%;
+  --sc: 167 15% 18%;
+  --a: 43 31% 60%;
+  --ac: 167 15% 18%;
+}
+
+/* Primary color overrides */
+.text-primary {
+  color: #054239 !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+.border-primary {
+  border-color: #054239 !important;
+}
+
+.hover\:text-primary:hover {
+  color: #054239 !important;
+}
+
+.hover\:bg-primary:hover {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(5, 66, 57, 0.35) !important;
+  filter: brightness(1.1);
+}
+
+.btn-outline-primary {
+  border: 2px solid #054239 !important;
+  color: #054239 !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+}
+
+/* Accent colors */
+.text-accent {
+  color: #b9a779 !important;
+}
+
+.bg-accent {
+  background-color: #b9a779 !important;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #054239 !important;
+  box-shadow: 0 0 0 3px rgba(5, 66, 57, 0.1) !important;
+  outline: none;
+}
+
+/* Checkbox and Radio Primary Colors */
+.checkbox-primary:checked,
+.radio-primary:checked {
+  background-color: #054239 !important;
+  border-color: #054239 !important;
+}
+
+/* Badge Colors */
+.badge-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.95) 100%) !important;
+  color: white !important;
+  border: none !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 0.75rem !important;
+  box-shadow: 0 2px 8px rgba(5, 66, 57, 0.2) !important;
+}
+
+.badge-primary.badge-outline {
+  background: rgba(5, 66, 57, 0.05) !important;
+  color: #054239 !important;
+  border: 2px solid #054239 !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.badge-secondary {
+  background: linear-gradient(135deg, #b9a779 0%, rgba(185, 167, 121, 0.95) 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(185, 167, 121, 0.25) !important;
+}
+
+.badge-secondary.badge-outline {
+  background: rgba(185, 167, 121, 0.08) !important;
+  color: #8a7e5e !important;
+  border: 2px solid #b9a779 !important;
+  font-weight: 600 !important;
+}
+
+.badge-accent.badge-outline {
+  background: rgba(185, 167, 121, 0.08) !important;
+  color: #8a7e5e !important;
+  border: 2px solid #b9a779 !important;
+  font-weight: 600 !important;
+}
+
+/* Links */
+a:hover {
+  color: #054239 !important;
+}
+
+/* Card hover effects */
+.card {
+  border: 1px solid rgba(5, 66, 57, 0.12) !important;
+  transition: all 0.3s ease !important;
+  background: white !important;
+}
+
+.card:hover {
+  border-color: rgba(5, 66, 57, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(5, 66, 57, 0.12) !important;
+  transform: translateY(-2px);
+}
+
+/* Active button state */
+.btn-active {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Loading spinner */
+.loading-primary {
+  color: #054239 !important;
+}
+
+/* Drawer overlay */
+.drawer-button {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  border: none !important;
+  color: white !important;
+}
+
+/* Product prices */
+.text-primary {
+  color: #054239 !important;
+}
+
+/* Secondary button with accent */
+.btn-secondary {
+  background: linear-gradient(135deg, #b9a779 0%, rgba(185, 167, 121, 0.9) 100%) !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(185, 167, 121, 0.35) !important;
+  filter: brightness(1.1);
+}
+
+/* Outline buttons */
+.btn-outline:hover {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  color: white !important;
+  border-color: #054239 !important;
+}
+
+/* Success badges */
+.badge-success {
+  background: linear-gradient(135deg, #054239 0%, #076d5f 100%) !important;
+  color: white !important;
+  border: none !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(5, 66, 57, 0.25) !important;
+}
+
+.badge-error {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25) !important;
+}
+
+.badge-ghost {
+  background: rgba(5, 66, 57, 0.05) !important;
+  color: #054239 !important;
+  font-weight: 500 !important;
+}
+
+/* Rating stars */
+.bg-warning {
+  background-color: #b9a779 !important;
+}
+
+/* Image loading effect */
+.img-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.img-container img {
+  transition: transform 0.3s ease;
+}
+
+.img-container img:not(.loaded) {
+  opacity: 0;
+}
+
+.img-container img.loaded {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.img-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(5, 66, 57, 0.05) 25%, rgba(5, 66, 57, 0.1) 50%, rgba(5, 66, 57, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  pointer-events: none;
+}
+
+.img-container img.loaded + .img-loading {
+  display: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Background for product theme */
+.product-theme {
+  background: linear-gradient(135deg, rgba(5, 66, 57, 0.03) 0%, #f8f9fa 50%, rgba(185, 167, 121, 0.05) 100%);
+  min-height: 100vh;
+}
+
+/* Enhanced background for base-200 */
+.product-theme .bg-base-200 {
+  background: linear-gradient(to bottom, #f8f9fa, #f1f3f5) !important;
+}
+
+/* Enhanced background for base-100 */
+.product-theme .bg-base-100 {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(5, 66, 57, 0.08) !important;
+}
+
+/* Hover effects for product cards */
+.card:hover .text-base-content {
+  color: #054239 !important;
+}
+
+/* Product title styling */
+.product-theme h1, 
+.product-theme h2, 
+.product-theme h3, 
+.product-theme h4 {
+  color: #161616 !important;
+  font-weight: 700 !important;
+}
+
+.product-theme h3:hover {
+  color: #054239 !important;
+}
+
+/* Text contrast improvements */
+.product-theme .text-base-content {
+  color: #161616 !important;
+}
+
+.product-theme .text-base-content\/70 {
+  color: rgba(22, 22, 22, 0.75) !important;
+}
+
+.product-theme .text-base-content\/50 {
+  color: rgba(22, 22, 22, 0.55) !important;
+}
+
+/* Search button */
+.btn-square.btn-primary {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.9) 100%) !important;
+  border: none !important;
+}
+
+.btn-square.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(5, 66, 57, 0.35) !important;
+}
+
+/* Border improvements */
+.product-theme .border-base-300 {
+  border-color: rgba(5, 66, 57, 0.15) !important;
+}
+
+/* Input styling */
+.product-theme input.input,
+.product-theme select.select {
+  border: 2px solid rgba(5, 66, 57, 0.15) !important;
+  background: white !important;
+  color: #161616 !important;
+  transition: all 0.3s ease !important;
+}
+
+.product-theme input.input:hover,
+.product-theme select.select:hover {
+  border-color: rgba(5, 66, 57, 0.25) !important;
+}
+
+/* Collapse styling */
+.product-theme .collapse {
+  background: white !important;
+  border: 1px solid rgba(5, 66, 57, 0.12) !important;
+  box-shadow: 0 1px 3px rgba(5, 66, 57, 0.05) !important;
+}
+
+.product-theme .collapse-title {
+  color: #161616 !important;
+  font-weight: 600 !important;
+}
+
+/* Filter section styling */
+.product-theme .bg-base-100.rounded-box {
+  background: white !important;
+  border: 1px solid rgba(5, 66, 57, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(5, 66, 57, 0.08) !important;
+}
+
+/* Price styling */
+.product-theme .text-primary {
+  color: #054239 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(5, 66, 57, 0.1);
+}
+
+/* Divider styling */
+.product-theme .border-t {
+  border-color: rgba(5, 66, 57, 0.12) !important;
+}
+
+/* Loading state */
+.product-theme .loading-spinner {
+  color: #054239 !important;
+  opacity: 1 !important;
+}
+
+/* Alert styling */
+.product-theme .alert-error {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(185, 28, 28, 0.08) 100%) !important;
+  border: 2px solid #dc2626 !important;
+  color: #991b1b !important;
+}
+
+/* Pagination */
+.product-theme .btn-group .btn {
+  border: 2px solid rgba(5, 66, 57, 0.15) !important;
+  background: white !important;
+  color: #161616 !important;
+  font-weight: 600 !important;
+}
+
+.product-theme .btn-group .btn:hover:not(:disabled) {
+  background: rgba(5, 66, 57, 0.05) !important;
+  border-color: #054239 !important;
+  color: #054239 !important;
+}
+
+.product-theme .btn-group .btn-active {
+  background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.95) 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(5, 66, 57, 0.25) !important;
+}
+
+/* Wishlist button */
+.product-theme .btn-circle.glass {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(5, 66, 57, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.product-theme .btn-circle.glass:hover {
+  background: white !important;
+  border-color: #054239 !important;
+  transform: scale(1.1);
+}
+
+/* Enhanced shadow for cards */
+.product-theme .shadow-lg {
+  box-shadow: 0 4px 16px rgba(5, 66, 57, 0.1) !important;
+}
+
+.product-theme .shadow-xl {
+  box-shadow: 0 8px 24px rgba(5, 66, 57, 0.15) !important;
+}
+
+/* Badge outline improvements */
+.product-theme .badge-outline {
+  border-width: 2px !important;
+  font-weight: 600 !important;
+}
+

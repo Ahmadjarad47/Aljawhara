@@ -36,6 +36,57 @@ export class HomePage implements OnInit, OnDestroy {
     satisfactionRate: 96
   };
 
+  // Hero Carousel
+  currentSlide = 0;
+  private carouselInterval?: ReturnType<typeof setInterval>;
+  
+  heroSlides = [
+    {
+      id: 1,
+      title: 'Discover Amazing',
+      titleHighlight: 'Products',
+      titleEnd: 'at Great Prices',
+      subtitle: 'Shop from thousands of verified sellers and find exactly what you\'re looking for. Fast delivery, secure payments, and excellent customer service guaranteed.',
+      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop',
+      ctaPrimary: 'Shop Now',
+      ctaSecondary: 'Learn More',
+      theme: 'primary'
+    },
+    {
+      id: 2,
+      title: 'Premium Quality',
+      titleHighlight: 'Electronics',
+      titleEnd: 'Best Deals Online',
+      subtitle: 'Get the latest gadgets and electronics at unbeatable prices. Free shipping on orders over $50 and 30-day money-back guarantee.',
+      image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&h=1080&fit=crop',
+      ctaPrimary: 'Browse Electronics',
+      ctaSecondary: 'View Deals',
+      theme: 'secondary'
+    },
+    {
+      id: 3,
+      title: 'Trendy Fashion',
+      titleHighlight: 'Collection',
+      titleEnd: 'Style Meets Comfort',
+      subtitle: 'Elevate your wardrobe with our curated fashion collection. From casual to formal, find the perfect outfit for every occasion.',
+      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=1080&fit=crop',
+      ctaPrimary: 'Shop Fashion',
+      ctaSecondary: 'New Arrivals',
+      theme: 'accent'
+    },
+    {
+      id: 4,
+      title: 'Smart Home',
+      titleHighlight: 'Essentials',
+      titleEnd: 'Modern Living',
+      subtitle: 'Transform your space with innovative smart home solutions. Energy-efficient, easy to install, and designed for modern lifestyles.',
+      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1920&h=1080&fit=crop',
+      ctaPrimary: 'Explore Smart Home',
+      ctaSecondary: 'Learn More',
+      theme: 'success'
+    }
+  ];
+
   // Countdown timer for special offer
   countdown = {
     days: 5,
@@ -133,6 +184,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.startCountdown();
+    this.startCarousel();
   }
 
   // Newsletter subscription
@@ -180,6 +232,9 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+    }
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
     }
   }
 
@@ -230,5 +285,39 @@ export class HomePage implements OnInit, OnDestroy {
   shopSale() {
     console.log('Shop sale clicked');
     // Implement navigation to sale page
+  }
+
+  // Carousel controls
+  startCarousel() {
+    this.carouselInterval = setInterval(() => {
+      this.nextSlide();
+    }, 5000); // Auto-advance every 5 seconds
+  }
+
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.heroSlides.length;
+  }
+
+  prevSlide() {
+    this.currentSlide = this.currentSlide === 0 ? this.heroSlides.length - 1 : this.currentSlide - 1;
+  }
+
+  goToSlide(index: number) {
+    this.currentSlide = index;
+    // Reset auto-advance timer
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+      this.startCarousel();
+    }
+  }
+
+  pauseCarousel() {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+    }
+  }
+
+  resumeCarousel() {
+    this.startCarousel();
   }
 }
