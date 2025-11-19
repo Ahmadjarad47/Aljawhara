@@ -2,8 +2,8 @@
 <div class="container mx-auto px-4 py-6">
   <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 px-5 py-4 mb-6 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-base-content">Your Cart</h1>
-      <p class="text-sm text-base-content/70">{{ itemCount }} item{{ itemCount === 1 ? '' : 's' }} in cart</p>
+      <h1 class="text-2xl font-bold text-base-content">{{t('yourCart')}}</h1>
+      <p class="text-sm text-base-content/70">{{ itemCount }} {{t('itemsInCart')}}</p>
     </div>
 
     <button class="btn btn-soft btn-sm" (click)="clearCart()" [disabled]="itemCount === 0">
@@ -11,7 +11,7 @@
         <path fill-rule="evenodd" d="M16.5 4.478V4.125A2.625 2.625 0 0013.875 1.5h-3.75A2.625 2.625 0 007.5 4.125v.353c-.44.051-.875.11-1.304.175a.75.75 0 10.232 1.482l.262-.041 1.017 12.2A3.375 3.375 0 0011.06 21h1.879a3.375 3.375 0 003.353-3.706l1.017-12.2.262.041a.75.75 0 10.232-1.482 43.384 43.384 0 00-1.303-.175zM9 4.125c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V4.5H9v-.375z" clip-rule="evenodd" />
         <path d="M10.25 8.25a.75.75 0 00-1.5 0l.34 8.159a.75.75 0 001.5 0L10.25 8.25zM15.25 8.25a.75.75 0 10-1.5 0l-.34 8.159a.75.75 0 001.5 0L15.25 8.25z" />
       </svg>
-      Clear cart
+      {{t('clearCart')}}
     </button>
   </div>
 
@@ -20,9 +20,9 @@
       <svg class="w-12 h-12 mx-auto mb-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.5 5h13m-10.5 0a1.5 1.5 0 11-3 0m13 0a1.5 1.5 0 11-3 0" />
       </svg>
-      <h2 class="text-xl font-semibold text-base-content mb-2">Your cart is empty</h2>
-      <p class="text-base-content/70 mb-4">Browse products and add items to your cart to see them here.</p>
-      <a routerLink="/" class="btn btn-soft btn-primary">Continue shopping</a>
+      <h2 class="text-xl font-semibold text-base-content mb-2">{{t('cartEmpty')}}</h2>
+      <p class="text-base-content/70 mb-4">{{t('browseProducts')}}</p>
+      <a routerLink="/" class="btn btn-soft btn-primary">{{t('continueShopping')}}</a>
     </div>
   } @else {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -49,13 +49,13 @@
                       <h3 class="font-semibold text-base-content truncate cursor-pointer hover:text-primary transition-colors">
                         <a [routerLink]="['/product', item.productId]">{{ item.name }}</a>
                       </h3>
-                      <div class="text-sm text-base-content/70">Added {{ item.addedAt | date:'mediumDate' }}</div>
+                      <div class="text-sm text-base-content/70">{{t('added')}} {{ item.addedAt | date:'mediumDate' }}</div>
                       @if (item.couponCode) {
                         <div class="text-xs text-success font-medium mt-1">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 inline mr-1">
                             <path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.122-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" />
                           </svg>
-                          Coupon: {{ item.couponCode }}
+                          {{t('coupon')}} {{ item.couponCode }}
                         </div>
                       }
                     </div>
@@ -77,7 +77,7 @@
                     </div>
                     <div class="text-right ml-auto">
                       <div class="font-semibold text-base-content">{{ getItemTotal(item.price, item.quantity) | currency }}</div>
-                      <div class="text-sm text-base-content/70">{{ item.price | currency }} each</div>
+                      <div class="text-sm text-base-content/70">{{ item.price | currency }} {{t('each')}}</div>
                     </div>
                   </div>
                 </div>
@@ -90,7 +90,7 @@
       <div class="lg:col-span-1 lg:sticky top-6 self-start space-y-4">
         <!-- Coupon Section -->
         <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
-          <h3 class="text-lg font-semibold text-base-content mb-3">Apply Coupon</h3>
+          <h3 class="text-lg font-semibold text-base-content mb-3">{{t('applyCoupon')}}</h3>
           
           @if (hasAppliedCoupon) {
             <div class="alert alert-success mb-3">
@@ -98,9 +98,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <div class="font-semibold">Coupon Applied!</div>
+                <div class="font-semibold">{{t('couponApplied')}}</div>
                 <div class="text-sm">{{ appliedCoupon()?.code }} - {{ appliedCoupon()?.description }}</div>
-                <div class="text-sm">Discount: {{ discountAmount | currency }}</div>
+                <div class="text-sm">{{t('discount')}} {{ discountAmount | currency }}</div>
               </div>
               <button class="btn btn-sm btn-ghost" (click)="removeCoupon()">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
@@ -113,7 +113,7 @@
               <input 
                 type="text" 
                 [(ngModel)]="couponCode"
-                placeholder="Enter coupon code"
+                [placeholder]="t('enterCouponCode')"
                 class="input input-bordered flex-1"
                 [class.input-error]="couponError"
                 (keyup.enter)="applyCoupon()"
@@ -126,7 +126,7 @@
                 @if (isApplyingCoupon) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {
-                  Apply
+                  {{t('apply')}}
                 }
               </button>
             </div>

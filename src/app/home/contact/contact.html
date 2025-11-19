@@ -4,9 +4,9 @@
   <div class="bg-gradient-to-r from-primary to-primary-focus text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{t('contactUs')}}</h1>
         <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-          We're here to help! Get in touch with us for any questions or concerns
+          {{t('heroDesc')}}
         </p>
       </div>
     </div>
@@ -18,14 +18,14 @@
       <!-- Contact Information -->
       <div class="lg:col-span-1">
         <div class="bg-base-100 rounded-xl shadow-lg p-6 sticky top-8">
-          <h2 class="text-2xl font-bold mb-6 text-base-content">Get in Touch</h2>
+          <h2 class="text-2xl font-bold mb-6 text-base-content">{{t('getInTouch')}}</h2>
           
           <!-- Address -->
           <div class="mb-6">
             <div class="flex items-start space-x-4 mb-4">
               <div class="text-2xl">📍</div>
               <div>
-                <h3 class="font-semibold text-base-content mb-1">Address</h3>
+                <h3 class="font-semibold text-base-content mb-1">{{t('address')}}</h3>
                 <p class="text-base-content/70">{{contactInfo.address}}</p>
               </div>
             </div>
@@ -36,7 +36,7 @@
             <div class="flex items-start space-x-4 mb-4">
               <div class="text-2xl">📞</div>
               <div>
-                <h3 class="font-semibold text-base-content mb-1">Phone</h3>
+                <h3 class="font-semibold text-base-content mb-1">{{t('phone')}}</h3>
                 <a href="tel:{{contactInfo.phone}}" class="text-primary hover:underline">
                   {{contactInfo.phone}}
                 </a>
@@ -49,7 +49,7 @@
             <div class="flex items-start space-x-4 mb-4">
               <div class="text-2xl">✉️</div>
               <div>
-                <h3 class="font-semibold text-base-content mb-1">Email</h3>
+                <h3 class="font-semibold text-base-content mb-1">{{t('email')}}</h3>
                 <a href="mailto:{{contactInfo.email}}" class="text-primary hover:underline">
                   {{contactInfo.email}}
                 </a>
@@ -62,7 +62,7 @@
             <div class="flex items-start space-x-4 mb-4">
               <div class="text-2xl">🕐</div>
               <div>
-                <h3 class="font-semibold text-base-content mb-1">Working Hours</h3>
+                <h3 class="font-semibold text-base-content mb-1">{{t('workingHours')}}</h3>
                 <p class="text-base-content/70">{{contactInfo.workingHours}}</p>
               </div>
             </div>
@@ -70,7 +70,7 @@
 
           <!-- Social Media -->
           <div class="border-t border-base-300 pt-6">
-            <h3 class="font-semibold text-base-content mb-4">Follow Us</h3>
+            <h3 class="font-semibold text-base-content mb-4">{{t('followUs')}}</h3>
             <div class="flex flex-wrap gap-3">
               @for (social of socialLinks; track social.name) {
               <a [href]="social.url" target="_blank" rel="noopener noreferrer"
@@ -87,7 +87,7 @@
       <!-- Contact Form -->
       <div class="lg:col-span-2">
         <div class="bg-base-100 rounded-xl shadow-lg p-8">
-          <h2 class="text-2xl font-bold mb-6 text-base-content">Send us a Message</h2>
+          <h2 class="text-2xl font-bold mb-6 text-base-content">{{t('sendMessage')}}</h2>
           
           @if (isSubmitted()) {
           <div class="alert alert-success mb-6">
@@ -95,7 +95,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span>Thank you! Your message has been sent successfully. We'll get back to you soon.</span>
+            <span>{{t('thankYou')}} {{t('messageSent')}}</span>
           </div>
           }
 
@@ -104,21 +104,21 @@
               <!-- Name -->
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
-                  Name <span class="text-error">*</span>
+                  {{t('name')}} <span class="text-error">{{t('required')}}</span>
                 </label>
                 <input type="text" [(ngModel)]="formData.name" name="name" required
                   class="input input-bordered w-full focus:input-primary"
-                  placeholder="Your name">
+                  [placeholder]="t('yourName')">
               </div>
 
               <!-- Email -->
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
-                  Email <span class="text-error">*</span>
+                  {{t('emailLabel')}} <span class="text-error">{{t('required')}}</span>
                 </label>
                 <input type="email" [(ngModel)]="formData.email" name="email" required
                   class="input input-bordered w-full focus:input-primary"
-                  placeholder="your.email@example.com">
+                  [placeholder]="t('yourEmail')">
               </div>
             </div>
 
@@ -126,26 +126,26 @@
               <!-- Phone -->
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
-                  Phone
+                  {{t('phoneLabel')}}
                 </label>
                 <input type="tel" [(ngModel)]="formData.phone" name="phone"
                   class="input input-bordered w-full focus:input-primary"
-                  placeholder="+963 11 123 4567">
+                  [placeholder]="t('yourPhone')">
               </div>
 
               <!-- Subject -->
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
-                  Subject <span class="text-error">*</span>
+                  {{t('subject')}} <span class="text-error">{{t('required')}}</span>
                 </label>
                 <select [(ngModel)]="formData.subject" name="subject" required
                   class="select select-bordered w-full focus:select-primary">
-                  <option value="">Select a subject</option>
-                  <option value="general">General Inquiry</option>
-                  <option value="support">Technical Support</option>
-                  <option value="sales">Sales Question</option>
-                  <option value="partnership">Partnership Opportunity</option>
-                  <option value="other">Other</option>
+                  <option value="">{{t('selectSubject')}}</option>
+                  <option value="general">{{t('generalInquiry')}}</option>
+                  <option value="support">{{t('technicalSupport')}}</option>
+                  <option value="sales">{{t('salesQuestion')}}</option>
+                  <option value="partnership">{{t('partnership')}}</option>
+                  <option value="other">{{t('other')}}</option>
                 </select>
               </div>
             </div>
@@ -153,11 +153,11 @@
             <!-- Message -->
             <div class="mb-6">
               <label class="block text-sm font-medium text-base-content mb-2">
-                Message <span class="text-error">*</span>
+                {{t('message')}} <span class="text-error">{{t('required')}}</span>
               </label>
               <textarea [(ngModel)]="formData.message" name="message" required rows="6"
                 class="textarea textarea-bordered w-full focus:textarea-primary"
-                placeholder="Tell us how we can help you..."></textarea>
+                [placeholder]="t('tellUs')"></textarea>
             </div>
 
             <!-- Submit Button -->
@@ -165,9 +165,9 @@
               <button type="submit" [disabled]="isSubmitting() || contactForm.invalid"
                 class="btn btn-primary btn-lg" [class.loading]="isSubmitting()">
                 @if (isSubmitting()) {
-                <span>Sending...</span>
+                <span>{{t('sending')}}</span>
                 } @else {
-                <span>Send Message</span>
+                <span>{{t('sendMessageBtn')}}</span>
                 }
               </button>
             </div>
@@ -179,7 +179,7 @@
     <!-- Map Section (Placeholder) -->
     <div class="mt-12">
       <div class="bg-base-100 rounded-xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold mb-6 text-base-content">Find Us on Map</h2>
+        <h2 class="text-2xl font-bold mb-6 text-base-content">{{t('findUsOnMap')}}</h2>
         <div class="bg-base-200 rounded-lg h-96 flex items-center justify-center">
           <div class="text-center text-base-content/60">
             <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <p class="text-lg">Map will be displayed here</p>
+            <p class="text-lg">{{t('mapWillBeDisplayed')}}</p>
             <p class="text-sm">{{contactInfo.address}}</p>
           </div>
         </div>

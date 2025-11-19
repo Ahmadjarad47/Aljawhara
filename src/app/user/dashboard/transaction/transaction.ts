@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
@@ -14,9 +14,132 @@ import { PaymentMethod, TransactionAdvancedDto, TransactionFilterDto, PagedResul
   templateUrl: './transaction.html',
   styleUrl: './transaction.css'
 })
-export class Transaction implements OnInit {
+export class Transaction implements OnInit, OnDestroy {
   public service = inject(ServiceTransaction);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      myTransactions: 'معاملاتي',
+      viewAndFilter: 'عرض وتصفية معاملات الدفع الخاصة بك',
+      orderId: 'رقم الطلب',
+      orderNumber: 'رقم الطلب',
+      paymentMethod: 'طريقة الدفع',
+      status: 'الحالة',
+      startDate: 'تاريخ البداية',
+      endDate: 'تاريخ النهاية',
+      minAmount: 'الحد الأدنى للمبلغ',
+      maxAmount: 'الحد الأقصى للمبلغ',
+      refunded: 'مسترد',
+      pageSize: 'حجم الصفحة',
+      sortBy: 'ترتيب حسب',
+      direction: 'الاتجاه',
+      all: 'الكل',
+      card: 'بطاقة',
+      cashOnDelivery: 'الدفع عند الاستلام',
+      paypal: 'باي بال',
+      bank: 'بنك',
+      yes: 'نعم',
+      no: 'لا',
+      desc: 'تنازلي',
+      asc: 'تصاعدي',
+      transactionDate: 'تاريخ المعاملة',
+      amount: 'المبلغ',
+      paymentMethodName: 'طريقة الدفع',
+      orderNumberLabel: 'رقم الطلب',
+      apply: 'تطبيق',
+      clear: 'مسح',
+      order: 'الطلب',
+      customer: 'العميل',
+      method: 'الطريقة',
+      processed: 'تمت المعالجة',
+      reference: 'المرجع',
+      noTransactionsFound: 'لم يتم العثور على معاملات',
+      error: 'خطأ',
+      failedToLoad: 'فشل تحميل المعاملات'
+    },
+    en: {
+      myTransactions: 'My Transactions',
+      viewAndFilter: 'View and filter your payment transactions',
+      orderId: 'Order ID',
+      orderNumber: 'Order Number',
+      paymentMethod: 'Payment Method',
+      status: 'Status',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      minAmount: 'Min Amount',
+      maxAmount: 'Max Amount',
+      refunded: 'Refunded',
+      pageSize: 'Page Size',
+      sortBy: 'Sort By',
+      direction: 'Direction',
+      all: 'All',
+      card: 'Card',
+      cashOnDelivery: 'Cash on Delivery',
+      paypal: 'Paypal',
+      bank: 'Bank',
+      yes: 'Yes',
+      no: 'No',
+      desc: 'Desc',
+      asc: 'Asc',
+      transactionDate: 'Transaction Date',
+      amount: 'Amount',
+      paymentMethodName: 'Payment Method',
+      orderNumberLabel: 'Order Number',
+      apply: 'Apply',
+      clear: 'Clear',
+      order: 'Order',
+      customer: 'Customer',
+      method: 'Method',
+      processed: 'Processed',
+      reference: 'Reference',
+      noTransactionsFound: 'No transactions found',
+      error: 'Error',
+      failedToLoad: 'Failed to load transactions'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
+
+  // Get payment method name based on language
+  getPaymentMethodName(method: PaymentMethod): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    switch (method) {
+      case PaymentMethod.Card:
+        return isArabic ? this.t('card') : 'Card';
+      case PaymentMethod.Cod:
+        return isArabic ? this.t('cashOnDelivery') : 'Cash on Delivery';
+      case PaymentMethod.Paypal:
+        return isArabic ? this.t('paypal') : 'Paypal';
+      case PaymentMethod.Bank:
+        return isArabic ? this.t('bank') : 'Bank';
+      default:
+        return '-';
+    }
+  }
+
+  // Get status translation
+  getStatusText(status: string): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'succeeded' || statusLower === 'paid') {
+      return isArabic ? 'نجح' : 'Succeeded';
+    } else if (statusLower === 'failed') {
+      return isArabic ? 'فشل' : 'Failed';
+    } else if (statusLower === 'pending') {
+      return isArabic ? 'قيد الانتظار' : 'Pending';
+    }
+    return status;
+  }
 
   // UI state
   isLoading = signal(false);
@@ -78,7 +201,37 @@ export class Transaction implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Load saved language
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang) {
+      this.currentLanguage.set(savedLang);
+    }
+
+    // Listen for language changes from other tabs/windows
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language') {
+        const newLang = e.newValue as 'ar' | 'en' | null;
+        if (newLang) {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    // Poll for language changes in the same window
+    this.languageCheckInterval = setInterval(() => {
+      const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (savedLang && savedLang !== this.currentLanguage()) {
+        this.currentLanguage.set(savedLang);
+      }
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
+  }
 
   loadTransactions(filters: TransactionFilterDto) {
     this.isLoading.set(true);
@@ -86,7 +239,7 @@ export class Transaction implements OnInit {
       next: (_result: PagedResult<TransactionAdvancedDto>) => this.isLoading.set(false),
       error: () => {
         this.isLoading.set(false);
-        this.toastService.error('Error', 'Failed to load transactions');
+        this.toastService.error(this.t('error'), this.t('failedToLoad'));
       }
     });
   }

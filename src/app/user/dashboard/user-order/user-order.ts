@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserOrderService } from './user-order.service';
@@ -14,9 +14,157 @@ import { ToastComponent } from '../../../core/components/toast/toast.component';
   templateUrl: './user-order.html',
   styleUrl: './user-order.css'
 })
-export class UserOrder implements OnInit {
+export class UserOrder implements OnInit, OnDestroy {
   public readonly orderService = inject(UserOrderService);
   public readonly toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      myOrders: 'طلباتي',
+      viewAndManage: 'عرض وإدارة سجل طلباتك',
+      refresh: 'تحديث',
+      searchPlaceholder: 'البحث برقم الطلب أو اسم العميل...',
+      allStatus: 'جميع الحالات',
+      clearFilters: 'مسح الفلاتر',
+      orderNumber: 'رقم الطلب',
+      customer: 'العميل',
+      items: 'العناصر',
+      total: 'الإجمالي',
+      status: 'الحالة',
+      orderDate: 'تاريخ الطلب',
+      actions: 'الإجراءات',
+      view: 'عرض',
+      cancel: 'إلغاء',
+      noOrdersFound: 'لم يتم العثور على طلبات',
+      orderDetails: 'تفاصيل الطلب',
+      orderDateLabel: 'تاريخ الطلب',
+      shippingAddress: 'عنوان الشحن',
+      orderItems: 'عناصر الطلب',
+      product: 'المنتج',
+      price: 'السعر',
+      quantity: 'الكمية',
+      rating: 'التقييم',
+      rated: 'تم التقييم',
+      rate: 'قيم',
+      subtotal: 'المجموع الفرعي',
+      discount: 'خصم',
+      shipping: 'الشحن',
+      tax: 'الضريبة',
+      cancelOrder: 'إلغاء الطلب',
+      close: 'إغلاق',
+      rateProduct: 'قيم المنتج',
+      yourRating: 'تقييمك',
+      selectedStars: 'محدد',
+      outOfStars: 'من 5 نجوم',
+      yourReview: 'تقييمك',
+      required: 'مطلوب',
+      shareExperience: 'شاركنا تجربتك مع هذا المنتج...',
+      characters: 'حرف',
+      submitRating: 'إرسال التقييم',
+      pending: 'قيد الانتظار',
+      processing: 'قيد المعالجة',
+      shipped: 'تم الشحن',
+      delivered: 'تم التسليم',
+      cancelled: 'ملغي',
+      unknown: 'غير معروف',
+      error: 'خطأ',
+      failedToLoadOrders: 'فشل تحميل الطلبات',
+      loading: 'جاري التحميل',
+      loadingOrderDetails: 'جاري تحميل تفاصيل الطلب...',
+      failedToLoadOrderDetails: 'فشل تحميل تفاصيل الطلب',
+      validationError: 'خطأ في التحقق',
+      pleaseEnterReview: 'يرجى إدخال تعليق التقييم',
+      ratingRange: 'يجب أن يكون التقييم بين 1 و 5',
+      submitting: 'جاري الإرسال',
+      submittingRating: 'جاري إرسال تقييمك...',
+      success: 'نجح',
+      thankYouRating: 'شكراً لك على تقييمك!',
+      failedToSubmitRating: 'فشل إرسال التقييم',
+      cancelling: 'جاري الإلغاء',
+      cancellingOrder: 'جاري إلغاء الطلب...',
+      orderCancelled: 'تم إلغاء الطلب بنجاح',
+      failedToCancelOrder: 'فشل إلغاء الطلب',
+      areYouSure: 'هل أنت متأكد أنك تريد إلغاء هذا الطلب؟'
+    },
+    en: {
+      myOrders: 'My Orders',
+      viewAndManage: 'View and manage your order history',
+      refresh: 'Refresh',
+      searchPlaceholder: 'Search by order number or customer name...',
+      allStatus: 'All Status',
+      clearFilters: 'Clear Filters',
+      orderNumber: 'Order Number',
+      customer: 'Customer',
+      items: 'Items',
+      total: 'Total',
+      status: 'Status',
+      orderDate: 'Order Date',
+      actions: 'Actions',
+      view: 'View',
+      cancel: 'Cancel',
+      noOrdersFound: 'No orders found',
+      orderDetails: 'Order Details',
+      orderDateLabel: 'Order Date',
+      shippingAddress: 'Shipping Address',
+      orderItems: 'Order Items',
+      product: 'Product',
+      price: 'Price',
+      quantity: 'Quantity',
+      rating: 'Rating',
+      rated: 'Rated',
+      rate: 'Rate',
+      subtotal: 'Subtotal',
+      discount: 'Discount',
+      shipping: 'Shipping',
+      tax: 'Tax',
+      cancelOrder: 'Cancel Order',
+      close: 'Close',
+      rateProduct: 'Rate Product',
+      yourRating: 'Your Rating',
+      selectedStars: 'Selected',
+      outOfStars: 'out of 5 stars',
+      yourReview: 'Your Review',
+      required: 'Required',
+      shareExperience: 'Share your experience with this product...',
+      characters: 'characters',
+      submitRating: 'Submit Rating',
+      pending: 'Pending',
+      processing: 'Processing',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      unknown: 'Unknown',
+      error: 'Error',
+      failedToLoadOrders: 'Failed to load orders',
+      loading: 'Loading',
+      loadingOrderDetails: 'Loading order details...',
+      failedToLoadOrderDetails: 'Failed to load order details',
+      validationError: 'Validation Error',
+      pleaseEnterReview: 'Please enter a review comment',
+      ratingRange: 'Rating must be between 1 and 5',
+      submitting: 'Submitting',
+      submittingRating: 'Submitting your rating...',
+      success: 'Success',
+      thankYouRating: 'Thank you for your rating!',
+      failedToSubmitRating: 'Failed to submit rating',
+      cancelling: 'Cancelling',
+      cancellingOrder: 'Cancelling order...',
+      orderCancelled: 'Order cancelled successfully',
+      failedToCancelOrder: 'Failed to cancel order',
+      areYouSure: 'Are you sure you want to cancel this order?'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
   
   // Signals for reactive state management
   isLoading = signal(false);
@@ -77,7 +225,35 @@ export class UserOrder implements OnInit {
   }
 
   ngOnInit() {
-    // Orders will be loaded by the effect
+    // Load saved language
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang) {
+      this.currentLanguage.set(savedLang);
+    }
+
+    // Listen for language changes from other tabs/windows
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language') {
+        const newLang = e.newValue as 'ar' | 'en' | null;
+        if (newLang) {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    // Poll for language changes in the same window
+    this.languageCheckInterval = setInterval(() => {
+      const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (savedLang && savedLang !== this.currentLanguage()) {
+        this.currentLanguage.set(savedLang);
+      }
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
   
   loadOrders() {
@@ -87,7 +263,7 @@ export class UserOrder implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load orders');
+        this.toastService.error(this.t('error'), this.t('failedToLoadOrders'));
         this.isLoading.set(false);
         console.error('Error loading orders:', error);
       }
@@ -108,7 +284,7 @@ export class UserOrder implements OnInit {
   }
 
   viewOrderDetails(orderId: number) {
-    const loadingToastId = this.toastService.loading('Loading', 'Loading order details...');
+    const loadingToastId = this.toastService.loading(this.t('loading'), this.t('loadingOrderDetails'));
     this.isLoading.set(true);
     this.orderService.getOrderById(orderId).subscribe({
       next: (order) => {
@@ -120,7 +296,7 @@ export class UserOrder implements OnInit {
         this.checkProductRatings(order);
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to load order details');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToLoadOrderDetails'));
         this.isLoading.set(false);
         console.error('Error loading order details:', error);
       }
@@ -199,12 +375,12 @@ export class UserOrder implements OnInit {
 
     const form = this.ratingForm();
     if (!form.content || form.content.trim().length === 0) {
-      this.toastService.error('Validation Error', 'Please enter a review comment');
+      this.toastService.error(this.t('validationError'), this.t('pleaseEnterReview'));
       return;
     }
 
     if (form.ratingNumber < 1 || form.ratingNumber > 5) {
-      this.toastService.error('Validation Error', 'Rating must be between 1 and 5');
+      this.toastService.error(this.t('validationError'), this.t('ratingRange'));
       return;
     }
 
@@ -214,7 +390,7 @@ export class UserOrder implements OnInit {
       content: form.content.trim()
     };
 
-    const loadingToastId = this.toastService.loading('Submitting', 'Submitting your rating...');
+    const loadingToastId = this.toastService.loading(this.t('submitting'), this.t('submittingRating'));
     this.orderService.addProductRating(ratingDto).subscribe({
       next: (newRating) => {
         // Update the rating data for this product
@@ -223,13 +399,13 @@ export class UserOrder implements OnInit {
         this.productRatings.set(ratingsMap);
         
         this.closeRatingModal();
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Thank you for your rating!');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('thankYouRating'));
       },
       error: (error) => {
         this.toastService.updateToError(
           loadingToastId, 
-          'Error', 
-          error.error?.message || 'Failed to submit rating'
+          this.t('error'), 
+          error.error?.message || this.t('failedToSubmitRating')
         );
         console.error('Error submitting rating:', error);
       }
@@ -237,20 +413,20 @@ export class UserOrder implements OnInit {
   }
 
   cancelOrder(orderId: number) {
-    if (!confirm('Are you sure you want to cancel this order?')) {
+    if (!confirm(this.t('areYouSure'))) {
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Cancelling', 'Cancelling order...');
+    const loadingToastId = this.toastService.loading(this.t('cancelling'), this.t('cancellingOrder'));
     this.isLoading.set(true);
     this.orderService.cancelOrder(orderId).subscribe({
       next: () => {
         this.loadOrders();
         this.closeDetailsModal();
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Order cancelled successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('orderCancelled'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', error.error?.message || 'Failed to cancel order');
+        this.toastService.updateToError(loadingToastId, this.t('error'), error.error?.message || this.t('failedToCancelOrder'));
         this.isLoading.set(false);
         console.error('Error cancelling order:', error);
       }
@@ -282,19 +458,20 @@ export class UserOrder implements OnInit {
   }
 
   getOrderStatusText(status: OrderStatus): string {
+    const isArabic = this.currentLanguage() === 'ar';
     switch (status) {
       case OrderStatus.Pending:
-        return 'Pending';
+        return isArabic ? this.t('pending') : 'Pending';
       case OrderStatus.Processing:
-        return 'Processing';
+        return isArabic ? this.t('processing') : 'Processing';
       case OrderStatus.Shipped:
-        return 'Shipped';
+        return isArabic ? this.t('shipped') : 'Shipped';
       case OrderStatus.Delivered:
-        return 'Delivered';
+        return isArabic ? this.t('delivered') : 'Delivered';
       case OrderStatus.Cancelled:
-        return 'Cancelled';
+        return isArabic ? this.t('cancelled') : 'Cancelled';
       default:
-        return 'Unknown';
+        return isArabic ? this.t('unknown') : 'Unknown';
     }
   }
 

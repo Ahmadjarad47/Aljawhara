@@ -37,6 +37,158 @@ export class Product implements OnInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   private cartService = inject(CartService);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+  
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object - Simple translation system without libraries
+  translations = {
+    ar: {
+      // Header
+      products: 'المنتجات',
+      discoverProducts: 'اكتشف منتجات رائعة مصممة خصيصاً لك',
+      searchProducts: 'ابحث عن المنتجات...',
+      // Filters
+      filters: 'الفلاتر',
+      categories: 'الفئات',
+      subcategories: 'الفئات الفرعية',
+      priceRange: 'نطاق السعر',
+      min: 'الحد الأدنى',
+      max: 'الحد الأقصى',
+      to: 'إلى',
+      apply: 'تطبيق',
+      clear: 'مسح',
+      rating: 'التقييم',
+      andUp: 'فأكثر',
+      availability: 'التوفر',
+      inStock: 'متوفر',
+      onSale: 'عرض',
+      newArrivals: 'وصل حديثاً',
+      sortBy: 'ترتيب حسب',
+      clearAllFilters: 'مسح جميع الفلاتر',
+      // Sort options
+      newestFirst: 'الأحدث أولاً',
+      oldestFirst: 'الأقدم أولاً',
+      ratingHighToLow: 'التقييم من الأعلى للأقل',
+      ratingLowToHigh: 'التقييم من الأقل للأعلى',
+      priceLowToHigh: 'السعر من الأقل للأعلى',
+      priceHighToLow: 'السعر من الأعلى للأقل',
+      nameAZ: 'الاسم أ-ي',
+      nameZA: 'الاسم ي-أ',
+      // Results
+      productsFound: 'منتج موجود',
+      categoriesSelected: 'فئة',
+      subcategoriesSelected: 'فئة فرعية',
+      stars: 'نجمة',
+      showing: 'عرض',
+      of: 'من',
+      // Product actions
+      active: 'نشط',
+      sale: 'عرض',
+      addToWishlist: 'أضف إلى قائمة الأمنيات',
+      removeFromWishlist: 'إزالة من قائمة الأمنيات',
+      inStockCount: 'متوفر',
+      outOfStock: 'غير متوفر',
+      details: 'التفاصيل',
+      addToCart: 'أضف إلى السلة',
+      viewDetails: 'عرض التفاصيل',
+      // No results
+      noProductsFound: 'لم يتم العثور على منتجات',
+      tryAdjustingFilters: 'حاول تعديل الفلاتر أو مصطلحات البحث',
+      // Errors
+      failedToLoadProducts: 'فشل تحميل المنتجات',
+      // Toast messages
+      addedToCart: 'تمت الإضافة إلى السلة',
+      hasBeenAdded: 'تمت إضافته إلى سلة التسوق الخاصة بك',
+      error: 'خطأ',
+      failedToAddToCart: 'فشل إضافة المنتج إلى السلة'
+    },
+    en: {
+      // Header
+      products: 'Products',
+      discoverProducts: 'Discover amazing products tailored for you',
+      searchProducts: 'Search products...',
+      // Filters
+      filters: 'Filters',
+      categories: 'Categories',
+      subcategories: 'Subcategories',
+      priceRange: 'Price Range',
+      min: 'Min',
+      max: 'Max',
+      to: 'to',
+      apply: 'Apply',
+      clear: 'Clear',
+      rating: 'Rating',
+      andUp: '& up',
+      availability: 'Availability',
+      inStock: 'In Stock',
+      onSale: 'On Sale',
+      newArrivals: 'New Arrivals',
+      sortBy: 'Sort By',
+      clearAllFilters: 'Clear All Filters',
+      // Sort options
+      newestFirst: 'Newest First',
+      oldestFirst: 'Oldest First',
+      ratingHighToLow: 'Rating High to Low',
+      ratingLowToHigh: 'Rating Low to High',
+      priceLowToHigh: 'Price Low to High',
+      priceHighToLow: 'Price High to Low',
+      nameAZ: 'Name A-Z',
+      nameZA: 'Name Z-A',
+      // Results
+      productsFound: 'Products Found',
+      categoriesSelected: 'Categories',
+      subcategoriesSelected: 'Subcategories',
+      stars: 'Stars',
+      showing: 'Showing',
+      of: 'of',
+      // Product actions
+      active: 'Active',
+      sale: 'Sale',
+      addToWishlist: 'Add to wishlist',
+      removeFromWishlist: 'Remove from wishlist',
+      inStockCount: 'In Stock',
+      outOfStock: 'Out of Stock',
+      details: 'Details',
+      addToCart: 'Add to Cart',
+      viewDetails: 'View details',
+      // No results
+      noProductsFound: 'No products found',
+      tryAdjustingFilters: 'Try adjusting your filters or search terms',
+      // Errors
+      failedToLoadProducts: 'Failed to load products',
+      // Toast messages
+      addedToCart: 'Added to Cart',
+      hasBeenAdded: 'has been added to your cart',
+      error: 'Error',
+      failedToAddToCart: 'Failed to add product to cart'
+    }
+  };
+
+  // Helper method to get translation
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
+  }
+
+  // Get product display name based on current language
+  getProductName(product: ProductSummaryDto): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.titleAr || product.title) : product.title;
+  }
+
+  // Get product description based on current language
+  getProductDescription(product: ProductSummaryDto): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.descriptionAr || product.description || 'لا يوجد وصف متاح') : (product.description || 'No description available');
+  }
+
+  // Get category name based on current language
+  getCategoryName(category: CategoryDto | SubCategoryDto): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (category.nameAr || category.name) : category.name;
+  }
   
   // Signals for reactive state management
   isLoading = signal(false);
@@ -111,6 +263,33 @@ export class Product implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Load saved language from localStorage
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
+      this.currentLanguage.set(savedLang);
+    } else {
+      // Default to Arabic
+      this.currentLanguage.set('ar');
+    }
+
+    // Listen for language changes from localStorage (when changed in navbar)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language' && e.newValue) {
+        const newLang = e.newValue as 'ar' | 'en';
+        if (newLang === 'ar' || newLang === 'en') {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    // Also check periodically for language changes (for same-window updates)
+    this.languageCheckInterval = setInterval(() => {
+      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
+        this.currentLanguage.set(currentLang);
+      }
+    }, 500);
+
     this.loadCategories();
     this.loadSubCategories();
     
@@ -179,7 +358,7 @@ export class Product implements OnInit, OnDestroy {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.errorMessage.set('Failed to load products');
+        this.errorMessage.set(this.t('failedToLoadProducts'));
         this.isLoading.set(false);
         console.error('Error loading products:', error);
       }
@@ -353,9 +532,10 @@ export class Product implements OnInit, OnDestroy {
   // Product actions
   addToCart(product: ProductSummaryDto) {
     try {
+      const productName = this.getProductName(product);
       const cartItem = {
         productId: product.id,
-        name: product.title,
+        name: productName,
         image: product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image',
         price: product.newPrice,
         quantity: 1
@@ -364,13 +544,13 @@ export class Product implements OnInit, OnDestroy {
       this.cartService.addItem(cartItem);
       
       this.toastService.success(
-        'Added to Cart',
-        `${product.title} has been added to your cart`
+        this.t('addedToCart'),
+        `${productName} ${this.t('hasBeenAdded')}`
       );
     } catch (error) {
       this.toastService.error(
-        'Error',
-        'Failed to add product to cart'
+        this.t('error'),
+        this.t('failedToAddToCart')
       );
       console.error('Error adding to cart:', error);
     }
@@ -427,5 +607,8 @@ export class Product implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Cleanup if needed
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 }

@@ -4,15 +4,15 @@
   <div class="bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <nav class="flex items-center space-x-2 text-sm">
-        <a href="/" class="text-gray-500 hover:text-primary">Home</a>
+        <a href="/" class="text-gray-500 hover:text-primary">{{t('home')}}</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
-        <a href="/category/electronics" class="text-gray-500 hover:text-primary">Electronics</a>
+        <a [routerLink]="['/product']" [queryParams]="{category: product()?.categoryName}" class="text-gray-500 hover:text-primary">{{getCategoryName(product())}}</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
-        <span class=" font-medium">{{product()?.title || 'Product'}}</span>
+        <span class=" font-medium">{{getProductName(product())}}</span>
       </nav>
     </div>
   </div>
@@ -45,7 +45,7 @@
           <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
             <div class="img-container w-full h-full">
               <img [src]="(product()?.images && product()!.images.length > 0) ? product()!.images[selectedImageIndex] : 'https://via.placeholder.com/400x400?text=No+Image'" 
-                   [alt]="product()?.title || 'Product'"
+                   [alt]="getProductName(product())"
                    loading="lazy"
                    (load)="$event.target.classList.add('loaded')"
                    (error)="$event.target.classList.add('loaded')"
@@ -90,7 +90,7 @@
                   [class.border-gray-200]="selectedImageIndex !== i">
             <div class="img-container w-full h-full">
               <img [src]="image" 
-                   [alt]="(product()?.title || 'Product') + ' ' + (i + 1)"
+                   [alt]="getProductName(product()) + ' ' + (i + 1)"
                    loading="lazy"
                    (load)="$event.target.classList.add('loaded')"
                    (error)="$event.target.classList.add('loaded')"
@@ -107,8 +107,8 @@
       <div class="space-y-6">
         <!-- Brand and Name -->
         <div>
-          <p class="text-sm text-gray-500 mb-2">{{product()?.categoryName || 'Category'}}</p>
-          <h1 class="text-3xl font-bold  mb-4">{{product()?.title || 'Product'}}</h1>
+          <p class="text-sm text-gray-500 mb-2">{{getCategoryName(product())}}</p>
+          <h1 class="text-3xl font-bold  mb-4">{{getProductName(product())}}</h1>
           
           <!-- Rating and Reviews -->
           <div class="flex items-center space-x-4 mb-4">
@@ -152,7 +152,7 @@
         <div class="space-y-4">
           @for (variant of (product()?.variants || []); track variant.id ?? $index) {
           <div class="space-y-2">
-            <h3 class="text-lg font-semibold">{{variant.name}} / {{variant.nameAr}}</h3>
+            <h3 class="text-lg font-semibold">{{getVariantName(variant)}}</h3>
             <div class="flex flex-wrap gap-2">
               @for (value of variant.values; track value.id ?? $index) {
               <button 
@@ -162,7 +162,7 @@
                 [class.border-primary]="isVariantValueSelected(variant.id!, value.id!)"
                 [class.bg-base-200]="!isVariantValueSelected(variant.id!, value.id!)"
                 class="px-4 py-2 rounded-lg border-2 border-base-300 hover:border-primary transition-colors">
-                <span>{{value.value}} / {{value.valueAr}}</span>
+                <span>{{getVariantValue(value)}}</span>
                 @if (value.price !== product()!.newPrice) {
                 <span class="text-xs ml-1">({{(value.price |currency)}})</span>
                 }
@@ -234,15 +234,20 @@
 
         <!-- Description -->
         <div class="space-y-2">
-          <p class="">{{product()?.description || 'No description available'}}</p>
-          @if (showFullDescription) {
-          <p class="text-gray-600">{{product()?.descriptionAr || product()?.description || ''}}</p>
+          <p class="">{{getProductDescription(product())}}</p>
+          @if (showFullDescription && currentLanguage() === 'ar' && product()?.description) {
+          <p class="text-gray-600">{{product()?.description}}</p>
           <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
-            Show Less
+            {{t('showLess')}}
           </button>
-          } @else {
+          } @else if (showFullDescription && currentLanguage() === 'en' && product()?.descriptionAr) {
+          <p class="text-gray-600">{{product()?.descriptionAr}}</p>
           <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
-            Read More
+            {{t('showLess')}}
+          </button>
+          } @else if (!showFullDescription && ((currentLanguage() === 'ar' && product()?.description) || (currentLanguage() === 'en' && product()?.descriptionAr))) {
+          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+            {{t('readMore')}}
           </button>
           }
         </div>
@@ -302,7 +307,7 @@
               <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
-              <span class="">{{detail.label}}: {{detail.value}}</span>
+              <span class="">{{getProductDetailLabel(detail)}}: {{getProductDetailValue(detail)}}</span>
             </li>
             }
           </ul>
@@ -355,8 +360,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           @for (detail of product()?.productDetails || []; track detail.id) {
           <div class="flex justify-between py-3 border-b border-gray-100">
-            <span class="font-medium ">{{detail.label}}</span>
-            <span class="text-gray-600">{{detail.value}}</span>
+            <span class="font-medium ">{{getProductDetailLabel(detail)}}</span>
+            <span class="text-gray-600">{{getProductDetailValue(detail)}}</span>
           </div>
           }
         </div>
@@ -587,7 +592,7 @@
 
     <!-- Related Products -->
     <div class="mt-16">
-      <h2 class="text-2xl font-bold  mb-8">Related Products</h2>
+      <h2 class="text-2xl font-bold  mb-8">{{t('relatedProducts')}}</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (relatedProduct of relatedProducts; track relatedProduct.id) {
         <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">

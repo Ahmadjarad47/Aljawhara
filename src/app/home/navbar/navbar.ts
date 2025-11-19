@@ -43,8 +43,109 @@ export class Navbar implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   
   // Language and currency
+  currentLanguage = signal<'ar' | 'en'>('ar');
   selectedLanguage: string = 'العربية';
   selectedCurrency: string = 'SYP';
+  
+  // Translations object - Simple translation system without libraries
+  translations = {
+    ar: {
+      // Top bar
+      freeShipping: 'شحن مجاني للطلبات أكثر من 50$',
+      followUs: 'تابعنا:',
+      // Search
+      searchPlaceholder: 'ابحث عن المنتجات، العلامات التجارية، الفئات...',
+      search: 'بحث',
+      searching: 'جاري البحث...',
+      // Navigation
+      allCategories: 'جميع الفئات',
+      home: 'الرئيسية',
+      products: 'المنتجات',
+      mostRating: 'الأكثر تقييماً',
+      bestDiscount: 'أفضل خصم',
+      about: 'من نحن',
+      contact: 'اتصل بنا',
+      // User
+      signIn: 'تسجيل الدخول',
+      signOut: 'تسجيل الخروج',
+      createAccount: 'إنشاء حساب',
+      welcome: 'مرحباً بك في الجوهرة',
+      welcomeDesc: 'سجل الدخول للوصول إلى حسابك والاستمتاع بالتسوق المخصص',
+      myProfile: 'ملفي الشخصي',
+      myOrders: 'طلباتي',
+      settings: 'الإعدادات',
+      // Mobile
+      categories: 'الفئات',
+      pages: 'الصفحات',
+      language: 'اللغة',
+      wishlist: 'قائمة الأمنيات',
+      cart: 'السلة',
+      account: 'الحساب',
+      login: 'تسجيل الدخول',
+      register: 'التسجيل',
+      logout: 'تسجيل الخروج',
+      searchProducts: 'ابحث عن المنتجات',
+      // Special offers
+      hot: 'مميز',
+      new: 'جديد',
+      upTo50Off: 'خصم حتى 50%',
+      freeShippingText: 'شحن مجاني',
+      // Account overlay
+      welcomeToAljawhara: 'مرحباً بك في الجوهرة',
+      signInToAccess: 'سجل الدخول للوصول إلى حسابك'
+    },
+    en: {
+      // Top bar
+      freeShipping: 'Free shipping on orders over $50',
+      followUs: 'Follow us:',
+      // Search
+      searchPlaceholder: 'Search products, brands, categories...',
+      search: 'Search',
+      searching: 'Searching...',
+      // Navigation
+      allCategories: 'All Categories',
+      home: 'Home',
+      products: 'Products',
+      mostRating: 'Most Rating',
+      bestDiscount: 'Best Discount',
+      about: 'About',
+      contact: 'Contact',
+      // User
+      signIn: 'Sign In',
+      signOut: 'Sign Out',
+      createAccount: 'Create Account',
+      welcome: 'Welcome to Aljawhara',
+      welcomeDesc: 'Sign in to access your account and enjoy personalized shopping',
+      myProfile: 'My Profile',
+      myOrders: 'My Orders',
+      settings: 'Settings',
+      // Mobile
+      categories: 'Categories',
+      pages: 'Pages',
+      language: 'Language',
+      wishlist: 'Wishlist',
+      cart: 'Cart',
+      account: 'Account',
+      login: 'Login',
+      register: 'Register',
+      logout: 'Logout',
+      searchProducts: 'Search Products',
+      // Special offers
+      hot: 'HOT',
+      new: 'NEW',
+      upTo50Off: 'Up to 50% OFF',
+      freeShippingText: 'Free Shipping',
+      // Account overlay
+      welcomeToAljawhara: 'Welcome to Aljawhara',
+      signInToAccess: 'Sign in to access your account'
+    }
+  };
+  
+  // Helper method to get translation
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
+  }
   
   // Dropdown states
   isLanguageDropdownOpen: boolean = false;
@@ -118,19 +219,25 @@ export class Navbar implements OnInit, OnDestroy {
     // Initialize component - defer non-critical operations
     this.loadUserData();
     
-    // Load saved language preference
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage) {
-      const lang = this.languages.find(l => l.code === savedLanguage);
-      if (lang) {
-        this.selectedLanguage = lang.name;
-        document.documentElement.lang = lang.code;
-        if (lang.code === 'ar') {
-          document.documentElement.dir = 'rtl';
-        } else {
-          document.documentElement.dir = 'ltr';
-        }
+    // Load saved language from localStorage
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
+      this.currentLanguage.set(savedLang);
+      this.selectedLanguage = savedLang === 'ar' ? 'العربية' : 'English';
+      // Set document direction
+      if (savedLang === 'ar') {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+      } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', 'en');
       }
+    } else {
+      // Default to Arabic
+      this.currentLanguage.set('ar');
+      this.selectedLanguage = 'العربية';
+      document.documentElement.setAttribute('dir', 'rtl');
+      document.documentElement.setAttribute('lang', 'ar');
     }
     
     // Load categories from API (defer to avoid blocking initial render)
@@ -310,29 +417,24 @@ export class Navbar implements OnInit, OnDestroy {
   // Language switching
   changeLanguage(language: any) {
     this.selectedLanguage = language.name;
+    this.currentLanguage.set(language.code);
     this.isLanguageDropdownOpen = false;
-    console.log('Language changed to:', language.code);
     
-    // Save language preference to localStorage
-    localStorage.setItem('preferredLanguage', language.code);
-    
-    // Update document language attribute
-    document.documentElement.lang = language.code;
-    
-    // Update document direction for RTL languages
+    // Update document direction for RTL/LTR
     if (language.code === 'ar') {
-      document.documentElement.dir = 'rtl';
+      document.documentElement.setAttribute('dir', 'rtl');
+      document.documentElement.setAttribute('lang', 'ar');
     } else {
-      document.documentElement.dir = 'ltr';
+      document.documentElement.setAttribute('dir', 'ltr');
+      document.documentElement.setAttribute('lang', 'en');
     }
     
+    // Save to localStorage
+    localStorage.setItem('language', language.code);
+    
+    console.log('Language changed to:', language.code);
     // Reload categories with new language
     this.loadCategories();
-    
-    // Note: For full i18n support, you need to build separate versions:
-    // ng build --localize
-    // This will create separate builds for each language configured in angular.json
-    // For runtime language switching, consider using @ngx-translate/core instead
   }
 
   // Currency switching

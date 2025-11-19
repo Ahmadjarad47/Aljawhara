@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -18,13 +18,204 @@ import { RatingDto } from '../../admin/product/product.models';
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css'
 })
-export class ProductDetail implements OnInit {
+export class ProductDetail implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cartService = inject(CartService);
   public authService = inject(ServiceAuth);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      home: 'الرئيسية',
+      category: 'الفئة',
+      product: 'منتج',
+      inStock: 'متوفر',
+      outOfStock: 'غير متوفر',
+      available: 'متوفر',
+      inCart: 'في السلة:',
+      quantity: 'الكمية',
+      addToCart: 'أضف إلى السلة',
+      buyNow: 'اشتري الآن',
+      details: 'التفاصيل',
+      specifications: 'المواصفات',
+      reviews: 'التقييمات',
+      shippingInfo: 'معلومات الشحن',
+      returnPolicy: 'سياسة الإرجاع',
+      keyFeatures: 'المميزات الرئيسية',
+      readMore: 'اقرأ المزيد',
+      showLess: 'عرض أقل',
+      noDescription: 'لا يوجد وصف متاح',
+      verifiedPurchase: 'شراء موثق',
+      reviewsCount: 'تقييم',
+      youSave: 'وفرت',
+      freeShipping: 'شحن مجاني',
+      onOrdersOver: 'للطلبات أكثر من',
+      fastDelivery: 'توصيل سريع',
+      businessDays: 'أيام عمل',
+      easyReturns: 'إرجاع سهل',
+      dayReturnPolicy: 'سياسة إرجاع لمدة 30 يوماً',
+      relatedProducts: 'منتجات ذات صلة',
+      loginRequired: 'تسجيل الدخول مطلوب',
+      pleaseLogin: 'يرجى تسجيل الدخول أولاً لكتابة تقييم',
+      login: 'تسجيل الدخول',
+      checkingRating: 'جاري التحقق من تقييمك...',
+      yourReview: 'تقييمك',
+      submitted: 'تم الإرسال',
+      writeReview: 'اكتب تقييماً',
+      rating: 'التقييم',
+      title: 'العنوان',
+      summarizeReview: 'لخص تقييمك',
+      review: 'التقييم',
+      tellUsExperience: 'أخبرنا عن تجربتك مع هذا المنتج',
+      submitReview: 'إرسال التقييم',
+      submittedOn: 'تم الإرسال في',
+      basedOn: 'بناءً على',
+      reviewsText: 'تقييم',
+      removeFromCart: 'إزالة من السلة',
+      cartUpdated: 'تم تحديث السلة',
+      addedToCart: 'تمت الإضافة إلى السلة',
+      hasBeenAdded: 'تمت إضافته إلى سلة التسوق الخاصة بك',
+      error: 'خطأ',
+      failedToAdd: 'فشل إضافة المنتج إلى السلة',
+      outOfStockMsg: 'هذا المنتج غير متوفر حالياً',
+      selectionRequired: 'الاختيار مطلوب',
+      pleaseSelectAll: 'يرجى اختيار جميع خيارات المتغيرات',
+      stockLimit: 'حد المخزون',
+      onlyAvailable: 'متوفر فقط',
+      itemsAvailable: 'عنصر متوفر',
+      removed: 'تمت الإزالة',
+      hasBeenRemoved: 'تمت إزالته من السلة'
+    },
+    en: {
+      home: 'Home',
+      category: 'Category',
+      product: 'Product',
+      inStock: 'In Stock',
+      outOfStock: 'Out of Stock',
+      available: 'available',
+      inCart: 'In cart:',
+      quantity: 'Quantity',
+      addToCart: 'Add to Cart',
+      buyNow: 'Buy Now',
+      details: 'Details',
+      specifications: 'Specifications',
+      reviews: 'Reviews',
+      shippingInfo: 'Shipping Info',
+      returnPolicy: 'Return Policy',
+      keyFeatures: 'Key Features',
+      readMore: 'Read More',
+      showLess: 'Show Less',
+      noDescription: 'No description available',
+      verifiedPurchase: 'Verified Purchase',
+      reviewsCount: 'reviews',
+      youSave: 'You save',
+      freeShipping: 'Free Shipping',
+      onOrdersOver: 'On orders over',
+      fastDelivery: 'Fast Delivery',
+      businessDays: 'business days',
+      easyReturns: 'Easy Returns',
+      dayReturnPolicy: '30-day return policy',
+      relatedProducts: 'Related Products',
+      loginRequired: 'Login Required',
+      pleaseLogin: 'Please login first to write a review',
+      login: 'Login',
+      checkingRating: 'Checking your rating...',
+      yourReview: 'Your Review',
+      submitted: 'Submitted',
+      writeReview: 'Write a Review',
+      rating: 'Rating',
+      title: 'Title',
+      summarizeReview: 'Summarize your review',
+      review: 'Review',
+      tellUsExperience: 'Tell us about your experience with this product',
+      submitReview: 'Submit Review',
+      submittedOn: 'Submitted on',
+      basedOn: 'Based on',
+      reviewsText: 'reviews',
+      removeFromCart: 'Remove from cart',
+      cartUpdated: 'Cart Updated',
+      addedToCart: 'Added to Cart',
+      hasBeenAdded: 'has been added to your cart',
+      error: 'Error',
+      failedToAdd: 'Failed to add product to cart',
+      outOfStockMsg: 'This product is currently out of stock',
+      selectionRequired: 'Selection Required',
+      pleaseSelectAll: 'Please select all variant options',
+      stockLimit: 'Stock Limit',
+      onlyAvailable: 'Only',
+      itemsAvailable: 'items available',
+      removed: 'Removed',
+      hasBeenRemoved: 'has been removed from cart'
+    }
+  };
+
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
+  }
+
+  // Get product display name based on current language
+  getProductName(product: ProductDto | null): string {
+    if (!product) return this.t('product');
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.titleAr || product.title) : product.title;
+  }
+
+  // Get product description based on current language
+  getProductDescription(product: ProductDto | null): string {
+    if (!product) return this.t('noDescription');
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.descriptionAr || product.description || this.t('noDescription')) : (product.description || this.t('noDescription'));
+  }
+
+  // Get category name based on current language
+  getCategoryName(product: ProductDto | null): string {
+    if (!product) return this.t('category');
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.categoryNameAr || product.categoryName) : product.categoryName;
+  }
+
+  // Get subcategory name based on current language
+  getSubCategoryName(product: ProductDto | null): string {
+    if (!product) return this.t('category');
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (product.subCategoryNameAr || product.subCategoryName) : product.subCategoryName;
+  }
+
+  // Get variant name based on current language
+  getVariantName(variant: any): string {
+    if (!variant) return '';
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (variant.nameAr || variant.name) : variant.name;
+  }
+
+  // Get variant value based on current language
+  getVariantValue(value: any): string {
+    if (!value) return '';
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (value.valueAr || value.value) : value.value;
+  }
+
+  // Get product detail label based on current language
+  getProductDetailLabel(detail: any): string {
+    if (!detail) return '';
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (detail.labelAr || detail.label) : detail.label;
+  }
+
+  // Get product detail value based on current language
+  getProductDetailValue(detail: any): string {
+    if (!detail) return '';
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (detail.valueAr || detail.value) : detail.value;
+  }
 
   // Signals for reactive state management
   isLoading = signal(true);
@@ -129,6 +320,30 @@ export class ProductDetail implements OnInit {
   };
 
   ngOnInit() {
+    // Load saved language from localStorage
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
+      this.currentLanguage.set(savedLang);
+    } else {
+      this.currentLanguage.set('ar');
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language' && e.newValue) {
+        const newLang = e.newValue as 'ar' | 'en';
+        if (newLang === 'ar' || newLang === 'en') {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    this.languageCheckInterval = setInterval(() => {
+      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
+        this.currentLanguage.set(currentLang);
+      }
+    }, 500);
+
     // Get product ID from route parameters
     this.route.params.subscribe(params => {
       const productId = +params['id'];
@@ -139,6 +354,12 @@ export class ProductDetail implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 
   loadProduct(id: number) {

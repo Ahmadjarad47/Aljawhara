@@ -1,28 +1,28 @@
 @if (cartItems().length === 0 && showEmptyMessage()) {
   <div class="alert">
-    <span>Your cart is empty.</span>
+    <span>{{t('cartEmpty')}}</span>
   </div>
 } @else {
   <div class="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden">
     <div class="p-5">
-      <h2 class="text-xl font-semibold text-base-content">Order summary</h2>
+      <h2 class="text-xl font-semibold text-base-content">{{t('orderSummary')}}</h2>
       <div class="divider my-3"></div>
 
       <div class="flex items-center justify-between py-1">
-        <span class="text-base-content/70">Items ({{ itemCount() }})</span>
+        <span class="text-base-content/70">{{t('items')}} ({{ itemCount() }})</span>
         <span class="font-medium text-base-content">{{ subtotal() | currency }}</span>
       </div>
 
       @if (showTax()) {
         <div class="flex items-center justify-between py-1">
-          <span class="text-base-content/70">Estimated tax</span>
+          <span class="text-base-content/70">{{t('estimatedTax')}}</span>
           <span class="font-medium text-base-content">{{ tax() | currency }}</span>
         </div>
       }
 
       @if (hasAppliedCoupon()) {
         <div class="flex items-center justify-between py-1">
-          <span class="text-base-content/70">Discount</span>
+          <span class="text-base-content/70">{{t('discount')}}</span>
           <span class="font-medium text-success">-{{ discountAmount() | currency }}</span>
         </div>
       }
@@ -30,7 +30,7 @@
       <div class="divider my-3"></div>
 
       <div class="flex items-center justify-between py-1">
-        <span class="font-semibold text-base-content">Total</span>
+        <span class="font-semibold text-base-content">{{t('total')}}</span>
         <span class="text-lg font-bold text-base-content">{{ total() | currency }}</span>
       </div>
 
@@ -40,7 +40,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-2">
               <path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.713 0-2.334.055-.65.057-1.18.17-1.678.45a4.5 4.5 0 00-1.177 1.177C.083 9.49 0 10.02 0 10.67v7.91c0 .917 0 1.588.048 2.112.05.545.155 1.08.417 1.564a4.5 4.5 0 001.903 1.903c.485.262 1.02.367 1.564.417C4.463 23 5.134 23 6.05 23h11.9c.917 0 1.587 0 2.112-.048.545-.05 1.08-.155 1.564-.417a4.5 4.5 0 001.903-1.903c.262-.485.367-1.02.417-1.564.048-.524.048-1.195.048-2.112v-7.91c0-.65-.083-1.177-.346-1.617a4.5 4.5 0 00-1.177-1.177c-.498-.28-1.027-.393-1.678-.45C19.7 6 18.96 6 18 6h-3.75V5.25c0-.918 0-1.588-.048-2.112-.05-.545-.155-1.08-.417-1.564a4.5 4.5 0 00-1.903-1.903C11.3.405 10.765.3 10.22.25 9.696.2 9.025.2 8.108.2H5.25c-.918 0-1.587 0-2.112.048-.545.05-1.08.155-1.564.417A4.5 4.5 0 00.656 2.573c-.262.485-.367 1.02-.417 1.564C.19 3.662.19 4.333.19 5.25V6z" clip-rule="evenodd" />
             </svg>
-            Checkout
+            {{t('checkout')}}
           </button>
         </div>
       }

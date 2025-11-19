@@ -4,9 +4,9 @@
   <div class="bg-gradient-to-r from-primary to-primary-focus text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">About Aljawhara</h1>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{t('aboutAljawhara')}}</h1>
         <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-          Your trusted marketplace connecting buyers and sellers across Syria
+          {{t('heroDesc')}}
         </p>
       </div>
     </div>
@@ -17,7 +17,7 @@
     <!-- Our Story Section -->
     <section class="mb-16">
       <div class="bg-base-100 rounded-xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold mb-6 text-base-content">Our Story</h2>
+        <h2 class="text-3xl font-bold mb-6 text-base-content">{{t('ourStory')}}</h2>
         <div class="prose max-w-none text-base-content/80 leading-relaxed">
           <p class="text-lg mb-4">
             Aljawhara was founded with a vision to revolutionize e-commerce in Syria, providing a seamless platform
@@ -41,13 +41,13 @@
 
     <!-- Stats Section -->
     <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">Our Achievements</h2>
+      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('ourAchievements')}}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         @for (stat of stats; track stat.label) {
         <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
           <div class="text-4xl mb-4">{{stat.icon}}</div>
           <div class="text-3xl font-bold text-primary mb-2">{{stat.value}}</div>
-          <div class="text-base-content/70 font-medium">{{stat.label}}</div>
+          <div class="text-base-content/70 font-medium">{{getStatLabel(stat)}}</div>
         </div>
         }
       </div>
@@ -55,15 +55,15 @@
 
     <!-- Values Section -->
     <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">Our Values</h2>
+      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('ourValues')}}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (value of values; track value.title) {
         <div class="bg-base-100 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
           <div class="flex items-start space-x-4">
             <div class="text-4xl flex-shrink-0">{{value.icon}}</div>
             <div>
-              <h3 class="text-xl font-bold mb-2 text-base-content">{{value.title}}</h3>
-              <p class="text-base-content/70">{{value.description}}</p>
+              <h3 class="text-xl font-bold mb-2 text-base-content">{{getValueTitle(value)}}</h3>
+              <p class="text-base-content/70">{{getValueDescription(value)}}</p>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@
 
     <!-- Team Section -->
     <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">Meet Our Team</h2>
+      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('meetOurTeam')}}</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         @for (member of team; track member.name) {
         <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
@@ -91,7 +91,7 @@
     <!-- Mission Section -->
     <section class="mb-16">
       <div class="bg-gradient-to-r from-primary/10 to-primary-focus/10 rounded-xl p-8 border border-primary/20">
-        <h2 class="text-3xl font-bold mb-6 text-base-content">Our Mission</h2>
+        <h2 class="text-3xl font-bold mb-6 text-base-content">{{t('ourMission')}}</h2>
         <p class="text-lg text-base-content/80 leading-relaxed">
           To empower Syrian businesses and consumers by providing a reliable, secure, and user-friendly e-commerce
           platform that fosters economic growth and strengthens local communities. We strive to bridge the gap
@@ -104,17 +104,16 @@
     <!-- CTA Section -->
     <section class="text-center">
       <div class="bg-base-100 rounded-xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold mb-4 text-base-content">Join Us Today</h2>
+        <h2 class="text-3xl font-bold mb-4 text-base-content">{{t('joinUsToday')}}</h2>
         <p class="text-lg text-base-content/70 mb-6 max-w-2xl mx-auto">
-          Whether you're a business looking to expand your reach or a customer seeking quality products,
-          Aljawhara is here to serve you. Join our growing community today!
+          {{t('joinUsDesc')}}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
           <a routerLink="/product" class="btn btn-primary btn-lg">
-            Browse Products
+            {{t('browseProducts')}}
           </a>
           <a routerLink="/contact" class="btn btn-outline btn-primary btn-lg">
-            Contact Us
+            {{t('contactUs')}}
           </a>
         </div>
       </div>

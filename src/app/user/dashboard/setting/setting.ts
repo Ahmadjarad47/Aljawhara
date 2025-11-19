@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
@@ -14,9 +14,153 @@ import { CreateAddressDto, UpdateAddressDto, UserAddressDto } from './setting.mo
   templateUrl: './setting.html',
   styleUrl: './setting.css'
 })
-export class Setting implements OnInit {
+export class Setting implements OnInit, OnDestroy {
   private settingService = inject(SettingService);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      accountSettings: 'إعدادات الحساب',
+      manageProfile: 'إدارة ملفك الشخصي والعناوين',
+      profile: 'الملف الشخصي',
+      addresses: 'العناوين',
+      userInfo: 'معلومات المستخدم',
+      username: 'اسم المستخدم',
+      email: 'البريد الإلكتروني',
+      phone: 'الهاتف',
+      created: 'تاريخ الإنشاء',
+      updateUsername: 'تحديث اسم المستخدم',
+      updatePhoneNumber: 'تحديث رقم الهاتف',
+      save: 'حفظ',
+      yourAddresses: 'عناوينك',
+      addAddress: 'إضافة عنوان',
+      noAddressesFound: 'لم يتم العثور على عناوين',
+      name: 'الاسم',
+      address: 'العنوان',
+      cityState: 'المدينة/الولاية',
+      postal: 'الرمز البريدي',
+      default: 'افتراضي',
+      yes: 'نعم',
+      no: 'لا',
+      edit: 'تعديل',
+      delete: 'حذف',
+      fullName: 'الاسم الكامل',
+      phoneNumber: 'رقم الهاتف',
+      addressLine1: 'سطر العنوان 1',
+      addressLine2: 'سطر العنوان 2',
+      country: 'الدولة',
+      city: 'المدينة',
+      state: 'الولاية',
+      postalCode: 'الرمز البريدي',
+      setAsDefault: 'تعيين كعنوان افتراضي',
+      cancel: 'إلغاء',
+      editAddress: 'تعديل العنوان',
+      error: 'خطأ',
+      failedToLoadUser: 'فشل تحميل بيانات المستخدم',
+      validation: 'التحقق',
+      usernameMinLength: 'يجب أن يكون اسم المستخدم 3 أحرف على الأقل',
+      updating: 'جاري التحديث',
+      updatingUsername: 'جاري تحديث اسم المستخدم...',
+      success: 'نجح',
+      usernameUpdated: 'تم تحديث اسم المستخدم',
+      failedToUpdateUsername: 'فشل تحديث اسم المستخدم',
+      phoneMinLength: 'يجب أن يكون رقم الهاتف 10 أرقام على الأقل',
+      updatingPhone: 'جاري تحديث رقم الهاتف...',
+      phoneUpdated: 'تم تحديث رقم الهاتف',
+      failedToUpdatePhone: 'فشل تحديث رقم الهاتف',
+      failedToLoadAddresses: 'فشل تحميل العناوين',
+      limitReached: 'تم الوصول للحد الأقصى',
+      onlyOneAddress: 'يمكنك إنشاء عنوان واحد فقط',
+      requiredFields: 'الاسم الكامل والهاتف والعنوان مطلوبة',
+      creating: 'جاري الإنشاء',
+      creatingAddress: 'جاري إنشاء العنوان...',
+      addressCreated: 'تم إنشاء العنوان',
+      failedToCreateAddress: 'فشل إنشاء العنوان',
+      updatingAddress: 'جاري تحديث العنوان...',
+      addressUpdated: 'تم تحديث العنوان',
+      failedToUpdateAddress: 'فشل تحديث العنوان',
+      deleting: 'جاري الحذف',
+      deletingAddress: 'جاري حذف العنوان...',
+      addressDeleted: 'تم حذف العنوان',
+      failedToDeleteAddress: 'فشل حذف العنوان'
+    },
+    en: {
+      accountSettings: 'Account Settings',
+      manageProfile: 'Manage your profile and addresses',
+      profile: 'Profile',
+      addresses: 'Addresses',
+      userInfo: 'User info',
+      username: 'Username',
+      email: 'Email',
+      phone: 'Phone',
+      created: 'Created',
+      updateUsername: 'Update username',
+      updatePhoneNumber: 'Update phone number',
+      save: 'Save',
+      yourAddresses: 'Your addresses',
+      addAddress: 'Add address',
+      noAddressesFound: 'No addresses found',
+      name: 'Name',
+      address: 'Address',
+      cityState: 'City/State',
+      postal: 'Postal',
+      default: 'Default',
+      yes: 'Yes',
+      no: 'No',
+      edit: 'Edit',
+      delete: 'Delete',
+      fullName: 'Full name',
+      phoneNumber: 'Phone',
+      addressLine1: 'Address line 1',
+      addressLine2: 'Address line 2',
+      country: 'Country',
+      city: 'City',
+      state: 'State',
+      postalCode: 'Postal code',
+      setAsDefault: 'Set as default address',
+      cancel: 'Cancel',
+      editAddress: 'Edit address',
+      error: 'Error',
+      failedToLoadUser: 'Failed to load user details',
+      validation: 'Validation',
+      usernameMinLength: 'Username must be at least 3 characters',
+      updating: 'Updating',
+      updatingUsername: 'Updating username...',
+      success: 'Success',
+      usernameUpdated: 'Username updated',
+      failedToUpdateUsername: 'Failed to update username',
+      phoneMinLength: 'Phone number must be at least 10 digits',
+      updatingPhone: 'Updating phone number...',
+      phoneUpdated: 'Phone number updated',
+      failedToUpdatePhone: 'Failed to update phone number',
+      failedToLoadAddresses: 'Failed to load addresses',
+      limitReached: 'Limit reached',
+      onlyOneAddress: 'You can only create one address',
+      requiredFields: 'Full name, phone, and address are required',
+      creating: 'Creating',
+      creatingAddress: 'Creating address...',
+      addressCreated: 'Address created',
+      failedToCreateAddress: 'Failed to create address',
+      updatingAddress: 'Updating address...',
+      addressUpdated: 'Address updated',
+      failedToUpdateAddress: 'Failed to update address',
+      deleting: 'Deleting',
+      deletingAddress: 'Deleting address...',
+      addressDeleted: 'Address deleted',
+      failedToDeleteAddress: 'Failed to delete address'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
 
   // Tabs
   activeTab = signal<'profile' | 'addresses'>('profile');
@@ -57,8 +201,38 @@ export class Setting implements OnInit {
   };
 
   ngOnInit(): void {
+    // Load saved language
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang) {
+      this.currentLanguage.set(savedLang);
+    }
+
+    // Listen for language changes from other tabs/windows
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language') {
+        const newLang = e.newValue as 'ar' | 'en' | null;
+        if (newLang) {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    // Poll for language changes in the same window
+    this.languageCheckInterval = setInterval(() => {
+      const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (savedLang && savedLang !== this.currentLanguage()) {
+        this.currentLanguage.set(savedLang);
+      }
+    }, 100);
+
     this.loadUser();
     this.loadAddresses();
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 
   // User methods
@@ -75,49 +249,49 @@ export class Setting implements OnInit {
       },
       error: () => {
         this.isLoadingUser.set(false);
-        this.toastService.error('Error', 'Failed to load user details');
+        this.toastService.error(this.t('error'), this.t('failedToLoadUser'));
       }
     });
   }
 
   onUpdateUsername() {
     if (!this.updateUsernameModel.username || this.updateUsernameModel.username.length < 3) {
-      this.toastService.warning('Validation', 'Username must be at least 3 characters');
+      this.toastService.warning(this.t('validation'), this.t('usernameMinLength'));
       return;
     }
-    const toastId = this.toastService.loading('Updating', 'Updating username...');
+    const toastId = this.toastService.loading(this.t('updating'), this.t('updatingUsername'));
     this.settingService.updateUsername({ username: this.updateUsernameModel.username }).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.updateToSuccess(toastId, 'Success', res.message || 'Username updated');
+          this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('usernameUpdated'));
           this.loadUser();
         } else {
-          this.toastService.updateToError(toastId, 'Error', res.message || 'Failed to update username');
+          this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdateUsername'));
         }
       },
       error: () => {
-        this.toastService.updateToError(toastId, 'Error', 'Failed to update username');
+        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToUpdateUsername'));
       }
     });
   }
 
   onUpdatePhone() {
     if (!this.updatePhoneModel.phoneNumber || this.updatePhoneModel.phoneNumber.length < 10) {
-      this.toastService.warning('Validation', 'Phone number must be at least 10 digits');
+      this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
       return;
     }
-    const toastId = this.toastService.loading('Updating', 'Updating phone number...');
+    const toastId = this.toastService.loading(this.t('updating'), this.t('updatingPhone'));
     this.settingService.updatePhoneNumber({ phoneNumber: this.updatePhoneModel.phoneNumber }).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.updateToSuccess(toastId, 'Success', res.message || 'Phone number updated');
+          this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('phoneUpdated'));
           this.loadUser();
         } else {
-          this.toastService.updateToError(toastId, 'Error', res.message || 'Failed to update phone');
+          this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdatePhone'));
         }
       },
       error: () => {
-        this.toastService.updateToError(toastId, 'Error', 'Failed to update phone number');
+        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToUpdatePhone'));
       }
     });
   }
@@ -134,14 +308,14 @@ export class Setting implements OnInit {
       },
       error: () => {
         this.isLoadingAddresses.set(false);
-        this.toastService.error('Error', 'Failed to load addresses');
+        this.toastService.error(this.t('error'), this.t('failedToLoadAddresses'));
       }
     });
   }
 
   openAddAddress() {
     if ((this.addresses() || []).length >= 1) {
-      this.toastService.warning('Limit reached', 'You can only create one address');
+      this.toastService.warning(this.t('limitReached'), this.t('onlyOneAddress'));
       return;
     }
     this.resetNewAddress();
@@ -166,61 +340,61 @@ export class Setting implements OnInit {
 
   addAddress() {
     if (!this.newAddress.fullName || !this.newAddress.phoneNumber || !this.newAddress.addressLine1) {
-      this.toastService.warning('Validation', 'Full name, phone, and address are required');
+      this.toastService.warning(this.t('validation'), this.t('requiredFields'));
       return;
     }
-    const toastId = this.toastService.loading('Creating', 'Creating address...');
+    const toastId = this.toastService.loading(this.t('creating'), this.t('creatingAddress'));
     this.settingService.createAddress(this.newAddress).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.updateToSuccess(toastId, 'Success', 'Address created');
+          this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressCreated'));
           this.showAddAddress.set(false);
           this.loadAddresses();
         } else {
-          this.toastService.updateToError(toastId, 'Error', res.message || 'Failed to create address');
+          this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToCreateAddress'));
         }
       },
       error: () => {
-        this.toastService.updateToError(toastId, 'Error', 'Failed to create address');
+        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToCreateAddress'));
       }
     });
   }
 
   updateAddress() {
     if (!this.editAddress.fullName || !this.editAddress.phoneNumber || !this.editAddress.addressLine1) {
-      this.toastService.warning('Validation', 'Full name, phone, and address are required');
+      this.toastService.warning(this.t('validation'), this.t('requiredFields'));
       return;
     }
-    const toastId = this.toastService.loading('Updating', 'Updating address...');
+    const toastId = this.toastService.loading(this.t('updating'), this.t('updatingAddress'));
     this.settingService.updateAddress(this.editAddress).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.updateToSuccess(toastId, 'Success', 'Address updated');
+          this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressUpdated'));
           this.showEditAddress.set(false);
           this.loadAddresses();
         } else {
-          this.toastService.updateToError(toastId, 'Error', res.message || 'Failed to update address');
+          this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdateAddress'));
         }
       },
       error: () => {
-        this.toastService.updateToError(toastId, 'Error', 'Failed to update address');
+        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToUpdateAddress'));
       }
     });
   }
 
   deleteAddress(addressId: number) {
-    const toastId = this.toastService.loading('Deleting', 'Deleting address...');
+    const toastId = this.toastService.loading(this.t('deleting'), this.t('deletingAddress'));
     this.settingService.deleteAddress(addressId).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.updateToSuccess(toastId, 'Success', 'Address deleted');
+          this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressDeleted'));
           this.loadAddresses();
         } else {
-          this.toastService.updateToError(toastId, 'Error', res.message || 'Failed to delete address');
+          this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToDeleteAddress'));
         }
       },
       error: () => {
-        this.toastService.updateToError(toastId, 'Error', 'Failed to delete address');
+        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToDeleteAddress'));
       }
     });
   }

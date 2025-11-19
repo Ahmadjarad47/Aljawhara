@@ -34,19 +34,6 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
-      "i18n": {
-        "sourceLocale": "en-US",
-        "locales": {
-          "ar": {
-            "translation": "src/locale/messages.ar.xlf",
-            "baseHref": "/ar/"
-          },
-          "en": {
-            "translation": "src/locale/messages.en.xlf",
-            "baseHref": "/en/"
-          }
-        }
-      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",

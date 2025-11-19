@@ -37,6 +37,8 @@ export class UserOrderService {
         this.sourceOrders.next(orders);
         // Since the backend doesn't return pagination for this endpoint,
         // we'll create pagination info from the array
+        console.log('Orders length:', orders);
+        
         this.sourcePagination.next({
           totalCount: orders.length,
           totalPages: 1,

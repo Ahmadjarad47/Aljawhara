@@ -1,8 +1,8 @@
 <div class="p-6">
   <div class="flex justify-between items-center mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-base-content">My Transactions</h1>
-      <p class="text-base-content/70 mt-2">View and filter your payment transactions</p>
+      <h1 class="text-3xl font-bold text-base-content">{{t('myTransactions')}}</h1>
+      <p class="text-base-content/70 mt-2">{{t('viewAndFilter')}}</p>
     </div>
   </div>
 
@@ -11,62 +11,62 @@
     <div class="card-body p-4">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="form-control">
-          <label class="label"><span class="label-text">Order ID</span></label>
+          <label class="label"><span class="label-text">{{t('orderId')}}</span></label>
           <input type="number" class="input input-bordered" [ngModel]="orderId()" (ngModelChange)="orderId.set($event ? +$event : null)" (keyup.enter)="onSearch()" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Order Number</span></label>
+          <label class="label"><span class="label-text">{{t('orderNumber')}}</span></label>
           <input type="text" class="input input-bordered" [ngModel]="orderNumber()" (ngModelChange)="orderNumber.set($event)" (keyup.enter)="onSearch()" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Payment Method</span></label>
+          <label class="label"><span class="label-text">{{t('paymentMethod')}}</span></label>
           <select class="select select-bordered" [ngModel]="paymentMethod()" (ngModelChange)="paymentMethod.set($event ? +$event : null)">
-            <option [ngValue]="null">All</option>
-            <option [ngValue]="PaymentMethod.Card">Card</option>
-            <option [ngValue]="PaymentMethod.Cod">Cash on Delivery</option>
-            <option [ngValue]="PaymentMethod.Paypal">Paypal</option>
-            <option [ngValue]="PaymentMethod.Bank">Bank</option>
+            <option [ngValue]="null">{{t('all')}}</option>
+            <option [ngValue]="PaymentMethod.Card">{{t('card')}}</option>
+            <option [ngValue]="PaymentMethod.Cod">{{t('cashOnDelivery')}}</option>
+            <option [ngValue]="PaymentMethod.Paypal">{{t('paypal')}}</option>
+            <option [ngValue]="PaymentMethod.Bank">{{t('bank')}}</option>
           </select>
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Status</span></label>
+          <label class="label"><span class="label-text">{{t('status')}}</span></label>
           <input type="text" class="input input-bordered" [ngModel]="status()" (ngModelChange)="status.set($event)" (keyup.enter)="onSearch()" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Start Date</span></label>
+          <label class="label"><span class="label-text">{{t('startDate')}}</span></label>
           <input type="date" class="input input-bordered" [ngModel]="startDate()" (ngModelChange)="startDate.set($event || null)" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">End Date</span></label>
+          <label class="label"><span class="label-text">{{t('endDate')}}</span></label>
           <input type="date" class="input input-bordered" [ngModel]="endDate()" (ngModelChange)="endDate.set($event || null)" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Min Amount</span></label>
+          <label class="label"><span class="label-text">{{t('minAmount')}}</span></label>
           <input type="number" class="input input-bordered" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event !== null && $event !== '' ? +$event : null)" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Max Amount</span></label>
+          <label class="label"><span class="label-text">{{t('maxAmount')}}</span></label>
           <input type="number" class="input input-bordered" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event !== null && $event !== '' ? +$event : null)" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Refunded</span></label>
+          <label class="label"><span class="label-text">{{t('refunded')}}</span></label>
           <select class="select select-bordered" [ngModel]="isRefunded()" (ngModelChange)="isRefunded.set($event === '' ? null : ($event === 'true'))">
-            <option value="">All</option>
-            <option [ngValue]="true">Yes</option>
-            <option [ngValue]="false">No</option>
+            <option value="">{{t('all')}}</option>
+            <option [ngValue]="true">{{t('yes')}}</option>
+            <option [ngValue]="false">{{t('no')}}</option>
           </select>
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Page Size</span></label>
+          <label class="label"><span class="label-text">{{t('pageSize')}}</span></label>
           <select class="select select-bordered" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
             <option [value]="10">10</option>
             <option [value]="20">20</option>
@@ -76,21 +76,21 @@
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Sort By</span></label>
+          <label class="label"><span class="label-text">{{t('sortBy')}}</span></label>
           <select class="select select-bordered" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
-            <option value="TransactionDate">Transaction Date</option>
-            <option value="Amount">Amount</option>
-            <option value="Status">Status</option>
-            <option value="PaymentMethod">Payment Method</option>
-            <option value="OrderNumber">Order Number</option>
+            <option value="TransactionDate">{{t('transactionDate')}}</option>
+            <option value="Amount">{{t('amount')}}</option>
+            <option value="Status">{{t('status')}}</option>
+            <option value="PaymentMethod">{{t('paymentMethod')}}</option>
+            <option value="OrderNumber">{{t('orderNumberLabel')}}</option>
           </select>
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Direction</span></label>
+          <label class="label"><span class="label-text">{{t('direction')}}</span></label>
           <select class="select select-bordered" [ngModel]="sortDirection()" (ngModelChange)="onSortDirectionChange($event)">
-            <option value="desc">Desc</option>
-            <option value="asc">Asc</option>
+            <option value="desc">{{t('desc')}}</option>
+            <option value="asc">{{t('asc')}}</option>
           </select>
         </div>
       </div>
@@ -98,9 +98,9 @@
       <div class="mt-4 flex gap-2">
         <button class="btn btn-primary" (click)="onSearch()" [disabled]="isLoading()">
           @if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> }
-          Apply
+          {{t('apply')}}
         </button>
-        <button class="btn btn-outline" (click)="clearFilters()" [disabled]="isLoading()">Clear</button>
+        <button class="btn btn-outline" (click)="clearFilters()" [disabled]="isLoading()">{{t('clear')}}</button>
       </div>
     </div>
   </div>
@@ -117,48 +117,48 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>Order</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Status</th>
-                <th>Transaction Date</th>
-                <th>Processed</th>
-                <th>Reference</th>
-                <th>Refunded</th>
+                <th>{{t('order')}}</th>
+                <th>{{t('customer')}}</th>
+                <th>{{t('amount')}}</th>
+                <th>{{t('method')}}</th>
+                <th>{{t('status')}}</th>
+                <th>{{t('transactionDate')}}</th>
+                <th>{{t('processed')}}</th>
+                <th>{{t('reference')}}</th>
+                <th>{{t('refunded')}}</th>
               </tr>
             </thead>
             <tbody>
-              @for (t of transactions$ | async; track t.id) {
+              @for (transaction of transactions$ | async; track transaction.id) {
                 <tr>
                   <td>
-                    <div class="font-semibold">#{{t.orderNumber}}</div>
-                    <div class="text-xs opacity-60">ID: {{t.orderId}}</div>
+                    <div class="font-semibold">#{{transaction.orderNumber}}</div>
+                    <div class="text-xs opacity-60">ID: {{transaction.orderId}}</div>
                   </td>
                   <td>
-                    <div class="font-semibold">{{t.customerName || '-'}}</div>
-                    <div class="text-xs opacity-60">{{t.customerEmail || '-'}}</div>
+                    <div class="font-semibold">{{transaction.customerName || '-'}}</div>
+                    <div class="text-xs opacity-60">{{transaction.customerEmail || '-'}}</div>
                   </td>
-                  <td><div class="badge badge-outline">{{t.amount | number:'1.2-2'}}</div></td>
-                  <td>{{t.paymentMethodName}}</td>
+                  <td><div class="badge badge-outline">{{transaction.amount | number:'1.2-2'}}</div></td>
+                  <td>{{getPaymentMethodName(transaction.paymentMethod)}}</td>
                   <td>
-                    <div class="badge" [class.badge-success]="t.status.toLowerCase()==='succeeded' || t.status.toLowerCase()==='paid'" [class.badge-error]="t.status.toLowerCase()==='failed'" [class.badge-warning]="t.status.toLowerCase()==='pending'">
-                      {{t.status}}
+                    <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
+                      {{getStatusText(transaction.status)}}
                     </div>
                   </td>
-                  <td>{{t.transactionDate | date:'medium'}}</td>
-                  <td>{{t.processedDate ? (t.processedDate | date:'medium') : '-'}}</td>
-                  <td class="truncate max-w-[180px]" title="{{t.transactionReference}}">{{t.transactionReference || '-'}}</td>
+                  <td>{{transaction.transactionDate | date:'medium'}}</td>
+                  <td>{{transaction.processedDate ? (transaction.processedDate | date:'medium') : '-'}}</td>
+                  <td class="truncate max-w-[180px]" title="{{transaction.transactionReference}}">{{transaction.transactionReference || '-'}}</td>
                   <td>
-                    <div class="badge" [class.badge-error]="t.isRefunded" [class.badge-success]="!t.isRefunded">
-                      {{t.isRefunded ? 'Yes' : 'No'}}
+                    <div class="badge" [class.badge-error]="transaction.isRefunded" [class.badge-success]="!transaction.isRefunded">
+                      {{transaction.isRefunded ? t('yes') : t('no')}}
                     </div>
                   </td>
                 </tr>
               }
               @if ((transactions$ | async)?.length === 0) {
                 <tr>
-                  <td colspan="9" class="text-center py-8 text-base-content/50">No transactions found</td>
+                  <td colspan="9" class="text-center py-8 text-base-content/50">{{t('noTransactionsFound')}}</td>
                 </tr>
               }
             </tbody>
