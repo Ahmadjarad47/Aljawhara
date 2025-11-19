@@ -118,6 +118,21 @@ export class Navbar implements OnInit, OnDestroy {
     // Initialize component - defer non-critical operations
     this.loadUserData();
     
+    // Load saved language preference
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage) {
+      const lang = this.languages.find(l => l.code === savedLanguage);
+      if (lang) {
+        this.selectedLanguage = lang.name;
+        document.documentElement.lang = lang.code;
+        if (lang.code === 'ar') {
+          document.documentElement.dir = 'rtl';
+        } else {
+          document.documentElement.dir = 'ltr';
+        }
+      }
+    }
+    
     // Load categories from API (defer to avoid blocking initial render)
     setTimeout(() => {
       this.loadCategories();
@@ -297,10 +312,27 @@ export class Navbar implements OnInit, OnDestroy {
     this.selectedLanguage = language.name;
     this.isLanguageDropdownOpen = false;
     console.log('Language changed to:', language.code);
+    
+    // Save language preference to localStorage
+    localStorage.setItem('preferredLanguage', language.code);
+    
+    // Update document language attribute
+    document.documentElement.lang = language.code;
+    
+    // Update document direction for RTL languages
+    if (language.code === 'ar') {
+      document.documentElement.dir = 'rtl';
+    } else {
+      document.documentElement.dir = 'ltr';
+    }
+    
     // Reload categories with new language
     this.loadCategories();
-    // Implement language switching logic here
-    // this.translateService.use(language.code);
+    
+    // Note: For full i18n support, you need to build separate versions:
+    // ng build --localize
+    // This will create separate builds for each language configured in angular.json
+    // For runtime language switching, consider using @ngx-translate/core instead
   }
 
   // Currency switching

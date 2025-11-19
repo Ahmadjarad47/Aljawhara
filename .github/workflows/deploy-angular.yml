@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies and build Angular
         run: |
           npm ci
-          npm run build  --configuration=production
+          npm run build --localize=ar --configuration=production
 
       - name: Clean old files on server
         uses: appleboy/ssh-action@v1.1.0

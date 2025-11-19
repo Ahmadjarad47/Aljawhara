@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Navbar } from "../navbar/navbar";
+import { ProductService, ProductResponse } from '../product/product-service';
+import { ProductSummaryDto } from '../product/product.models';
 
 @Component({
   selector: 'app-home-page',
@@ -17,16 +19,22 @@ import { Navbar } from "../navbar/navbar";
 export class HomePage implements OnInit, OnDestroy {
   private countdownInterval?: ReturnType<typeof setInterval>;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService
+  ) {}
 
   // Loading states
   isLoadingCategories: boolean = false;
-  isLoadingProducts: boolean = false;
+  isLoadingProducts: boolean = true;
   isLoadingStats: boolean = false;
 
   // Newsletter subscription
   newsletterEmail: string = '';
   isNewsletterSubscribed: boolean = false;
+
+  // Featured Products
+  featuredProducts: any[] = [];
 
   // Hero section stats
   stats = {
@@ -95,96 +103,60 @@ export class HomePage implements OnInit, OnDestroy {
     seconds: 30
   };
 
-  // Featured products data
-  featuredProducts = [
-    {
-      id: 1,
-      name: 'Wireless Headphones',
-      description: 'Premium quality sound with noise cancellation technology for the ultimate listening experience',
-      price: 199,
-      originalPrice: 249,
-      discount: 20,
-      rating: 4.5,
-      image: 'https://media.istockphoto.com/id/1191174265/photo/men-fashion-leather-chelsea-boot-isolated-on-a-white-background-side-view.jpg?s=612x612&w=is&k=20&c=GU6P3bVTBgY5lONQftSGBN9eV6MeSaVHR7FXLHB64x8=',
-      badge: 'SALE',
-      isWishlisted: false
-    },
-    {
-      id: 2,
-      name: 'Running Shoes',
-      description: 'Comfortable and durable athletic footwear designed for performance and style',
-      price: 129,
-      originalPrice: null,
-      discount: 0,
-      rating: 4.8,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop&crop=center',
-      badge: null,
-      isWishlisted: false
-    },
-    {
-      id: 3,
-      name: 'Smart Watch',
-      description: 'Track your fitness and stay connected with this advanced smart wearable device',
-      price: 299,
-      originalPrice: null,
-      discount: 0,
-      rating: 4.9,
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop&crop=center',
-      badge: 'NEW',
-      isWishlisted: true
-    },
-    {
-      id: 4,
-      name: 'Laptop Backpack',
-      description: 'Stylish and functional laptop protection with multiple compartments and ergonomic design',
-      price: 89,
-      originalPrice: null,
-      discount: 0,
-      rating: 4.6,
-      image: 'https://images.unsplash.com/photo-1506905925346-04b1e0c0c6b0?w=400&h=300&fit=crop&crop=center',
-      badge: null,
-      isWishlisted: false
-    }
-  ];
-
-  // Categories data
-  categories = [
-    { name: 'Electronics', icon: '💻', itemCount: 1234, color: 'primary' },
-    { name: 'Fashion', icon: '👕', itemCount: 2456, color: 'secondary' },
-    { name: 'Home & Garden', icon: '🏠', itemCount: 987, color: 'accent' },
-    { name: 'Books', icon: '📚', itemCount: 3210, color: 'info' },
-    { name: 'Sports & Games', icon: '🎮', itemCount: 1567, color: 'success' },
-    { name: 'Beauty & Health', icon: '💄', itemCount: 876, color: 'warning' }
-  ];
-
-  // Testimonials data
-  testimonials = [
-    {
-      name: 'Ahmed Al-Mahmoud',
-      text: 'Amazing quality products and excellent customer service. The delivery was super fast and the packaging was perfect. Highly recommended!',
-      rating: 5,
-      avatar: 'A',
-      color: 'primary'
-    },
-    {
-      name: 'Sarah Johnson',
-      text: 'Great prices and wide selection. I\'ve been shopping here for months and never disappointed. The return policy is also very customer-friendly.',
-      rating: 5,
-      avatar: 'S',
-      color: 'secondary'
-    },
-    {
-      name: 'Mohammed Ali',
-      text: 'The mobile app is fantastic and the checkout process is so smooth. I love how easy it is to track my orders and manage my account.',
-      rating: 5,
-      avatar: 'M',
-      color: 'accent'
-    }
-  ];
-
   ngOnInit() {
     this.startCountdown();
     this.startCarousel();
+    this.loadFeaturedProducts();
+  }
+
+  // Load featured products from API
+  loadFeaturedProducts() {
+    this.isLoadingProducts = true;
+    this.productService.getProducts({ 
+      pageNumber: 1, 
+      pageSize: 8,
+      sortBy: 'highRating' // Get highest rated products
+    }).subscribe({
+      next: (response) => {
+        const products = this.extractProducts(response);
+        this.featuredProducts = products.map(product => this.transformProduct(product));
+        this.isLoadingProducts = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.isLoadingProducts = false;
+      }
+    });
+  }
+
+  // Extract products from response (handles both array and object responses)
+  private extractProducts(response: ProductSummaryDto[] | ProductResponse): ProductSummaryDto[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.Products || response.products || [];
+  }
+
+  // Transform API product to HTML expected format
+  private transformProduct(product: ProductSummaryDto): any {
+    const hasDiscount = product.oldPrice > product.newPrice;
+    const discountPercentage = hasDiscount 
+      ? Math.round(((product.oldPrice - product.newPrice) / product.oldPrice) * 100)
+      : 0;
+
+    return {
+      id: product.id,
+      name: product.title,
+      description: product.description,
+      price: product.newPrice,
+      originalPrice: hasDiscount ? product.oldPrice : null,
+      image: product.mainImage || 'https://via.placeholder.com/400x300?text=No+Image',
+      rating: product.averageRating || 0,
+      badge: hasDiscount ? 'SALE' : (!product.isInStock ? 'OUT OF STOCK' : null),
+      discount: discountPercentage,
+      isWishlisted: product.isInWishlist || false,
+      isInStock: product.isInStock
+    };
   }
 
   // Newsletter subscription
@@ -245,8 +217,9 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   addToWishlist(product: any) {
-    console.log('Adding to wishlist:', product.name);
-    // Implement add to wishlist logic
+    product.isWishlisted = !product.isWishlisted;
+    console.log(product.isWishlisted ? 'Added to wishlist:' : 'Removed from wishlist:', product.name);
+    // TODO: Implement API call to save wishlist state
   }
 
   // Navigation actions

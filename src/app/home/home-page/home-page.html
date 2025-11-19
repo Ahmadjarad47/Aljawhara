@@ -156,90 +156,6 @@
   </div>
 </section>
 
-<!-- Categories Section -->
-<section class="categories-section py-20 relative overflow-hidden">
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-    <!-- Section Header -->
-    <div class="text-center mb-16">
-      <div class="accent-chip mb-4">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Browse Categories
-      </div>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-base-content mb-6">
-        Shop by <span class="gradient-text">Category</span>
-      </h2>
-      <p class="text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed">
-        Discover our carefully curated categories and find exactly what you're looking for
-      </p>
-    </div>
-
-    <!-- Categories Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
-      @if (isLoadingCategories) {
-        <!-- Skeleton loading for categories -->
-        @for (skeleton of [1,2,3,4,5,6]; track skeleton) {
-        <div class="card bg-base-100 shadow-lg border border-base-300/50 overflow-hidden animate-pulse">
-          <div class="card-body p-4 lg:p-6 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-base-300"></div>
-            <div class="h-4 bg-base-300 rounded mb-2"></div>
-            <div class="h-6 bg-base-300 rounded w-20 mx-auto"></div>
-          </div>
-        </div>
-        }
-      } @else {
-        @for (category of categories; track category.name) {
-        <div class="group cursor-pointer" (click)="goToCategory(category)" 
-             role="button" 
-             tabindex="0"
-             (keydown.enter)="goToCategory(category)"
-             (keydown.space)="goToCategory(category)"
-             aria-label="Browse {{category.name}} category">
-          <div class="card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:scale-105 border border-base-300/50 group-hover:border-primary/30 overflow-hidden">
-            <div class="card-body p-4 lg:p-6 text-center relative">
-              <!-- Background gradient -->
-              <div class="absolute inset-0 bg-gradient-to-br from-{{category.color}}/5 to-{{category.color}}/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <!-- Icon with enhanced styling -->
-              <div class="relative z-10">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-{{category.color}}/20 to-{{category.color}}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <span class="text-3xl">{{category.icon}}</span>
-                </div>
-                
-                <!-- Category name -->
-                <h3 class="font-bold text-base lg:text-lg text-base-content group-hover:text-{{category.color}} transition-colors duration-300 mb-2">
-                  {{category.name}}
-                </h3>
-                
-                <!-- Item count with badge -->
-                <div class="badge badge-{{category.color}} badge-outline group-hover:badge-{{category.color}} group-hover:badge-fill transition-all duration-300">
-                  {{category.itemCount | number}} items
-                </div>
-              </div>
-              
-              <!-- Hover effect overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-{{category.color}}/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-          </div>
-        </div>
-        }
-      }
-    </div>
-
-    <!-- View All Categories Button -->
-    <div class="text-center mt-12">
-      <button class="btn btn-lg group accent-outline" (click)="viewAllCategories()" 
-              style="border: 2px solid #054239; color: #054239; background: transparent;">
-        <span>View All Categories</span>
-        <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
-</section>
 
 <!-- Featured Products Section -->
 <section class="featured-section py-20 relative overflow-hidden">
@@ -535,7 +451,7 @@
     </div>
 
     <!-- Testimonials Grid -->
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       @for (testimonial of testimonials; track testimonial.name) {
       <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 testimonial-card">
         <div class="flex items-center mb-4">
@@ -559,7 +475,7 @@
         </div>
       </div>
       }
-    </div>
+    </div> -->
   </div>
 </section>
 

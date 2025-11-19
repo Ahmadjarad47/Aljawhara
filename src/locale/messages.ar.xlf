@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="ar">
+    <body>
+      <trans-unit id="phone" datatype="html">
+        <source>+963 11 123 4567</source>
+        <target>+963 11 123 4567</target>
+      </trans-unit>
+      <trans-unit id="email" datatype="html">
+        <source>info@aljawhara.com</source>
+        <target>info@aljawhara.com</target>
+      </trans-unit>
+      <trans-unit id="freeShipping" datatype="html">
+        <source>Free shipping on orders over $50</source>
+        <target>شحن مجاني للطلبات التي تزيد عن 50 دولار</target>
+      </trans-unit>
+      <trans-unit id="followUs" datatype="html">
+        <source>Follow us:</source>
+        <target>تابعنا:</target>
+      </trans-unit>
+      <trans-unit id="searchPlaceholder" datatype="html">
+        <source>Search products, brands, categories...</source>
+        <target>ابحث عن المنتجات والعلامات التجارية والفئات...</target>
+      </trans-unit>
+      <trans-unit id="searching" datatype="html">
+        <source>Searching...</source>
+        <target>جاري البحث...</target>
+      </trans-unit>
+      <trans-unit id="search" datatype="html">
+        <source>Search</source>
+        <target>بحث</target>
+      </trans-unit>
+      <trans-unit id="welcomeToAljawhara" datatype="html">
+        <source>Welcome to Aljawhara</source>
+        <target>مرحباً بك في الجوهرة</target>
+      </trans-unit>
+      <trans-unit id="signInDescription" datatype="html">
+        <source>Sign in to access your account and enjoy personalized shopping</source>
+        <target>سجل الدخول للوصول إلى حسابك والاستمتاع بالتسوق المخصص</target>
+      </trans-unit>
+      <trans-unit id="signIn" datatype="html">
+        <source>Sign In</source>
+        <target>تسجيل الدخول</target>
+      </trans-unit>
+      <trans-unit id="createAccount" datatype="html">
+        <source>Create Account</source>
+        <target>إنشاء حساب</target>
+      </trans-unit>
+      <trans-unit id="myProfile" datatype="html">
+        <source>My Profile</source>
+        <target>ملفي الشخصي</target>
+      </trans-unit>
+      <trans-unit id="myOrders" datatype="html">
+        <source>My Orders</source>
+        <target>طلباتي</target>
+      </trans-unit>
+      <trans-unit id="settings" datatype="html">
+        <source>Settings</source>
+        <target>الإعدادات</target>
+      </trans-unit>
+      <trans-unit id="signOut" datatype="html">
+        <source>Sign Out</source>
+        <target>تسجيل الخروج</target>
+      </trans-unit>
+      <trans-unit id="allCategories" datatype="html">
+        <source>All Categories</source>
+        <target>جميع الفئات</target>
+      </trans-unit>
+      <trans-unit id="home" datatype="html">
+        <source>Home</source>
+        <target>الرئيسية</target>
+      </trans-unit>
+      <trans-unit id="products" datatype="html">
+        <source>Products</source>
+        <target>المنتجات</target>
+      </trans-unit>
+      <trans-unit id="mostRating" datatype="html">
+        <source>Most Rating</source>
+        <target>الأعلى تقييماً</target>
+      </trans-unit>
+      <trans-unit id="bestDiscount" datatype="html">
+        <source>Best Discount</source>
+        <target>أفضل خصم</target>
+      </trans-unit>
+      <trans-unit id="about" datatype="html">
+        <source>About</source>
+        <target>من نحن</target>
+      </trans-unit>
+      <trans-unit id="contact" datatype="html">
+        <source>Contact</source>
+        <target>اتصل بنا</target>
+      </trans-unit>
+      <trans-unit id="upTo50Off" datatype="html">
+        <source>Up to 50% OFF</source>
+        <target>خصم يصل إلى 50%</target>
+      </trans-unit>
+      <trans-unit id="freeShippingOffer" datatype="html">
+        <source>Free Shipping</source>
+        <target>شحن مجاني</target>
+      </trans-unit>
+      <trans-unit id="aljawhara" datatype="html">
+        <source>Aljawhara</source>
+        <target>الجوهرة</target>
+      </trans-unit>
+      <trans-unit id="marketplace" datatype="html">
+        <source>Marketplace</source>
+        <target>السوق</target>
+      </trans-unit>
+      <trans-unit id="categories" datatype="html">
+        <source>Categories</source>
+        <target>الفئات</target>
+      </trans-unit>
+      <trans-unit id="pages" datatype="html">
+        <source>Pages</source>
+        <target>الصفحات</target>
+      </trans-unit>
+      <trans-unit id="aboutUs" datatype="html">
+        <source>About Us</source>
+        <target>من نحن</target>
+      </trans-unit>
+      <trans-unit id="cart" datatype="html">
+        <source>Cart</source>
+        <target>السلة</target>
+      </trans-unit>
+      <trans-unit id="language" datatype="html">
+        <source>Language</source>
+        <target>اللغة</target>
+      </trans-unit>
+      <trans-unit id="wishlist" datatype="html">
+        <source>Wishlist</source>
+        <target>قائمة الأمنيات</target>
+      </trans-unit>
+      <trans-unit id="login" datatype="html">
+        <source>Login</source>
+        <target>تسجيل الدخول</target>
+      </trans-unit>
+      <trans-unit id="register" datatype="html">
+        <source>Register</source>
+        <target>التسجيل</target>
+      </trans-unit>
+      <trans-unit id="logout" datatype="html">
+        <source>Logout</source>
+        <target>تسجيل الخروج</target>
+      </trans-unit>
+      <trans-unit id="account" datatype="html">
+        <source>Account</source>
+        <target>الحساب</target>
+      </trans-unit>
+      <trans-unit id="searchProducts" datatype="html">
+        <source>Search Products</source>
+        <target>البحث عن المنتجات</target>
+      </trans-unit>
+      <trans-unit id="signInToAccess" datatype="html">
+        <source>Sign in to access your account</source>
+        <target>سجل الدخول للوصول إلى حسابك</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
+

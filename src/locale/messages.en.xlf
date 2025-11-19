@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="en-US">
+    <body>
+      <trans-unit id="phone" datatype="html">
+        <source>+963 11 123 4567</source>
+        <target>+963 11 123 4567</target>
+      </trans-unit>
+      <trans-unit id="email" datatype="html">
+        <source>info@aljawhara.com</source>
+        <target>info@aljawhara.com</target>
+      </trans-unit>
+      <trans-unit id="freeShipping" datatype="html">
+        <source>Free shipping on orders over $50</source>
+        <target>Free shipping on orders over $50</target>
+      </trans-unit>
+      <trans-unit id="followUs" datatype="html">
+        <source>Follow us:</source>
+        <target>Follow us:</target>
+      </trans-unit>
+      <trans-unit id="searchPlaceholder" datatype="html">
+        <source>Search products, brands, categories...</source>
+        <target>Search products, brands, categories...</target>
+      </trans-unit>
+      <trans-unit id="searching" datatype="html">
+        <source>Searching...</source>
+        <target>Searching...</target>
+      </trans-unit>
+      <trans-unit id="search" datatype="html">
+        <source>Search</source>
+        <target>Search</target>
+      </trans-unit>
+      <trans-unit id="welcomeToAljawhara" datatype="html">
+        <source>Welcome to Aljawhara</source>
+        <target>Welcome to Aljawhara</target>
+      </trans-unit>
+      <trans-unit id="signInDescription" datatype="html">
+        <source>Sign in to access your account and enjoy personalized shopping</source>
+        <target>Sign in to access your account and enjoy personalized shopping</target>
+      </trans-unit>
+      <trans-unit id="signIn" datatype="html">
+        <source>Sign In</source>
+        <target>Sign In</target>
+      </trans-unit>
+      <trans-unit id="createAccount" datatype="html">
+        <source>Create Account</source>
+        <target>Create Account</target>
+      </trans-unit>
+      <trans-unit id="myProfile" datatype="html">
+        <source>My Profile</source>
+        <target>My Profile</target>
+      </trans-unit>
+      <trans-unit id="myOrders" datatype="html">
+        <source>My Orders</source>
+        <target>My Orders</target>
+      </trans-unit>
+      <trans-unit id="settings" datatype="html">
+        <source>Settings</source>
+        <target>Settings</target>
+      </trans-unit>
+      <trans-unit id="signOut" datatype="html">
+        <source>Sign Out</source>
+        <target>Sign Out</target>
+      </trans-unit>
+      <trans-unit id="allCategories" datatype="html">
+        <source>All Categories</source>
+        <target>All Categories</target>
+      </trans-unit>
+      <trans-unit id="home" datatype="html">
+        <source>Home</source>
+        <target>Home</target>
+      </trans-unit>
+      <trans-unit id="products" datatype="html">
+        <source>Products</source>
+        <target>Products</target>
+      </trans-unit>
+      <trans-unit id="mostRating" datatype="html">
+        <source>Most Rating</source>
+        <target>Most Rating</target>
+      </trans-unit>
+      <trans-unit id="bestDiscount" datatype="html">
+        <source>Best Discount</source>
+        <target>Best Discount</target>
+      </trans-unit>
+      <trans-unit id="about" datatype="html">
+        <source>About</source>
+        <target>About</target>
+      </trans-unit>
+      <trans-unit id="contact" datatype="html">
+        <source>Contact</source>
+        <target>Contact</target>
+      </trans-unit>
+      <trans-unit id="upTo50Off" datatype="html">
+        <source>Up to 50% OFF</source>
+        <target>Up to 50% OFF</target>
+      </trans-unit>
+      <trans-unit id="freeShippingOffer" datatype="html">
+        <source>Free Shipping</source>
+        <target>Free Shipping</target>
+      </trans-unit>
+      <trans-unit id="aljawhara" datatype="html">
+        <source>Aljawhara</source>
+        <target>Aljawhara</target>
+      </trans-unit>
+      <trans-unit id="marketplace" datatype="html">
+        <source>Marketplace</source>
+        <target>Marketplace</target>
+      </trans-unit>
+      <trans-unit id="categories" datatype="html">
+        <source>Categories</source>
+        <target>Categories</target>
+      </trans-unit>
+      <trans-unit id="pages" datatype="html">
+        <source>Pages</source>
+        <target>Pages</target>
+      </trans-unit>
+      <trans-unit id="aboutUs" datatype="html">
+        <source>About Us</source>
+        <target>About Us</target>
+      </trans-unit>
+      <trans-unit id="cart" datatype="html">
+        <source>Cart</source>
+        <target>Cart</target>
+      </trans-unit>
+      <trans-unit id="language" datatype="html">
+        <source>Language</source>
+        <target>Language</target>
+      </trans-unit>
+      <trans-unit id="wishlist" datatype="html">
+        <source>Wishlist</source>
+        <target>Wishlist</target>
+      </trans-unit>
+      <trans-unit id="login" datatype="html">
+        <source>Login</source>
+        <target>Login</target>
+      </trans-unit>
+      <trans-unit id="register" datatype="html">
+        <source>Register</source>
+        <target>Register</target>
+      </trans-unit>
+      <trans-unit id="logout" datatype="html">
+        <source>Logout</source>
+        <target>Logout</target>
+      </trans-unit>
+      <trans-unit id="account" datatype="html">
+        <source>Account</source>
+        <target>Account</target>
+      </trans-unit>
+      <trans-unit id="searchProducts" datatype="html">
+        <source>Search Products</source>
+        <target>Search Products</target>
+      </trans-unit>
+      <trans-unit id="signInToAccess" datatype="html">
+        <source>Sign in to access your account</source>
+        <target>Sign in to access your account</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
+

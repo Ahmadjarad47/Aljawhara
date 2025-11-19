@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="phone" datatype="html">
+        <source>+963 11 123 4567</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">12,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="email" datatype="html">
+        <source>info@aljawhara.com</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">19,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="freeShipping" datatype="html">
+        <source>Free shipping on orders over $50</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">27,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="followUs" datatype="html">
+        <source>Follow us:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="searchPlaceholder" datatype="html">
+        <source>Search products, brands, categories...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="searching" datatype="html">
+        <source>Searching...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">105,106</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">804,806</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="search" datatype="html">
+        <source>Search</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">131,132</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">702,703</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="welcomeToAljawhara" datatype="html">
+        <source>Welcome to Aljawhara</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">253,254</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">883,884</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="signInDescription" datatype="html">
+        <source>Sign in to access your account and enjoy personalized shopping</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">254,256</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="signIn" datatype="html">
+        <source>Sign In</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">264,265</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">890,891</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="createAccount" datatype="html">
+        <source>Create Account</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">275,276</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">894,896</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="myProfile" datatype="html">
+        <source>My Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">306,307</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">626,627</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="myOrders" datatype="html">
+        <source>My Orders</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">317,318</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">631,632</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="settings" datatype="html">
+        <source>Settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">331,332</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">563,564</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">636,637</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="signOut" datatype="html">
+        <source>Sign Out</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">341,342</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="allCategories" datatype="html">
+        <source>All Categories</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">387,388</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home" datatype="html">
+        <source>Home</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">410,411</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">539,540</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">669,672</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="products" datatype="html">
+        <source>Products</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">417,418</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">542,543</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mostRating" datatype="html">
+        <source>Most Rating</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">425,426</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">545,546</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="bestDiscount" datatype="html">
+        <source>Best Discount</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">433,435</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">548,549</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about" datatype="html">
+        <source>About</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">440,441</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="contact" datatype="html">
+        <source>Contact</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">447,448</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">554,555</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upTo50Off" datatype="html">
+        <source>Up to 50% OFF</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">459,460</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="freeShippingOffer" datatype="html">
+        <source>Free Shipping</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">463,465</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="aljawhara" datatype="html">
+        <source>Aljawhara</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">491,492</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="marketplace" datatype="html">
+        <source>Marketplace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">492,494</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="categories" datatype="html">
+        <source>Categories</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">521,522</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">685,688</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">837,838</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="pages" datatype="html">
+        <source>Pages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">535,536</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="aboutUs" datatype="html">
+        <source>About Us</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">551,552</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="cart" datatype="html">
+        <source>Cart</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">557,558</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">602</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">748,751</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="language" datatype="html">
+        <source>Language</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">567,568</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="wishlist" datatype="html">
+        <source>Wishlist</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">592</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">725,728</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="login" datatype="html">
+        <source>Login</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">611,612</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="register" datatype="html">
+        <source>Register</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">615,616</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="logout" datatype="html">
+        <source>Logout</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">640,641</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="account" datatype="html">
+        <source>Account</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">768,770</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">865,866</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="searchProducts" datatype="html">
+        <source>Search Products</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">779,780</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="signInToAccess" datatype="html">
+        <source>Sign in to access your account</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
+          <context context-type="linenumber">884,887</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
