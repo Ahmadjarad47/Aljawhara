@@ -199,6 +199,23 @@
                     </a>
                 </li>
 
+                <!-- Carousels -->
+                <li>
+                    <a routerLink="carousel" 
+                       routerLinkActive="active" 
+                       [routerLinkActiveOptions]="{exact: true}"
+                       class="is-drawer-close:tooltip is-drawer-close:tooltip-right transition-colors duration-200 hover:bg-primary/10 active:bg-primary/20" 
+                       data-tip="Carousels">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
+                            stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
+                            class="inline-block size-4 my-1.5">
+                            <path d="M4 5h16a1 1 0 0 1 1 1v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a1 1 0 0 1 1-1z"></path>
+                            <path d="M8 5v14m8-14v14"></path>
+                        </svg>
+                        <span class="is-drawer-close:hidden">Carousels</span>
+                    </a>
+                </li>
+
                 <!-- Coupons -->
                 <li>
                     <a routerLink="coupons" 

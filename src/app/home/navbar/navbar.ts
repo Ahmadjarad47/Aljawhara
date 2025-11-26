@@ -6,6 +6,7 @@ import { Subscription, debounceTime, distinctUntilChanged, Subject, switchMap, c
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserResponseDto } from '../../auth/auth.models';
 import { CartService } from '../../core/service/cart-service';
+import { WishlistService } from '../../core/service/wishlist-service';
 import { ProductService } from '../product/product-service';
 import { ProductSummaryDto, CategoryDto } from '../product/product.models';
 
@@ -22,6 +23,7 @@ export class Navbar implements OnInit, OnDestroy {
   
   // Services
   private cartService = inject(CartService);
+  private wishlistService = inject(WishlistService);
   private productService = inject(ProductService);
   private activatedRoute = inject(ActivatedRoute);
   
@@ -154,11 +156,16 @@ export class Navbar implements OnInit, OnDestroy {
   
   // Cart and wishlist counts
   cartItems = this.cartService.getCartItemsSignal();
-  wishlistCount: number = 3;
+  wishlistItems = this.wishlistService.getWishlistItemsSignal();
   
   // Computed cart count
   get cartCount(): number {
     return this.cartItems().reduce((total, item) => total + item.quantity, 0);
+  }
+  
+  // Computed wishlist count
+  get wishlistCount(): number {
+    return this.wishlistItems().length;
   }
   
   // Mobile menu state
@@ -541,7 +548,9 @@ export class Navbar implements OnInit, OnDestroy {
   goToWishlist() {
     console.log('Navigate to wishlist');
     this.activeTab = 'wishlist';
-    // this.router.navigate(['/wishlist']);
+    // Set flag to show wishlist in home page
+    localStorage.setItem('showWishlist', 'true');
+    this.router.navigate(['/']);
   }
 
   // Profile methods

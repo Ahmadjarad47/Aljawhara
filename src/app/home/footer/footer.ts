@@ -151,10 +151,7 @@ export class Footer implements OnInit, OnDestroy {
   }
 
   socialLinks = [
-    { name: 'Facebook', icon: 'facebook', url: 'https://facebook.com' },
-    { name: 'Instagram', icon: 'instagram', url: 'https://instagram.com' },
-    { name: 'Twitter', icon: 'twitter', url: 'https://twitter.com' },
-    { name: 'LinkedIn', icon: 'linkedin', url: 'https://linkedin.com' }
+    { name: 'Instagram', icon: 'instagram', url: 'https://www.instagram.com/aljawhara_plus?igsh=aWpwNDdpd3Q3OWRy&utm_source=qr' }
   ];
 
   contactInfo = {

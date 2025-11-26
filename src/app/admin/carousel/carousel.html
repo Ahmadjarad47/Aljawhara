@@ -1,0 +1,441 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content">Carousel Management</h1>
+      <p class="text-base-content/70 mt-2">Manage homepage carousels (banners) with images and prices</p>
+    </div>
+    <div class="flex gap-2">
+      @if (selectedCarousels().length > 0) {
+        <button
+          (click)="deleteSelected()"
+          [disabled]="isLoading()"
+          class="btn btn-error btn-sm">
+          @if (isLoading()) {
+            <span class="loading loading-spinner loading-xs"></span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          }
+          Delete Selected ({{selectedCarousels().length}})
+        </button>
+      }
+      <button
+        (click)="showAddModal.set(true)"
+        [disabled]="isLoading()"
+        class="btn btn-primary btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Carousel
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+    <div class="card-body p-4">
+      <div class="flex flex-col lg:flex-row gap-4 items-center">
+        <!-- Status Filter -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Status</span>
+          </label>
+          <select
+            class="select select-bordered"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusFilterChange($event)">
+            <option [value]="null">All</option>
+            <option [value]="true">Active</option>
+            <option [value]="false">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Page Size -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Page Size</span>
+          </label>
+          <select
+            class="select select-bordered"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)">
+            <option [value]="10">10 per page</option>
+            <option [value]="20">20 per page</option>
+            <option [value]="50">50 per page</option>
+          </select>
+        </div>
+
+        <button
+          (click)="clearFilters()"
+          [disabled]="isLoading()"
+          class="btn btn-outline mt-6 lg:mt-8">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body p-0">
+      @if (isLoading()) {
+        <div class="flex justify-center items-center py-12">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      [checked]="selectedCarousels().length === getCarouselsLength() && getCarouselsLength() > 0"
+                      [disabled]="isLoading()"
+                      (change)="toggleSelectAll()" />
+                  </label>
+                </th>
+                <th>Image</th>
+                <th>Title (EN)</th>
+                <th>Title (AR)</th>
+                <th>Description (EN)</th>
+                <th>Description (AR)</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (carousel of carousels$ | async; track $index) {
+                <tr>
+                  <th>
+                    <label>
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        [checked]="selectedCarousels().includes(carousel.id)"
+                        [disabled]="isLoading()"
+                        (change)="toggleCarouselSelection(carousel.id)" />
+                    </label>
+                  </th>
+                  <td>
+                    <div class="avatar">
+                      <div class="w-16 h-16 rounded-lg overflow-hidden border">
+                        <img [src]="carousel.image" alt="Carousel Image" class="object-cover w-full h-full" />
+                      </div>
+                    </div>
+                  </td>
+                  <td class="font-semibold">
+                    {{carousel.title}}
+                  </td>
+                  <td class="font-semibold">
+                    {{carousel.titleAr}}
+                  </td>
+                  <td>
+                    <div class="text-sm text-base-content/70 max-w-xs truncate">
+                      {{carousel.description}}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="text-sm text-base-content/70 max-w-xs truncate text-right">
+                      {{carousel.descriptionAr}}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-semibold">
+                      ${{carousel.price}}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="badge" [class.badge-success]="carousel.isActive" [class.badge-error]="!carousel.isActive">
+                      {{carousel.isActive ? 'Active' : 'Inactive'}}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="text-xs text-base-content/70">
+                      {{carousel.createdAt | date:'short'}}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex gap-1 flex-wrap">
+                      <button
+                        (click)="toggleCarouselStatus(carousel.id)"
+                        [disabled]="isLoading()"
+                        class="btn btn-ghost btn-xs"
+                        [ngClass]="carousel.isActive ? 'btn-error' : 'btn-success'">
+                        @if (isLoading()) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          {{carousel.isActive ? 'Deactivate' : 'Activate'}}
+                        }
+                      </button>
+                      <button
+                        (click)="editCarouselStart(carousel)"
+                        [disabled]="isLoading()"
+                        class="btn btn-ghost btn-xs">
+                        Edit
+                      </button>
+                      <button
+                        (click)="deleteCarouselSingle(carousel.id)"
+                        [disabled]="isLoading()"
+                        class="btn btn-ghost btn-xs btn-error">
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (getCarouselsLength() === 0 && !isLoading()) {
+                <tr>
+                  <td colspan="8" class="text-center py-8 text-base-content/50">
+                    No carousels found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  @if (getTotalPages() > 1) {
+    <div class="flex justify-center items-center mt-6">
+      <div class="join">
+        <!-- Previous -->
+        <button
+          (click)="onPageChange(getCurrentPage() - 1)"
+          [disabled]="getCurrentPage() === 1 || isLoading()"
+          class="join-item btn">
+          «
+        </button>
+
+        <!-- Page Numbers -->
+        @for (page of pageNumbers$ | async; track page) {
+          @if (page === '...') {
+            <button class="join-item btn btn-disabled">...</button>
+          } @else {
+            <button
+              (click)="onPageChange(+page)"
+              [disabled]="isLoading()"
+              [class.btn-active]="getCurrentPage() === page"
+              class="join-item btn">
+              {{page}}
+            </button>
+          }
+        }
+
+        <!-- Next -->
+        <button
+          (click)="onPageChange(getCurrentPage() + 1)"
+          [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
+          class="join-item btn">
+          »
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center mt-4 text-sm text-base-content/70">
+      @if (pagination$ | async; as pagination) {
+        Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}}
+        to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}}
+        of {{pagination.totalCount}} carousels
+      }
+    </div>
+  }
+
+  <!-- Add Carousel Modal -->
+  @if (showAddModal()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">Add New Carousel</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Title EN -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Title (English) *</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Enter English title"
+              class="input input-bordered w-full"
+              [(ngModel)]="newCarousel.title" />
+          </div>
+
+          <!-- Title AR -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Title (Arabic) *</span>
+            </label>
+            <input
+              type="text"
+              dir="rtl"
+              placeholder="ادخل العنوان بالعربية"
+              class="input input-bordered w-full"
+              [(ngModel)]="newCarousel.titleAr" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <!-- Description EN -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Description (English) *</span>
+            </label>
+            <textarea
+              class="textarea textarea-bordered w-full"
+              rows="3"
+              placeholder="Enter English description"
+              [(ngModel)]="newCarousel.description"></textarea>
+          </div>
+
+          <!-- Description AR -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Description (Arabic) *</span>
+            </label>
+            <textarea
+              class="textarea textarea-bordered w-full"
+              rows="3"
+              dir="rtl"
+              placeholder="ادخل الوصف بالعربية"
+              [(ngModel)]="newCarousel.descriptionAr"></textarea>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Image *</span>
+          </label>
+          <input
+            type="file"
+            class="file-input file-input-bordered w-full"
+            accept="image/*"
+            (change)="onImageSelected($event, false)" />
+        </div>
+
+        <div class="modal-action">
+          <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+          <button (click)="addCarousel()" [disabled]="isLoading()" class="btn btn-primary">
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            }
+            Add Carousel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Carousel Modal -->
+  @if (showEditModal()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">Edit Carousel</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Title EN -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Title (English) *</span>
+            </label>
+            <input
+              type="text"
+              class="input input-bordered w-full"
+              [(ngModel)]="editCarousel.title" />
+          </div>
+
+          <!-- Title AR -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Title (Arabic) *</span>
+            </label>
+            <input
+              type="text"
+              dir="rtl"
+              class="input input-bordered w-full"
+              [(ngModel)]="editCarousel.titleAr" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <!-- Description EN -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Description (English) *</span>
+            </label>
+            <textarea
+              class="textarea textarea-bordered w-full"
+              rows="3"
+              [(ngModel)]="editCarousel.description"></textarea>
+          </div>
+
+          <!-- Description AR -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Description (Arabic) *</span>
+            </label>
+            <textarea
+              class="textarea textarea-bordered w-full"
+              rows="3"
+              dir="rtl"
+              [(ngModel)]="editCarousel.descriptionAr"></textarea>
+          </div>
+        </div>
+
+        <!-- Current Image -->
+        @if (currentImageUrl) {
+          <div class="mt-4">
+            <span class="label-text">Current Image</span>
+            <div class="mt-2">
+              <img [src]="currentImageUrl" alt="Current Carousel Image" class="w-32 h-32 object-cover rounded-lg border" />
+            </div>
+          </div>
+        }
+
+        <!-- New Image -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Change Image (optional)</span>
+          </label>
+          <input
+            type="file"
+            class="file-input file-input-bordered w-full"
+            accept="image/*"
+            (change)="onImageSelected($event, true)" />
+          <label class="label">
+            <span class="label-text-alt text-base-content/70">
+              If you select a new image, the old one will be replaced.
+            </span>
+          </label>
+        </div>
+
+        <div class="modal-action">
+          <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+          <button (click)="updateCarousel()" [disabled]="isLoading()" class="btn btn-primary">
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            }
+            Update Carousel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toasts -->
+  <app-toast
+    [toasts]="toasts"
+    (close)="onToastClose($event)">
+  </app-toast>
+</div>
+
+

@@ -7,6 +7,7 @@ export const adminRoutes: Routes = [
         path: '', component: Dashboard,  children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', loadComponent: () => import('./dashboard-content/dashboard-content').then(m => m.DashboardContent) },
+            { path: 'carousel', loadComponent: () => import('./carousel/carousel').then(m => m.Carousel) },
             { path: 'category', loadComponent: () => import('./category/category').then(m => m.Category) },
             { path: 'sub-category', loadComponent: () => import('./sub-category/sub-category').then(m => m.SubCategory) },
             { path: 'product', loadComponent: () => import('./product/product').then(m => m.Product) },

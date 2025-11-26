@@ -1,10 +1,12 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Navbar } from "../navbar/navbar";
 import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
+import { WishlistService } from '../../core/service/wishlist-service';
+import { CartService } from '../../core/service/cart-service';
 
 @Component({
   selector: 'app-home-page',
@@ -73,7 +75,19 @@ export class HomePage implements OnInit, OnDestroy {
       qualityGuaranteeTitle: 'ضمان الجودة',
       qualityGuaranteeDesc: 'منتجات أصلية 100% مع ضمان الجودة. تسوق بثقة.',
       support247: 'دعم 24/7',
-      support247Desc: 'دعم العملاء على مدار الساعة لمساعدتك في أي أسئلة أو مخاوف.'
+      support247Desc: 'دعم العملاء على مدار الساعة لمساعدتك في أي أسئلة أو مخاوف.',
+      // Wishlist
+      myWishlist: 'قائمة الأمنيات',
+      wishlistEmpty: 'قائمة الأمنيات فارغة',
+      wishlistEmptyDesc: 'لم تقم بإضافة أي منتجات إلى قائمة الأمنيات بعد.',
+      browseProducts: 'تصفح المنتجات',
+      moveToCart: 'نقل إلى السلة',
+      moveAllToCart: 'نقل الكل إلى السلة',
+      removeFromWishlist: 'إزالة من قائمة الأمنيات',
+      clearWishlist: 'مسح قائمة الأمنيات',
+      clearWishlistConfirm: 'هل أنت متأكد من حذف جميع المنتجات من قائمة الأمنيات؟',
+      addedToCart: 'تمت الإضافة إلى السلة',
+      removedFromWishlist: 'تمت الإزالة من قائمة الأمنيات'
     },
     en: {
       // Hero section
@@ -124,7 +138,19 @@ export class HomePage implements OnInit, OnDestroy {
       qualityGuaranteeTitle: 'Quality Guarantee',
       qualityGuaranteeDesc: '100% authentic products with quality guarantee. Shop with confidence.',
       support247: '24/7 Support',
-      support247Desc: 'Round-the-clock customer support to help you with any questions or concerns.'
+      support247Desc: 'Round-the-clock customer support to help you with any questions or concerns.',
+      // Wishlist
+      myWishlist: 'My Wishlist',
+      wishlistEmpty: 'Your wishlist is empty',
+      wishlistEmptyDesc: 'You haven\'t added any products to your wishlist yet.',
+      browseProducts: 'Browse Products',
+      moveToCart: 'Move to Cart',
+      moveAllToCart: 'Move All to Cart',
+      removeFromWishlist: 'Remove from Wishlist',
+      clearWishlist: 'Clear Wishlist',
+      clearWishlistConfirm: 'Are you sure you want to clear your wishlist?',
+      addedToCart: 'Added to Cart',
+      removedFromWishlist: 'Removed from Wishlist'
     }
   };
 
@@ -133,6 +159,9 @@ export class HomePage implements OnInit, OnDestroy {
     const lang = this.currentLanguage();
     return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
   }
+
+  private wishlistService = inject(WishlistService);
+  private cartService = inject(CartService);
 
   constructor(
     private router: Router,
@@ -152,6 +181,13 @@ export class HomePage implements OnInit, OnDestroy {
   featuredProducts: any[] = [];
   // Store original products from API to avoid re-fetching
   private originalProducts: ProductSummaryDto[] = [];
+
+  // Wishlist
+  wishlistItems = this.wishlistService.getWishlistItemsSignal();
+  showWishlist = signal<boolean>(false);
+  
+  // Expose Math for template
+  Math = Math;
 
   // Hero section stats
   stats = {
@@ -306,6 +342,13 @@ export class HomePage implements OnInit, OnDestroy {
     this.startCountdown();
     this.startCarousel();
     this.loadFeaturedProducts();
+    
+    // Check if we should show wishlist (from route or query param)
+    const showWishlistParam = localStorage.getItem('showWishlist');
+    if (showWishlistParam === 'true') {
+      this.showWishlist.set(true);
+      localStorage.removeItem('showWishlist');
+    }
   }
 
   // Load featured products from API
@@ -425,14 +468,72 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Product actions
   addToCart(product: any) {
-    console.log('Adding to cart:', product.name);
-    // Implement add to cart logic
+    const cartItem = {
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      quantity: 1
+    };
+    this.cartService.addItem(cartItem);
+    console.log('Added to cart:', product.name);
+  }
+
+  // Wishlist actions
+  removeFromWishlist(itemId: number) {
+    this.wishlistService.removeItem(itemId);
+    // Update featured products if needed
+    const product = this.featuredProducts.find(p => p.id === itemId);
+    if (product) {
+      product.isWishlisted = false;
+    }
+  }
+
+  moveToCartFromWishlist(item: any) {
+    const wishlistItem = this.wishlistService.getWishlistItems().find(w => w.id === item.id);
+    if (wishlistItem) {
+      this.wishlistService.moveToCart(wishlistItem);
+      // Update featured products if needed
+      const product = this.featuredProducts.find(p => p.id === item.id);
+      if (product) {
+        product.isWishlisted = false;
+      }
+    }
+  }
+
+  moveAllToCart() {
+    this.wishlistService.moveAllToCart();
+    // Update all featured products
+    this.featuredProducts.forEach(product => {
+      if (this.wishlistService.isProductInWishlist(product.id)) {
+        product.isWishlisted = false;
+      }
+    });
+  }
+
+  clearWishlist() {
+    if (confirm(this.t('clearWishlistConfirm'))) {
+      this.wishlistService.clearWishlist();
+      // Update all featured products
+      this.featuredProducts.forEach(product => {
+        product.isWishlisted = false;
+      });
+    }
+  }
+
+  // Toggle wishlist view
+  toggleWishlistView() {
+    this.showWishlist.set(!this.showWishlist());
   }
 
   addToWishlist(product: any) {
-    product.isWishlisted = !product.isWishlisted;
-    console.log(product.isWishlisted ? 'Added to wishlist:' : 'Removed from wishlist:', product.name);
-    // TODO: Implement API call to save wishlist state
+    // Find the original product from API
+    const originalProduct = this.originalProducts.find(p => p.id === product.id);
+    if (originalProduct) {
+      const isAdded = this.wishlistService.toggleItem(originalProduct);
+      product.isWishlisted = isAdded;
+      console.log(isAdded ? 'Added to wishlist:' : 'Removed from wishlist:', product.name);
+    }
   }
 
   // Navigation actions

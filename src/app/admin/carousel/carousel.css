@@ -1,0 +1,11 @@
+/* Simple, plain CSS (no Tailwind @apply) to avoid angular-css errors */
+.carousel-image-preview {
+  width: 4rem;          /* 64px ~ w-16 */
+  height: 4rem;         /* 64px ~ h-16 */
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+
