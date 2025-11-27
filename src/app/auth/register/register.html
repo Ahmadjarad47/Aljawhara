@@ -3,21 +3,21 @@
   <div class="card w-full max-w-md shadow-2xl" style="background: var(--color-base-200)">
     <div class="card-body">
       <h2 class="card-title justify-center text-2xl font-bold mb-4">
-        Create Account
+        {{ t('createAccountTitle') }}
       </h2>
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         <!-- Username -->
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text font-semibold">Username</span>
+            <span class="label-text font-semibold">{{ t('usernameLabel') }}</span>
           </label>
           <input
             type="text"
             formControlName="username"
             class="input input-bordered w-full"
             [class.input-error]="getError('username')"
-            placeholder="Enter your username"
+            [placeholder]="t('usernamePlaceholder')"
           />
           @if (getError('username')) {
             <label class="label">
@@ -29,14 +29,14 @@
         <!-- Email -->
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text font-semibold">Email</span>
+            <span class="label-text font-semibold">{{ t('emailLabel') }}</span>
           </label>
           <input
             type="email"
             formControlName="email"
             class="input input-bordered w-full"
             [class.input-error]="getError('email')"
-            placeholder="Enter your email"
+            [placeholder]="t('emailPlaceholder')"
           />
           @if (getError('email')) {
             <label class="label">
@@ -48,14 +48,14 @@
         <!-- Phone Number -->
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text font-semibold">Phone Number</span>
+            <span class="label-text font-semibold">{{ t('phoneLabel') }}</span>
           </label>
           <input
             type="text"
             formControlName="phoneNumber"
             class="input input-bordered w-full"
             [class.input-error]="getError('phoneNumber')"
-            placeholder="Enter your phone number"
+            [placeholder]="t('phonePlaceholder')"
           />
           @if (getError('phoneNumber')) {
             <label class="label">
@@ -67,7 +67,7 @@
         <!-- Password -->
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text font-semibold">Password</span>
+            <span class="label-text font-semibold">{{ t('passwordLabel') }}</span>
           </label>
           <div class="relative">
             <input
@@ -75,7 +75,7 @@
               formControlName="password"
               class="input input-bordered w-full pr-12"
               [class.input-error]="getError('password')"
-              placeholder="Enter your password"
+              [placeholder]="t('passwordPlaceholder')"
             />
             <button
               type="button"
@@ -104,7 +104,7 @@
         <!-- Confirm Password -->
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text font-semibold">Confirm Password</span>
+            <span class="label-text font-semibold">{{ t('confirmPasswordLabel') }}</span>
           </label>
           <div class="relative">
             <input
@@ -112,7 +112,7 @@
               formControlName="confirmPassword"
               class="input input-bordered w-full pr-12"
               [class.input-error]="getError('confirmPassword') || isPasswordMismatch"
-              placeholder="Confirm your password"
+              [placeholder]="t('confirmPasswordPlaceholder')"
             />
             <button
               type="button"
@@ -142,24 +142,23 @@
         <div class="form-control mt-6">
           <button
             type="submit"
-            class="btn w-full"
-            style="background: var(--color-primary); color: var(--color-primary-content)"
+            class="btn btn-primary w-full"
             [disabled]="isLoading()"
           >
             @if (isLoading()) {
               <span class="loading loading-spinner loading-sm"></span>
-              Creating Account...
+              {{ t('creatingAccount') }}
             } @else {
-              Create Account
+              {{ t('createAccount') }}
             }
           </button>
         </div>
 
         <!-- Login Link -->
         <div class="text-center mt-4">
-          <span class="text-sm">Already have an account?</span>
+          <span class="text-sm">{{ t('alreadyHaveAccount') }}</span>
           <a routerLink="/auth/login" class="link link-hover ml-2 text-sm" style="color: var(--color-primary)">
-            Login
+            {{ t('login') }}
           </a>
         </div>
       </form>

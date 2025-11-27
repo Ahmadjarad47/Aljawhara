@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -14,13 +14,93 @@ import { ToastComponent } from '../../core/components/toast/toast.component';
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css'
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
   private authService = inject(ServiceAuth);
   private router = inject(Router);
   private toastService = inject(ToastService);
   private formBuilder = inject(FormBuilder);
 
   isLoading = signal(false);
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Translations object - Simple translation system without libraries
+  translations = {
+    ar: {
+      // Titles & descriptions
+      resetPasswordTitle: 'إعادة تعيين كلمة المرور',
+      resetPasswordSubtitle: 'أدخل بريدك الإلكتروني، ورمز التحقق، وكلمة المرور الجديدة',
+      // Fields
+      emailLabel: 'البريد الإلكتروني',
+      emailPlaceholder: 'أدخل بريدك الإلكتروني',
+      verificationCodeLabel: 'رمز التحقق',
+      verificationCodePlaceholder: '000000',
+      newPasswordLabel: 'كلمة المرور الجديدة',
+      newPasswordPlaceholder: 'أدخل كلمة المرور الجديدة',
+      confirmNewPasswordLabel: 'تأكيد كلمة المرور الجديدة',
+      confirmNewPasswordPlaceholder: 'أعد إدخال كلمة المرور الجديدة',
+      // Buttons
+      resetting: 'جاري إعادة التعيين...',
+      resetPasswordButton: 'إعادة تعيين كلمة المرور',
+      backToLogin: 'العودة لتسجيل الدخول',
+      // Toasts
+      resetSuccessTitle: 'تمت إعادة تعيين كلمة المرور',
+      resetSuccessMessage: 'تمت إعادة تعيين كلمة المرور بنجاح',
+      resetFailedTitle: 'فشل إعادة التعيين',
+      resetFailedGeneric: 'تعذر إعادة تعيين كلمة المرور',
+      // Validation
+      emailRequired: 'البريد الإلكتروني مطلوب',
+      emailInvalid: 'يجب إدخال بريد إلكتروني صالح',
+      otpRequired: 'رمز التحقق مطلوب',
+      otpInvalid: 'يرجى إدخال رمز تحقق مكون من 6 أرقام',
+      newPasswordRequired: 'كلمة المرور الجديدة مطلوبة',
+      newPasswordMinLength: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
+      confirmNewPasswordRequired: 'تأكيد كلمة المرور الجديدة مطلوب',
+      invalidLength: 'الطول غير صالح',
+      passwordsDoNotMatch: 'كلمتا المرور غير متطابقتين'
+    },
+    en: {
+      // Titles & descriptions
+      resetPasswordTitle: 'Reset Password',
+      resetPasswordSubtitle: 'Enter your email, verification code, and new password',
+      // Fields
+      emailLabel: 'Email',
+      emailPlaceholder: 'Enter your email',
+      verificationCodeLabel: 'Verification Code',
+      verificationCodePlaceholder: '000000',
+      newPasswordLabel: 'New Password',
+      newPasswordPlaceholder: 'Enter new password',
+      confirmNewPasswordLabel: 'Confirm New Password',
+      confirmNewPasswordPlaceholder: 'Confirm new password',
+      // Buttons
+      resetting: 'Resetting...',
+      resetPasswordButton: 'Reset Password',
+      backToLogin: 'Back to Login',
+      // Toasts
+      resetSuccessTitle: 'Password Reset',
+      resetSuccessMessage: 'Your password has been reset successfully',
+      resetFailedTitle: 'Reset Failed',
+      resetFailedGeneric: 'Could not reset your password',
+      // Validation
+      emailRequired: 'Email is required',
+      emailInvalid: 'Valid email is required',
+      otpRequired: 'OTP is required',
+      otpInvalid: 'Please enter a valid 6-digit OTP',
+      newPasswordRequired: 'New password is required',
+      newPasswordMinLength: 'Password must be at least 6 characters',
+      confirmNewPasswordRequired: 'Confirm new password is required',
+      invalidLength: 'Invalid length',
+      passwordsDoNotMatch: 'Passwords do not match'
+    }
+  };
+
+  // Helper method to get translation
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof (typeof this.translations)['ar']] || key;
+  }
   
   resetPasswordForm: FormGroup;
 
@@ -33,6 +113,40 @@ export class ResetPasswordComponent {
     }, {
       validators: this.passwordMatchValidator()
     });
+  }
+
+  ngOnInit(): void {
+    // Load saved language from localStorage
+    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
+      this.currentLanguage.set(savedLang);
+    } else {
+      this.currentLanguage.set('ar');
+    }
+
+    // Listen for language changes from localStorage (when changed in navbar)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'language' && e.newValue) {
+        const newLang = e.newValue as 'ar' | 'en';
+        if (newLang === 'ar' || newLang === 'en') {
+          this.currentLanguage.set(newLang);
+        }
+      }
+    });
+
+    // Also check periodically for language changes (for same-window updates)
+    this.languageCheckInterval = setInterval(() => {
+      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
+        this.currentLanguage.set(currentLang);
+      }
+    }, 500);
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 
   passwordMatchValidator(): ValidatorFn {
@@ -66,10 +180,16 @@ export class ResetPasswordComponent {
       next: (response) => {
         this.isLoading.set(false);
         if (response.success) {
-          this.toastService.success('Password Reset', 'Your password has been reset successfully');
+          this.toastService.success(
+            this.t('resetSuccessTitle'),
+            this.t('resetSuccessMessage')
+          );
           this.router.navigate(['/auth/login']);
         } else {
-          this.toastService.error('Reset Failed', response.message);
+          this.toastService.error(
+            this.t('resetFailedTitle'),
+            response.message || this.t('resetFailedGeneric')
+          );
           if (response.errors) {
             this.setErrorsFromResponse(response.errors);
           }
@@ -77,7 +197,10 @@ export class ResetPasswordComponent {
       },
       error: (error) => {
         this.isLoading.set(false);
-        this.toastService.error('Reset Failed', 'Could not reset your password');
+        this.toastService.error(
+          this.t('resetFailedTitle'),
+          this.t('resetFailedGeneric')
+        );
         console.error('Reset password error:', error);
       }
     });
@@ -104,11 +227,18 @@ export class ResetPasswordComponent {
       return control.getError('serverError');
     }
     if (control?.touched && control?.invalid) {
-      if (control.hasError('required')) return `${fieldName} is required`;
-      if (control.hasError('email')) return 'Valid email is required';
-      if (control.hasError('pattern')) return 'Please enter a valid 6-digit OTP';
+      if (control.hasError('required')) {
+        if (fieldName === 'email') return this.t('emailRequired');
+        if (fieldName === 'otp') return this.t('otpRequired');
+        if (fieldName === 'newPassword') return this.t('newPasswordRequired');
+        if (fieldName === 'confirmNewPassword') return this.t('confirmNewPasswordRequired');
+      }
+      if (control.hasError('email')) return this.t('emailInvalid');
+      if (control.hasError('pattern')) return this.t('otpInvalid');
       if (control.hasError('minlength')) {
-        return fieldName === 'newPassword' ? 'Password must be at least 6 characters' : 'Invalid length';
+        return fieldName === 'newPassword'
+          ? this.t('newPasswordMinLength')
+          : this.t('invalidLength');
       }
     }
     return null;

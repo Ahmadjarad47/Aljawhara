@@ -52,4 +52,27 @@ export interface ToggleCarouselResponse {
   message: string;
 }
 
+// DTOs used by the public carousel API (customer satisfaction + latest reviews)
+export interface ProductRatingSummaryDto {
+  ratingId: number;
+  productId: number;
+  productTitle: string;
+  content: string;
+  ratingNumber: number;
+  /**
+   * ISO date string coming from the backend (DateTime).
+   */
+  createdAt: string;
+}
+
+export interface CustomerSatisfactionDto {
+  /**
+   * Satisfaction percentage between 0 and 100.
+   */
+  percentage: number;
+  /**
+   * Number of currently available products (Active + InStock).
+   */
+  availableProductsCount: number;
+}
 

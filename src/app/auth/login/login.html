@@ -1,113 +1,101 @@
 <div>
-<div class="min-h-screen flex items-center justify-center px-4" style="background: var(--color-base-100)">
-  <div class="card w-full max-w-md shadow-2xl" style="background: var(--color-base-200)">
-    <div class="card-body">
-      <h2 class="card-title justify-center text-2xl font-bold mb-4">
-        Welcome Back
-      </h2>
-      <p class="text-center text-sm opacity-70 mb-6">
-        Sign in to your account to continue
-      </p>
+  <div class="min-h-screen flex items-center justify-center px-4" style="background: var(--color-base-100)">
+    <div class="card w-full max-w-md shadow-2xl" style="background: var(--color-base-200)">
+      <div class="card-body">
+        <h2 class="card-title justify-center text-2xl font-bold mb-4">
+          {{ t('welcomeBackTitle') }}
+        </h2>
+        <p class="text-center text-sm opacity-70 mb-6">
+          {{ t('welcomeBackSubtitle') }}
+        </p>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <!-- Email -->
-        <div class="form-control mb-4">
-          <label class="label">
-            <span class="label-text font-semibold">Email</span>
-          </label>
-          <input
-            type="email"
-            formControlName="email"
-            class="input input-bordered w-full"
-            [class.input-error]="getError('email')"
-            placeholder="Enter your email"
-          />
-          @if (getError('email')) {
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <!-- Email -->
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text font-semibold">{{ t('emailLabel') }}</span>
+            </label>
+            <input type="email" formControlName="email" class="input input-bordered w-full"
+              [class.input-error]="getError('email')" [placeholder]="t('emailPlaceholder')" />
+            @if (getError('email')) {
             <label class="label">
               <span class="label-text-alt text-error">{{ getError('email') }}</span>
             </label>
-          }
-        </div>
-
-        <!-- Password -->
-        <div class="form-control mb-4">
-          <label class="label">
-            <span class="label-text font-semibold">Password</span>
-            <a routerLink="/auth/forgot-password" class="label-text-alt link link-hover" style="color: var(--color-primary)">
-              Forgot password?
-            </a>
-          </label>
-          <div class="relative">
-            <input
-              [type]="showPassword() ? 'text' : 'password'"
-              formControlName="password"
-              class="input input-bordered w-full pr-12"
-              [class.input-error]="getError('password')"
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              (click)="togglePasswordVisibility()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hover:text-base-content"
-            >
-              @if (showPassword()) {
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              }
-            </button>
+            }
           </div>
-          @if (getError('password')) {
+
+          <!-- Password -->
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text font-semibold">{{ t('passwordLabel') }}</span>
+              <a routerLink="/auth/forgot-password" class="label-text-alt link link-hover"
+                style="color: var(--color-primary)">
+                {{ t('forgotPassword') }}
+              </a>
+            </label>
+            <div class="relative">
+              <input [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                class="input input-bordered w-full pr-12" [class.input-error]="getError('password')"
+                [placeholder]="t('passwordPlaceholder')" />
+              <button type="button" (click)="togglePasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hover:text-base-content">
+                @if (showPassword()) {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+                } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                }
+              </button>
+            </div>
+            @if (getError('password')) {
             <label class="label">
               <span class="label-text-alt text-error">{{ getError('password') }}</span>
             </label>
-          }
-        </div>
-
-        <!-- Remember Me -->
-        <div class="form-control mb-4">
-          <label class="label cursor-pointer justify-start">
-            <input type="checkbox" formControlName="rememberMe" class="checkbox checkbox-primary" />
-            <span class="label-text ml-2">Remember me</span>
-          </label>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="form-control mt-6">
-          <button
-            type="submit"
-            class="btn w-full"
-            style="background: var(--color-primary); color: var(--color-primary-content)"
-            [disabled]="isLoading()"
-          >
-            @if (isLoading()) {
-              <span class="loading loading-spinner loading-sm"></span>
-              Signing in...
-            } @else {
-              Sign In
             }
-          </button>
-        </div>
+          </div>
 
-        <!-- Register Link -->
-        <div class="text-center mt-4">
-          <span class="text-sm">Don't have an account?</span>
-          <a routerLink="/auth/register" class="link link-hover ml-2 text-sm" style="color: var(--color-primary)">
-            Sign Up
-          </a>
-        </div>
-      </form>
+          <!-- Remember Me -->
+          <div class="form-control mb-4">
+            <label class="label cursor-pointer justify-start">
+              <input type="checkbox" formControlName="rememberMe" class="checkbox checkbox-primary" />
+              <span class="label-text ml-2">{{ t('rememberMe') }}</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="form-control mt-6">
+            <button type="submit" class="btn bg-primary w-full"
+              style="background: var(--color-primary); color: var(--color-primary-content)" [disabled]="isLoading()">
+              @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              {{ t('signingIn') }}
+              } @else {
+              {{ t('signIn') }}
+              }
+            </button>
+          </div>
+
+          <!-- Register Link -->
+          <div class="text-center mt-4">
+            <span class="text-sm">{{ t('dontHaveAccount') }}</span>
+            <a routerLink="/auth/register" class="link link-hover ml-2 text-sm" style="color: var(--color-primary)">
+              {{ t('signUp') }}
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-  <app-toast 
-    [toasts]="toasts" 
-    (close)="onToastClose($event)">
+  <app-toast [toasts]="toasts" (close)="onToastClose($event)">
   </app-toast>
 </div>

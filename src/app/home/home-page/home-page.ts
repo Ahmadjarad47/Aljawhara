@@ -7,7 +7,11 @@ import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { CartService } from '../../core/service/cart-service';
-import { CarouselDto } from '../../admin/carousel/carousel.models';
+import {
+  CarouselDto,
+  CustomerSatisfactionDto,
+  ProductRatingSummaryDto
+} from '../../admin/carousel/carousel.models';
 import { environment } from '../../../environments/environment.development';
 
 @Component({
@@ -176,6 +180,7 @@ export class HomePage implements OnInit, OnDestroy {
   isLoadingCategories: boolean = false;
   isLoadingProducts: boolean = true;
   isLoadingStats: boolean = false;
+  isLoadingReviews: boolean = false;
 
   // Newsletter subscription
   newsletterEmail: string = '';
@@ -186,6 +191,10 @@ export class HomePage implements OnInit, OnDestroy {
   // Store original products from API to avoid re-fetching
   private originalProducts: ProductSummaryDto[] = [];
 
+  // Stats & testimonials data from backend
+  customerSatisfaction: CustomerSatisfactionDto | null = null;
+  latestReviews: ProductRatingSummaryDto[] = [];
+
   // Wishlist
   wishlistItems = this.wishlistService.getWishlistItemsSignal();
   showWishlist = signal<boolean>(false);
@@ -193,13 +202,7 @@ export class HomePage implements OnInit, OnDestroy {
   // Expose Math for template
   Math = Math;
 
-  // Hero section stats
-  stats = {
-    activeUsers: 25000,
-    productsSold: 150000,
-    merchants: 1200,
-    satisfactionRate: 96
-  };
+
 
   // Hero Carousel
   currentSlide = 0;
@@ -314,6 +317,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.loadHeroSlides();
     this.startCarousel();
     this.loadFeaturedProducts();
+    this.loadCustomerSatisfaction();
+    this.loadLatestReviews();
     
     // Check if we should show wishlist (from route or query param)
     const showWishlistParam = localStorage.getItem('showWishlist');
@@ -378,6 +383,42 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoadingHero = false;
       }
     });
+  }
+
+  // Load customer satisfaction stats from public API
+  private loadCustomerSatisfaction() {
+    this.isLoadingStats = true;
+
+    this.http
+      .get<CustomerSatisfactionDto>(`${environment.apiUrl}Carousels/customer-satisfaction`)
+      .subscribe({
+        next: (data) => {
+          this.customerSatisfaction = data;
+          this.isLoadingStats = false;
+        },
+        error: (error) => {
+          console.error('[HomePage] Error loading customer satisfaction:', error);
+          this.isLoadingStats = false;
+        }
+      });
+  }
+
+  // Load latest third of product reviews for testimonials section
+  private loadLatestReviews() {
+    this.isLoadingReviews = true;
+
+    this.http
+      .get<ProductRatingSummaryDto[]>(`${environment.apiUrl}Carousels/latest-third-reviews`)
+      .subscribe({
+        next: (reviews) => {
+          this.latestReviews = Array.isArray(reviews) ? reviews : [];
+          this.isLoadingReviews = false;
+        },
+        error: (error) => {
+          console.error('[HomePage] Error loading latest reviews:', error);
+          this.isLoadingReviews = false;
+        }
+      });
   }
 
   // Load featured products from API
