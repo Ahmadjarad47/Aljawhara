@@ -78,6 +78,10 @@ export class CarouselService {
     formData.append('descriptionAr', carousel.descriptionAr);
     formData.append('price', carousel.price.toString());
 
+    if (carousel.productUrl) {
+      formData.append('productUrl', carousel.productUrl);
+    }
+
     if (carousel.image) {
       formData.append('image', carousel.image);
     }
@@ -95,6 +99,10 @@ export class CarouselService {
     formData.append('description', carousel.description);
     formData.append('descriptionAr', carousel.descriptionAr);
     formData.append('price', carousel.price.toString());
+
+    if (carousel.productUrl) {
+      formData.append('productUrl', carousel.productUrl);
+    }
 
     if (carousel.image) {
       formData.append('image', carousel.image);

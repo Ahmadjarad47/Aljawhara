@@ -36,9 +36,6 @@ export class Carousel implements OnInit {
   // Filters
   statusFilter = signal<boolean | null>(null);
 
-  // Internal filters subject (if needed later)
-  private filtersSubject = new BehaviorSubject<CarouselFilters>({});
-
   // Computed filters observable
   filters$ = computed(() => ({
     pageNumber: this.currentPage(),
@@ -94,6 +91,7 @@ export class Carousel implements OnInit {
     description: '',
     descriptionAr: '',
     price: 0,
+    productUrl: '',
     image: null
   };
 
@@ -104,6 +102,7 @@ export class Carousel implements OnInit {
     description: '',
     descriptionAr: '',
     price: 0,
+    productUrl: '',
     image: null,
     imageToDelete: null
   };
@@ -111,10 +110,18 @@ export class Carousel implements OnInit {
   // Keep the current image url for display in edit modal
   currentImageUrl: string | null = null;
 
+  // Cache last applied filters to avoid duplicate API calls (especially in dev mode)
+  private lastFilters: CarouselFilters | null = null;
+
   constructor() {
     effect(() => {
       const filters = this.filters$();
-      this.loadCarousels(filters);
+
+      // Only trigger API call when filters actually change
+      if (!this.areFiltersEqual(this.lastFilters, filters)) {
+        this.lastFilters = { ...filters };
+        this.loadCarousels(filters);
+      }
     });
   }
 
@@ -236,11 +243,22 @@ export class Carousel implements OnInit {
       description: carousel.description,
       descriptionAr: carousel.descriptionAr,
       price: carousel.price,
+      productUrl: carousel.productUrl,
       image: null,
       imageToDelete: null
     };
     this.currentImageUrl = carousel.image;
     this.showEditModal.set(true);
+  }
+
+  // Mark existing image for deletion without uploading a new one
+  markCurrentImageForDeletion() {
+    if (!this.currentImageUrl) {
+      return;
+    }
+
+    this.editCarousel.imageToDelete = this.currentImageUrl;
+    this.currentImageUrl = null;
   }
 
   updateCarousel() {
@@ -334,6 +352,7 @@ export class Carousel implements OnInit {
       description: '',
       descriptionAr: '',
       price: 0,
+      productUrl: '',
       image: null
     };
   }
@@ -349,6 +368,7 @@ export class Carousel implements OnInit {
       description: '',
       descriptionAr: '',
       price: 0,
+      productUrl: '',
       image: null,
       imageToDelete: null
     };
@@ -388,6 +408,18 @@ export class Carousel implements OnInit {
     }
 
     return pages;
+  }
+
+  private areFiltersEqual(a: CarouselFilters | null, b: CarouselFilters): boolean {
+    if (!a) {
+      return false;
+    }
+
+    return (
+      a.pageNumber === b.pageNumber &&
+      a.pageSize === b.pageSize &&
+      a.isActive === b.isActive
+    );
   }
 
   // Toast close

@@ -7,6 +7,7 @@ export interface CarouselDto extends BaseDto {
   descriptionAr: string;
   price: number;
   image: string;
+  productUrl: string;
 }
 
 export interface CarouselCreateWithFileDto {
@@ -15,6 +16,7 @@ export interface CarouselCreateWithFileDto {
   description: string;
   descriptionAr: string;
   price: number;
+  productUrl?: string;
   image: File | null;
 }
 
@@ -25,6 +27,7 @@ export interface CarouselUpdateWithFileDto {
   description: string;
   descriptionAr: string;
   price: number;
+  productUrl?: string;
   image: File | null;
   imageToDelete?: string | null;
 }

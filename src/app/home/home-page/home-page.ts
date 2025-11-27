@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Navbar } from "../navbar/navbar";
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { CartService } from '../../core/service/cart-service';
+import { CarouselDto } from '../../admin/carousel/carousel.models';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-home-page',
@@ -14,7 +16,8 @@ import { CartService } from '../../core/service/cart-service';
   imports: [
     CommonModule,
     FormsModule,
-  ],
+    RouterLink
+],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css'
 })
@@ -162,6 +165,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   private wishlistService = inject(WishlistService);
   private cartService = inject(CartService);
+  private http = inject(HttpClient);
 
   constructor(
     private router: Router,
@@ -200,8 +204,9 @@ export class HomePage implements OnInit, OnDestroy {
   // Hero Carousel
   currentSlide = 0;
   private carouselInterval?: ReturnType<typeof setInterval>;
+  isLoadingHero: boolean = false;
   
-  // Hero slides with translations
+  // Hero slides (will be populated from API, with static defaults as fallback)
   heroSlidesAr = [
     {
       id: 1,
@@ -212,40 +217,8 @@ export class HomePage implements OnInit, OnDestroy {
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop',
       ctaPrimary: 'تسوق الآن',
       ctaSecondary: 'اعرف المزيد',
-      theme: 'primary'
-    },
-    {
-      id: 2,
-      title: 'إلكترونيات',
-      titleHighlight: 'بجودة عالية',
-      titleEnd: 'أفضل الصفقات أونلاين',
-      subtitle: 'احصل على أحدث الأجهزة والإلكترونيات بأسعار لا تقبل المنافسة. شحن مجاني للطلبات أكثر من 50 دولاراً وضمان استرداد الأموال لمدة 30 يوماً.',
-      image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'تصفح الإلكترونيات',
-      ctaSecondary: 'عرض الصفقات',
-      theme: 'secondary'
-    },
-    {
-      id: 3,
-      title: 'مجموعة',
-      titleHighlight: 'أزياء عصرية',
-      titleEnd: 'الأناقة تلتقي بالراحة',
-      subtitle: 'ارتقِ بخزانة ملابسك مع مجموعتنا المختارة من الأزياء. من الكاجوال إلى الرسمي، ابحث عن الإطلالة المثالية لكل مناسبة.',
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'تسوق الأزياء',
-      ctaSecondary: 'وصل حديثاً',
-      theme: 'accent'
-    },
-    {
-      id: 4,
-      title: 'أساسيات',
-      titleHighlight: 'المنزل الذكي',
-      titleEnd: 'عيش عصري',
-      subtitle: 'حوّل مساحتك مع حلول المنزل الذكي المبتكرة. موفرة للطاقة، سهلة التركيب، ومصممة لأنماط الحياة العصرية.',
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'استكشف المنزل الذكي',
-      ctaSecondary: 'اعرف المزيد',
-      theme: 'success'
+      theme: 'primary',
+      productUrl: '/products'
     }
   ];
 
@@ -259,46 +232,43 @@ export class HomePage implements OnInit, OnDestroy {
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop',
       ctaPrimary: 'Shop Now',
       ctaSecondary: 'Learn More',
-      theme: 'primary'
-    },
-    {
-      id: 2,
-      title: 'Premium Quality',
-      titleHighlight: 'Electronics',
-      titleEnd: 'Best Deals Online',
-      subtitle: 'Get the latest gadgets and electronics at unbeatable prices. Free shipping on orders over $50 and 30-day money-back guarantee.',
-      image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'Browse Electronics',
-      ctaSecondary: 'View Deals',
-      theme: 'secondary'
-    },
-    {
-      id: 3,
-      title: 'Trendy Fashion',
-      titleHighlight: 'Collection',
-      titleEnd: 'Style Meets Comfort',
-      subtitle: 'Elevate your wardrobe with our curated fashion collection. From casual to formal, find the perfect outfit for every occasion.',
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'Shop Fashion',
-      ctaSecondary: 'New Arrivals',
-      theme: 'accent'
-    },
-    {
-      id: 4,
-      title: 'Smart Home',
-      titleHighlight: 'Essentials',
-      titleEnd: 'Modern Living',
-      subtitle: 'Transform your space with innovative smart home solutions. Energy-efficient, easy to install, and designed for modern lifestyles.',
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1920&h=1080&fit=crop',
-      ctaPrimary: 'Explore Smart Home',
-      ctaSecondary: 'Learn More',
-      theme: 'success'
+      theme: 'primary',
+      productUrl: '/products'
     }
   ];
 
   // Get hero slides based on current language
   get heroSlides() {
     return this.currentLanguage() === 'ar' ? this.heroSlidesAr : this.heroSlidesEn;
+  }
+
+  // Helper to split full title into (title, titleHighlight, titleEnd)
+  private splitTitle(fullTitle: string) {
+    if (!fullTitle) {
+      return {
+        title: '',
+        titleHighlight: '',
+        titleEnd: ''
+      };
+    }
+
+    const parts = fullTitle.trim().split(/\s+/);
+
+    // If not enough words, just use the whole string as main title
+    if (parts.length <= 2) {
+      return {
+        title: fullTitle,
+        titleHighlight: '',
+        titleEnd: ''
+      };
+    }
+
+    // Use first two words as main title, third as highlight, rest as ending
+    return {
+      title: parts.slice(0, 2).join(' '),
+      titleHighlight: parts[2] ?? '',
+      titleEnd: parts.slice(3).join(' ')
+    };
   }
 
   // Countdown timer for special offer
@@ -318,6 +288,7 @@ export class HomePage implements OnInit, OnDestroy {
       // Default to Arabic
       this.currentLanguage.set('ar');
     }
+    console.log('[HomePage] ngOnInit - currentLanguage =', this.currentLanguage());
 
     // Listen for language changes from localStorage (when changed in navbar)
     window.addEventListener('storage', (e) => {
@@ -340,6 +311,7 @@ export class HomePage implements OnInit, OnDestroy {
     }, 500);
 
     this.startCountdown();
+    this.loadHeroSlides();
     this.startCarousel();
     this.loadFeaturedProducts();
     
@@ -349,6 +321,63 @@ export class HomePage implements OnInit, OnDestroy {
       this.showWishlist.set(true);
       localStorage.removeItem('showWishlist');
     }
+  }
+
+  // Load hero slides (carousel) from public API
+  private loadHeroSlides() {
+    this.isLoadingHero = true;
+
+    console.log('[HomePage] loadHeroSlides - calling API:', `${environment.apiUrl}Carousels`);
+
+    this.http.get<CarouselDto[]>(`${environment.apiUrl}Carousels`).subscribe({
+      next: (carousels) => {
+        console.log('[HomePage] loadHeroSlides - API raw response:', carousels);
+
+        const items = Array.isArray(carousels) ? carousels : [];
+
+        // Map backend DTOs to hero slide format for both languages
+        this.heroSlidesAr = items.map((item, index) => {
+          const titles = this.splitTitle(item.titleAr || item.title);
+          const mapped = {
+            id: item.id ?? index + 1,
+            ...titles,
+            subtitle: item.descriptionAr || item.description,
+            image: item.image,
+            ctaPrimary: 'تسوق الآن',
+            ctaSecondary: 'اعرف المزيد',
+            theme: 'primary',
+            productUrl: item.productUrl
+          };
+          console.log('[HomePage] heroSlidesAr mapped item:', mapped);
+          return mapped;
+        });
+
+        this.heroSlidesEn = items.map((item, index) => {
+          const titles = this.splitTitle(item.title);
+          const mapped = {
+            id: item.id ?? index + 1,
+            ...titles,
+            subtitle: item.description,
+            image: item.image,
+            ctaPrimary: 'Shop Now',
+            ctaSecondary: 'Learn More',
+            theme: 'primary',
+            productUrl: item.productUrl
+          };
+          console.log('[HomePage] heroSlidesEn mapped item:', mapped);
+          return mapped;
+        });
+
+        console.log('[HomePage] heroSlidesAr final:', this.heroSlidesAr);
+        console.log('[HomePage] heroSlidesEn final:', this.heroSlidesEn);
+
+        this.isLoadingHero = false;
+      },
+      error: (error) => {
+        console.error('[HomePage] Error loading hero carousels:', error);
+        this.isLoadingHero = false;
+      }
+    });
   }
 
   // Load featured products from API

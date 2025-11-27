@@ -12,8 +12,8 @@
     @for (slide of heroSlides; track slide.id; let i = $index) {
       <div class="carousel-slide absolute inset-0 w-full h-full transition-all duration-700 ease-in-out"
            [class.active]="currentSlide === i"
-           [class.prev]="currentSlide === (i + 1) % heroSlides.length"
-           [class.next]="currentSlide === (i - 1 + heroSlides.length) % heroSlides.length">
+           [class.prev]="heroSlides.length > 1 && currentSlide === (i + 1) % heroSlides.length"
+           [class.next]="heroSlides.length > 1 && currentSlide === (i - 1 + heroSlides.length) % heroSlides.length">
         
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 w-full h-full">
@@ -67,7 +67,7 @@
 
               <!-- CTA Buttons -->
               <div class="slide-content-animate flex flex-col sm:flex-row gap-3 sm:gap-4" style="animation-delay: 0.4s;">
-                <button (click)="shopNow()" 
+                <button [routerLink]="slide.productUrl"
                         class="group relative inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 sm:hover:scale-105"
                         style="background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.85) 100%); box-shadow: 0 4px 20px rgba(5, 66, 57, 0.4);">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

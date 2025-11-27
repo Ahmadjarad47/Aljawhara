@@ -105,6 +105,7 @@
                 <th>Description (EN)</th>
                 <th>Description (AR)</th>
                 <th>Price</th>
+                <th>Product URL</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Actions</th>
@@ -150,6 +151,15 @@
                     <div class="font-semibold">
                       ${{carousel.price}}
                     </div>
+                  </td>
+                  <td>
+                    @if (carousel.productUrl) {
+                      <a [href]="carousel.productUrl" target="_blank" class="link link-primary text-xs truncate max-w-[10rem] inline-block">
+                        {{carousel.productUrl}}
+                      </a>
+                    } @else {
+                      <span class="text-xs text-base-content/50">—</span>
+                    }
                   </td>
                   <td>
                     <div class="badge" [class.badge-success]="carousel.isActive" [class.badge-error]="!carousel.isActive">
@@ -310,6 +320,18 @@
           </div>
         </div>
 
+        <!-- Product URL (optional) -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Product URL</span>
+          </label>
+          <input
+            type="text"
+            placeholder="https://example.com/product/123"
+            class="input input-bordered w-full"
+            [(ngModel)]="newCarousel.productUrl" />
+        </div>
+
         <!-- Image -->
         <div class="form-control w-full mt-4">
           <label class="label">
@@ -391,6 +413,18 @@
           </div>
         </div>
 
+        <!-- Product URL (optional) -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Product URL</span>
+          </label>
+          <input
+            type="text"
+            placeholder="https://example.com/product/123"
+            class="input input-bordered w-full"
+            [(ngModel)]="editCarousel.productUrl" />
+        </div>
+
         <!-- Current Image -->
         @if (currentImageUrl) {
           <div class="mt-4">
@@ -398,6 +432,12 @@
             <div class="mt-2">
               <img [src]="currentImageUrl" alt="Current Carousel Image" class="w-32 h-32 object-cover rounded-lg border" />
             </div>
+            <button
+              type="button"
+              class="btn btn-outline btn-error btn-xs mt-2"
+              (click)="markCurrentImageForDeletion()">
+              Delete current image
+            </button>
           </div>
         }
 
