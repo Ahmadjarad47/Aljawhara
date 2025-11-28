@@ -217,7 +217,7 @@ export class HomePage implements OnInit, OnDestroy {
       titleHighlight: 'رائعة',
       titleEnd: 'بأسعار ممتازة',
       subtitle: 'تسوق من آلاف البائعين المعتمدين وابحث عن ما تبحث عنه بالضبط. توصيل سريع ودفع آمن وخدمة عملاء ممتازة مضمونة.',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop',
+      image: '',
       ctaPrimary: 'تسوق الآن',
       ctaSecondary: 'اعرف المزيد',
       theme: 'primary',
@@ -232,7 +232,7 @@ export class HomePage implements OnInit, OnDestroy {
       titleHighlight: 'Products',
       titleEnd: 'at Great Prices',
       subtitle: 'Shop from thousands of verified sellers and find exactly what you\'re looking for. Fast delivery, secure payments, and excellent customer service guaranteed.',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop',
+      image: 'https://images.unsplash.com/photo74bd600d8?w=1920&h=1080&fit=crop',
       ctaPrimary: 'Shop Now',
       ctaSecondary: 'Learn More',
       theme: 'primary',
@@ -403,7 +403,7 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
-  // Load latest third of product reviews for testimonials section
+  // Load lates third of product reviews for testimonials section
   private loadLatestReviews() {
     this.isLoadingReviews = true;
 
