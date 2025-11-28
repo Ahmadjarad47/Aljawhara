@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'https://aljawharaplus.com/api/',
+  apiUrl: 'https://api.aljawharaplus.com/api/',
 };
