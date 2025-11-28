@@ -45,7 +45,7 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline'", // Angular requires unsafe-inline for styles
     "img-src 'self' data: https: blob:",
     "font-src 'self' data: https:",
-    "connect-src 'self' https://api.aljawharaplus.com",
+    "connect-src 'self' https://localhost:7130",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",

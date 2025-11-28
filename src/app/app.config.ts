@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading, withInMemoryScrolling } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch, withInterceptors, withJsonpSupport } from '@angular/common/http';
 import { routes } from './app.routes';
@@ -24,7 +24,11 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(), // Enable component input binding from route params
       withViewTransitions(), // Enable view transitions for smoother navigation
-      withPreloading(SelectivePreloadingStrategy) // Smart preloading based on connection and priority
+      withPreloading(SelectivePreloadingStrategy), // Smart preloading based on connection and priority
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top', // Always scroll to top on navigation
+        anchorScrolling: 'enabled' // Enable scrolling to anchors if present in the URL
+      })
     ),
     
     // SSR optimizations

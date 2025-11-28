@@ -71,7 +71,7 @@
                         class="group relative inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-semibold text-white rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 sm:hover:scale-105"
                         style="background: linear-gradient(135deg, #054239 0%, rgba(5, 66, 57, 0.85) 100%); box-shadow: 0 4px 20px rgba(5, 66, 57, 0.4);">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0-5 5m5-5H6"></path>
                   </svg>
                   {{slide.ctaPrimary}}
                 </button>
@@ -150,8 +150,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-16">
       <div class="mb-8 sm:mb-0">
         <div class="accent-chip mb-4">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11.049 2.927l1.902 3.858 4.259.619-3.08 3 0.726 4.233L12 12.96l-3.856 2.017L8.87 10.4l-3.08-3 4.259-.619 1.902-3.858z" />
           </svg>
           {{t('featuredCollection')}}
         </div>
@@ -162,13 +163,13 @@
           {{t('discoverProducts')}}
         </p>
       </div>
-      <button (click)="viewAllProducts()" class="btn btn-lg group accent-outline self-start sm:self-center"
+      <a routerLink="/product" class="btn btn-lg group accent-outline self-start sm:self-center"
               style="border: 2px solid #054239; color: #054239; background: transparent;">
         <span>{{t('viewAllProducts')}}</span>
         <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
         </svg>
-      </button>
+      </a>
     </div>
 
     <!-- Products Grid -->
@@ -298,7 +299,7 @@
                       class="btn btn-sm group/btn"
                       style="background: #054239; color: white; border: none;">
                 <svg class="w-4 h-4 mr-1 group-hover/btn:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0-5 5m5-5H8"></path>
                 </svg>
                 {{t('addToCart')}}
               </button>
@@ -335,9 +336,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           <div class="stat bg-base-100 border border-base-300/50 rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="stat-figure mb-4 flex justify-center" style="color: #054239;">
-              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+              <!-- Icon: stacked boxes for products -->
+              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 7l9-4 9 4-9 4-9-4z" />
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 7v6c0 .6.3 1.2.8 1.4l8.2 4 8.2-4c.5-.2.8-.8.8-1.4V7" />
               </svg>
+              
             </div>
             <div class="stat-title text-sm sm:text-base mb-2">{{t('totalProducts')}}</div>
             <div class="stat-value text-2xl sm:text-3xl md:text-4xl mb-2" style="color: #054239;">
@@ -348,9 +354,13 @@
           
           <div class="stat bg-base-100 border border-base-300/50 rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="stat-figure mb-4 flex justify-center" style="color: #054239;">
-              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6l7-4z" />
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12l2 2 4-4" />
               </svg>
+                            
             </div>
             <div class="stat-title text-sm sm:text-base mb-2">{{t('qualityGuarantee')}}</div>
             <div class="stat-value text-2xl sm:text-3xl md:text-4xl mb-2" style="color: #054239;">
@@ -361,9 +371,13 @@
           
           <div class="stat bg-base-100 border border-base-300/50 rounded-xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="stat-figure mb-4 flex justify-center" style="color: #054239;">
-              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              <svg class="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 2a9 9 0 00-9 9v4a2 2 0 002 2h2v-6H5a7 7 0 0114 0h-2v6h2a2 2 0 002-2v-4a9 9 0 00-9-9z" />
+                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 20h6" />
               </svg>
+              
             </div>
             <div class="stat-title text-sm sm:text-base mb-2">{{t('support')}}</div>
             <div class="stat-value text-2xl sm:text-3xl md:text-4xl mb-2" style="color: #054239;">24/7</div>

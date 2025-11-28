@@ -62,7 +62,8 @@
         <div class="form-control mt-6">
           <button
             type="submit"
-            class="btn btn-primary w-full"
+            class="btn text-white w-full"
+            style="background: #054239"
             [disabled]="isLoading()"
           >
             @if (isLoading()) {
@@ -79,7 +80,8 @@
           <p class="text-sm opacity-70 mb-2">{{ t('didntReceiveCode') }}</p>
           <button
             type="button"
-            class="btn btn-link"
+            class="btn text-white"
+            style="background: #054239"
             [disabled]="isResending()"
             (click)="resendVerification()"
           >
