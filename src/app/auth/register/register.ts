@@ -118,37 +118,58 @@ export class RegisterComponent implements OnInit, OnDestroy {
       return error;
     }
 
-    const msg = error.toLowerCase();
+    const description = error;
+    const msg = description.toLowerCase();
 
-    // Email / username already taken
-    if (msg.includes('is already taken') || msg.includes('already in use')) {
-      if (msg.includes('email')) {
-        return 'هذا البريد الإلكتروني مستخدم بالفعل';
+    // ===== نفس منطق IdentityErrorTranslator في الباكند (TranslateByPattern) =====
+
+    // Password length: "at least X characters"
+    if (msg.includes('at least') && msg.includes('characters')) {
+      const match = description.match(/at least\s+(\d+)\s+characters?/i);
+      if (match && match[1]) {
+        return `كلمة المرور يجب أن تكون على الأقل ${match[1]} أحرف`;
       }
-      if (msg.includes('user name') || msg.includes('username')) {
+    }
+
+    // Password requirements
+    if (msg.includes('digit')) {
+      return 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل';
+    }
+    if (msg.includes('lowercase')) {
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل';
+    }
+    if (msg.includes('uppercase')) {
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل';
+    }
+    if (msg.includes('non alphanumeric') || msg.includes('special')) {
+      return 'كلمة المرور يجب أن تحتوي على حرف خاص واحد على الأقل';
+    }
+
+    // Duplicate / already taken errors
+    if (msg.includes('already taken') || msg.includes('is already taken') || msg.includes('already in use')) {
+      if (msg.includes('email')) {
+        return 'البريد الإلكتروني مستخدم بالفعل';
+      }
+      if (msg.includes('user name') || msg.includes('username') || msg.includes('user')) {
         return 'اسم المستخدم مستخدم بالفعل';
       }
       return 'هذه البيانات مستخدمة بالفعل';
     }
 
-    // Password rules (Identity default messages)
-    if (msg.includes('passwords must be at least')) {
-      return 'يجب أن تكون كلمة المرور بطول كافٍ (على الأقل 6 أحرف عادةً)';
-    }
-    if (msg.includes('passwords must have at least one non alphanumeric character')) {
-      return 'يجب أن تحتوي كلمة المرور على رمز واحد على الأقل (مثل ! @ # $ %)';
-    }
-    if (msg.includes('passwords must have at least one digit')) {
-      return 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل';
-    }
-    if (msg.includes('passwords must have at least one lowercase')) {
-      return 'يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل';
-    }
-    if (msg.includes('passwords must have at least one uppercase')) {
-      return 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل';
+    // Invalid errors
+    if (msg.includes('invalid')) {
+      if (msg.includes('email')) {
+        return 'البريد الإلكتروني غير صحيح';
+      }
+      if (msg.includes('token')) {
+        return 'رمز التحقق غير صحيح';
+      }
+      if (msg.includes('password')) {
+        return 'كلمة المرور غير صحيحة';
+      }
     }
 
-    // Required / invalid field messages
+    // ===== رسائل تحقق حقول النموذج (ModelState) =====
     if (msg.includes('the email field is required') || msg.includes('email is required')) {
       return this.t('emailRequired');
     }
@@ -163,8 +184,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
       return this.t('emailInvalid');
     }
 
-    // Fallback: return original error for AR (better than nothing)
-    return error;
+    // Fallback: return original error for AR (أفضل من لا شيء)
+    return description;
   }
   
   registerForm: FormGroup;
