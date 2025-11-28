@@ -112,12 +112,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private translateServerError(error: string): string {
     if (!error) return error;
 
-    const lang = this.currentLanguage();
-    // Keep original English messages when language is EN
-    if (lang === 'en') {
-      return error;
-    }
-
     const description = error;
     const msg = description.toLowerCase();
 
@@ -187,7 +181,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     // Fallback: return original error for AR (أفضل من لا شيء)
     return description;
   }
-  
+
   registerForm: FormGroup;
 
   constructor() {
@@ -259,8 +253,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const registerDto: RegisterDto = this.registerForm.value;
 
     this.authService.register(registerDto).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.isLoading.set(false);
+
         if (response.success) {
           this.toastService.success(
             this.t('registerSuccessTitle'),
@@ -268,22 +263,43 @@ export class RegisterComponent implements OnInit, OnDestroy {
           );
           this.router.navigate(['/auth/verify'], { queryParams: { email: registerDto.email } });
         } else {
+          const rawMessage = response.message || this.t('registerFailedGeneric');
+          const translated = this.translateServerError(rawMessage);
+
           this.toastService.error(
             this.t('registerFailedTitle'),
-            response.message ? this.translateServerError(response.message) : this.t('registerFailedGeneric')
+            translated
           );
-          if (response.errors) {
+
+          // حاول وضع الرسالة تحت الحقل المناسب إذا كان الرد عام فقط مثل: "Username is already taken"
+          this.applyFieldErrorFromMessage(rawMessage);
+
+          if (Array.isArray(response.errors) && response.errors.length) {
             this.setErrorsFromResponse(response.errors);
           }
         }
       },
       error: (error) => {
         this.isLoading.set(false);
+
+        const apiError = error?.error;
+        const rawMessage =
+          (apiError && apiError.message) ||
+          error?.message ||
+          this.t('registerFailedGeneric');
+        const translated = this.translateServerError(rawMessage);
+
         this.toastService.error(
           this.t('registerFailedTitle'),
-          this.t('registerFailedGeneric')
+          translated
         );
-        console.error('Registration error:', error);
+
+        // حاول أيضاً ربط الرسالة بحقل معيّن إن أمكن
+        this.applyFieldErrorFromMessage(rawMessage);
+
+        if (apiError && Array.isArray(apiError.errors) && apiError.errors.length) {
+          this.setErrorsFromResponse(apiError.errors);
+        }
       }
     });
   }
@@ -306,6 +322,33 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.toastService.error(this.t('registerFailedTitle'), translated);
       }
     });
+  }
+
+  // يحاول استنتاج الحقل من رسالة عامة من السيرفر مثل "Username is already taken"
+  private applyFieldErrorFromMessage(message: string) {
+    if (!message) return;
+
+    const msg = message.toLowerCase();
+    const translated = this.translateServerError(message);
+
+    if (msg.includes('user name') || msg.includes('username')) {
+      this.registerForm.get('username')?.setErrors({ serverError: translated });
+      return;
+    }
+
+    if (msg.includes('email')) {
+      this.registerForm.get('email')?.setErrors({ serverError: translated });
+      return;
+    }
+
+    if (msg.includes('phone')) {
+      this.registerForm.get('phoneNumber')?.setErrors({ serverError: translated });
+      return;
+    }
+
+    if (msg.includes('password')) {
+      this.registerForm.get('password')?.setErrors({ serverError: translated });
+    }
   }
 
   getError(fieldName: string): string | null {
