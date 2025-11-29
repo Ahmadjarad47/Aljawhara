@@ -34,6 +34,53 @@ export class ShippingStepComponent implements OnInit {
   // Form state
   isCreatingNew = signal<boolean>(true);
   selectedAddressId = signal<number | null>(null);
+
+  // Language / translations
+  currentLanguage = signal<'ar' | 'en'>(
+    (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar'
+  );
+
+  translations = {
+    ar: {
+      shippingTitle: 'عنوان الشحن',
+      editAddressTitle: 'تعديل العنوان',
+      newAddressTitle: 'عنوان جديد',
+      fullName: 'الاسم الكامل',
+      phoneNumber: 'رقم الجوال',
+      addressLine1: 'العنوان الأول',
+      addressLine2Optional: 'العنوان الثاني (اختياري)',
+      city: 'المدينة',
+      state: 'المنطقة',
+      postalCode: 'الرمز البريدي',
+      country: 'الدولة',
+      setAsDefault: 'تعيين كعنوان افتراضي',
+      saving: 'جاري الحفظ...',
+      updateAddressBtn: 'تحديث العنوان',
+      saveAddressBtn: 'حفظ العنوان',
+    },
+    en: {
+      shippingTitle: 'Shipping Address',
+      editAddressTitle: 'Edit Address',
+      newAddressTitle: 'New Address',
+      fullName: 'Full Name',
+      phoneNumber: 'Phone Number',
+      addressLine1: 'Address Line 1',
+      addressLine2Optional: 'Address Line 2 (Optional)',
+      city: 'City',
+      state: 'State',
+      postalCode: 'Postal Code',
+      country: 'Country',
+      setAsDefault: 'Set as default address',
+      saving: 'Saving...',
+      updateAddressBtn: 'Update Address',
+      saveAddressBtn: 'Save Address',
+    },
+  } as const;
+
+  t(key: keyof typeof this.translations.ar): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key] ?? key;
+  }
   
   // Form data
   formData: CreateAddressDto = {
@@ -62,12 +109,47 @@ export class ShippingStepComponent implements OnInit {
       
       if (response?.success && response.data) {
         this.addresses.set(response.data);
-        
-        // Check if there's a default address
-        const defaultAddress = response.data.find(a => a.isDefault);
-        if (defaultAddress) {
-          this.selectedAddressId.set(defaultAddress.id);
+
+        // If user already has at least one address, use it for update (no multiple addresses)
+        if (response.data.length > 0) {
+          const selected =
+            response.data.find(a => a.isDefault) ?? response.data[0];
+
+          this.selectedAddressId.set(selected.id);
           this.isCreatingNew.set(false);
+
+          this.formData = {
+            fullName: selected.fullName,
+            addressLine1: selected.addressLine1,
+            addressLine2: selected.addressLine2,
+            city: selected.city,
+            state: selected.state,
+            postalCode: selected.postalCode,
+            country: selected.country,
+            phoneNumber: selected.phoneNumber,
+            isDefault: selected.isDefault
+          };
+
+          // Sync with stepper data so payment step has the latest address
+          this.stepperService.updateCheckoutData({
+            address: selected,
+            selectedAddressId: selected.id
+          });
+        } else {
+          // No address yet → allow creating a new one
+          this.isCreatingNew.set(true);
+          this.selectedAddressId.set(null);
+          this.formData = {
+            fullName: '',
+            addressLine1: '',
+            addressLine2: null,
+            city: '',
+            state: '',
+            postalCode: '',
+            country: 'Saudi Arabia',
+            phoneNumber: '',
+            isDefault: true
+          };
         }
       }
     } catch (error) {
@@ -78,9 +160,11 @@ export class ShippingStepComponent implements OnInit {
   }
   
   checkExistingData() {
+    // Only fall back to stepper data if API did not return any address
     const data = this.stepperService.checkoutData();
-    if (data.address) {
+    if (!this.addresses().length && data.address) {
       this.isCreatingNew.set(false);
+      this.selectedAddressId.set((data.address as any).id ?? null);
       this.formData = {
         fullName: data.address.fullName,
         addressLine1: data.address.addressLine1,

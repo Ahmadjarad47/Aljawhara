@@ -320,7 +320,7 @@
                   <!-- Product Image Section -->
                   <div class="relative w-full sm:w-80 lg:w-96 h-64 sm:h-auto bg-base-200 flex-shrink-0">
                     <div class="img-container w-full h-full">
-                      <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                      <img [src]="product.mainImage" 
                            [alt]="product.title"
                            loading="lazy"
                            (load)="$event.target.classList.add('loaded')"

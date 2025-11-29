@@ -4,71 +4,19 @@
   </div>
 } @else {
   <div>
-    <h2 class="text-2xl font-bold text-base-content mb-6">Shipping Address</h2>
-    
-    <!-- Existing Addresses -->
-    @if (addresses().length > 0 && !isCreatingNew()) {
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-base-content">Select Address</h3>
-          <button class="btn btn-sm btn-soft btn-primary" (click)="startCreatingNew()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-2">
-              <path d="M5.25 6a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM5.25 22.5a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM5.25 14.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM9 6a2.25 2.25 0 100-4.5A2.25 2.25 0 009 6zM9 22.5a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM9 14.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM12.75 6a2.25 2.25 0 100-4.5A2.25 2.25 0 0012.75 6zM12.75 22.5a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM12.75 14.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM16.5 6a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM16.5 22.5a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM16.5 14.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM19.5 3v18m0-18h-3m3 0h3" />
-            </svg>
-            Add New Address
-          </button>
-        </div>
-        
-        <div class="grid gap-4">
-          @for (address of addresses(); track address.id) {
-            <div 
-              class="border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md"
-              [class.border-primary]="selectedAddressId() === address.id"
-              [class.bg-base-200]="selectedAddressId() === address.id"
-              (click)="selectAddress(address)"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h4 class="font-semibold text-base-content">{{ address.fullName }}</h4>
-                    @if (address.isDefault) {
-                      <span class="badge badge-primary badge-sm">Default</span>
-                    }
-                  </div>
-                  <p class="text-sm text-base-content/70 mb-1">{{ address.addressLine1 }}</p>
-                  @if (address.addressLine2) {
-                    <p class="text-sm text-base-content/70 mb-1">{{ address.addressLine2 }}</p>
-                  }
-                  <p class="text-sm text-base-content/70">
-                    {{ address.city }}, {{ address.state }} {{ address.postalCode }}
-                  </p>
-                  <p class="text-sm text-base-content/70">{{ address.country }}</p>
-                  <p class="text-sm text-base-content/70 mt-2">📞 {{ address.phoneNumber }}</p>
-                </div>
-                <button class="btn btn-sm btn-ghost" (click)="startEditing(address); $event.stopPropagation()">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                    <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 001.32-2.214l12.15-12.15z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-    }
-    
-    <!-- Address Form -->
-    @if (isCreatingNew() || selectedAddressId()) {
-      <div class="border-t pt-6">
-        <h3 class="text-lg font-semibold text-base-content mb-4">
-          {{ selectedAddressId() ? 'Edit Address' : 'New Address' }}
-        </h3>
+    <h2 class="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">{{ t('shippingTitle') }}</h2>
+
+    <!-- Address Form: create first address or update existing one -->
+    <div class="border-t pt-4 md:pt-6">
+      <h3 class="text-base md:text-lg font-semibold text-base-content mb-3 md:mb-4">
+        {{ selectedAddressId() ? t('editAddressTitle') : t('newAddressTitle') }}
+      </h3>
         
         <form class="space-y-4" (ngSubmit)="saveAddress()">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Full Name *</span>
+                <span class="label-text font-medium">{{ t('fullName') }} *</span>
               </label>
               <input 
                 type="text" 
@@ -82,7 +30,7 @@
             
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Phone Number *</span>
+                <span class="label-text font-medium">{{ t('phoneNumber') }} *</span>
               </label>
               <input 
                 type="tel" 
@@ -97,7 +45,7 @@
           
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Address Line 1 *</span>
+              <span class="label-text font-medium">{{ t('addressLine1') }} *</span>
             </label>
             <input 
               type="text" 
@@ -111,7 +59,7 @@
           
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Address Line 2 (Optional)</span>
+              <span class="label-text font-medium">{{ t('addressLine2Optional') }}</span>
             </label>
             <input 
               type="text" 
@@ -122,10 +70,10 @@
             />
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">City *</span>
+                <span class="label-text font-medium">{{ t('city') }} *</span>
               </label>
               <input 
                 type="text" 
@@ -139,7 +87,7 @@
             
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">State *</span>
+                <span class="label-text font-medium">{{ t('state') }} *</span>
               </label>
               <input 
                 type="text" 
@@ -152,10 +100,10 @@
             </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Postal Code *</span>
+                <span class="label-text font-medium">{{ t('postalCode') }} *</span>
               </label>
               <input 
                 type="text" 
@@ -169,7 +117,7 @@
             
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Country *</span>
+                <span class="label-text font-medium">{{ t('country') }} *</span>
               </label>
               <input 
                 type="text" 
@@ -186,51 +134,30 @@
             <label class="label cursor-pointer justify-start gap-3">
               <input 
                 type="checkbox" 
-                class="checkbox checkbox-primary" 
+                class="checkbox accent-[#054239]" 
                 [(ngModel)]="formData.isDefault"
                 name="isDefault"
               />
-              <span class="label-text">Set as default address</span>
+              <span class="label-text">{{ t('setAsDefault') }}</span>
             </label>
           </div>
           
-          <div class="flex gap-3 mt-6">
+          <div class="flex gap-3 mt-4 md:mt-6">
             <button 
               type="submit" 
-              class="btn btn-primary"
+              class="btn border-none bg-[#054239] text-white hover:bg-[#04352f]"
               [disabled]="!isFormValid() || isSubmitting()"
             >
               @if (isSubmitting()) {
                 <span class="loading loading-spinner loading-sm"></span>
-                Saving...
+                {{ t('saving') }}
               } @else {
-                {{ selectedAddressId() ? 'Update Address' : 'Save Address' }}
+                {{ selectedAddressId() ? t('updateAddressBtn') : t('saveAddressBtn') }}
               }
             </button>
-            
-            @if (addresses().length > 0) {
-              <button 
-                type="button" 
-                class="btn btn-ghost"
-                (click)="startCreatingNew(); formData = {
-                  fullName: '',
-                  addressLine1: '',
-                  addressLine2: null,
-                  city: '',
-                  state: '',
-                  postalCode: '',
-                  country: 'Saudi Arabia',
-                  phoneNumber: '',
-                  isDefault: true
-                }"
-              >
-                Cancel
-              </button>
-            }
           </div>
         </form>
-      </div>
-    }
+    </div>
   </div>
 }
 

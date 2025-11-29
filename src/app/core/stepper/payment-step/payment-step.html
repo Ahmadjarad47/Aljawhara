@@ -1,18 +1,18 @@
 <div>
-  <h2 class="text-2xl font-bold text-base-content mb-6">Payment Information</h2>
+  <h2 class="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">{{ t('paymentTitle') }}</h2>
   
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
     <!-- Payment Form -->
     <div>
       <div class="card bg-base-200 shadow-sm">
         <div class="card-body">
-          <h3 class="text-lg font-semibold text-base-content mb-4">Card Details</h3>
+          <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('cardDetails') }}</h3>
           
           <div class="space-y-4">
             <!-- Card Number -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Card Number</span>
+                <span class="label-text font-medium">{{ t('cardNumber') }}</span>
               </label>
               <input 
                 type="text" 
@@ -27,7 +27,7 @@
             <!-- Cardholder Name -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Cardholder Name</span>
+                <span class="label-text font-medium">{{ t('cardholderName') }}</span>
               </label>
               <input 
                 type="text" 
@@ -39,10 +39,10 @@
             </div>
             
             <!-- Expiry Date and CVV -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3 md:gap-4">
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Expiry Date</span>
+                  <span class="label-text font-medium">{{ t('expiryDate') }}</span>
                 </label>
                 <div class="flex gap-2">
                   <select 
@@ -70,7 +70,7 @@
               
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">CVV</span>
+                  <span class="label-text font-medium">{{ t('cvv') }}</span>
                 </label>
                 <input 
                   type="text" 
@@ -88,32 +88,32 @@
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span class="text-sm">Your payment information is secure and encrypted.</span>
+              <span class="text-sm">{{ t('securityNote') }}</span>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Order Summary -->
-      <div class="card bg-base-200 shadow-sm mt-6">
+      <div class="card bg-base-200 shadow-sm mt-4 md:mt-6">
         <div class="card-body">
-          <h3 class="text-lg font-semibold text-base-content mb-4">Order Summary</h3>
+          <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('orderSummary') }}</h3>
           
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
-              <span class="text-base-content/70">Subtotal</span>
+              <span class="text-base-content/70">{{ t('subtotal') }}</span>
               <span class="font-medium">{{ subtotal() | currency }}</span>
             </div>
             
             <div class="flex justify-between text-sm">
-              <span class="text-base-content/70">Tax</span>
+              <span class="text-base-content/70">{{ t('tax') }}</span>
               <span class="font-medium">{{ tax() | currency }}</span>
             </div>
             
             <div class="divider"></div>
             
             <div class="flex justify-between text-lg font-bold">
-              <span>Total</span>
+              <span>{{ t('total') }}</span>
               <span>{{ total() | currency }}</span>
             </div>
           </div>
@@ -123,9 +123,9 @@
     
     <!-- Order Details -->
     <div>
-      <div class="card bg-base-200 shadow-sm mb-6">
+      <div class="card bg-base-200 shadow-sm mb-4 md:mb-6">
         <div class="card-body">
-          <h3 class="text-lg font-semibold text-base-content mb-4">Shipping To</h3>
+          <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('shippingTo') }}</h3>
           
           @if (address) {
             <div class="space-y-2">
@@ -145,15 +145,15 @@
       
       <div class="card bg-base-200 shadow-sm">
         <div class="card-body">
-          <h3 class="text-lg font-semibold text-base-content mb-4">Order Items</h3>
+          <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('orderItems') }}</h3>
           
           @if (cartItems().length === 0) {
-            <p class="text-center text-base-content/70 py-4">Your cart is empty</p>
+            <p class="text-center text-base-content/70 py-4">{{ t('cartEmpty') }}</p>
           } @else {
             <div class="space-y-3">
               @for (item of cartItems(); track item.id) {
                 <div class="flex items-center gap-3 py-3 border-b border-base-300 last:border-0">
-                  <img [src]="item.image" [alt]="item.name" class="w-16 h-16 rounded-lg object-cover" />
+                  <img [src]="item.image" [alt]="item.name" class="w-14 h-14 md:w-16 md:h-16 rounded-lg object-cover" />
                   <div class="flex-1">
                     <p class="font-medium text-sm">{{ item.name }}</p>
                     <p class="text-xs text-base-content/70">Quantity: {{ item.quantity }}</p>
@@ -171,15 +171,15 @@
   <!-- Complete Order Button -->
   <div class="mt-8">
     <button 
-      class="btn btn-primary btn-lg w-full"
+      class="btn btn-lg w-full border-none bg-[#054239] text-white hover:bg-[#04352f]"
       [disabled]="!isFormValid() || isProcessing()"
       (click)="processPayment()"
     >
       @if (isProcessing()) {
         <span class="loading loading-spinner loading-sm"></span>
-        Processing...
+        {{ t('processing') }}
       } @else {
-        Complete Order
+        {{ t('completeOrder') }}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ml-2">
           <path fill-rule="evenodd" d="M16.5 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zm-1.5 4.5a.75.75 0 01-1.5 0v-.752l-.93 1.118a.75.75 0 11-1.14-.948l1.121-1.348V9.375a.75.75 0 111.5 0v2.625zM12 3c-1.5 0-2.25 0-3.024.051-.813.054-1.43.167-1.98.44-.535.268-.964.624-1.237 1.057-.265.42-.422.893-.515 1.62-.05.39-.1.825-.127 1.332a48.678 48.678 0 00-.05 4.408c.002.085.007.17.014.255.028.507.077.942.127 1.332.093.727.25 1.2.515 1.62.273.433.702.789 1.237 1.057.55.273 1.167.386 1.98.44C9.75 21 10.5 21 12 21s2.25 0 3.024-.051c.813-.054 1.43-.167 1.98-.44.535-.268.964-.624 1.237-1.057.265-.42.422-.893.515-1.62.05-.39.1-.825.127-1.332.007-.085.012-.17.014-.255a48.678 48.678 0 00.05-4.408c-.002-.085-.007-.17-.014-.255-.028-.507-.077-.942-.127-1.332-.093-.727-.25-1.2-.515-1.62-.273-.433-.702-.789-1.237-1.057-.55-.273-1.167-.386-1.98-.44C14.25 3 13.5 3 12 3z" clip-rule="evenodd" />
         </svg>
@@ -187,7 +187,7 @@
     </button>
     
     <p class="text-center text-sm text-base-content/70 mt-4">
-      By completing your order, you agree to our Terms of Service and Privacy Policy.
+      {{ t('completeOrderNote') }}
     </p>
   </div>
 </div>

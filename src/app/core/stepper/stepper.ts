@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ServiceStepper, StepperStep } from './service-stepper';
 import { ShippingStepComponent } from './shipping-step/shipping-step';
@@ -19,6 +19,41 @@ import { PaymentStepComponent } from './payment-step/payment-step';
 })
 export class StepperComponent {
   private stepperService = inject(ServiceStepper);
+  
+  // Language / translations
+  currentLanguage = signal<'ar' | 'en'>(
+    (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar'
+  );
+
+  translations = {
+    ar: {
+      checkoutTitle: 'إتمام الشراء',
+      step: 'الخطوة',
+      of: 'من',
+      checkoutSubtitle: 'راجع تفاصيلك وأكمل طلبك بأمان.',
+      shippingStep: 'الشحن',
+      reviewStep: 'مراجعة الطلب',
+      paymentStep: 'الدفع',
+      previous: 'السابق',
+      continueTo: 'متابعة إلى',
+    },
+    en: {
+      checkoutTitle: 'Checkout',
+      step: 'Step',
+      of: 'of',
+      checkoutSubtitle: 'Review your details and place your order securely.',
+      shippingStep: 'Shipping',
+      reviewStep: 'Review Order',
+      paymentStep: 'Payment',
+      previous: 'Previous',
+      continueTo: 'Continue to',
+    },
+  } as const;
+
+  t(key: keyof typeof this.translations.ar): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key] ?? key;
+  }
   
   currentStep = this.stepperService.currentStep;
   
@@ -48,10 +83,10 @@ export class StepperComponent {
   
   getNextStepName(): string {
     if (this.currentStep() === StepperStep.SHIPPING) {
-      return 'Review';
+      return this.t('reviewStep');
     }
     if (this.currentStep() === StepperStep.REVIEW) {
-      return 'Payment';
+      return this.t('paymentStep');
     }
     return '';
   }

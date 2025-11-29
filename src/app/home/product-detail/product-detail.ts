@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product/product-service';
-import { ProductDto } from '../product/product.models';
+import { ProductDto, ProductSummaryDto } from '../product/product.models';
 import { Observable, catchError, of } from 'rxjs';
 import { CartService } from '../../core/service/cart-service';
+import { WishlistService } from '../../core/service/wishlist-service';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 import { ServiceAuth } from '../../auth/service-auth';
@@ -23,6 +24,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cartService = inject(CartService);
+  private wishlistService = inject(WishlistService);
   public authService = inject(ServiceAuth);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
@@ -91,7 +93,11 @@ export class ProductDetail implements OnInit, OnDestroy {
       onlyAvailable: 'متوفر فقط',
       itemsAvailable: 'عنصر متوفر',
       removed: 'تمت الإزالة',
-      hasBeenRemoved: 'تمت إزالته من السلة'
+      hasBeenRemoved: 'تمت إزالته من السلة',
+      addToWishlist: 'أضف إلى قائمة الأمنيات',
+      removeFromWishlist: 'إزالة من قائمة الأمنيات',
+      addedToWishlist: 'تمت إضافة المنتج إلى قائمة الأمنيات',
+      removedFromWishlist: 'تمت إزالة المنتج من قائمة الأمنيات'
     },
     en: {
       home: 'Home',
@@ -152,7 +158,11 @@ export class ProductDetail implements OnInit, OnDestroy {
       onlyAvailable: 'Only',
       itemsAvailable: 'items available',
       removed: 'Removed',
-      hasBeenRemoved: 'has been removed from cart'
+      hasBeenRemoved: 'has been removed from cart',
+      addToWishlist: 'Add to wishlist',
+      removeFromWishlist: 'Remove from wishlist',
+      addedToWishlist: 'Added to wishlist',
+      removedFromWishlist: 'Removed from wishlist'
     }
   };
 
@@ -223,6 +233,9 @@ export class ProductDetail implements OnInit, OnDestroy {
   product = signal<ProductDto | null>(null);
   userRating = signal<RatingDto | null>(null);
   isCheckingRating = signal(false);
+
+  // Wishlist state
+  isInWishlist = signal(false);
 
   // Component state
   selectedImageIndex = 0;
@@ -386,6 +399,9 @@ export class ProductDetail implements OnInit, OnDestroy {
         
         // Reset selected variants
         this.selectedVariants.set({});
+
+        // Sync wishlist state from local storage
+        this.isInWishlist.set(this.wishlistService.isProductInWishlist(product.id));
         
         // Check if product is already in cart and set quantity
         const cartItem = this.cartService.getItemByProductId(product.id);
@@ -507,7 +523,10 @@ export class ProductDetail implements OnInit, OnDestroy {
     if (product && this.quantity < product.totalInStock) {
       this.quantity++;
     } else if (product && this.quantity >= product.totalInStock) {
-      this.toastService.warning('Stock Limit', 'Maximum stock reached');
+      this.toastService.warning(
+        this.t('stockLimit'),
+        `${this.t('onlyAvailable')} ${product.totalInStock} ${this.t('itemsAvailable')}`
+      );
     }
   }
 
@@ -526,19 +545,41 @@ export class ProductDetail implements OnInit, OnDestroy {
     }
 
     if (!product.isInStock) {
-      this.toastService.warning('Out of Stock', 'This product is currently out of stock');
+      this.toastService.warning(
+        this.t('outOfStockMsg'),
+        this.t('outOfStockMsg')
+      );
       return;
     }
 
     // Check if variants are required and all are selected
     if (product.variants && product.variants.length > 0 && !this.areAllVariantsSelected()) {
-      this.toastService.warning('Selection Required', 'Please select all variant options');
+      this.toastService.warning(
+        this.t('selectionRequired'),
+        this.t('pleaseSelectAll')
+      );
       return;
     }
 
-    if (this.quantity > product.totalInStock) {
-      this.toastService.warning('Stock Limit', `Only ${product.totalInStock} items available`);
-      this.quantity = product.totalInStock;
+    // Respect stock including existing cart quantity
+    const existingItem = this.cartService.getItemByProductId(product.id);
+    const existingQty = existingItem ? existingItem.quantity : 0;
+
+    if (existingQty >= product.totalInStock) {
+      this.toastService.warning(
+        this.t('stockLimit'),
+        `${this.t('onlyAvailable')} ${product.totalInStock} ${this.t('itemsAvailable')}`
+      );
+      return;
+    }
+
+    if (existingQty + this.quantity > product.totalInStock) {
+      const allowed = product.totalInStock - existingQty;
+      this.quantity = allowed;
+      this.toastService.warning(
+        this.t('stockLimit'),
+        `${this.t('onlyAvailable')} ${product.totalInStock} ${this.t('itemsAvailable')}`
+      );
       return;
     }
 
@@ -566,19 +607,19 @@ export class ProductDetail implements OnInit, OnDestroy {
         this.quantity = totalQuantity;
         
         this.toastService.success(
-          'Cart Updated',
-          `${product.title} - ${totalQuantity} in cart`
+          this.t('cartUpdated'),
+          `${product.title} - ${totalQuantity} ${this.t('inCart')}`
         );
       } else {
         this.toastService.success(
-          'Added to Cart',
-          `${product.title} x${this.quantity} has been added to your cart`
+          this.t('addedToCart'),
+          `${product.title} x${this.quantity} ${this.t('hasBeenAdded')}`
         );
       }
     } catch (error) {
       this.toastService.error(
-        'Error',
-        'Failed to add product to cart'
+        this.t('error'),
+        this.t('failedToAdd')
       );
       console.error('Error adding to cart:', error);
     }
@@ -586,8 +627,41 @@ export class ProductDetail implements OnInit, OnDestroy {
 
   addToWishlist() {
     const product = this.product();
-    console.log('Adding to wishlist:', product);
-    // Implement add to wishlist logic
+    if (!product) {
+      return;
+    }
+
+    // Map ProductDto to ProductSummaryDto shape for wishlist service
+    const summary: ProductSummaryDto = {
+      id: product.id,
+      title: product.title,
+      titleAr: product.titleAr,
+      description: product.description,
+      descriptionAr: product.descriptionAr,
+      oldPrice: product.oldPrice,
+      newPrice: product.newPrice,
+      isInStock: product.isInStock,
+      totalInStock: product.totalInStock,
+      mainImage: (product.images && product.images.length > 0)
+        ? product.images[0]
+        : 'https://via.placeholder.com/400x400?text=No+Image',
+      subCategoryName: product.subCategoryName,
+      subCategoryNameAr: product.subCategoryNameAr,
+      averageRating: product.averageRating,
+      totalReviews: product.totalReviews,
+      isActive: true,
+      isInWishlist: this.isInWishlist()
+    };
+
+    const nowInWishlist = this.wishlistService.toggleItem(summary);
+    this.isInWishlist.set(nowInWishlist);
+
+    const name = this.getProductName(product);
+    if (nowInWishlist) {
+      this.toastService.success(this.t('addedToWishlist'), name);
+    } else {
+      this.toastService.success(this.t('removedFromWishlist'), name);
+    }
   }
 
   buyNow() {
@@ -599,6 +673,7 @@ export class ProductDetail implements OnInit, OnDestroy {
       quantity: this.quantity
     });
     // Implement buy now logic
+    this.router.navigate(['/cart']);
   }
 
   // Toggle sections
@@ -743,7 +818,10 @@ export class ProductDetail implements OnInit, OnDestroy {
     const newQuantity = cartItem.quantity + 1;
     
     if (newQuantity > product.totalInStock) {
-      this.toastService.warning('Stock Limit', `Only ${product.totalInStock} items available`);
+      this.toastService.warning(
+        this.t('stockLimit'),
+        `${this.t('onlyAvailable')} ${product.totalInStock} ${this.t('itemsAvailable')}`
+      );
       return;
     }
 

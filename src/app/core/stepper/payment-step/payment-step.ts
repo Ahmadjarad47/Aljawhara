@@ -16,6 +16,57 @@ export class PaymentStepComponent {
   private cartService = inject(CartService);
   private router = inject(Router);
   
+  // Language / translations
+  currentLanguage = signal<'ar' | 'en'>(
+    (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar'
+  );
+
+  translations = {
+    ar: {
+      paymentTitle: 'معلومات الدفع',
+      cardDetails: 'بيانات البطاقة',
+      cardNumber: 'رقم البطاقة',
+      cardholderName: 'اسم صاحب البطاقة',
+      expiryDate: 'تاريخ الانتهاء',
+      cvv: 'رمز الأمان (CVV)',
+      securityNote: 'بيانات الدفع الخاصة بك آمنة ومشفرة.',
+      orderSummary: 'ملخص الطلب',
+      subtotal: 'المجموع الفرعي',
+      tax: 'الضريبة',
+      total: 'الإجمالي',
+      shippingTo: 'الشحن إلى',
+      orderItems: 'عناصر الطلب',
+      cartEmpty: 'سلة التسوق فارغة',
+      processing: 'جاري المعالجة...',
+      completeOrder: 'إكمال الطلب',
+      completeOrderNote: 'بإكمال الطلب، فإنك توافق على شروط الخدمة وسياسة الخصوصية.',
+    },
+    en: {
+      paymentTitle: 'Payment Information',
+      cardDetails: 'Card Details',
+      cardNumber: 'Card Number',
+      cardholderName: 'Cardholder Name',
+      expiryDate: 'Expiry Date',
+      cvv: 'CVV',
+      securityNote: 'Your payment information is secure and encrypted.',
+      orderSummary: 'Order Summary',
+      subtotal: 'Subtotal',
+      tax: 'Tax',
+      total: 'Total',
+      shippingTo: 'Shipping To',
+      orderItems: 'Order Items',
+      cartEmpty: 'Your cart is empty',
+      processing: 'Processing...',
+      completeOrder: 'Complete Order',
+      completeOrderNote: 'By completing your order, you agree to our Terms of Service and Privacy Policy.',
+    },
+  } as const;
+
+  t(key: keyof typeof this.translations.ar): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key] ?? key;
+  }
+  
   // Loading state
   isProcessing = signal<boolean>(false);
   

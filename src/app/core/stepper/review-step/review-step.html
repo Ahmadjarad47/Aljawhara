@@ -1,14 +1,14 @@
 <div>
-  <h2 class="text-2xl font-bold text-base-content mb-6">Review Your Order</h2>
+  <h2 class="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">{{ t('reviewTitle') }}</h2>
   
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
     <!-- Shipping Address -->
     <div class="card bg-base-200 shadow-sm">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-base-content">Shipping To</h3>
+          <h3 class="text-lg font-semibold text-base-content">{{ t('shippingTo') }}</h3>
           <button class="btn btn-sm btn-ghost" (click)="stepperService.goToStep(1)">
-            Edit
+            {{ t('edit') }}
           </button>
         </div>
         
@@ -26,7 +26,7 @@
             <p class="text-sm text-base-content/70">📞 {{ address.phoneNumber }}</p>
           </div>
         } @else {
-          <p class="text-base-content/70">No address selected</p>
+          <p class="text-base-content/70">{{ t('noAddressSelected') }}</p>
         }
       </div>
     </div>
@@ -34,16 +34,16 @@
     <!-- Order Summary -->
     <div class="card bg-base-200 shadow-sm">
       <div class="card-body">
-        <h3 class="text-lg font-semibold text-base-content mb-4">Order Summary</h3>
+        <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('orderSummary') }}</h3>
         
-        <div class="space-y-2 mb-4">
+        <div class="space-y-2 mb-3 md:mb-4">
           @for (item of cartItems(); track item.id) {
             <div class="flex justify-between items-start py-2 border-b border-base-300">
               <div class="flex gap-3">
-                <img [src]="item.image" [alt]="item.name" class="w-16 h-16 rounded-lg object-cover" />
+                <img [src]="item.image" [alt]="item.name" class="w-14 h-14 md:w-16 md:h-16 rounded-lg object-cover" />
                 <div>
                   <p class="font-medium text-sm">{{ item.name }}</p>
-                  <p class="text-xs text-base-content/70">Quantity: {{ item.quantity }}</p>
+                  <p class="text-xs text-base-content/70">{{ t('quantity') }}: {{ item.quantity }}</p>
                   <p class="text-sm font-semibold text-base-content mt-1">
                     {{ getItemTotal(item.price, item.quantity) | currency }}
                   </p>
@@ -57,17 +57,17 @@
         
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
-            <span class="text-base-content/70">Subtotal ({{ itemCount() }} items)</span>
+            <span class="text-base-content/70">{{ t('subtotal') }} ({{ itemCount() }} {{ t('items') }})</span>
             <span class="font-medium">{{ subtotal() | currency }}</span>
           </div>
           
           <div class="flex justify-between text-sm">
-            <span class="text-base-content/70">Tax</span>
+            <span class="text-base-content/70">{{ t('tax') }}</span>
             <span class="font-medium">{{ tax() | currency }}</span>
           </div>
           
           <div class="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-base-300">
-            <span>Total</span>
+            <span>{{ t('total') }}</span>
             <span>{{ total() | currency }}</span>
           </div>
         </div>
@@ -76,17 +76,17 @@
   </div>
   
   <!-- Order Items List -->
-  <div class="mt-6">
-    <h3 class="text-lg font-semibold text-base-content mb-4">Order Details</h3>
-    <div class="bg-base-200 rounded-lg p-4">
+  <div class="mt-4 md:mt-6">
+    <h3 class="text-base md:text-lg font-semibold text-base-content mb-3 md:mb-4">{{ t('orderDetails') }}</h3>
+    <div class="bg-base-200 rounded-lg p-3 md:p-4">
       @if (cartItems().length === 0) {
-        <p class="text-center text-base-content/70 py-8">Your cart is empty</p>
+        <p class="text-center text-base-content/70 py-6 md:py-8">{{ t('cartEmpty') }}</p>
       } @else {
         <div class="space-y-3">
           @for (item of cartItems(); track item.id) {
             <div class="flex items-center justify-between py-3 border-b border-base-300 last:border-0">
-              <div class="flex items-center gap-4">
-                <img [src]="item.image" [alt]="item.name" class="w-20 h-20 rounded-lg object-cover" />
+              <div class="flex items-center gap-3 md:gap-4">
+                <img [src]="item.image" [alt]="item.name" class="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover" />
                 <div>
                   <p class="font-semibold text-base-content">{{ item.name }}</p>
                   <p class="text-sm text-base-content/70">{{ item.price | currency }} x {{ item.quantity }}</p>
