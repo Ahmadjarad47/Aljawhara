@@ -382,7 +382,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     this.productService.getProductById(id).pipe(
       catchError(error => {
         console.error('Error loading product:', error);
-        this.errorMessage.set('Failed to load product details');
+        this.errorMessage.set(this.t('failedToAdd')); // reuse generic error text
         this.isLoading.set(false);
         return of(null);
       })
@@ -540,7 +540,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   addToCart() {
     const product = this.product();
     if (!product) {
-      this.toastService.error('Error', 'Product not found');
+      this.toastService.error(this.t('error'), this.t('product'));
       return;
     }
 
@@ -700,7 +700,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   // Review methods
   submitReview() {
     if (!this.authService.isAuthenticated) {
-      this.toastService.warning('Login Required', 'Please login first to submit a review');
+      this.toastService.warning(this.t('loginRequired'), this.t('pleaseLogin'));
       this.router.navigate(['/auth/login'], { 
         queryParams: { returnUrl: this.router.url } 
       });
@@ -857,7 +857,7 @@ export class ProductDetail implements OnInit, OnDestroy {
 
     this.cartService.removeItem(cartItem.id);
     this.quantity = 1;
-    this.toastService.success('Removed', `${product.title} has been removed from cart`);
+    this.toastService.success(this.t('removed'), `${product.title} ${this.t('hasBeenRemoved')}`);
   }
 
   // Toast methods
