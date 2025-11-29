@@ -60,7 +60,7 @@
   @if (activeTab() === 'addresses') {
     <div class="card bg-base-100 shadow-sm border border-base-300">
       <div class="card-body p-4">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
           <h3 class="card-title">{{t('yourAddresses')}}</h3>
           @if ((addresses() || []).length === 0) {
             <button class="btn btn-primary btn-sm" (click)="openAddAddress()">{{t('addAddress')}}</button>
@@ -75,40 +75,86 @@
           @if ((addresses() || []).length === 0) {
             <div class="text-center text-base-content/60 py-6">{{t('noAddressesFound')}}</div>
           } @else {
-            <div class="overflow-x-auto">
-              <table class="table table-zebra">
-                <thead>
-                  <tr>
-                    <th>{{t('name')}}</th>
-                    <th>{{t('phone')}}</th>
-                    <th>{{t('address')}}</th>
-                    <th>{{t('cityState')}}</th>
-                    <th>{{t('postal')}}</th>
-                    <th>{{t('default')}}</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (addr of addresses(); track addr.id) {
+            <!-- Desktop / tablet table view -->
+            <div class="hidden md:block">
+              <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                  <thead>
                     <tr>
-                      <td>{{addr.fullName}}</td>
-                      <td>{{addr.phoneNumber}}</td>
-                      <td>{{addr.addressLine1}} <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span></td>
-                      <td>{{addr.city}} <span *ngIf="addr.state">/ {{addr.state}}</span></td>
-                      <td>{{addr.postalCode}}</td>
-                      <td>
-                        <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">{{addr.isDefault ? t('yes') : t('no')}}</div>
-                      </td>
-                      <td class="text-right">
-                        <div class="flex gap-2 justify-end">
-                          <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
-                          <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
-                        </div>
-                      </td>
+                      <th>{{t('name')}}</th>
+                      <th>{{t('phone')}}</th>
+                      <th>{{t('address')}}</th>
+                      <th>{{t('cityState')}}</th>
+                      <th>{{t('postal')}}</th>
+                      <th>{{t('default')}}</th>
+                      <th></th>
                     </tr>
-                  }
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @for (addr of addresses(); track addr.id) {
+                      <tr>
+                        <td>{{addr.fullName}}</td>
+                        <td>{{addr.phoneNumber}}</td>
+                        <td>{{addr.addressLine1}} <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span></td>
+                        <td>{{addr.city}} <span *ngIf="addr.state">/ {{addr.state}}</span></td>
+                        <td>{{addr.postalCode}}</td>
+                        <td>
+                          <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">{{addr.isDefault ? t('yes') : t('no')}}</div>
+                        </td>
+                        <td class="text-right">
+                          <div class="flex gap-2 justify-end">
+                            <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
+                            <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Mobile card view -->
+            <div class="md:hidden space-y-3">
+              @for (addr of addresses(); track addr.id) {
+                <div class="border border-base-300 rounded-lg p-4 space-y-2">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="font-semibold">
+                        {{addr.fullName}}
+                      </div>
+                      <div class="text-sm text-base-content/70">
+                        {{addr.phoneNumber}}
+                      </div>
+                    </div>
+                    <div class="shrink-0">
+                      <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">
+                        {{addr.isDefault ? t('default') : t('secondary')}}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-sm text-base-content">
+                    <div>
+                      {{addr.addressLine1}}
+                      <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span>
+                    </div>
+                    <div class="mt-1">
+                      {{addr.city}}
+                      <span *ngIf="addr.state">/ {{addr.state}}</span>
+                      <span *ngIf="addr.postalCode">, {{addr.postalCode}}</span>
+                    </div>
+                    <div class="mt-1" *ngIf="addr.country">
+                      {{addr.country}}
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end gap-2 pt-1">
+                    <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
+                    <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
+                  </div>
+                </div>
+              }
             </div>
           }
         }

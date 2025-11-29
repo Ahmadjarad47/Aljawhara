@@ -1,189 +1,285 @@
-<div class="p-6">
-  <div class="flex justify-between items-center mb-6">
+<div class="p-4 md:p-6">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
     <div>
       <h1 class="text-3xl font-bold text-base-content">{{t('myTransactions')}}</h1>
       <p class="text-base-content/70 mt-2">{{t('viewAndFilter')}}</p>
     </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-    <div class="card-body p-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('orderId')}}</span></label>
-          <input type="number" class="input input-bordered" [ngModel]="orderId()" (ngModelChange)="orderId.set($event ? +$event : null)" (keyup.enter)="onSearch()" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('orderNumber')}}</span></label>
-          <input type="text" class="input input-bordered" [ngModel]="orderNumber()" (ngModelChange)="orderNumber.set($event)" (keyup.enter)="onSearch()" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('paymentMethod')}}</span></label>
-          <select class="select select-bordered" [ngModel]="paymentMethod()" (ngModelChange)="paymentMethod.set($event ? +$event : null)">
-            <option [ngValue]="null">{{t('all')}}</option>
-            <option [ngValue]="PaymentMethod.Card">{{t('card')}}</option>
-            <option [ngValue]="PaymentMethod.Cod">{{t('cashOnDelivery')}}</option>
-            <option [ngValue]="PaymentMethod.Paypal">{{t('paypal')}}</option>
-            <option [ngValue]="PaymentMethod.Bank">{{t('bank')}}</option>
-          </select>
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('status')}}</span></label>
-          <input type="text" class="input input-bordered" [ngModel]="status()" (ngModelChange)="status.set($event)" (keyup.enter)="onSearch()" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('startDate')}}</span></label>
-          <input type="date" class="input input-bordered" [ngModel]="startDate()" (ngModelChange)="startDate.set($event || null)" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('endDate')}}</span></label>
-          <input type="date" class="input input-bordered" [ngModel]="endDate()" (ngModelChange)="endDate.set($event || null)" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('minAmount')}}</span></label>
-          <input type="number" class="input input-bordered" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event !== null && $event !== '' ? +$event : null)" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('maxAmount')}}</span></label>
-          <input type="number" class="input input-bordered" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event !== null && $event !== '' ? +$event : null)" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('refunded')}}</span></label>
-          <select class="select select-bordered" [ngModel]="isRefunded()" (ngModelChange)="isRefunded.set($event === '' ? null : ($event === 'true'))">
-            <option value="">{{t('all')}}</option>
-            <option [ngValue]="true">{{t('yes')}}</option>
-            <option [ngValue]="false">{{t('no')}}</option>
-          </select>
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('pageSize')}}</span></label>
-          <select class="select select-bordered" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
-            <option [value]="10">10</option>
-            <option [value]="20">20</option>
-            <option [value]="50">50</option>
-            <option [value]="100">100</option>
-          </select>
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('sortBy')}}</span></label>
-          <select class="select select-bordered" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
-            <option value="TransactionDate">{{t('transactionDate')}}</option>
-            <option value="Amount">{{t('amount')}}</option>
-            <option value="Status">{{t('status')}}</option>
-            <option value="PaymentMethod">{{t('paymentMethod')}}</option>
-            <option value="OrderNumber">{{t('orderNumberLabel')}}</option>
-          </select>
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text">{{t('direction')}}</span></label>
-          <select class="select select-bordered" [ngModel]="sortDirection()" (ngModelChange)="onSortDirectionChange($event)">
-            <option value="desc">{{t('desc')}}</option>
-            <option value="asc">{{t('asc')}}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="mt-4 flex gap-2">
-        <button class="btn btn-primary" (click)="onSearch()" [disabled]="isLoading()">
-          @if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> }
-          {{t('apply')}}
-        </button>
-        <button class="btn btn-outline" (click)="clearFilters()" [disabled]="isLoading()">{{t('clear')}}</button>
-      </div>
+    <div class="md:self-end">
+      <label for="transactions-filters-drawer" class="btn btn-outline btn-sm md:btn-md gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h6" />
+        </svg>
+        <span class="hidden sm:inline">{{t('filters')}}</span>
+      </label>
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="card bg-base-100 shadow-sm border border-base-300">
-    <div class="card-body p-0">
-      @if (isLoading()) {
-        <div class="flex justify-center items-center py-12">
-          <span class="loading loading-spinner loading-lg"></span>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>{{t('order')}}</th>
-                <th>{{t('customer')}}</th>
-                <th>{{t('amount')}}</th>
-                <th>{{t('method')}}</th>
-                <th>{{t('status')}}</th>
-                <th>{{t('transactionDate')}}</th>
-                <th>{{t('processed')}}</th>
-                <th>{{t('reference')}}</th>
-                <th>{{t('refunded')}}</th>
-              </tr>
-            </thead>
-            <tbody>
+  <!-- Filters + Transactions Drawer -->
+  <div class="drawer drawer-end">
+    <input id="transactions-filters-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col gap-6">
+      <!-- Transactions -->
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+          @if (isLoading()) {
+            <div class="flex justify-center items-center py-12">
+              <span class="loading loading-spinner loading-lg"></span>
+            </div>
+          } @else {
+            <!-- Desktop / tablet table view -->
+            <div class="hidden md:block">
+              <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>{{t('order')}}</th>
+                      <th>{{t('customer')}}</th>
+                      <th>{{t('amount')}}</th>
+                      <th>{{t('method')}}</th>
+                      <th>{{t('status')}}</th>
+                      <th>{{t('transactionDate')}}</th>
+                      <th>{{t('processed')}}</th>
+                      <th>{{t('reference')}}</th>
+                      <th>{{t('refunded')}}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (transaction of transactions$ | async; track transaction.id) {
+                      <tr>
+                        <td>
+                          <div class="font-semibold">#{{transaction.orderNumber}}</div>
+                          <div class="text-xs opacity-60">ID: {{transaction.orderId}}</div>
+                        </td>
+                        <td>
+                          <div class="font-semibold">{{transaction.customerName || '-'}}</div>
+                          <div class="text-xs opacity-60">{{transaction.customerEmail || '-'}}</div>
+                        </td>
+                        <td><div class="badge badge-outline">{{transaction.amount | number:'1.2-2'}}</div></td>
+                        <td>{{getPaymentMethodName(transaction.paymentMethod)}}</td>
+                        <td>
+                          <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
+                            {{getStatusText(transaction.status)}}
+                          </div>
+                        </td>
+                        <td>{{transaction.transactionDate | date:'medium'}}</td>
+                        <td>{{transaction.processedDate ? (transaction.processedDate | date:'medium') : '-'}}</td>
+                        <td class="truncate max-w-[180px]" title="{{transaction.transactionReference}}">{{transaction.transactionReference || '-'}}</td>
+                        <td>
+                          <div class="badge" [class.badge-error]="transaction.isRefunded" [class.badge-success]="!transaction.isRefunded">
+                            {{transaction.isRefunded ? t('yes') : t('no')}}
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                    @if ((transactions$ | async)?.length === 0) {
+                      <tr>
+                        <td colspan="9" class="text-center py-8 text-base-content/50">{{t('noTransactionsFound')}}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Mobile card view -->
+            <div class="md:hidden">
               @for (transaction of transactions$ | async; track transaction.id) {
-                <tr>
-                  <td>
-                    <div class="font-semibold">#{{transaction.orderNumber}}</div>
-                    <div class="text-xs opacity-60">ID: {{transaction.orderId}}</div>
-                  </td>
-                  <td>
-                    <div class="font-semibold">{{transaction.customerName || '-'}}</div>
-                    <div class="text-xs opacity-60">{{transaction.customerEmail || '-'}}</div>
-                  </td>
-                  <td><div class="badge badge-outline">{{transaction.amount | number:'1.2-2'}}</div></td>
-                  <td>{{getPaymentMethodName(transaction.paymentMethod)}}</td>
-                  <td>
-                    <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
-                      {{getStatusText(transaction.status)}}
+                <div class="border-b border-base-300 last:border-b-0">
+                  <div class="p-4 space-y-2">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-xs text-base-content/70 uppercase tracking-wide">
+                          {{t('order')}}
+                        </div>
+                        <div class="font-semibold">
+                          #{{transaction.orderNumber}}
+                        </div>
+                        <div class="mt-1 text-xs text-base-content/70">
+                          ID: {{transaction.orderId}}
+                        </div>
+                      </div>
+                      <div class="shrink-0">
+                        <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
+                          {{getStatusText(transaction.status)}}
+                        </div>
+                      </div>
                     </div>
-                  </td>
-                  <td>{{transaction.transactionDate | date:'medium'}}</td>
-                  <td>{{transaction.processedDate ? (transaction.processedDate | date:'medium') : '-'}}</td>
-                  <td class="truncate max-w-[180px]" title="{{transaction.transactionReference}}">{{transaction.transactionReference || '-'}}</td>
-                  <td>
-                    <div class="badge" [class.badge-error]="transaction.isRefunded" [class.badge-success]="!transaction.isRefunded">
-                      {{transaction.isRefunded ? t('yes') : t('no')}}
+
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <div class="text-base-content/70">{{t('customer')}}</div>
+                        <div class="font-medium truncate">{{transaction.customerName || '-'}}</div>
+                        <div class="text-xs text-base-content/70 truncate">{{transaction.customerEmail || '-'}}</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-base-content/70">{{t('amount')}}</div>
+                        <div class="font-semibold">
+                          {{transaction.amount | number:'1.2-2'}}
+                        </div>
+                      </div>
+                      <div>
+                        <div class="text-base-content/70">{{t('method')}}</div>
+                        <div class="font-medium">
+                          {{getPaymentMethodName(transaction.paymentMethod)}}
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-base-content/70">{{t('transactionDate')}}</div>
+                        <div class="text-xs">
+                          {{transaction.transactionDate | date:'short'}}
+                        </div>
+                      </div>
                     </div>
-                  </td>
-                </tr>
+
+                    <div class="flex items-center justify-between text-xs text-base-content/70 pt-1">
+                      <div class="truncate max-w-[60%]">
+                        <span class="font-medium">{{t('reference')}}:</span>
+                        <span title="{{transaction.transactionReference}}">
+                          {{transaction.transactionReference || '-'}}
+                        </span>
+                      </div>
+                      <div>
+                        <span class="font-medium">{{t('refunded')}}:</span>
+                        <span class="ml-1 badge badge-xs" [class.badge-error]="transaction.isRefunded" [class.badge-success]="!transaction.isRefunded">
+                          {{transaction.isRefunded ? t('yes') : t('no')}}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               }
               @if ((transactions$ | async)?.length === 0) {
-                <tr>
-                  <td colspan="9" class="text-center py-8 text-base-content/50">{{t('noTransactionsFound')}}</td>
-                </tr>
+                <div class="text-center py-8 text-base-content/50">
+                  {{t('noTransactionsFound')}}
+                </div>
               }
-            </tbody>
-          </table>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      @if (getTotalPages() > 1) {
+        <div class="flex justify-center items-center">
+          <div class="join">
+            <button class="join-item btn" (click)="onPageChange(getCurrentPage() - 1)" [disabled]="getCurrentPage() === 1 || isLoading()">«</button>
+            @for (page of pageNumbers$ | async; track page) {
+              @if (page === '...') {
+                <button class="join-item btn btn-disabled">...</button>
+              } @else {
+                <button class="join-item btn" [class.btn-active]="getCurrentPage() === page" (click)="onPageChange(+page)" [disabled]="isLoading()">{{page}}</button>
+              }
+            }
+            <button class="join-item btn" (click)="onPageChange(getCurrentPage() + 1)" [disabled]="getCurrentPage() === getTotalPages() || isLoading()">»</button>
+          </div>
         </div>
       }
     </div>
-  </div>
 
-  <!-- Pagination -->
-  @if (getTotalPages() > 1) {
-    <div class="flex justify-center items-center mt-6">
-      <div class="join">
-        <button class="join-item btn" (click)="onPageChange(getCurrentPage() - 1)" [disabled]="getCurrentPage() === 1 || isLoading()">«</button>
-        @for (page of pageNumbers$ | async; track page) {
-          @if (page === '...') {
-            <button class="join-item btn btn-disabled">...</button>
-          } @else {
-            <button class="join-item btn" [class.btn-active]="getCurrentPage() === page" (click)="onPageChange(+page)" [disabled]="isLoading()">{{page}}</button>
-          }
-        }
-        <button class="join-item btn" (click)="onPageChange(getCurrentPage() + 1)" [disabled]="getCurrentPage() === getTotalPages() || isLoading()">»</button>
+    <div class="drawer-side">
+      <label for="transactions-filters-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+      <div class="w-80 sm:w-96 bg-base-100 border-l border-base-300 min-h-full">
+        <!-- Filters -->
+        <div class="card bg-base-100 shadow-sm h-full">
+          <div class="card-body p-4">
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('orderId')}}</span></label>
+                <input type="number" class="input input-bordered" [ngModel]="orderId()" (ngModelChange)="orderId.set($event ? +$event : null)" (keyup.enter)="onSearch()" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('orderNumber')}}</span></label>
+                <input type="text" class="input input-bordered" [ngModel]="orderNumber()" (ngModelChange)="orderNumber.set($event)" (keyup.enter)="onSearch()" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('paymentMethod')}}</span></label>
+                <select class="select select-bordered" [ngModel]="paymentMethod()" (ngModelChange)="paymentMethod.set($event ? +$event : null)">
+                  <option [ngValue]="null">{{t('all')}}</option>
+                  <option [ngValue]="PaymentMethod.Card">{{t('card')}}</option>
+                  <option [ngValue]="PaymentMethod.Cod">{{t('cashOnDelivery')}}</option>
+                  <option [ngValue]="PaymentMethod.Paypal">{{t('paypal')}}</option>
+                  <option [ngValue]="PaymentMethod.Bank">{{t('bank')}}</option>
+                </select>
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('status')}}</span></label>
+                <input type="text" class="input input-bordered" [ngModel]="status()" (ngModelChange)="status.set($event)" (keyup.enter)="onSearch()" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('startDate')}}</span></label>
+                <input type="date" class="input input-bordered" [ngModel]="startDate()" (ngModelChange)="startDate.set($event || null)" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('endDate')}}</span></label>
+                <input type="date" class="input input-bordered" [ngModel]="endDate()" (ngModelChange)="endDate.set($event || null)" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('minAmount')}}</span></label>
+                <input type="number" class="input input-bordered" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event !== null && $event !== '' ? +$event : null)" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('maxAmount')}}</span></label>
+                <input type="number" class="input input-bordered" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event !== null && $event !== '' ? +$event : null)" />
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('refunded')}}</span></label>
+                <select class="select select-bordered" [ngModel]="isRefunded()" (ngModelChange)="isRefunded.set($event === '' ? null : ($event === 'true'))">
+                  <option value="">{{t('all')}}</option>
+                  <option [ngValue]="true">{{t('yes')}}</option>
+                  <option [ngValue]="false">{{t('no')}}</option>
+                </select>
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('pageSize')}}</span></label>
+                <select class="select select-bordered" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
+                  <option [value]="10">10</option>
+                  <option [value]="20">20</option>
+                  <option [value]="50">50</option>
+                  <option [value]="100">100</option>
+                </select>
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('sortBy')}}</span></label>
+                <select class="select select-bordered" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
+                  <option value="TransactionDate">{{t('transactionDate')}}</option>
+                  <option value="Amount">{{t('amount')}}</option>
+                  <option value="Status">{{t('status')}}</option>
+                  <option value="PaymentMethod">{{t('paymentMethod')}}</option>
+                  <option value="OrderNumber">{{t('orderNumberLabel')}}</option>
+                </select>
+              </div>
+
+              <div class="form-control">
+                <label class="label"><span class="label-text">{{t('direction')}}</span></label>
+                <select class="select select-bordered" [ngModel]="sortDirection()" (ngModelChange)="onSortDirectionChange($event)">
+                  <option value="desc">{{t('desc')}}</option>
+                  <option value="asc">{{t('asc')}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button class="btn btn-primary w-full" (click)="onSearch()" [disabled]="isLoading()">
+                @if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> }
+                {{t('apply')}}
+              </button>
+              <button class="btn btn-outline w-full" (click)="clearFilters()" [disabled]="isLoading()">{{t('clear')}}</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  }
+  </div>
 
   <!-- Toasts -->
   <app-toast [toasts]="toasts" (close)="onToastClose($event)"></app-toast>
