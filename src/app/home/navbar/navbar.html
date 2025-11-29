@@ -644,13 +644,17 @@
 </ng-template>
 
 <!-- Mobile Bottom Navigation -->
-<div class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-base-100 border-t border-base-300 shadow-lg">
-  <div class="flex items-center justify-around py-2">
+<div class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-base-100/95 border-t border-base-300 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+  <div class="flex items-center justify-around py-1.5 px-1">
     <!-- Home -->
-    <a routerLink="/" routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: true}"
-      class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group">
+    <a routerLink="/" (click)="setActiveTab('home')"
+      class="flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 group"
+      [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'home', 'text-base-content/70': activeTab !== 'home'}">
       <div class="relative">
-        <svg class="w-6 h-6 transition-all duration-300" [class.scale-110]="activeTab === 'home'" fill="none"
+        <svg class="w-6 h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'home'"
+          [class.text-primary]="activeTab === 'home'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
@@ -665,10 +669,12 @@
 
     <!-- Categories -->
     <button (click)="toggleCategoriesMobile()"
-      class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group"
-      [class.bg-primary/10]="activeTab === 'categories'" [class.text-primary]="activeTab === 'categories'">
+      class="flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 group"
+      [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'categories', 'text-base-content/70': activeTab !== 'categories'}">
       <div class="relative">
-        <svg class="w-6 h-6 transition-all duration-300" [class.scale-110]="activeTab === 'categories'" fill="none"
+        <svg class="w-6 h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'categories'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
@@ -681,10 +687,12 @@
 
     <!-- Search -->
     <button (click)="toggleSearchMobile()"
-      class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group"
-      [class.bg-primary/10]="activeTab === 'search'" [class.text-primary]="activeTab === 'search'">
+      class="flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 group"
+      [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'search', 'text-base-content/70': activeTab !== 'search'}">
       <div class="relative">
-        <svg class="w-6 h-6 transition-all duration-300" [class.scale-110]="activeTab === 'search'" fill="none"
+        <svg class="w-6 h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'search'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -698,9 +706,12 @@
 
     <!-- Wishlist -->
     <a (click)="goToWishlist()" routerLinkActive="bg-red-50 text-red-500" [routerLinkActiveOptions]="{exact: false}"
-      class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group relative cursor-pointer">
+      class="flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 group relative cursor-pointer"
+      [ngClass]="{'text-red-500 bg-red-50 shadow-md': activeTab === 'wishlist', 'text-base-content/70': activeTab !== 'wishlist'}">
       <div class="relative">
-        <svg class="w-6 h-6 transition-all duration-300" [class.scale-110]="activeTab === 'wishlist'" fill="none"
+        <svg class="w-6 h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'wishlist'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
@@ -720,10 +731,14 @@
     </a>
 
     <!-- Cart -->
-    <a routerLink="/cart" routerLinkActive="bg-primary/10 text-primary" [routerLinkActiveOptions]="{exact: false}"
-      class="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-xl transition-all duration-300 group relative">
+    <a routerLink="/cart"
+      class="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all duration-300 group relative"
+      [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'cart', 'text-base-content/70': activeTab !== 'cart'}"
+      (click)="setActiveTab('cart')">
       <div class="relative flex items-center justify-center">
-        <svg class="w-7 h-7 sm:w-6 sm:h-6 transition-all duration-300" [class.scale-110]="activeTab === 'cart'" fill="none"
+        <svg class="w-7 h-7 sm:w-6 sm:h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'cart'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
@@ -743,10 +758,12 @@
 
     <!-- Account -->
     <button (click)="toggleAccountMobile()"
-      class="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 group"
-      [class.bg-primary/10]="activeTab === 'account'" [class.text-primary]="activeTab === 'account'">
+      class="flex flex-col items-center justify-center px-3 py-2 rounded-2xl transition-all duration-300 group"
+      [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'account', 'text-base-content/70': activeTab !== 'account'}">
       <div class="relative">
-        <svg class="w-6 h-6 transition-all duration-300" [class.scale-110]="activeTab === 'account'" fill="none"
+        <svg class="w-6 h-6 transition-all duration-300"
+          [class.scale-110]="activeTab === 'account'"
+          fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

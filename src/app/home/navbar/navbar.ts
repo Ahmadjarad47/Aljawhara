@@ -1,8 +1,8 @@
 import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, inject, signal, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { Subscription, debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of } from 'rxjs';
+import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Subscription, debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of, filter } from 'rxjs';
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserResponseDto } from '../../auth/auth.models';
 import { CartService } from '../../core/service/cart-service';
@@ -220,6 +220,13 @@ export class Navbar implements OnInit, OnDestroy {
         this.showSearchSuggestions.set(false);
       }
     });
+
+    // Sync activeTab with current route (for bottom mobile navbar)
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => {
+        this.updateActiveTabFromRoute(event.urlAfterRedirects);
+      });
   }
 
   ngOnInit() {
@@ -307,6 +314,9 @@ export class Navbar implements OnInit, OnDestroy {
         this.searchQuery.set(params['search']);
       }
     });
+
+    // Initialize activeTab based on the current route
+    this.updateActiveTabFromRoute(this.router.url);
   }
 
   ngOnDestroy() {
@@ -464,8 +474,8 @@ export class Navbar implements OnInit, OnDestroy {
 
   toggleSearchMobile() {
     this.showMobileSearch = !this.showMobileSearch;
-    this.activeTab = 'search';
     if (this.showMobileSearch) {
+      this.activeTab = 'search';
       this.showMobileCategories = false;
       this.showMobileAccount = false;
       // Focus the input after the view updates
@@ -476,37 +486,46 @@ export class Navbar implements OnInit, OnDestroy {
           this.mobileSearchInput.nativeElement.click();
         }
       }, 100);
+    } else {
+      this.updateActiveTabFromRoute();
     }
   }
 
   closeMobileSearch() {
     this.showMobileSearch = false;
+    this.updateActiveTabFromRoute();
   }
 
   toggleCategoriesMobile() {
     this.showMobileCategories = !this.showMobileCategories;
-    this.activeTab = 'categories';
     if (this.showMobileCategories) {
+      this.activeTab = 'categories';
       this.showMobileSearch = false;
       this.showMobileAccount = false;
+    } else {
+      this.updateActiveTabFromRoute();
     }
   }
 
   closeMobileCategories() {
     this.showMobileCategories = false;
+    this.updateActiveTabFromRoute();
   }
 
   toggleAccountMobile() {
     this.showMobileAccount = !this.showMobileAccount;
-    this.activeTab = 'account';
     if (this.showMobileAccount) {
+      this.activeTab = 'account';
       this.showMobileSearch = false;
       this.showMobileCategories = false;
+    } else {
+      this.updateActiveTabFromRoute();
     }
   }
 
   closeMobileAccount() {
     this.showMobileAccount = false;
+    this.updateActiveTabFromRoute();
   }
 
   searchPopular(term: string) {
@@ -586,6 +605,38 @@ export class Navbar implements OnInit, OnDestroy {
     // User data is now loaded through the auth service subscriptions
     this.isLoggedIn = this.authService.isAuthenticated;
     this.userProfile = this.authService.currentUser;
+  }
+
+  // Determine which bottom tab should be active based on the current route / overlays
+  private updateActiveTabFromRoute(url?: string) {
+    // If any mobile overlay is open, keep its tab active
+    if (this.showMobileSearch) {
+      this.activeTab = 'search';
+      return;
+    }
+    if (this.showMobileCategories) {
+      this.activeTab = 'categories';
+      return;
+    }
+    if (this.showMobileAccount) {
+      this.activeTab = 'account';
+      return;
+    }
+
+    const currentUrl = url || this.router.url || '/';
+
+    if (currentUrl === '/' || currentUrl.startsWith('/home')) {
+      this.activeTab = 'home';
+    } else if (currentUrl.startsWith('/wishlist')) {
+      this.activeTab = 'wishlist';
+    } else if (currentUrl.startsWith('/cart')) {
+      this.activeTab = 'cart';
+    } else if (currentUrl.startsWith('/user')) {
+      this.activeTab = 'account';
+    } else {
+      // Default
+      this.activeTab = 'home';
+    }
   }
 
   private loadCategories() {

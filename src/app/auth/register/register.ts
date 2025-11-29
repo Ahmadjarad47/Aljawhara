@@ -140,6 +140,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
 
     // Duplicate / already taken errors
+    // خاص بالرسالة: "User with this email already exists"
+    if (msg.includes('email') && msg.includes('already exists')) {
+      return 'البريد الإلكتروني مستخدم بالفعل';
+    }
+
     if (msg.includes('already taken') || msg.includes('is already taken') || msg.includes('already in use')) {
       if (msg.includes('email')) {
         return 'البريد الإلكتروني مستخدم بالفعل';
