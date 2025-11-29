@@ -195,7 +195,7 @@ export class Navbar implements OnInit, OnDestroy {
 
   // Language options
   languages = [
-    { code: 'ar', name: 'العربية', flag: '🇸🇾' },
+    { code: 'ar', name: 'العربية', flag: '🇰🇼' },
     { code: 'en', name: 'English', flag: '🇺🇸' },
   ];
 
@@ -567,9 +567,8 @@ export class Navbar implements OnInit, OnDestroy {
   goToWishlist() {
     console.log('Navigate to wishlist');
     this.activeTab = 'wishlist';
-    // Set flag to show wishlist in home page
-    localStorage.setItem('showWishlist', 'true');
-    this.router.navigate(['/']);
+    // Navigate directly to the wishlist route for faster and more reliable loading
+    this.router.navigate(['/wishlist']);
   }
 
   // Profile methods

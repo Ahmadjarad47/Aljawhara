@@ -85,6 +85,7 @@ export class HomePage implements OnInit, OnDestroy {
       support247Desc: 'دعم العملاء على مدار الساعة لمساعدتك في أي أسئلة أو مخاوف.',
       // Wishlist
       myWishlist: 'قائمة الأمنيات',
+      addToWishlist: 'أضف إلى قائمة الأمنيات',
       wishlistEmpty: 'قائمة الأمنيات فارغة',
       wishlistEmptyDesc: 'لم تقم بإضافة أي منتجات إلى قائمة الأمنيات بعد.',
       browseProducts: 'تصفح المنتجات',
@@ -148,6 +149,7 @@ export class HomePage implements OnInit, OnDestroy {
       support247Desc: 'Round-the-clock customer support to help you with any questions or concerns.',
       // Wishlist
       myWishlist: 'My Wishlist',
+      addToWishlist: 'Add to Wishlist',
       wishlistEmpty: 'Your wishlist is empty',
       wishlistEmptyDesc: 'You haven\'t added any products to your wishlist yet.',
       browseProducts: 'Browse Products',
@@ -185,6 +187,9 @@ export class HomePage implements OnInit, OnDestroy {
   // Newsletter subscription
   newsletterEmail: string = '';
   isNewsletterSubscribed: boolean = false;
+
+  // Simple cache TTL: 5 minutes (in milliseconds)
+  private readonly CACHE_TTL = 5 * 60 * 1000;
 
   // Featured Products
   featuredProducts: any[] = [];
@@ -274,6 +279,42 @@ export class HomePage implements OnInit, OnDestroy {
     };
   }
 
+  // --------- Simple localStorage cache helpers ----------
+  private getCache<T>(key: string): T | null {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw) as { timestamp: number; data: T };
+      if (!parsed || typeof parsed.timestamp !== 'number') {
+        return null;
+      }
+      const isExpired = Date.now() - parsed.timestamp > this.CACHE_TTL;
+      if (isExpired) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return parsed.data;
+    } catch {
+      // In case of malformed JSON or access error, clear the key
+      localStorage.removeItem(key);
+      return null;
+    }
+  }
+
+  private setCache<T>(key: string, data: T): void {
+    try {
+      const wrapped = {
+        timestamp: Date.now(),
+        data
+      };
+      localStorage.setItem(key, JSON.stringify(wrapped));
+    } catch {
+      // Ignore storage errors (e.g. quota exceeded, private mode, etc.)
+    }
+  }
+
   // Countdown timer for special offer
   countdown = {
     days: 5,
@@ -332,6 +373,15 @@ export class HomePage implements OnInit, OnDestroy {
   private loadHeroSlides() {
     this.isLoadingHero = true;
 
+    // Try cache first
+    const cachedSlides = this.getCache<{ heroSlidesAr: any[]; heroSlidesEn: any[] }>('home_hero_slides');
+    if (cachedSlides) {
+      this.heroSlidesAr = cachedSlides.heroSlidesAr || [];
+      this.heroSlidesEn = cachedSlides.heroSlidesEn || [];
+      this.isLoadingHero = false;
+      return;
+    }
+
     console.log('[HomePage] loadHeroSlides - calling API:', `${environment.apiUrl}Carousels`);
 
     this.http.get<CarouselDto[]>(`${environment.apiUrl}Carousels`).subscribe({
@@ -373,6 +423,12 @@ export class HomePage implements OnInit, OnDestroy {
           return mapped;
         });
 
+        // Cache mapped slides for 5 minutes
+        this.setCache('home_hero_slides', {
+          heroSlidesAr: this.heroSlidesAr,
+          heroSlidesEn: this.heroSlidesEn
+        });
+
         console.log('[HomePage] heroSlidesAr final:', this.heroSlidesAr);
         console.log('[HomePage] heroSlidesEn final:', this.heroSlidesEn);
 
@@ -389,11 +445,20 @@ export class HomePage implements OnInit, OnDestroy {
   private loadCustomerSatisfaction() {
     this.isLoadingStats = true;
 
+    // Try cache first
+    const cachedStats = this.getCache<CustomerSatisfactionDto>('home_customer_satisfaction');
+    if (cachedStats) {
+      this.customerSatisfaction = cachedStats;
+      this.isLoadingStats = false;
+      return;
+    }
+
     this.http
       .get<CustomerSatisfactionDto>(`${environment.apiUrl}Carousels/customer-satisfaction`)
       .subscribe({
         next: (data) => {
           this.customerSatisfaction = data;
+          this.setCache('home_customer_satisfaction', data);
           this.isLoadingStats = false;
         },
         error: (error) => {
@@ -407,11 +472,20 @@ export class HomePage implements OnInit, OnDestroy {
   private loadLatestReviews() {
     this.isLoadingReviews = true;
 
+    // Try cache first
+    const cachedReviews = this.getCache<ProductRatingSummaryDto[]>('home_latest_reviews');
+    if (cachedReviews) {
+      this.latestReviews = cachedReviews;
+      this.isLoadingReviews = false;
+      return;
+    }
+
     this.http
       .get<ProductRatingSummaryDto[]>(`${environment.apiUrl}Carousels/latest-third-reviews`)
       .subscribe({
         next: (reviews) => {
           this.latestReviews = Array.isArray(reviews) ? reviews : [];
+          this.setCache('home_latest_reviews', this.latestReviews);
           this.isLoadingReviews = false;
         },
         error: (error) => {
@@ -424,23 +498,37 @@ export class HomePage implements OnInit, OnDestroy {
   // Load featured products from API
   loadFeaturedProducts() {
     this.isLoadingProducts = true;
-    this.productService.getProducts({ 
-      pageNumber: 1, 
-      pageSize: 8,
-      sortBy: 'highRating' // Get highest rated products
-    }).subscribe({
-      next: (response) => {
-        const products = this.extractProducts(response);
-        // Store original products for language switching
-        this.originalProducts = products;
-        this.updateProductsLanguage();
-        this.isLoadingProducts = false;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.isLoadingProducts = false;
-      }
-    });
+    // Try cache first
+    const cachedProducts = this.getCache<ProductSummaryDto[]>('home_featured_products');
+    if (cachedProducts && cachedProducts.length > 0) {
+      // Restore originalProducts and derived featuredProducts
+      this.originalProducts = cachedProducts;
+      this.updateProductsLanguage();
+      this.isLoadingProducts = false;
+      return;
+    }
+
+    this.productService
+      .getProducts({
+        pageNumber: 1,
+        pageSize: 8,
+        sortBy: 'highRating' // Get highest rated products
+      })
+      .subscribe({
+        next: (response) => {
+          const products = this.extractProducts(response);
+          // Store original products for language switching
+          this.originalProducts = products;
+          // Cache original API products (not transformed) for 5 minutes
+          this.setCache('home_featured_products', products);
+          this.updateProductsLanguage();
+          this.isLoadingProducts = false;
+        },
+        error: (error) => {
+          console.error('Error loading products:', error);
+          this.isLoadingProducts = false;
+        }
+      });
   }
 
   // Update products language when language changes (without re-fetching from API)

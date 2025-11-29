@@ -252,12 +252,7 @@
               <label class="label"><span class="label-text">{{t('postalCode')}}</span></label>
               <input class="input input-bordered" [(ngModel)]="editAddress.postalCode" />
             </div>
-            <div class="form-control md:col-span-2">
-              <label class="cursor-pointer label justify-start gap-3">
-                <input type="checkbox" class="checkbox" [(ngModel)]="editAddress.isDefault">
-                <span class="label-text">{{t('setAsDefault')}}</span>
-              </label>
-            </div>
+           
           </div>
           <div class="modal-action">
             <button class="btn btn-ghost" (click)="showEditAddress.set(false)">{{t('cancel')}}</button>

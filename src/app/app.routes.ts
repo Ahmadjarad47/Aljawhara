@@ -36,6 +36,10 @@ export const routes: Routes = [
         loadComponent: () => import('./home/cookie-policy/cookie-policy').then(m => m.CookiePolicy)
     },
     {
+        path: 'wishlist',
+        loadComponent: () => import('./home/wishlist/wishlist').then(m => m.Wishlist)
+    },
+    {
         path: 'cart',
         loadComponent: () => import('./core/components/cart/cart').then(m => m.Cart)
     },

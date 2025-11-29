@@ -151,7 +151,7 @@
                 @for (lang of languages; track lang.code; let i = $index) {
                 <div (click)="changeLanguage(lang)" (keydown.enter)="changeLanguage(lang)"
                   class="flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 dropdown-item cursor-pointer transition-colors duration-150"
-                  [class.bg-primary/5]="selectedLanguage === lang.name" role="menuitem" [tabindex]="i">
+                  [class.bg-primary]="selectedLanguage === lang.name" role="menuitem" [tabindex]="i">
                   <span class="text-lg mr-3">{{lang.flag}}</span>
                   <span class="font-medium">{{lang.name}}</span>
                   @if (selectedLanguage === lang.name) {
@@ -193,11 +193,9 @@
           <a routerLink="/cart" routerLinkActive="text-primary bg-primary/10" [routerLinkActiveOptions]="{exact: false}"
             class="relative p-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors duration-300 group"
             aria-label="Shopping Cart" [attr.aria-label]="'Shopping cart with ' + cartCount + ' items'">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-base-content/70 transition-colors duration-200 group-hover:text-primary"
-              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
-            </svg>
+            <img src="/shopping-cart-outline-svgrepo-com.svg"
+              class="w-5 h-5 sm:w-6 sm:h-6 text-base-content/70 transition-colors duration-200 group-hover:text-primary"
+              alt="Shopping cart icon">
 
             @if (cartCount > 0) {
             <span
@@ -551,7 +549,7 @@
             @for (lang of languages; track lang.code) {
             <button (click)="changeLanguage(lang); toggleMobileMenu()"
               class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium"
-              [class.bg-primary/10]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
+              [class.bg-primary]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
               <span class="text-lg mr-3">{{lang.flag}}</span>
               <span class="flex-1 text-left">{{lang.name}}</span>
               @if (selectedLanguage === lang.name) {
@@ -584,10 +582,9 @@
               <a routerLink="/cart" routerLinkActive="bg-primary-focus" [routerLinkActiveOptions]="{exact: false}"
                 (click)="toggleMobileMenu()"
                 class="flex-1 flex items-center justify-center px-3 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-focus transition-colors relative">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
-                </svg>
+                <img src="/shopping-cart-outline-svgrepo-com.svg"
+                  class="w-5 h-5 mr-2"
+                  alt="Shopping cart icon">
                 <span class="text-sm font-medium">{{t('cart')}}</span>
                 @if (cartCount > 0) {
                 <span class="ml-2 min-w-[20px] h-5 px-1.5 bg-white/20 text-white text-xs rounded-full flex items-center justify-center font-bold">
@@ -736,13 +733,9 @@
       [ngClass]="{'text-primary bg-primary/10 shadow-md': activeTab === 'cart', 'text-base-content/70': activeTab !== 'cart'}"
       (click)="setActiveTab('cart')">
       <div class="relative flex items-center justify-center">
-        <svg class="w-7 h-7 sm:w-6 sm:h-6 transition-all duration-300"
-          [class.scale-110]="activeTab === 'cart'"
-          fill="none"
-          stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 7h14l-2-7M10 21a2 2 0 11-4 0m8 0a2 2 0 11-4 0" />
-        </svg>
+        <img src="/shopping-cart-outline-svgrepo-com.svg"
+          class="w-7 h-7 sm:w-6 sm:h-6 transition-all duration-300"
+          alt="Shopping cart icon">
         @if (cartCount > 0) {
         <span
           class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-r from-primary to-primary-focus text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-bold shadow-md z-10">
@@ -912,7 +905,7 @@
           @for (lang of languages; track lang.code) {
           <button (click)="changeLanguage(lang); closeMobileAccount()"
             class="w-full flex items-center px-3 py-2.5 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium"
-            [class.bg-primary/10]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
+            [class.bg-primary]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
             <span class="text-lg mr-3">{{lang.flag}}</span>
             <span class="flex-1 text-left">{{lang.name}}</span>
             @if (selectedLanguage === lang.name) {

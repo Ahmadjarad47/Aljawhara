@@ -1,0 +1,149 @@
+<div class="min-h-screen bg-base-200">
+  <div class="bg-base-100 shadow-sm border-b border-base-300">
+    <div class="container mx-auto px-4 py-6 flex flex-col gap-2">
+      <h1 class="text-2xl md:text-3xl font-bold" style="color: #054239;">
+        {{ t('wishlist') }}
+      </h1>
+      <p class="text-sm md:text-base text-base-content/70">
+        {{ t('wishlistDesc') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 py-6">
+    @if (isEmpty()) {
+      <div class="flex flex-col items-center justify-center py-16">
+        <div
+          class="w-20 h-20 rounded-full bg-base-100 flex items-center justify-center shadow-md mb-4"
+        >
+          <svg
+            class="w-10 h-10 text-base-content/40"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            ></path>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold mb-2">
+          {{ t('emptyTitle') }}
+        </h2>
+        <p class="text-base-content/60 mb-6 text-center max-w-md">
+          {{ t('emptyDesc') }}
+        </p>
+        <a
+          routerLink="/product"style="background-color: #054239; "
+          class="btn text-white px-6"
+        >
+          {{ t('browseProducts') }}
+        </a>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-4 mb-6">
+        <div
+          class="bg-base-100 border border-base-300 rounded-box p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-sm"
+        >
+          <div>
+            <p class="text-sm font-medium text-base-content/70">
+              {{ t('totalItems') }}:
+              <span class="font-semibold text-base-content">
+                {{ wishlistItems().length }}
+              </span>
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="btn btn-sm btn-primary"
+              type="button"
+              (click)="moveAllToCart()"
+            >
+              {{ t('moveAllToCart') }}
+            </button>
+            <button
+              class="btn btn-sm btn-outline btn-error"
+              type="button"
+              (click)="clearWishlist()"
+            >
+              {{ t('clearWishlist') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (item of wishlistItems(); track item.id) {
+            <div
+              class="bg-base-100 border border-base-300 rounded-box shadow-sm overflow-hidden flex flex-col"
+            >
+              <div class="relative w-full h-48 bg-base-200">
+                <img
+                  [src]="item.product.mainImage"
+                  [alt]="getProductName(item)"
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="p-4 flex-1 flex flex-col gap-2">
+                <h3 class="font-semibold text-base-content line-clamp-2">
+                  {{ getProductName(item) }}
+                </h3>
+
+                @if (getProductDescription(item)) {
+                  <p class="text-xs text-base-content/60 line-clamp-2">
+                    {{ getProductDescription(item) }}
+                  </p>
+                }
+
+                <div class="mt-2 flex items-center justify-between text-sm">
+                  <div class="font-semibold text-primary">
+                    @if (getProductPrice(item) !== null) {
+                      <span>
+                        {{ getProductPrice(item) }}
+                      </span>
+                    }
+                  </div>
+                  <div class="text-xs text-base-content/60">
+                    {{ t('addedAt') }}:
+                    {{ item.addedAt | date: 'mediumDate' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-4 pt-2 flex flex-wrap gap-2">
+                <button
+                  class="btn btn-sm btn-primary flex-1"
+                  type="button"
+                  (click)="moveItemToCart(item)"
+                >
+                  {{ t('moveToCart') }}
+                </button>
+                <button
+                  class="btn btn-sm btn-outline flex-1"
+                  type="button"
+                  (click)="navigateToProduct(item)"
+                >
+                  {{ t('goToProduct') }}
+                </button>
+                <button
+                  class="btn btn-sm btn-ghost text-error w-full"
+                  type="button"
+                  (click)="removeItem(item)"
+                >
+                  {{ t('remove') }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+
