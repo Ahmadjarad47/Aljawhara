@@ -123,6 +123,16 @@ export class Wishlist implements OnInit, OnDestroy {
     return item.product.newPrice ?? null;
   }
 
+  // Handle image loading errors
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.classList.add('loaded');
+    // Set fallback image if main image fails to load
+    if (img.src !== 'https://via.placeholder.com/400x300?text=No+Image') {
+      img.src = 'https://via.placeholder.com/400x300?text=No+Image';
+    }
+  }
+
   // Actions
   removeItem(item: WishlistItem): void {
     this.wishlistService.removeItem(item.id);

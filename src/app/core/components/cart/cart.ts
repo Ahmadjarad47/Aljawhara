@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../service/cart-service';
-import { CoponeService } from '../../../admin/copone/copone-service';
+import { CouponService } from '../../service/coupon-service';
 import { OrderSummaryComponent } from '../order-summary/order-summary';
 import { CartItem } from '../../../Models/order';
-import { CouponDto, CouponValidationDto, CouponValidationResultDto } from '../../../admin/copone/copone.models';
+import { CouponDto, CouponValidationDto, CouponValidationResultDto } from '../../Models/coupon';
 
 @Component({
   selector: 'app-cart',
@@ -17,7 +17,7 @@ import { CouponDto, CouponValidationDto, CouponValidationResultDto } from '../..
 })
 export class Cart implements OnInit, OnDestroy {
   private cartService = inject(CartService);
-  private couponService = inject(CoponeService);
+  private couponService = inject(CouponService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
 
   // Language management

@@ -295,35 +295,18 @@ export class ProductDetail implements OnInit, OnDestroy {
   ];
 
   // Related products
-  relatedProducts = [
-    {
-      id: 2,
-      name: 'Bluetooth Speaker',
-      price: 89.99,
-      originalPrice: 119.99,
-      image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop&crop=center',
-      rating: 4.3,
-      discount: 25
-    },
-    {
-      id: 3,
-      name: 'Smart Watch',
-      price: 299.99,
-      originalPrice: null,
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop&crop=center',
-      rating: 4.7,
-      discount: 0
-    },
-    {
-      id: 4,
-      name: 'Gaming Mouse',
-      price: 79.99,
-      originalPrice: 99.99,
-      image: 'https://images.unsplash.com/photo-1527864550417-7f91c4da76f1?w=400&h=300&fit=crop&crop=center',
-      rating: 4.5,
-      discount: 20
-    }
-  ];
+  relatedProducts: Array<{
+    id: number;
+    name: string;
+    price: number;
+    originalPrice: number | null;
+    image: string;
+    rating: number;
+    discount: number;
+  }> = [];
+  
+  // Store original related products data for language switching
+  private originalRelatedProducts: ProductSummaryDto[] = [];
 
   // New review form
   newReview = {
@@ -346,6 +329,8 @@ export class ProductDetail implements OnInit, OnDestroy {
         const newLang = e.newValue as 'ar' | 'en';
         if (newLang === 'ar' || newLang === 'en') {
           this.currentLanguage.set(newLang);
+          // Update related products language when language changes
+          this.updateRelatedProductsLanguage();
         }
       }
     });
@@ -354,6 +339,8 @@ export class ProductDetail implements OnInit, OnDestroy {
       const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
       if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
         this.currentLanguage.set(currentLang);
+        // Update related products language when language changes
+        this.updateRelatedProductsLanguage();
       }
     }, 500);
 
@@ -413,6 +400,11 @@ export class ProductDetail implements OnInit, OnDestroy {
 
         // Check if user is authenticated and has rated this product
         this.checkUserRating(product.id);
+
+        // Load related products from the same subcategory
+        if (product.subCategoryId) {
+          this.loadRelatedProducts(product.subCategoryId, product.id);
+        }
       }
       this.isLoading.set(false);
     });
@@ -858,6 +850,50 @@ export class ProductDetail implements OnInit, OnDestroy {
     this.cartService.removeItem(cartItem.id);
     this.quantity = 1;
     this.toastService.success(this.t('removed'), `${product.title} ${this.t('hasBeenRemoved')}`);
+  }
+
+  // Load related products
+  loadRelatedProducts(subCategoryId: number, currentProductId: number) {
+    this.productService.getRandomProductsBySubCategory(subCategoryId, 3).pipe(
+      catchError(error => {
+        console.error('Error loading related products:', error);
+        return of([]);
+      })
+    ).subscribe(products => {
+      // Store original products for language switching
+      this.originalRelatedProducts = products.filter(p => p.id !== currentProductId);
+      
+      // Transform to match template expectations
+      this.transformRelatedProducts();
+    });
+  }
+
+  // Transform related products based on current language
+  private transformRelatedProducts() {
+    const isArabic = this.currentLanguage() === 'ar';
+    
+    this.relatedProducts = this.originalRelatedProducts.map(p => {
+      const discount = p.oldPrice && p.newPrice && p.oldPrice > p.newPrice
+        ? Math.round(((p.oldPrice - p.newPrice) / p.oldPrice) * 100)
+        : 0;
+      
+      return {
+        id: p.id,
+        name: isArabic ? (p.titleAr || p.title) : p.title,
+        price: p.newPrice,
+        originalPrice: p.oldPrice && p.oldPrice > p.newPrice ? p.oldPrice : null,
+        image: p.mainImage || 'https://via.placeholder.com/400x400?text=No+Image',
+        rating: p.averageRating || 0,
+        discount: discount
+      };
+    });
+  }
+
+  // Update related products when language changes
+  updateRelatedProductsLanguage() {
+    if (this.originalRelatedProducts.length > 0) {
+      this.transformRelatedProducts();
+    }
   }
 
   // Toast methods

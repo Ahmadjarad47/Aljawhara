@@ -600,11 +600,12 @@
     </div>
 
     <!-- Related Products -->
+    @if (relatedProducts.length > 0) {
     <div class="mt-16">
       <h2 class="text-2xl font-bold  mb-8">{{t('relatedProducts')}}</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (relatedProduct of relatedProducts; track relatedProduct.id) {
-        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+        <a [routerLink]="['/product', relatedProduct.id]" class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group block cursor-pointer">
           <div class="relative">
             <div class="img-container w-full h-48">
               <img [src]="relatedProduct.image" 
@@ -636,16 +637,17 @@
               <span class="text-sm text-gray-600">{{relatedProduct.rating}}</span>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="text-lg font-bold text-primary">${{relatedProduct.price}}</span>
+              <span class="text-lg font-bold text-primary">{{relatedProduct.price|currency}}</span>
               @if (relatedProduct.originalPrice) {
-              <span class="text-sm text-gray-400 line-through">{{relatedProduct.originalPrice|currency:'KWD'}}</span>
+              <span class="text-sm text-gray-400 line-through">{{relatedProduct.originalPrice|currency}}</span>
               }
             </div>
           </div>
-        </div>
+        </a>
         }
       </div>
     </div>
+    }
     }
   </div>
 </div>

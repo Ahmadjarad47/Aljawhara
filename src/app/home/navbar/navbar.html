@@ -279,7 +279,7 @@
                   </div>
                 </div>
                 <div class="px-2 py-2">
-                  <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+                  <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
                     [routerLinkActiveOptions]="{exact: false}"
                     class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium">
                     <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor"
@@ -611,7 +611,7 @@
             <!-- User Menu -->
             @if (isLoggedIn) {
             <div class="space-y-2">
-              <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+              <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
                 [routerLinkActiveOptions]="{exact: false}" (click)="toggleMobileMenu()"
                 class="w-full px-4 py-2 text-left text-gray-700 hover:bg-base-200 rounded-lg transition-colors">
                 {{t('myProfile')}}
@@ -936,7 +936,7 @@
       </div>
 
       <div class="space-y-2">
-        <a routerLink="/user" routerLinkActive="bg-primary/10 text-primary font-semibold"
+        <a routerLink="/user/settings" routerLinkActive="bg-primary/10 text-primary font-semibold"
           [routerLinkActiveOptions]="{exact: false}" (click)="closeMobileAccount()"
           class="w-full flex items-center p-3 text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150">
           <svg class="w-5 h-5 mr-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

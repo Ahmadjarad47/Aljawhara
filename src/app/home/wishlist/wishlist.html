@@ -81,12 +81,17 @@
               class="bg-base-100 border border-base-300 rounded-box shadow-sm overflow-hidden flex flex-col"
             >
               <div class="relative w-full h-48 bg-base-200">
-                <img
-                  [src]="item.product.mainImage"
-                  [alt]="getProductName(item)"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <div class="img-container w-full h-full">
+                  <img
+                    [src]="item.product.mainImage || 'https://via.placeholder.com/400x300?text=No+Image'"
+                    [alt]="getProductName(item)"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                    (load)="$event.target.classList.add('loaded')"
+                    (error)="handleImageError($event)"
+                  />
+                  <div class="img-loading"></div>
+                </div>
               </div>
 
               <div class="p-4 flex-1 flex flex-col gap-2">

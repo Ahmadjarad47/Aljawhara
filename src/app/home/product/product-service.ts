@@ -79,4 +79,10 @@ export class ProductService {
       params: { productId: productId.toString() }
     });
   }
+
+  getRandomProductsBySubCategory(subCategoryId: number, count: number = 3): Observable<ProductSummaryDto[]> {
+    return this.http.get<ProductSummaryDto[]>(`${this.api}Products/subcategory/${subCategoryId}/random`, {
+      params: { count: count.toString() }
+    });
+  }
 }

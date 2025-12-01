@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { CartItem, OrderItemCreateDto } from '../../Models/order';
-import { CouponDto, CouponValidationResultDto } from '../../admin/copone/copone.models';
+import { CouponDto, CouponValidationResultDto } from '../Models/coupon';
 
 @Injectable({
   providedIn: 'root'
