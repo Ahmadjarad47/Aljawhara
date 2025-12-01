@@ -4,21 +4,25 @@ import { UserAddressDto, CreateAddressDto, UpdateAddressDto } from '../Models/sh
 export enum StepperStep {
   SHIPPING = 1,
   REVIEW = 2,
-  PAYMENT = 3
+  PAYMENT_TIMING = 3,
+  PAYMENT = 4
 }
+
+export type PaymentTiming = 'now' | 'on_delivery';
 
 export interface CheckoutData {
   address?: UserAddressDto;
   createAddressDto?: CreateAddressDto;
   updateAddressDto?: UpdateAddressDto;
   selectedAddressId?: number;
+  paymentTiming?: PaymentTiming;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceStepper {
-  private readonly TOTAL_STEPS = 3;
+  private readonly TOTAL_STEPS = 4;
   
   // Current step signal
   currentStep = signal<StepperStep>(StepperStep.SHIPPING);

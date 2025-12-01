@@ -13,7 +13,7 @@ import {
   providedIn: 'root'
 })
 export class CouponService {
-  private api = environment.apiUrl + 'coupons';
+  private api = environment.apiUrl + 'Coupons';
   private http = inject(HttpClient);
 
   // Get all coupons
@@ -27,7 +27,7 @@ export class CouponService {
   }
 
   // Get coupon by ID
-  getCouponById(id: number): Observable<CouponDto> {
+  getCouponById(id: number): Observable<CouponDto> {  
     return this.http.get<CouponDto>(`${this.api}/${id}`);
   }
 

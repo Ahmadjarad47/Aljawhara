@@ -1,0 +1,142 @@
+<div [dir]="isRTL() ? 'rtl' : 'ltr'">
+  @if (isCreatingOrder()) {
+    <div class="flex flex-col items-center justify-center py-12 md:py-16">
+      <span class="loading loading-spinner loading-lg text-[#054239] mb-4"></span>
+      <p class="text-base-content/70 text-sm md:text-base">{{ t('creatingOrder') }}</p>
+    </div>
+  } @else {
+    <div class="mb-6 md:mb-8">
+      <h2 class="text-xl md:text-2xl font-bold text-base-content mb-2 md:mb-3">{{ t('paymentTimingTitle') }}</h2>
+      <p class="text-base-content/70 text-sm md:text-base leading-relaxed">{{ t('paymentTimingSubtitle') }}</p>
+    </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+    <!-- Pay Now Option -->
+    <div 
+      class="payment-timing-card group relative card bg-base-100 shadow-md transition-all duration-300 border-2 overflow-hidden"
+      [class.cursor-pointer]="!isCreatingOrder()"
+      [class.cursor-not-allowed]="isCreatingOrder()"
+      [class.opacity-50]="isCreatingOrder()"
+      [class.border-[#054239]]="selectedTiming() === 'now'"
+      [class.border-base-300]="selectedTiming() !== 'now'"
+      [class.shadow-lg]="selectedTiming() === 'now'"
+      (click)="!isCreatingOrder() && selectTiming('now')"
+    >
+      @if (selectedTiming() === 'now') {
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#054239]"></div>
+      }
+      <div class="card-body p-5 md:p-6">
+        <div class="flex items-start gap-4">
+          <!-- Icon -->
+          <div 
+            class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+            [class.bg-[#054239]/10]="selectedTiming() === 'now'"
+            [class.bg-base-200]="selectedTiming() !== 'now'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
+              class="w-6 h-6 transition-colors duration-300"
+              [class.text-[#054239]]="selectedTiming() === 'now'"
+              [class.text-base-content/60]="selectedTiming() !== 'now'"
+            >
+              <path d="M4.5 3.75a3 3 0 00-3 3v.75h21v-.75a3 3 0 00-3-3h-15z" />
+              <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zm-18 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <h3 class="text-lg font-semibold text-base-content">{{ t('payNow') }}</h3>
+              <div 
+                class="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                [class.bg-[#054239]]="selectedTiming() === 'now'"
+                [class.border-[#054239]]="selectedTiming() === 'now'"
+                [class.border-base-300]="selectedTiming() !== 'now'"
+              >
+                @if (selectedTiming() === 'now') {
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 text-white">
+                    <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" />
+                  </svg>
+                }
+              </div>
+            </div>
+            <p class="text-sm text-base-content/70 leading-relaxed mb-3">{{ t('payNowDescription') }}</p>
+            @if (selectedTiming() === 'now') {
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#054239]/10 text-[#054239] text-xs font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+                {{ t('selected') }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pay on Delivery Option -->
+    <div 
+      class="payment-timing-card group relative card bg-base-100 shadow-md transition-all duration-300 border-2 overflow-hidden"
+      [class.cursor-pointer]="!isCreatingOrder()"
+      [class.cursor-not-allowed]="isCreatingOrder()"
+      [class.opacity-50]="isCreatingOrder()"
+      [class.border-[#054239]]="selectedTiming() === 'on_delivery'"
+      [class.border-base-300]="selectedTiming() !== 'on_delivery'"
+      [class.shadow-lg]="selectedTiming() === 'on_delivery'"
+      (click)="!isCreatingOrder() && selectTiming('on_delivery')"
+    >
+      @if (selectedTiming() === 'on_delivery') {
+        <div class="absolute top-0 left-0 right-0 h-1 bg-[#054239]"></div>
+      }
+      <div class="card-body p-5 md:p-6">
+        <div class="flex items-start gap-4">
+          <!-- Icon -->
+          <div 
+            class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+            [class.bg-[#054239]/10]="selectedTiming() === 'on_delivery'"
+            [class.bg-base-200]="selectedTiming() !== 'on_delivery'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
+              class="w-6 h-6 transition-colors duration-300"
+              [class.text-[#054239]]="selectedTiming() === 'on_delivery'"
+              [class.text-base-content/60]="selectedTiming() !== 'on_delivery'"
+            >
+              <path d="M3.375 4.5c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125S2.25 15.996 2.25 15.375v-9.75c0-.621.504-1.125 1.125-1.125zm12.75 0c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125s-1.125-.504-1.125-1.125v-9.75c0-.621.504-1.125 1.125-1.125zM8.25 4.5c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125S7.125 15.996 7.125 15.375v-9.75C7.125 5.004 7.629 4.5 8.25 4.5zm6 0c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125s-1.125-.504-1.125-1.125v-9.75c0-.621.504-1.125 1.125-1.125z" />
+              <path fill-rule="evenodd" d="M1.5 18.75a.75.75 0 01.75-.75h19.5a.75.75 0 010 1.5H2.25a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <h3 class="text-lg font-semibold text-base-content">{{ t('payOnDelivery') }}</h3>
+              <div 
+                class="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                [class.bg-[#054239]]="selectedTiming() === 'on_delivery'"
+                [class.border-[#054239]]="selectedTiming() === 'on_delivery'"
+                [class.border-base-300]="selectedTiming() !== 'on_delivery'"
+              >
+                @if (selectedTiming() === 'on_delivery') {
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 text-white">
+                    <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" />
+                  </svg>
+                }
+              </div>
+            </div>
+            <p class="text-sm text-base-content/70 leading-relaxed mb-3">{{ t('payOnDeliveryDescription') }}</p>
+            @if (selectedTiming() === 'on_delivery') {
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#054239]/10 text-[#054239] text-xs font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+                {{ t('selected') }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+

@@ -2,11 +2,26 @@
   <h2 class="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">{{ t('paymentTitle') }}</h2>
   
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-    <!-- Payment Form -->
+    <!-- Payment Form or Pay on Delivery Message -->
     <div>
-      <div class="card bg-base-200 shadow-sm">
-        <div class="card-body">
-          <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('cardDetails') }}</h3>
+      @if (isPayOnDelivery()) {
+        <!-- Pay on Delivery Message -->
+        <div class="card bg-base-200 shadow-sm">
+          <div class="card-body">
+            <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('payOnDeliveryTitle') }}</h3>
+            <div class="alert alert-success">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-sm">{{ t('payOnDeliveryDescription') }}</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Payment Form -->
+        <div class="card bg-base-200 shadow-sm">
+          <div class="card-body">
+            <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('cardDetails') }}</h3>
           
           <div class="space-y-4">
             <!-- Card Number -->
@@ -92,7 +107,9 @@
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      }
+      
       
       <!-- Order Summary -->
       <div class="card bg-base-200 shadow-sm mt-4 md:mt-6">
@@ -123,6 +140,22 @@
     
     <!-- Order Details -->
     <div>
+      <!-- Payment Timing Info -->
+      @if (paymentTiming()) {
+        <div class="card bg-base-200 shadow-sm mb-4 md:mb-6">
+          <div class="card-body">
+            <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('paymentTiming') }}</h3>
+            <div class="badge badge-lg" [class.badge-success]="isPayOnDelivery()" [class.badge-primary]="!isPayOnDelivery()">
+              @if (isPayOnDelivery()) {
+                {{ t('payOnDeliveryTitle') }}
+              } @else {
+                {{ t('payNow') }}
+              }
+            </div>
+          </div>
+        </div>
+      }
+      
       <div class="card bg-base-200 shadow-sm mb-4 md:mb-6">
         <div class="card-body">
           <h3 class="text-lg font-semibold text-base-content mb-4">{{ t('shippingTo') }}</h3>

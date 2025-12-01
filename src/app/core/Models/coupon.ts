@@ -29,7 +29,6 @@ export enum CouponType {
 export interface CouponValidationDto {
     code: string;
     orderAmount: number;
-    userId: string | null;
 }
 
 export interface CouponValidationResultDto {

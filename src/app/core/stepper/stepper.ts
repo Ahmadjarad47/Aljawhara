@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ServiceStepper, StepperStep } from './service-stepper';
 import { ShippingStepComponent } from './shipping-step/shipping-step';
 import { ReviewStepComponent } from './review-step/review-step';
+import { PaymentTimingStepComponent } from './payment-timing-step/payment-timing-step';
 import { PaymentStepComponent } from './payment-step/payment-step';
 
 @Component({
@@ -12,6 +13,7 @@ import { PaymentStepComponent } from './payment-step/payment-step';
     CommonModule,
     ShippingStepComponent,
     ReviewStepComponent,
+    PaymentTimingStepComponent,
     PaymentStepComponent
   ],
   templateUrl: './stepper.html',
@@ -33,6 +35,7 @@ export class StepperComponent {
       checkoutSubtitle: 'راجع تفاصيلك وأكمل طلبك بأمان.',
       shippingStep: 'الشحن',
       reviewStep: 'مراجعة الطلب',
+      paymentTimingStep: 'وقت الدفع',
       paymentStep: 'الدفع',
       previous: 'السابق',
       continueTo: 'متابعة إلى',
@@ -44,6 +47,7 @@ export class StepperComponent {
       checkoutSubtitle: 'Review your details and place your order securely.',
       shippingStep: 'Shipping',
       reviewStep: 'Review Order',
+      paymentTimingStep: 'Payment Timing',
       paymentStep: 'Payment',
       previous: 'Previous',
       continueTo: 'Continue to',
@@ -78,6 +82,9 @@ export class StepperComponent {
     if (this.currentStep() === StepperStep.REVIEW) {
       return true;
     }
+    if (this.currentStep() === StepperStep.PAYMENT_TIMING) {
+      return !!data.paymentTiming;
+    }
     return false;
   }
   
@@ -86,6 +93,9 @@ export class StepperComponent {
       return this.t('reviewStep');
     }
     if (this.currentStep() === StepperStep.REVIEW) {
+      return this.t('paymentTimingStep');
+    }
+    if (this.currentStep() === StepperStep.PAYMENT_TIMING) {
       return this.t('paymentStep');
     }
     return '';

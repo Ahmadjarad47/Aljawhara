@@ -50,13 +50,62 @@
           <label class="label">
             <span class="label-text font-semibold">{{ t('phoneLabel') }}</span>
           </label>
-          <input
-            type="text"
-            formControlName="phoneNumber"
-            class="input input-bordered w-full"
-            [class.input-error]="getError('phoneNumber')"
-            [placeholder]="t('phonePlaceholder')"
-          />
+          <div class="flex gap-2 country-selector">
+            <!-- Country Code Selector -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleCountryDropdown()"
+                class="flex items-center gap-2 px-3 h-12 border border-base-300 rounded-lg bg-base-100 hover:bg-base-200 transition-colors min-w-[110px]"
+                [class.border-error]="getError('phoneNumber')"
+              >
+                <span class="text-lg">{{ selectedCountry().flag }}</span>
+                <span class="text-sm font-medium">{{ selectedCountry().code }}</span>
+                <svg class="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <!-- Dropdown Menu -->
+              @if (isCountryDropdownOpen()) {
+                <div class="absolute top-full left-0 mt-1 w-64 max-h-60 overflow-y-auto bg-base-100 border border-base-300 rounded-lg shadow-xl z-50">
+                  <div class="py-2">
+                    @for (country of countries; track country.code + country.name) {
+                      <button
+                        type="button"
+                        (click)="selectCountry(country)"
+                        class="w-full flex items-center gap-3 px-4 py-2 hover:bg-base-200 transition-colors text-left"
+                        [class.bg-base-200]="selectedCountry().code === country.code && selectedCountry().name === country.name"
+                      >
+                        <span class="text-lg">{{ country.flag }}</span>
+                        <span class="flex-1 font-medium text-sm">{{ country.name }}</span>
+                        <span class="text-sm text-base-content/60">{{ country.code }}</span>
+                        @if (selectedCountry().code === country.code && selectedCountry().name === country.name) {
+                          <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                          </svg>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            
+            <!-- Phone Number Input -->
+            <div class="flex-1">
+              <input
+                type="tel"
+                formControlName="phoneNumber"
+                class="input input-bordered w-full"
+                [class.input-error]="getError('phoneNumber')"
+                placeholder="123-456-7890"
+                inputmode="numeric"
+                (input)="onPhoneNumberInput($event)"
+                (keypress)="onPhoneNumberKeyPress($event)"
+              />
+            </div>
+          </div>
           @if (getError('phoneNumber')) {
             <label class="label">
               <span class="label-text-alt text-error">{{ getError('phoneNumber') }}</span>
@@ -133,7 +182,7 @@
           </div>
           @if (getError('confirmPassword') || isPasswordMismatch) {
             <label class="label">
-              <span class="label-text-alt text-error">{{ getError('confirmPassword') || 'Passwords do not match' }}</span>
+              <span class="label-text-alt text-error">{{ getError('confirmPassword') || t('passwordsDoNotMatch') }}</span>
             </label>
           }
         </div>

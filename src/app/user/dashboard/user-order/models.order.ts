@@ -9,11 +9,11 @@ export interface BaseDto {
 }
 
 export enum OrderStatus {
-    Pending = 1,
-    Processing = 2,
-    Shipped = 3,
-    Delivered = 4,
-    Cancelled = 5
+    Pending = 0,
+    Processing = 1,
+    Shipped = 2,
+    Delivered = 3,
+    Cancelled = 4
 }
 
 export interface OrderSummaryDto {

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { catchError, finalize, of } from 'rxjs';
 import { CartService } from '../../service/cart-service';
 import { CouponService } from '../../service/coupon-service';
 import { OrderSummaryComponent } from '../order-summary/order-summary';
@@ -83,7 +84,7 @@ export class Cart implements OnInit, OnDestroy {
   
   // Coupon input
   couponCode = '';
-  isApplyingCoupon = false;
+  isApplyingCoupon = signal(false);
   couponError = '';
   
   // Total price
@@ -119,42 +120,59 @@ export class Cart implements OnInit, OnDestroy {
   }
 
   // Apply coupon
-  async applyCoupon(): Promise<void> {
+  applyCoupon(): void {
     if (!this.couponCode.trim()) {
       this.couponError = this.t('pleaseEnterCoupon');
       return;
     }
 
-    this.isApplyingCoupon = true;
+    if (this.isApplyingCoupon()) {
+      return; // Prevent multiple simultaneous requests
+    }
+
+    this.isApplyingCoupon.set(true);
     this.couponError = '';
 
-    try {
-      const validationDto: CouponValidationDto = {
-        code: this.couponCode.trim().toUpperCase(),
-        orderAmount: this.totalPrice,
-        userId: null // You can get this from auth service if needed
-      };
+    const validationDto: CouponValidationDto = {
+      code: this.couponCode.trim().toUpperCase(),
+      orderAmount: this.totalPrice
+    };
 
-      const result = await this.couponService.validateCoupon(validationDto).toPromise();
-      
-      if (!result) {
-        this.couponError = this.t('failedToValidate');
-        return;
-      }
-      
-      if (result.isValid && result.coupon) {
-        this.cartService.applyCoupon(result.coupon, result);
-        this.couponCode = '';
-        this.couponError = '';
-      } else {
-        this.couponError = result.message || this.t('invalidCoupon');
-      }
-    } catch (error) {
-      console.error('Error applying coupon:', error);
-      this.couponError = this.t('failedToApply');
-    } finally {
-      this.isApplyingCoupon = false;
-    }
+    this.couponService.validateCoupon(validationDto)
+      .pipe(
+        catchError((error: any) => {
+          console.error('Error applying coupon:', error);
+          let errorMessage = this.t('failedToApply');
+          if (error?.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error?.message) {
+            errorMessage = error.message;
+          }
+          this.couponError = errorMessage;
+          return of(null);
+        }),
+        finalize(() => {
+          this.isApplyingCoupon.set(false);
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          if (!result) {
+            if (!this.couponError) {
+              this.couponError = this.t('failedToValidate');
+            }
+            return;
+          }
+          
+          if (result.isValid && result.coupon) {
+            this.cartService.applyCoupon(result.coupon, result);
+            this.couponCode = '';
+            this.couponError = '';
+          } else {
+            this.couponError = result.message || this.t('invalidCoupon');
+          }
+        }
+      });
   }
 
   // Remove applied coupon

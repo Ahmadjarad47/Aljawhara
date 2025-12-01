@@ -121,9 +121,9 @@
               <button 
                 class="btn btn-primary"
                 (click)="applyCoupon()"
-                [disabled]="isApplyingCoupon || !couponCode.trim()"
+                [disabled]="isApplyingCoupon() || !couponCode.trim()"
               >
-                @if (isApplyingCoupon) {
+                @if (isApplyingCoupon()) {
                   <span class="loading loading-spinner loading-sm"></span>
                 } @else {
                   {{t('apply')}}

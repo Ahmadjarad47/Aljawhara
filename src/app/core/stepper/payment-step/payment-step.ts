@@ -40,6 +40,10 @@ export class PaymentStepComponent {
       processing: 'جاري المعالجة...',
       completeOrder: 'إكمال الطلب',
       completeOrderNote: 'بإكمال الطلب، فإنك توافق على شروط الخدمة وسياسة الخصوصية.',
+      payNow: 'الدفع الآن',
+      payOnDeliveryTitle: 'الدفع عند الاستلام',
+      payOnDeliveryDescription: 'سيتم الدفع نقداً عند استلام الطلب في العنوان المحدد.',
+      paymentTiming: 'وقت الدفع',
     },
     en: {
       paymentTitle: 'Payment Information',
@@ -59,6 +63,10 @@ export class PaymentStepComponent {
       processing: 'Processing...',
       completeOrder: 'Complete Order',
       completeOrderNote: 'By completing your order, you agree to our Terms of Service and Privacy Policy.',
+      payNow: 'Pay Now',
+      payOnDeliveryTitle: 'Pay on Delivery',
+      payOnDeliveryDescription: 'Payment will be made in cash when the order is received at the specified address.',
+      paymentTiming: 'Payment Timing',
     },
   } as const;
 
@@ -96,8 +104,20 @@ export class PaymentStepComponent {
     this.cardNumber.set(formatted);
   }
   
+  // Get payment timing
+  paymentTiming = computed(() => this.checkoutData().paymentTiming);
+  
+  // Check if payment is on delivery
+  isPayOnDelivery = computed(() => this.paymentTiming() === 'on_delivery');
+  
   // Check if form is valid
   isFormValid(): boolean {
+    // If payment is on delivery, no form validation needed
+    if (this.isPayOnDelivery()) {
+      return true;
+    }
+    
+    // Otherwise, validate payment form
     return !!(
       this.cardNumber().replace(/\s/g, '').length === 16 &&
       this.cardName() &&
@@ -116,12 +136,15 @@ export class PaymentStepComponent {
     this.isProcessing.set(true);
     
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // If payment is on delivery, skip payment processing
+      if (!this.isPayOnDelivery()) {
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // In production, you would call your payment API here
+      }
       
-      // In production, you would call your payment API here
-      // For now, we'll just clear the cart and show success
-      
+      // Clear cart and reset stepper
       this.cartService.clearCart();
       this.stepperService.reset();
       
