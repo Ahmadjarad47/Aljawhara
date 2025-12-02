@@ -53,6 +53,12 @@ export class ShippingStepComponent implements OnInit {
       state: 'المنطقة',
       postalCode: 'الرمز البريدي',
       country: 'الدولة',
+      alQataa: 'القطعة',
+      alSharee: 'الشارع',
+      alJada: 'الجادة',
+      alManzil: 'المنزل',
+      alDor: 'الدور',
+      alShakka: 'الشقة',
       setAsDefault: 'تعيين كعنوان افتراضي',
       saving: 'جاري الحفظ...',
       updateAddressBtn: 'تحديث العنوان',
@@ -70,6 +76,12 @@ export class ShippingStepComponent implements OnInit {
       state: 'State',
       postalCode: 'Postal Code',
       country: 'Country',
+      alQataa: 'District/Block',
+      alSharee: 'Street',
+      alJada: 'Avenue',
+      alManzil: 'House',
+      alDor: 'Floor',
+      alShakka: 'Apartment',
       setAsDefault: 'Set as default address',
       saving: 'Saving...',
       updateAddressBtn: 'Update Address',
@@ -92,7 +104,13 @@ export class ShippingStepComponent implements OnInit {
     postalCode: '',
     country: 'Saudi Arabia',
     phoneNumber: '',
-    isDefault: true
+    isDefault: true,
+    alQataa: null,
+    alSharee: null,
+    alJada: null,
+    alManzil: null,
+    alDor: null,
+    alShakka: null
   };
   
   async ngOnInit() {
@@ -127,7 +145,13 @@ export class ShippingStepComponent implements OnInit {
             postalCode: selected.postalCode,
             country: selected.country,
             phoneNumber: selected.phoneNumber,
-            isDefault: selected.isDefault
+            isDefault: selected.isDefault,
+            alQataa: selected.alQataa,
+            alSharee: selected.alSharee,
+            alJada: selected.alJada,
+            alManzil: selected.alManzil,
+            alDor: selected.alDor,
+            alShakka: selected.alShakka
           };
 
           // Sync with stepper data so payment step has the latest address
@@ -148,7 +172,13 @@ export class ShippingStepComponent implements OnInit {
             postalCode: '',
             country: 'Saudi Arabia',
             phoneNumber: '',
-            isDefault: true
+            isDefault: true,
+            alQataa: null,
+            alSharee: null,
+            alJada: null,
+            alManzil: null,
+            alDor: null,
+            alShakka: null
           };
         }
       }
@@ -174,7 +204,13 @@ export class ShippingStepComponent implements OnInit {
         postalCode: data.address.postalCode,
         country: data.address.country,
         phoneNumber: data.address.phoneNumber,
-        isDefault: data.address.isDefault
+        isDefault: data.address.isDefault,
+        alQataa: (data.address as any).alQataa || null,
+        alSharee: (data.address as any).alSharee || null,
+        alJada: (data.address as any).alJada || null,
+        alManzil: (data.address as any).alManzil || null,
+        alDor: (data.address as any).alDor || null,
+        alShakka: (data.address as any).alShakka || null
       };
     }
   }
@@ -200,7 +236,13 @@ export class ShippingStepComponent implements OnInit {
       postalCode: '',
       country: 'Saudi Arabia',
       phoneNumber: '',
-      isDefault: true
+      isDefault: true,
+      alQataa: null,
+      alSharee: null,
+      alJada: null,
+      alManzil: null,
+      alDor: null,
+      alShakka: null
     };
   }
   
@@ -216,7 +258,13 @@ export class ShippingStepComponent implements OnInit {
       postalCode: address.postalCode,
       country: address.country,
       phoneNumber: address.phoneNumber,
-      isDefault: address.isDefault
+      isDefault: address.isDefault,
+      alQataa: address.alQataa,
+      alSharee: address.alSharee,
+      alJada: address.alJada,
+      alManzil: address.alManzil,
+      alDor: address.alDor,
+      alShakka: address.alShakka
     };
   }
   

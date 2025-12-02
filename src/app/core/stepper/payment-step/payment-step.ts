@@ -93,7 +93,7 @@ export class PaymentStepComponent {
     this.cartItems().reduce((total, item) => total + (item.price * item.quantity), 0)
   );
   
-  tax = computed(() => this.subtotal() * 0.10);
+  tax = computed(() => 0); // Tax set to zero
   
   total = computed(() => this.subtotal() + this.tax());
   

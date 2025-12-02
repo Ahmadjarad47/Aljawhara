@@ -57,6 +57,12 @@ export class Setting implements OnInit, OnDestroy {
       city: 'المدينة',
       state: 'الولاية',
       postalCode: 'الرمز البريدي',
+      alQataa: 'القطعة',
+      alSharee: 'الشارع',
+      alJada: 'الجادة',
+      alManzil: 'المنزل',
+      alDor: 'الدور',
+      alShakka: 'الشقة',
       setAsDefault: 'تعيين كعنوان افتراضي',
       cancel: 'إلغاء',
       editAddress: 'تعديل العنوان',
@@ -122,6 +128,12 @@ export class Setting implements OnInit, OnDestroy {
       city: 'City',
       state: 'State',
       postalCode: 'Postal code',
+      alQataa: 'District/Block',
+      alSharee: 'Street',
+      alJada: 'Avenue',
+      alManzil: 'House',
+      alDor: 'Floor',
+      alShakka: 'Apartment',
       setAsDefault: 'Set as default address',
       cancel: 'Cancel',
       editAddress: 'Edit address',
@@ -185,7 +197,13 @@ export class Setting implements OnInit, OnDestroy {
     city: '',
     state: '',
     postalCode: '',
-    isDefault: false
+    isDefault: false,
+    alQataa: '',
+    alSharee: '',
+    alJada: '',
+    alManzil: '',
+    alDor: '',
+    alShakka: ''
   };
   editAddress: UpdateAddressDto = {
     id: 0,
@@ -197,7 +215,13 @@ export class Setting implements OnInit, OnDestroy {
     city: '',
     state: '',
     postalCode: '',
-    isDefault: false
+    isDefault: false,
+    alQataa: '',
+    alSharee: '',
+    alJada: '',
+    alManzil: '',
+    alDor: '',
+    alShakka: ''
   };
 
   ngOnInit(): void {
@@ -333,7 +357,13 @@ export class Setting implements OnInit, OnDestroy {
       city: address.city,
       state: address.state,
       postalCode: address.postalCode,
-      isDefault: !!address.isDefault
+      isDefault: !!address.isDefault,
+      alQataa: address.alQataa || '',
+      alSharee: address.alSharee || '',
+      alJada: address.alJada || '',
+      alManzil: address.alManzil || '',
+      alDor: address.alDor || '',
+      alShakka: address.alShakka || ''
     };
     this.showEditAddress.set(true);
   }
@@ -409,7 +439,13 @@ export class Setting implements OnInit, OnDestroy {
       city: '',
       state: '',
       postalCode: '',
-      isDefault: false
+      isDefault: false,
+      alQataa: '',
+      alSharee: '',
+      alJada: '',
+      alManzil: '',
+      alDor: '',
+      alShakka: ''
     };
   }
 }

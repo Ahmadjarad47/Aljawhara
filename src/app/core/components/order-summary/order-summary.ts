@@ -92,7 +92,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
     this.cartItems().reduce((total, item) => total + item.quantity, 0)
   );
   
-  tax = computed(() => this.subtotal() * 0.10); // 10% tax
+  tax = computed(() => 0); // Tax set to zero
   
   // Coupon-related computed values
   discountAmount = computed(() => this.cartService.getDiscountAmount());

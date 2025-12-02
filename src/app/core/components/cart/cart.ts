@@ -6,7 +6,6 @@ import { catchError, finalize, of } from 'rxjs';
 import { CartService } from '../../service/cart-service';
 import { CouponService } from '../../service/coupon-service';
 import { OrderSummaryComponent } from '../order-summary/order-summary';
-import { CartItem } from '../../../Models/order';
 import { CouponDto, CouponValidationDto, CouponValidationResultDto } from '../../Models/coupon';
 
 @Component({

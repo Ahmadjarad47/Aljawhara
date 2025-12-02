@@ -10,6 +10,12 @@ export interface UserAddressDto {
   addressLine1: string;
   addressLine2?: string;
   isDefault?: boolean;
+  alQataa?: string; // القطعة (District/Block)
+  alSharee?: string; // الشارع (Street)
+  alJada?: string; // الجادة (Avenue)
+  alManzil?: string; // المنزل (House)
+  alDor?: string; // الدور (Floor)
+  alShakka?: string; // الشقة (Apartment)
   createdAt?: string;
   updatedAt?: string;
 }
@@ -24,6 +30,12 @@ export interface CreateAddressDto {
   addressLine1: string;
   addressLine2?: string;
   isDefault?: boolean;
+  alQataa?: string; // القطعة (District/Block)
+  alSharee?: string; // الشارع (Street)
+  alJada?: string; // الجادة (Avenue)
+  alManzil?: string; // المنزل (House)
+  alDor?: string; // الدور (Floor)
+  alShakka?: string; // الشقة (Apartment)
 }
 
 export interface UpdateAddressDto extends CreateAddressDto {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal, HostListener } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -23,16 +23,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   isLoading = signal(false);
   showPassword = signal(false);
   showConfirmPassword = signal(false);
-  isCountryDropdownOpen = signal(false);
-
-  // Country codes with flags
-  countries = [
-  
-    { code: '+965', flag: '🇰🇼', name: 'Kuwait' },
-  
-  ];
-
-  selectedCountry = signal(this.countries[0]); // Default to US
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -49,7 +39,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       emailLabel: 'البريد الإلكتروني',
       emailPlaceholder: 'أدخل بريدك الإلكتروني',
       phoneLabel: 'رقم الهاتف',
-      phonePlaceholder: '123-456-7890',
+      phonePlaceholder: 'أدخل رقم هاتفك',
       passwordLabel: 'كلمة المرور',
       passwordPlaceholder: 'أدخل كلمة المرور',
       confirmPasswordLabel: 'تأكيد كلمة المرور',
@@ -68,7 +58,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       usernameRequired: 'اسم المستخدم مطلوب',
       emailRequired: 'البريد الإلكتروني مطلوب',
       phoneRequired: 'رقم الهاتف مطلوب',
-      phoneInvalid: 'يجب إدخال رقم هاتف صحيح (10 أرقام)',
+      phoneInvalid: 'يجب إدخال أرقام فقط',
       passwordRequired: 'كلمة المرور مطلوبة',
       confirmPasswordRequired: 'تأكيد كلمة المرور مطلوب',
       emailInvalid: 'يجب إدخال بريد إلكتروني صالح',
@@ -85,7 +75,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       emailLabel: 'Email',
       emailPlaceholder: 'Enter your email',
       phoneLabel: 'Phone Number',
-      phonePlaceholder: '123-456-7890',
+      phonePlaceholder: 'Enter your phone number',
       passwordLabel: 'Password',
       passwordPlaceholder: 'Enter your password',
       confirmPasswordLabel: 'Confirm Password',
@@ -104,7 +94,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       usernameRequired: 'Username is required',
       emailRequired: 'Email is required',
       phoneRequired: 'Phone number is required',
-      phoneInvalid: 'Please enter a valid phone number (10 digits)',
+      phoneInvalid: 'Only numbers are allowed',
       passwordRequired: 'Password is required',
       confirmPasswordRequired: 'Confirm password is required',
       emailInvalid: 'Valid email is required',
@@ -205,8 +195,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.registerForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      countryCode: [this.selectedCountry().code, [Validators.required]],
-      phoneNumber: ['', [Validators.required, this.phoneNumberValidator()]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, {
@@ -261,19 +250,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     };
   }
 
-  phoneNumberValidator(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) {
-        return null; // Let required validator handle empty values
-      }
-      const digitsOnly = control.value.replace(/\D/g, '');
-      if (digitsOnly.length < 10) {
-        return { phoneInvalid: true };
-      }
-      return null;
-    };
-  }
-
   onSubmit() {
     if (this.registerForm.invalid) {
       this.markAllFieldsAsTouched();
@@ -281,13 +257,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading.set(true);
-    const formValue = this.registerForm.value;
-    // Combine country code and phone number
-    const fullPhoneNumber = `${formValue.countryCode}${formValue.phoneNumber.replace(/-/g, '')}`;
-    const registerDto: RegisterDto = {
-      ...formValue,
-      phoneNumber: fullPhoneNumber
-    };
+    const registerDto: RegisterDto = this.registerForm.value;
 
     this.authService.register(registerDto).subscribe({
       next: (response: any) => {
@@ -402,7 +372,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         if (fieldName === 'confirmPassword') return this.t('confirmPasswordRequired');
       }
       if (control.hasError('email')) return this.t('emailInvalid');
-      if ((control.hasError('pattern') || control.hasError('phoneInvalid')) && fieldName === 'phoneNumber') {
+      if (control.hasError('pattern') && fieldName === 'phoneNumber') {
         return this.t('phoneInvalid');
       }
       if (control.hasError('minlength')) {
@@ -437,33 +407,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.toastService.removeToast(toastId);
   }
 
-  // Format phone number as user types (123-456-7890)
-  onPhoneNumberInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, ''); // Remove non-digits
-    
-    // Limit to 10 digits
-    if (value.length > 10) {
-      value = value.slice(0, 10);
-    }
-    
-    // Format as XXX-XXX-XXXX
-    let formatted = '';
-    if (value.length > 6) {
-      formatted = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6, 10)}`;
-    } else if (value.length > 3) {
-      formatted = `${value.slice(0, 3)}-${value.slice(3)}`;
-    } else {
-      formatted = value;
-    }
-    
-    // Update input value directly
-    input.value = formatted;
-    
-    // Update form control
-    this.registerForm.patchValue({ phoneNumber: formatted }, { emitEvent: true });
-  }
-
   // Prevent non-numeric input for phone number
   onPhoneNumberKeyPress(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
@@ -484,24 +427,5 @@ export class RegisterComponent implements OnInit, OnDestroy {
       return false;
     }
     return true;
-  }
-
-  selectCountry(country: typeof this.countries[0]) {
-    this.selectedCountry.set(country);
-    this.registerForm.patchValue({ countryCode: country.code });
-    this.isCountryDropdownOpen.set(false);
-  }
-
-  toggleCountryDropdown() {
-    this.isCountryDropdownOpen.set(!this.isCountryDropdownOpen());
-  }
-
-  // Close dropdown when clicking outside
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.country-selector')) {
-      this.isCountryDropdownOpen.set(false);
-    }
   }
 }

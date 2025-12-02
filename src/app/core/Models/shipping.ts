@@ -9,6 +9,12 @@ export interface UserAddressDto {
     country: string;
     phoneNumber: string;
     isDefault: boolean;
+    alQataa: string | null; // القطعة (District/Block)
+    alSharee: string | null; // الشارع (Street)
+    alJada: string | null; // الجادة (Avenue)
+    alManzil: string | null; // المنزل (House)
+    alDor: string | null; // الدور (Floor)
+    alShakka: string | null; // الشقة (Apartment)
     createdAt: string;
     updatedAt: string;
 }
@@ -23,6 +29,12 @@ export interface CreateAddressDto {
     country: string;
     phoneNumber: string;
     isDefault: boolean;
+    alQataa: string | null; // القطعة (District/Block)
+    alSharee: string | null; // الشارع (Street)
+    alJada: string | null; // الجادة (Avenue)
+    alManzil: string | null; // المنزل (House)
+    alDor: string | null; // الدور (Floor)
+    alShakka: string | null; // الشقة (Apartment)
 }
 
 export interface UpdateAddressDto {
@@ -36,4 +48,10 @@ export interface UpdateAddressDto {
     country: string;
     phoneNumber: string;
     isDefault: boolean;
+    alQataa: string | null; // القطعة (District/Block)
+    alSharee: string | null; // الشارع (Street)
+    alJada: string | null; // الجادة (Avenue)
+    alManzil: string | null; // المنزل (House)
+    alDor: string | null; // الدور (Floor)
+    alShakka: string | null; // الشقة (Apartment)
 }

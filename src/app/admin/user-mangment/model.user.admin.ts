@@ -85,6 +85,12 @@ export interface UserAddressDto {
     country: string;
     phoneNumber: string;
     isDefault: boolean;
+    alQataa?: string; // القطعة (District/Block)
+    alSharee?: string; // الشارع (Street)
+    alJada?: string; // الجادة (Avenue)
+    alManzil?: string; // المنزل (House)
+    alDor?: string; // الدور (Floor)
+    alShakka?: string; // الشقة (Apartment)
     createdAt: string;
     updatedAt: string;
 }
