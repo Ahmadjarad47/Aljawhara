@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ServiceAuth } from '../service-auth';
-import { LoginDto, LoginResponseDto } from '../auth.models';
+import { LoginDto, LoginResponseDto, ResendVerificationDto } from '../auth.models';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 
@@ -51,6 +51,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       loginFailedTitle: 'فشل تسجيل الدخول',
       loginFailedInvalid: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       loginFailedGeneric: 'حدث خطأ أثناء تسجيل الدخول',
+      emailNotVerifiedTitle: 'يرجى التحقق من بريدك الإلكتروني',
+      emailNotVerifiedMessage: 'تم إرسال رمز التحقق مرة أخرى إلى بريدك الإلكتروني',
       // Validation
       emailRequired: 'البريد الإلكتروني مطلوب',
       passwordRequired: 'كلمة المرور مطلوبة',
@@ -78,6 +80,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       loginFailedTitle: 'Login Failed',
       loginFailedInvalid: 'Invalid email or password',
       loginFailedGeneric: 'An error occurred while logging in',
+      emailNotVerifiedTitle: 'Please Verify Your Email',
+      emailNotVerifiedMessage: 'We have sent the verification code again to your email',
       // Validation
       emailRequired: 'Email is required',
       passwordRequired: 'Password is required',
@@ -197,19 +201,64 @@ export class LoginComponent implements OnInit, OnDestroy {
           // Redirect based on user role or to home
           this.router.navigate(['/']);
         } else {
-          this.toastService.error(
-            this.t('loginFailedTitle'),
-            this.translateAuthError(response.message)
-          );
+          // Check if the error is about email verification
+          const errorMessage = response.message || '';
+          if (errorMessage.toLowerCase().includes('please verify your email') || 
+              errorMessage.toLowerCase().includes('verify your email')) {
+            // Resend verification OTP and redirect to verify page
+            this.handleEmailNotVerified(loginDto.email);
+          } else {
+            this.toastService.error(
+              this.t('loginFailedTitle'),
+              this.translateAuthError(response.message)
+            );
+          }
         }
       },
       error: (error) => {
         this.isLoading.set(false);
-        this.toastService.error(
-          this.t('loginFailedTitle'),
-          this.t('loginFailedInvalid')
+        // Check if error response contains email verification message
+        const errorMessage = error?.error?.message || error?.message || '';
+        if (errorMessage.toLowerCase().includes('please verify your email') || 
+            errorMessage.toLowerCase().includes('verify your email')) {
+          // Resend verification OTP and redirect to verify page
+          this.handleEmailNotVerified(loginDto.email);
+        } else {
+          this.toastService.error(
+            this.t('loginFailedTitle'),
+            this.t('loginFailedInvalid')
+          );
+          console.error('Login error:', error);
+        }
+      }
+    });
+  }
+
+  private handleEmailNotVerified(email: string) {
+    // Resend verification OTP
+    const resendDto: ResendVerificationDto = { email };
+    
+    this.authService.resendVerification(resendDto).subscribe({
+      next: (response) => {
+        // Show success toast
+        this.toastService.success(
+          this.t('emailNotVerifiedTitle'),
+          this.t('emailNotVerifiedMessage')
         );
-        console.error('Login error:', error);
+        
+        // Redirect to verify page with email as query parameter
+        this.router.navigate(['/auth/verify'], { queryParams: { email } });
+      },
+      error: (error) => {
+        // Even if resend fails, still redirect to verify page
+        this.toastService.success(
+          this.t('emailNotVerifiedTitle'),
+          this.t('emailNotVerifiedMessage')
+        );
+        
+        // Redirect to verify page with email as query parameter
+        this.router.navigate(['/auth/verify'], { queryParams: { email } });
+        console.error('Resend verification error:', error);
       }
     });
   }
