@@ -193,7 +193,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       email: this.resetPasswordForm.get('email')?.value,
       otp: this.resetPasswordForm.get('otp')?.value,
       newPassword: this.resetPasswordForm.get('newPassword')?.value,
-      confirmNewPassword: ''
+      confirmNewPassword: this.resetPasswordForm.get('confirmNewPassword')?.value
     };
 
     this.authService.resetPassword(resetPasswordDto).subscribe({
