@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ServiceAuth } from '../service-auth';
 import { ResetPasswordDto } from '../auth.models';
 import { ToastService } from '../../services/toast.service';
@@ -17,6 +17,7 @@ import { ToastComponent } from '../../core/components/toast/toast.component';
 export class ResetPasswordComponent implements OnInit, OnDestroy {
   private authService = inject(ServiceAuth);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
   private formBuilder = inject(FormBuilder);
 
@@ -141,6 +142,25 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         this.currentLanguage.set(currentLang);
       }
     }, 500);
+
+    // Extract token and userId from URL query parameters
+    this.route.queryParams.subscribe(params => {
+      const token = params['token'];
+      const userId = params['userId'];
+      
+      if (token) {
+        // Pre-fill the OTP field with the token from URL
+        this.resetPasswordForm.patchValue({
+          otp: token
+        });
+      }
+      
+      // Store userId if needed (can be used for API calls or validation)
+      if (userId) {
+        // You can store userId in a property if needed for the API call
+        // For now, we'll just extract it from the URL
+      }
+    });
   }
 
   ngOnDestroy(): void {

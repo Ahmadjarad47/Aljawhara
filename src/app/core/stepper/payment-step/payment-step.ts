@@ -15,7 +15,7 @@ export class PaymentStepComponent {
   private stepperService = inject(ServiceStepper);
   private cartService = inject(CartService);
   private router = inject(Router);
-  
+  isInProccess=true
   // Language / translations
   currentLanguage = signal<'ar' | 'en'>(
     (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar'
@@ -44,6 +44,7 @@ export class PaymentStepComponent {
       payOnDeliveryTitle: 'الدفع عند الاستلام',
       payOnDeliveryDescription: 'سيتم الدفع نقداً عند استلام الطلب في العنوان المحدد.',
       paymentTiming: 'وقت الدفع',
+      processingMessage: 'يرجى الانتظار بينما نقوم بمعالجة طلبك...',
     },
     en: {
       paymentTitle: 'Payment Information',
@@ -67,6 +68,7 @@ export class PaymentStepComponent {
       payOnDeliveryTitle: 'Pay on Delivery',
       payOnDeliveryDescription: 'Payment will be made in cash when the order is received at the specified address.',
       paymentTiming: 'Payment Timing',
+      processingMessage: 'Please wait while we process your order...',
     },
   } as const;
 
