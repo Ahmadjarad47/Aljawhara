@@ -410,13 +410,13 @@
                         <div class="flex-shrink-0">
                           @if (product.oldPrice <= product.newPrice) {
                             <div class="text-3xl font-bold text-primary">
-                              ${{ product.newPrice | number:'1.2-2' }}
+                              {{ product.newPrice | currency:'KWD' }}
                             </div>
                           }
                           @if (product.oldPrice > product.newPrice) {
                             <div>
-                              <div class="text-3xl font-bold text-primary">${{ product.newPrice | number:'1.2-2' }}</div>
-                              <div class="text-xl text-base-content/50 line-through">${{ product.oldPrice | number:'1.2-2' }}</div>
+                              <div class="text-3xl font-bold text-primary">{{ product.newPrice | currency:'KWD' }}</div>
+                              <div class="text-xl text-base-content/50 line-through">{{ product.oldPrice | currency:'KWD' }}</div>
                               <div class="badge badge-error badge-lg mt-1">
                                 {{ Math.round((1 - product.newPrice / product.oldPrice) * 100) }}% OFF
                               </div>
@@ -495,12 +495,12 @@
               }
               <div class="text-xl font-bold text-primary mb-4">
                 @if (product.oldPrice <= product.newPrice) {
-                  <span>${{ product.newPrice | number:'1.2-2' }}</span>
+                  <span>{{ product.newPrice | currency:'KWD' }}</span>
                 }
                 @if (product.oldPrice > product.newPrice) {
                   <span>
-                    <span class="text-primary">${{ product.newPrice | number:'1.2-2' }}</span>
-                    <span class="text-base-content/50 line-through text-sm ml-2">${{ product.oldPrice | number:'1.2-2' }}</span>
+                    <span class="text-primary">{{ product.newPrice | currency:'KWD' }}</span>
+                    <span class="text-base-content/50 line-through text-sm ml-2">{{ product.oldPrice | currency:'KWD' }}</span>
                   </span>
                 }
               </div>

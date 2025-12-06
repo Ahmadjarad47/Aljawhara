@@ -99,8 +99,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   hasAppliedCoupon = computed(() => this.cartService.hasAppliedCoupon());
   
   total = computed(() => {
-    const subtotalWithTax = this.subtotal() + this.tax();
-    return this.hasAppliedCoupon() ? this.cartService.getTotalPriceWithDiscount() + this.tax() : subtotalWithTax;
+    return this.hasAppliedCoupon() ? this.cartService.getTotalPriceWithDiscount() : this.subtotal();
   });
   
   // Optional inputs

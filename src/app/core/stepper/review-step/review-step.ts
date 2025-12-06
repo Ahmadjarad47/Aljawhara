@@ -68,8 +68,8 @@ export class ReviewStepComponent {
   );
   
   tax = computed(() => 0); // Tax set to zero
-  
-  total = computed(() => this.subtotal() + this.tax());
+
+  total = computed(() => this.subtotal());
   
   itemCount = computed(() => 
     this.cartItems().reduce((total, item) => total + item.quantity, 0)

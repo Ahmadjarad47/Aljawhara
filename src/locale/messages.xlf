@@ -3,7 +3,7 @@
   <file source-language="en-US" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="phone" datatype="html">
-        <source>+963 11 123 4567</source>
+        <source>+965 67070814</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
           <context context-type="linenumber">12,13</context>
@@ -17,7 +17,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="freeShipping" datatype="html">
-        <source>Free shipping on orders over $50</source>
+        <source>Free shipping on orders over 15 KWD</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/home/navbar/navbar.html</context>
           <context context-type="linenumber">27,29</context>

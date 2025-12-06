@@ -104,7 +104,7 @@
                                             <div class="badge badge-outline">{{order.itemCount}} {{t('items')}}</div>
                                         </td>
                                         <td>
-                                            <div class="font-semibold">${{order.total.toFixed(2)}}</div>
+                                            <div class="font-semibold">{{order.total | currency:'KWD'}}</div>
                                         </td>
                                         <td>
                                             <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
@@ -187,7 +187,7 @@
                                     <div>
                                         <div class="text-base-content/70">{{t('total')}}</div>
                                         <div class="font-semibold">
-                                            ${{order.total.toFixed(2)}}
+                                            {{order.total | currency:'KWD'}}
                                         </div>
                                     </div>
                                 </div>
@@ -289,9 +289,9 @@
                                                 <div class="font-medium">{{item.name}}</div>
                                             </div>
                                         </td>
-                                        <td>${{item.price.toFixed(2)}}</td>
+                                        <td>{{item.price | currency:'KWD'}}</td>
                                         <td>{{item.quantity}}</td>
-                                        <td class="font-semibold">${{item.total.toFixed(2)}}</td>
+                                        <td class="font-semibold">{{item.total | currency:'KWD'}}</td>
                                         <td>
                                             @if (checkingRatings()) {
                                                 <span class="loading loading-spinner loading-xs"></span>
@@ -344,26 +344,26 @@
                 <div class="bg-base-200 p-4 rounded-lg">
                     <div class="flex justify-between mb-2">
                         <span class="text-base-content/70">{{t('subtotal')}}:</span>
-                        <span class="font-medium">${{selectedOrderDetails()!.subtotal.toFixed(2)}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.subtotal | currency:'KWD'}}</span>
                     </div>
                     @if (selectedOrderDetails()!.couponDiscountAmount && selectedOrderDetails()!.couponDiscountAmount! > 0) {
                         <div class="flex justify-between mb-2 text-success">
                             <span>{{t('discount')}} ({{selectedOrderDetails()!.couponCode}}):</span>
-                            <span class="font-medium">-${{selectedOrderDetails()!.couponDiscountAmount!.toFixed(2)}}</span>
+                            <span class="font-medium">-{{selectedOrderDetails()!.couponDiscountAmount! | currency:'KWD'}}</span>
                         </div>
                     }
                     <div class="flex justify-between mb-2">
                         <span class="text-base-content/70">{{t('shipping')}}:</span>
-                        <span class="font-medium">${{selectedOrderDetails()!.shipping.toFixed(2)}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.shipping | currency:'KWD'}}</span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span class="text-base-content/70">{{t('tax')}}:</span>
-                        <span class="font-medium">${{selectedOrderDetails()!.tax.toFixed(2)}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.tax | currency:'KWD'}}</span>
                     </div>
                     <div class="divider my-2"></div>
                     <div class="flex justify-between text-lg font-bold">
                         <span>{{t('total')}}:</span>
-                        <span>${{selectedOrderDetails()!.total.toFixed(2)}}</span>
+                        <span>{{selectedOrderDetails()!.total | currency:'KWD'}}</span>
                     </div>
                 </div>
 

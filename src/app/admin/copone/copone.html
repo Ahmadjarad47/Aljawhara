@@ -195,7 +195,7 @@
                                             @if (coupon.type === 1) {
                                                 {{coupon.value}}%
                                             } @else if (coupon.type === 2) {
-                                                ${{coupon.value}}
+                                                {{coupon.value | currency:'KWD'}}
                                             } @else {
                                                 Free
                                             }
@@ -204,7 +204,7 @@
                                     <td>
                                         <div class="text-sm">
                                             @if (coupon.minimumOrderAmount) {
-                                                ${{coupon.minimumOrderAmount}}
+                                                {{coupon.minimumOrderAmount | currency:'KWD'}}
                                             } @else {
                                                 <span class="text-base-content/50">None</span>
                                             }
@@ -213,7 +213,7 @@
                                     <td>
                                         <div class="text-sm">
                                             @if (coupon.maximumDiscountAmount) {
-                                                ${{coupon.maximumDiscountAmount}}
+                                                {{coupon.maximumDiscountAmount | currency:'KWD'}}
                                             } @else {
                                                 <span class="text-base-content/50">None</span>
                                             }

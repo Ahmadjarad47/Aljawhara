@@ -142,7 +142,7 @@ export class HomePage implements OnInit, OnDestroy {
       privacyNote: 'We respect your privacy. Unsubscribe at any time.',
       // Features
       freeShipping: 'Free Shipping',
-      freeShippingDesc: 'Free shipping on orders over $50. Fast and reliable delivery to your doorstep.',
+      freeShippingDesc: 'Free shipping on orders over 15 KWD. Fast and reliable delivery to your doorstep.',
       qualityGuaranteeTitle: 'Quality Guarantee',
       qualityGuaranteeDesc: '100% authentic products with quality guarantee. Shop with confidence.',
       support247: '24/7 Support',

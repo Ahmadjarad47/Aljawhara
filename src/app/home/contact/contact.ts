@@ -78,7 +78,7 @@ export class Contact implements OnInit, OnDestroy {
       message: 'Message',
       yourName: 'Your name',
       yourEmail: 'your.email@example.com',
-      yourPhone: '+963 11 123 4567',
+      yourPhone: '+965 67070814',
       selectSubject: 'Select a subject',
       generalInquiry: 'General Inquiry',
       technicalSupport: 'Technical Support',
@@ -116,8 +116,8 @@ export class Contact implements OnInit, OnDestroy {
 
   // Contact information
   contactInfo = {
-    address: 'Damascus, Syria',
-    phone: '+963 11 123 4567',
+    address: 'الكويت, الشويخ الصناعية',
+    phone: '+965 67070814',
     email: 'info@aljawhara.com',
     workingHours: 'Sunday - Thursday: 9:00 AM - 6:00 PM'
   };

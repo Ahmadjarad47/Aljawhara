@@ -138,12 +138,12 @@
 
         <!-- Price -->
         <div class="flex items-center space-x-4">
-          <span class="text-3xl font-bold text-primary">{{(getFinalPrice() |currency)}}</span>
+          <span class="text-3xl font-bold text-primary">{{(getFinalPrice() |currency:'KWD')}}</span>
           @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
-          <span class="text-xl text-gray-400 line-through">{{product()?.oldPrice|currency}}</span>
+          <span class="text-xl text-gray-400 line-through">{{product()?.oldPrice|currency:'KWD'}}</span>
           }
           @if (product()?.oldPrice && product()?.newPrice && product()!.oldPrice > product()!.newPrice) {
-          <span class="text-sm text-green-600 font-medium">{{t('youSave')}} {{((product()?.oldPrice || 0) - (getFinalPrice() || 0)|currency)}}</span>
+          <span class="text-sm text-green-600 font-medium">{{t('youSave')}} {{((product()?.oldPrice || 0) - (getFinalPrice() || 0)|currency:'KWD')}}</span>
           }
         </div>
 
@@ -164,7 +164,7 @@
                 class="px-4 py-2 rounded-lg border-2 border-base-300 hover:border-primary transition-colors">
                 <span>{{getVariantValue(value)}}</span>
                 @if (value.price !== product()!.newPrice) {
-                <span class="text-xs ml-1">({{(value.price |currency)}})</span>
+                <span class="text-xs ml-1">({{(value.price |currency:'KWD')}})</span>
                 }
               </button>
               }
@@ -548,7 +548,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
             </svg>
             <h3 class="font-semibold  mb-2">{{t('freeShipping')}}</h3>
-            <p class="text-sm text-gray-600">{{t('onOrdersOver')}} $50</p>
+            <p class="text-sm text-gray-600">{{t('onOrdersOver')}} 15 KWD</p>
           </div>
           
           <div class="text-center p-6 bg-gray-50 rounded-xl">
@@ -637,9 +637,9 @@
               <span class="text-sm text-gray-600">{{relatedProduct.rating}}</span>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="text-lg font-bold text-primary">{{relatedProduct.price|currency}}</span>
+              <span class="text-lg font-bold text-primary">{{relatedProduct.price|currency:'KWD'}}</span>
               @if (relatedProduct.originalPrice) {
-              <span class="text-sm text-gray-400 line-through">{{relatedProduct.originalPrice|currency}}</span>
+              <span class="text-sm text-gray-400 line-through">{{relatedProduct.originalPrice|currency:'KWD'}}</span>
               }
             </div>
           </div>

@@ -318,14 +318,14 @@
             <div class="card-actions justify-between items-center">
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
-                  <span class="text-2xl font-bold" style="color: #054239;">${{product.price}}</span>
+                  <span class="text-2xl font-bold" style="color: #054239;">{{product.price | currency:'KWD'}}</span>
                   @if (product.originalPrice) {
-                  <span class="text-lg text-base-content/40 line-through">${{product.originalPrice}}</span>
+                  <span class="text-lg text-base-content/40 line-through">{{product.originalPrice | currency:'KWD'}}</span>
                   }
                 </div>
                 @if (product.originalPrice) {
                 <div class="text-xs font-medium" style="color: #054239;">
-                  {{t('save')}} ${{product.originalPrice - product.price}}
+                  {{t('save')}} {{(product.originalPrice - product.price) | currency:'KWD'}}
                 </div>
                 }
               </div>
@@ -685,9 +685,9 @@
             <div class="card-actions justify-between items-center mt-auto">
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl font-bold" style="color: #054239;">${{item.product.newPrice}}</span>
+                  <span class="text-xl sm:text-2xl font-bold" style="color: #054239;">{{item.product.newPrice | currency:'KWD'}}</span>
                   @if (item.product.oldPrice > item.product.newPrice) {
-                  <span class="text-base sm:text-lg text-base-content/40 line-through">${{item.product.oldPrice}}</span>
+                  <span class="text-base sm:text-lg text-base-content/40 line-through">{{item.product.oldPrice | currency:'KWD'}}</span>
                   }
                 </div>
                 @if (!item.product.isInStock) {

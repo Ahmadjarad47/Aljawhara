@@ -10,20 +10,13 @@
 
       <div class="flex items-center justify-between py-1">
         <span class="text-base-content/70">{{t('items')}} ({{ itemCount() }})</span>
-        <span class="font-medium text-base-content">{{ subtotal() | currency }}</span>
+        <span class="font-medium text-base-content">{{ subtotal() | currency:'KWD' }}</span>
       </div>
-
-      @if (showTax()) {
-        <div class="flex items-center justify-between py-1">
-          <span class="text-base-content/70">{{t('estimatedTax')}}</span>
-          <span class="font-medium text-base-content">{{ tax() | currency }}</span>
-        </div>
-      }
 
       @if (hasAppliedCoupon()) {
         <div class="flex items-center justify-between py-1">
           <span class="text-base-content/70">{{t('discount')}}</span>
-          <span class="font-medium text-success">-{{ discountAmount() | currency }}</span>
+          <span class="font-medium text-success">-{{ discountAmount() | currency:'KWD' }}</span>
         </div>
       }
 
@@ -31,7 +24,7 @@
 
       <div class="flex items-center justify-between py-1">
         <span class="font-semibold text-base-content">{{t('total')}}</span>
-        <span class="text-lg font-bold text-base-content">{{ total() | currency }}</span>
+        <span class="text-lg font-bold text-base-content">{{ total() | currency:'KWD' }}</span>
       </div>
 
       @if (showCheckoutButton()) {

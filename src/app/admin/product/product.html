@@ -231,7 +231,7 @@
                                         <div class="flex flex-col">
                                             <div class="font-bold text-success">{{product.newPrice|currency:'KWD'}}</div>
                                             @if (product.oldPrice > product.newPrice) {
-                                                <div class="text-sm line-through opacity-50">${{product.oldPrice|currency:'KWD'}}</div>
+                                                <div class="text-sm line-through opacity-50">{{product.oldPrice|currency:'KWD'}}</div>
                                             }
                                         </div>
                                     </td>
@@ -622,7 +622,7 @@
                                 <div class="mt-2 space-y-1">
                                     @for (value of newVariant.values; track $index; let i = $index) {
                                     <div class="flex items-center justify-between p-2 bg-base-100 rounded text-sm">
-                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency)}}</span>
+                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}</span>
                                         <button (click)="newVariant.values.splice(i, 1)" class="btn btn-ghost btn-xs">Remove</button>
                                     </div>
                                     }
@@ -648,7 +648,7 @@
                                 <div class="space-y-1">
                                     @for (value of variant.values; track $index; let j = $index) {
                                     <div class="text-sm opacity-70">
-                                        {{value.value}} / {{value.valueAr}} - {{(value.price |currency)}}
+                                        {{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}
                                     </div>
                                     }
                                 </div>
@@ -980,7 +980,7 @@
                                 <div class="mt-2 space-y-1">
                                     @for (value of newVariant.values; track $index; let i = $index) {
                                     <div class="flex items-center justify-between p-2 bg-base-100 rounded text-sm">
-                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency)}}</span>
+                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}</span>
                                         <button (click)="newVariant.values.splice(i, 1)" class="btn btn-ghost btn-xs">Remove</button>
                                     </div>
                                     }

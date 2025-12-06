@@ -349,14 +349,7 @@
                                                 class="btn btn-info btn-xs">
                                                 Update Status
                                             </button>
-                                            @if (order.status !== OrderStatus.Cancelled && order.status !== OrderStatus.Refunded && order.status !== OrderStatus.Delivered) {
-                                                <button 
-                                                    (click)="cancelOrder(order)"
-                                                    [disabled]="isLoading()"
-                                                    class="btn btn-error btn-xs">
-                                                    Cancel
-                                                </button>
-                                            }
+                                          
                                         </div>
                                     </th>
                                 </tr>

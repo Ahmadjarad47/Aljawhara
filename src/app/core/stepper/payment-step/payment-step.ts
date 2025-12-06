@@ -96,8 +96,8 @@ export class PaymentStepComponent {
   );
   
   tax = computed(() => 0); // Tax set to zero
-  
-  total = computed(() => this.subtotal() + this.tax());
+
+  total = computed(() => this.subtotal());
   
   // Format card number
   formatCardNumber(value: string): void {

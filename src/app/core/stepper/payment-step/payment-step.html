@@ -120,19 +120,14 @@
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-base-content/70">{{ t('subtotal') }}</span>
-              <span class="font-medium">{{ subtotal() | currency }}</span>
-            </div>
-            
-            <div class="flex justify-between text-sm">
-              <span class="text-base-content/70">{{ t('tax') }}</span>
-              <span class="font-medium">{{ tax() | currency }}</span>
+              <span class="font-medium">{{ subtotal() | currency:'KWD' }}</span>
             </div>
             
             <div class="divider"></div>
             
             <div class="flex justify-between text-lg font-bold">
               <span>{{ t('total') }}</span>
-              <span>{{ total() | currency }}</span>
+              <span>{{ total() | currency:'KWD' }}</span>
             </div>
           </div>
         </div>
@@ -192,7 +187,7 @@
                     <p class="font-medium text-sm">{{ item.name }}</p>
                     <p class="text-xs text-base-content/70">Quantity: {{ item.quantity }}</p>
                   </div>
-                  <p class="font-semibold text-sm">{{ item.price * item.quantity | currency }}</p>
+                  <p class="font-semibold text-sm">{{ item.price * item.quantity | currency:'KWD' }}</p>
                 </div>
               }
             </div>

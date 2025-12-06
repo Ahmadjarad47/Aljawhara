@@ -155,7 +155,7 @@ export class Footer implements OnInit, OnDestroy {
   ];
 
   contactInfo = {
-    phone: '+963 11 123 4567',
+    phone: '+965 67070814',
     email: 'info@aljawhara.com',
     address: 'الكويت, الشويخ الصناعية'
   };

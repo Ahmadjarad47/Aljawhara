@@ -47,7 +47,7 @@ export class Navbar implements OnInit, OnDestroy {
   // Language and currency
   currentLanguage = signal<'ar' | 'en'>('ar');
   selectedLanguage: string = 'العربية';
-  selectedCurrency: string = 'SYP';
+  selectedCurrency: string = 'KWD';
   
   // Translations object - Simple translation system without libraries
   translations = {
@@ -98,7 +98,7 @@ export class Navbar implements OnInit, OnDestroy {
     },
     en: {
       // Top bar
-      freeShipping: 'Free shipping on orders over $50',
+      freeShipping: 'Free shipping on orders over 15 KWD',
       followUs: 'Follow us:',
       // Search
       searchPlaceholder: 'Search products, brands, categories...',
