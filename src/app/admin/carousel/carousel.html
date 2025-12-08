@@ -332,6 +332,20 @@
             [(ngModel)]="newCarousel.productUrl" />
         </div>
 
+        <!-- Price -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Price *</span>
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            class="input input-bordered w-full"
+            [(ngModel)]="newCarousel.price" />
+        </div>
+
         <!-- Image -->
         <div class="form-control w-full mt-4">
           <label class="label">
@@ -423,6 +437,20 @@
             placeholder="https://example.com/product/123"
             class="input input-bordered w-full"
             [(ngModel)]="editCarousel.productUrl" />
+        </div>
+
+        <!-- Price -->
+        <div class="form-control w-full mt-4">
+          <label class="label">
+            <span class="label-text">Price *</span>
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            class="input input-bordered w-full"
+            [(ngModel)]="editCarousel.price" />
         </div>
 
         <!-- Current Image -->

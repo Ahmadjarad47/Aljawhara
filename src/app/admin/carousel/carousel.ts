@@ -211,7 +211,7 @@ export class Carousel implements OnInit {
   addCarousel() {
     if (!this.newCarousel.title || !this.newCarousel.titleAr ||
         !this.newCarousel.description || !this.newCarousel.descriptionAr ||
-        !this.newCarousel.price || !this.newCarousel.image) {
+        this.newCarousel.price == null || this.newCarousel.price < 0 || !this.newCarousel.image) {
       this.toastService.warning('Validation Error', 'English/Arabic titles, descriptions, price and image are required');
       return;
     }
@@ -264,7 +264,7 @@ export class Carousel implements OnInit {
   updateCarousel() {
     if (!this.editCarousel.title || !this.editCarousel.titleAr ||
         !this.editCarousel.description || !this.editCarousel.descriptionAr ||
-        !this.editCarousel.price) {
+        this.editCarousel.price == null || this.editCarousel.price < 0) {
       this.toastService.warning('Validation Error', 'English/Arabic titles, descriptions and price are required');
       return;
     }
