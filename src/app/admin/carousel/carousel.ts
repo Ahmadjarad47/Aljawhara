@@ -83,6 +83,7 @@ export class Carousel implements OnInit {
     this.carousels$.subscribe(items => length = items.length).unsubscribe();
     return length;
   }
+  
 
   // Forms
   newCarousel: CarouselCreateWithFileDto = {
