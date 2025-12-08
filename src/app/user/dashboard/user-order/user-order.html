@@ -223,21 +223,21 @@
     <!-- Order Details Modal -->
     @if (showDetailsModal() && selectedOrderDetails()) {
         <div class="modal modal-open">
-            <div class="modal-box max-w-4xl">
-                <h3 class="font-bold text-lg mb-4">{{t('orderDetails')}} - {{selectedOrderDetails()!.orderNumber}}</h3>
+            <div class="modal-box max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-6">
+                <h3 class="font-bold text-lg md:text-xl mb-4 break-words">{{t('orderDetails')}} - {{selectedOrderDetails()!.orderNumber}}</h3>
                 
                 <!-- Order Status -->
                 <div class="mb-4">
-                    <div class="flex items-center gap-4">
-                        <div>
-                            <span class="text-sm text-base-content/70">{{t('status')}}:</span>
-                            <div class="badge badge-lg ml-2" [ngClass]="getOrderStatusClass(selectedOrderDetails()!.status)">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                        <div class="flex items-center flex-wrap gap-2">
+                            <span class="text-xs sm:text-sm text-base-content/70">{{t('status')}}:</span>
+                            <div class="badge badge-sm sm:badge-lg ml-2" [ngClass]="getOrderStatusClass(selectedOrderDetails()!.status)">
                                 {{getOrderStatusText(selectedOrderDetails()!.status)}}
                             </div>
                         </div>
-                        <div>
-                            <span class="text-sm text-base-content/70">{{t('orderDateLabel')}}:</span>
-                            <span class="font-medium ml-2">{{selectedOrderDetails()!.createdAt | date:'medium'}}</span>
+                        <div class="flex items-center flex-wrap gap-2">
+                            <span class="text-xs sm:text-sm text-base-content/70">{{t('orderDateLabel')}}:</span>
+                            <span class="font-medium text-xs sm:text-sm ml-2">{{selectedOrderDetails()!.createdAt | date:'medium'}}</span>
                         </div>
                     </div>
                 </div>
@@ -246,11 +246,11 @@
 
                 <!-- Shipping Address -->
                 <div class="mb-4">
-                    <h4 class="font-semibold mb-2">{{t('shippingAddress')}}</h4>
-                    <div class="bg-base-200 p-4 rounded-lg">
-                        <p class="font-medium">{{selectedOrderDetails()!.shippingAddress.fullName}}</p>
-                        <p class="text-sm text-base-content/70">{{selectedOrderDetails()!.shippingAddress.phone}}</p>
-                        <p class="text-sm text-base-content/70">
+                    <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('shippingAddress')}}</h4>
+                    <div class="bg-base-200 p-3 sm:p-4 rounded-lg">
+                        <p class="font-medium text-sm sm:text-base break-words">{{selectedOrderDetails()!.shippingAddress.fullName}}</p>
+                        <p class="text-xs sm:text-sm text-base-content/70 break-words">{{selectedOrderDetails()!.shippingAddress.phone}}</p>
+                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
                             {{selectedOrderDetails()!.shippingAddress.street}}<br>
                             {{selectedOrderDetails()!.shippingAddress.city}}@if (selectedOrderDetails()!.shippingAddress.state) {, {{selectedOrderDetails()!.shippingAddress.state}}} {{selectedOrderDetails()!.shippingAddress.postalCode}}<br>
                             {{selectedOrderDetails()!.shippingAddress.country}}
@@ -262,37 +262,41 @@
 
                 <!-- Order Items -->
                 <div class="mb-4">
-                    <h4 class="font-semibold mb-2">{{t('orderItems')}}</h4>
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm">
+                    <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('orderItems')}}</h4>
+                    <div class="overflow-x-auto -mx-4 sm:mx-0">
+                        <table class="table table-sm text-xs sm:text-sm">
                             <thead>
                                 <tr>
-                                    <th>{{t('product')}}</th>
-                                    <th>{{t('price')}}</th>
-                                    <th>{{t('quantity')}}</th>
-                                    <th>{{t('total')}}</th>
-                                    <th>{{t('rating')}}</th>
+                                    <th class="text-xs sm:text-sm">{{t('product')}}</th>
+                                    <th class="text-xs sm:text-sm hidden sm:table-cell">{{t('price')}}</th>
+                                    <th class="text-xs sm:text-sm">{{t('quantity')}}</th>
+                                    <th class="text-xs sm:text-sm">{{t('total')}}</th>
+                                    <th class="text-xs sm:text-sm hidden md:table-cell">{{t('rating')}}</th>
+                                    <th class="text-xs sm:text-sm md:hidden">{{t('rating')}}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @for (item of selectedOrderDetails()!.items; track item.id) {
                                     <tr>
                                         <td>
-                                            <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-2 sm:gap-3">
                                                 @if (item.image) {
-                                                    <div class="avatar">
-                                                        <div class="mask mask-squircle w-12 h-12">
+                                                    <div class="avatar shrink-0">
+                                                        <div class="mask mask-squircle w-8 h-8 sm:w-12 sm:h-12">
                                                             <img [src]="item.image" [alt]="item.name" />
                                                         </div>
                                                     </div>
                                                 }
-                                                <div class="font-medium">{{item.name}}</div>
+                                                <div class="font-medium text-xs sm:text-sm break-words min-w-0">
+                                                    <div>{{item.name}}</div>
+                                                    <div class="text-xs text-base-content/70 sm:hidden">{{item.price | currency:'KWD'}} × {{item.quantity}}</div>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td>{{item.price | currency:'KWD'}}</td>
-                                        <td>{{item.quantity}}</td>
-                                        <td class="font-semibold">{{item.total | currency:'KWD'}}</td>
-                                        <td>
+                                        <td class="hidden sm:table-cell">{{item.price | currency:'KWD'}}</td>
+                                        <td class="text-xs sm:text-sm">{{item.quantity}}</td>
+                                        <td class="font-semibold text-xs sm:text-sm">{{item.total | currency:'KWD'}}</td>
+                                        <td class="hidden md:table-cell">
                                             @if (checkingRatings()) {
                                                 <span class="loading loading-spinner loading-xs"></span>
                                             } @else {
@@ -323,12 +327,25 @@
                                                         (click)="openRatingModal(item.productId, item.name)"
                                                         [disabled]="isLoading()"
                                                         class="btn btn-primary btn-xs">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                                         </svg>
-                                                        {{t('rate')}}
+                                                        <span class="hidden sm:inline">{{t('rate')}}</span>
                                                     </button>
                                                 }
+                                            }
+                                        </td>
+                                        <!-- Mobile Rating Button -->
+                                        <td class="md:hidden">
+                                            @if (!checkingRatings() && !hasRatedProduct(item.productId)) {
+                                                <button 
+                                                    (click)="openRatingModal(item.productId, item.name)"
+                                                    [disabled]="isLoading()"
+                                                    class="btn btn-primary btn-xs">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                    </svg>
+                                                </button>
                                             }
                                         </td>
                                     </tr>
@@ -341,58 +358,58 @@
                 <div class="divider"></div>
 
                 <!-- Order Summary -->
-                <div class="bg-base-200 p-4 rounded-lg">
-                    <div class="flex justify-between mb-2">
+                <div class="bg-base-200 p-3 sm:p-4 rounded-lg">
+                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('subtotal')}}:</span>
                         <span class="font-medium">{{selectedOrderDetails()!.subtotal | currency:'KWD'}}</span>
                     </div>
                     @if (selectedOrderDetails()!.couponDiscountAmount && selectedOrderDetails()!.couponDiscountAmount! > 0) {
-                        <div class="flex justify-between mb-2 text-success">
+                        <div class="flex justify-between mb-2 text-success text-xs sm:text-sm">
                             <span>{{t('discount')}} ({{selectedOrderDetails()!.couponCode}}):</span>
                             <span class="font-medium">-{{selectedOrderDetails()!.couponDiscountAmount! | currency:'KWD'}}</span>
                         </div>
                     }
-                    <div class="flex justify-between mb-2">
+                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('shipping')}}:</span>
                         <span class="font-medium">{{selectedOrderDetails()!.shipping | currency:'KWD'}}</span>
                     </div>
-                    <div class="flex justify-between mb-2">
+                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('tax')}}:</span>
                         <span class="font-medium">{{selectedOrderDetails()!.tax | currency:'KWD'}}</span>
                     </div>
                     <div class="divider my-2"></div>
-                    <div class="flex justify-between text-lg font-bold">
+                    <div class="flex justify-between text-base sm:text-lg font-bold">
                         <span>{{t('total')}}:</span>
                         <span>{{selectedOrderDetails()!.total | currency:'KWD'}}</span>
                     </div>
                 </div>
 
-                <div class="modal-action">
+                <div class="modal-action flex-col sm:flex-row gap-2 mt-4">
                     <button 
                         (click)="downloadInvoice(selectedOrderDetails()!.id)" 
                         [disabled]="isLoading()" 
-                        class="btn btn-primary">
+                        class="btn btn-primary w-full sm:w-auto">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
                         } @else {
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         }
-                        {{t('downloadInvoice')}}
+                        <span class="text-xs sm:text-sm">{{t('downloadInvoice')}}</span>
                     </button>
                     @if (canCancelOrder(selectedOrderDetails()!)) {
                         <button 
                             (click)="cancelOrder(selectedOrderDetails()!.id)" 
                             [disabled]="isLoading()" 
-                            class="btn btn-error">
+                            class="btn btn-error w-full sm:w-auto">
                             @if (isLoading()) {
                                 <span class="loading loading-spinner loading-sm"></span>
                             }
-                            {{t('cancelOrder')}}
+                            <span class="text-xs sm:text-sm">{{t('cancelOrder')}}</span>
                         </button>
                     }
-                    <button (click)="closeDetailsModal()" [disabled]="isLoading()" class="btn">{{t('close')}}</button>
+                    <button (click)="closeDetailsModal()" [disabled]="isLoading()" class="btn w-full sm:w-auto text-xs sm:text-sm">{{t('close')}}</button>
                 </div>
             </div>
         </div>
@@ -401,15 +418,15 @@
     <!-- Rating Modal -->
     @if (showRatingModal() && selectedProductForRating()) {
         <div class="modal modal-open">
-            <div class="modal-box max-w-2xl">
-                <h3 class="font-bold text-lg mb-4">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>
+            <div class="modal-box max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-6">
+                <h3 class="font-bold text-base sm:text-lg mb-4 break-words">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>
                 
                 <!-- Rating Stars -->
                 <div class="mb-4">
-                    <label class="label">
-                        <span class="label-text font-semibold">{{t('yourRating')}}</span>
+                    <label class="label py-2">
+                        <span class="label-text font-semibold text-sm sm:text-base">{{t('yourRating')}}</span>
                     </label>
-                    <div class="rating rating-lg">
+                    <div class="rating rating-md sm:rating-lg justify-center sm:justify-start">
                         @for (star of [1, 2, 3, 4, 5]; track star) {
                             <input 
                                 type="radio" 
@@ -419,8 +436,8 @@
                                 (click)="updateRatingNumber(star)" />
                         }
                     </div>
-                    <div class="label">
-                        <span class="label-text-alt text-base-content/70">
+                    <div class="label py-1">
+                        <span class="label-text-alt text-xs sm:text-sm text-base-content/70">
                             {{t('selectedStars')}}: {{ratingForm().ratingNumber}} {{t('outOfStars')}}
                         </span>
                     </div>
@@ -428,39 +445,39 @@
 
                 <!-- Review Comment -->
                 <div class="form-control mb-4">
-                    <label class="label">
-                        <span class="label-text font-semibold">{{t('yourReview')}}</span>
-                        <span class="label-text-alt text-base-content/70">{{t('required')}}</span>
+                    <label class="label py-2">
+                        <span class="label-text font-semibold text-sm sm:text-base">{{t('yourReview')}}</span>
+                        <span class="label-text-alt text-xs sm:text-sm text-base-content/70">{{t('required')}}</span>
                     </label>
                     <textarea 
-                        class="textarea textarea-bordered h-32" 
+                        class="textarea textarea-bordered h-24 sm:h-32 text-sm" 
                         [placeholder]="t('shareExperience')"
                         [ngModel]="ratingForm().content"
                         (ngModelChange)="updateRatingContent($event)"
                         maxlength="1000">
                     </textarea>
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/70">
+                    <label class="label py-1">
+                        <span class="label-text-alt text-xs text-base-content/70">
                             {{ratingForm().content.length}} / 1000 {{t('characters')}}
                         </span>
                     </label>
                 </div>
 
-                <div class="modal-action">
+                <div class="modal-action flex-col sm:flex-row gap-2">
                     <button 
                         (click)="closeRatingModal()" 
                         [disabled]="isLoading()" 
-                        class="btn btn-ghost">
+                        class="btn btn-ghost w-full sm:w-auto text-xs sm:text-sm">
                         {{t('cancel')}}
                     </button>
                     <button 
                         (click)="submitRating()" 
                         [disabled]="isLoading() || !ratingForm().content.trim()" 
-                        class="btn btn-primary">
+                        class="btn btn-primary w-full sm:w-auto">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
                         }
-                        {{t('submitRating')}}
+                        <span class="text-xs sm:text-sm">{{t('submitRating')}}</span>
                     </button>
                 </div>
             </div>
