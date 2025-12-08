@@ -15,7 +15,7 @@ export const userRoutes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () => import('./dashboard/user-order/user-order').then(m => m.UserOrder)
+        loadComponent: () => import('./dashboard/user-order/user-order').then(m => m.UserOrderComponent)
       },
       {
         path: 'transactions',

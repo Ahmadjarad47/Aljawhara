@@ -3,7 +3,7 @@ import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, shareReplay, catchError } from 'rxjs/operators';
-import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto } from './models.order';
+import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto, InvoicePaymentDto } from './models.order';
 
 @Injectable({
   providedIn: 'root'
@@ -76,6 +76,13 @@ export class UserOrderService {
   // Add product rating
   addProductRating(rating: RatingCreateDto): Observable<RatingDto> {
     return this.http.post<RatingDto>(`${environment.apiUrl}Products/${rating.productId}/ratings`, rating).pipe(
+      shareReplay(1)
+    );
+  }
+
+  // Get invoice payment data
+  getInvoicePaymentData(orderId: number): Observable<InvoicePaymentDto> {
+    return this.http.get<InvoicePaymentDto>(`${this.api}/${orderId}/invoice-payment`).pipe(
       shareReplay(1)
     );
   }

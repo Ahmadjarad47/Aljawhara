@@ -62,6 +62,14 @@ export interface ShippingAddressDto extends BaseDto {
     postalCode: string;
     country: string;
     appUserId?: string;
+    
+    // Arabic address fields
+    alQataa?: string; // القطعة (District/Block)
+    alSharee?: string; // الشارع (Street)
+    alJada?: string; // الجادة (Avenue)
+    alManzil?: string; // المنزل (House)
+    alDor?: string; // الدور (Floor)
+    alShakka?: string; // الشقة (Apartment)
 }
 
 export interface OrderFilters {
@@ -93,5 +101,41 @@ export interface RatingCreateDto {
     content: string;
     ratingNumber: number;
     productId: number;
+}
+
+export interface InvoicePaymentDto {
+    // Order Information
+    orderId: number;
+    orderNumber: string;
+    status: OrderStatus;
+    orderCreatedAt: string;
+    
+    // Financial Information
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    paymentAmount: number; // Amount to be paid (same as Total)
+    
+    // Customer Information
+    appUserId?: string;
+    customerName: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    
+    // Coupon Information
+    couponId?: number;
+    couponCode?: string;
+    couponDiscountAmount?: number;
+    
+    // Order Items
+    items: OrderItemDto[];
+    
+    // Shipping Address
+    shippingAddress: ShippingAddressDto;
+    
+    // Success indicator
+    success: boolean;
+    message?: string;
 }
 

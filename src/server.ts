@@ -37,23 +37,8 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // Content Security Policy - Adjust based on your needs
-  // Note: For production, use nonces for better security
-  const cspHeader = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Angular requires unsafe-inline/unsafe-eval
-    "style-src 'self' 'unsafe-inline'", // Angular requires unsafe-inline for styles
-    "img-src 'self' data: https: blob:",
-    "font-src 'self' data: https:",
-    "connect-src 'self' https://api.aljawharaplus.com",
-    "frame-ancestors 'self'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    'upgrade-insecure-requests',
-    'block-all-mixed-content',
-  ].join('; ');
-
-  res.setHeader('Content-Security-Policy', cspHeader);
+ 
+  // res.setHeader('Content-Security-Policy', cspHeader);
 
   // Remove server information
   res.removeHeader('X-Powered-By');
