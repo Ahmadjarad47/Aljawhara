@@ -54,8 +54,8 @@ export class Setting implements OnInit, OnDestroy {
       addressLine1: 'سطر العنوان 1',
       addressLine2: 'سطر العنوان 2',
       country: 'الدولة',
-      city: 'المدينة',
-      state: 'الولاية',
+      city: 'المنطقة',
+      state: 'المحافظة',
       postalCode: 'الرمز البريدي',
       alQataa: 'القطعة',
       alSharee: 'الشارع',
@@ -93,7 +93,9 @@ export class Setting implements OnInit, OnDestroy {
       deleting: 'جاري الحذف',
       deletingAddress: 'جاري حذف العنوان...',
       addressDeleted: 'تم حذف العنوان',
-      failedToDeleteAddress: 'فشل حذف العنوان'
+      failedToDeleteAddress: 'فشل حذف العنوان',
+      selectCity: 'اختر المنطقة',
+      selectState: 'اختر المحافظة'
     },
     en: {
       accountSettings: 'Account Settings',
@@ -125,8 +127,8 @@ export class Setting implements OnInit, OnDestroy {
       addressLine1: 'Address line 1',
       addressLine2: 'Address line 2',
       country: 'Country',
-      city: 'City',
-      state: 'State',
+      city: 'Area',
+      state: 'Governorate',
       postalCode: 'Postal code',
       alQataa: 'District/Block',
       alSharee: 'Street',
@@ -164,9 +166,77 @@ export class Setting implements OnInit, OnDestroy {
       deleting: 'Deleting',
       deletingAddress: 'Deleting address...',
       addressDeleted: 'Address deleted',
-      failedToDeleteAddress: 'Failed to delete address'
+      failedToDeleteAddress: 'Failed to delete address',
+      selectCity: 'Select Area',
+      selectState: 'Select Governorate'
     }
   };
+
+  // Kuwait areas by governorate
+  kuwaitAreas: { [key: string]: string[] } = {
+    "محافظة العاصمة": [
+      "مدينة الكويت", "دسمان", "شرق", "الصوابر", "المرقاب", "القبلة", "الصالحية", "بنيد القار", "الدسمة",
+      "الدوحة", "الشامية", "الشويخ", "الصليبيخات", "الروضة", "الخالدية", "العديلية", "القادسية",
+      "الفيحاء", "النزهة", "قرطبة", "غرناطة", "مدينة جابر الأحمد"
+    ],
+    "محافظة حولي": [
+      "حولي", "السالمية", "الجابرية", "مشرف", "بيان", "الرميثية", "سلوى", "الشعب", "البدع",
+      "النقرة", "الصديق", "السلام", "الزهراء", "حطين", "سعد العبدالله"
+    ],
+    "محافظة الفروانية": [
+      "الفروانية", "خيطان", "جليب الشيوخ", "أشبيلية", "الأندلس", "العباسية", "الرابية", "العمرية",
+      "العارضية", "الرحاب", "الرقعي", "الفردوس", "ضاحية صباح الناصر", "ضاحية عبدالله المبارك"
+    ],
+    "محافظة الجهراء": [
+      "الجهراء", "الواحة", "القصر", "النعيم", "العيون", "النسيم", "تيماء", "أمغرة", "الصليبية",
+      "المطلاع", "العبدلي", "السالمي", "سعد العبدالله"
+    ],
+    "محافظة الأحمدي": [
+      "الأحمدي", "الفحيحيل", "المنقف", "المهبولة", "الرقة", "الصباحية", "الفنطاس", "أبو حليفة",
+      "ميناء عبدالله", "الزور", "الخيران", "الوفرة", "مدينة صباح الأحمد"
+    ],
+    "محافظة مبارك الكبير": [
+      "مبارك الكبير", "صباح السالم", "العدان", "القرين", "القصور", "المسايل",
+      "الفنطيس", "أبو فطيرة", "صبحان"
+    ]
+  };
+
+  // Kuwait governorates (المحافظة)
+  states = Object.keys(this.kuwaitAreas);
+
+  // Get filtered cities based on selected state for new address
+  getFilteredCitiesForNew(): string[] {
+    const selectedState = this.newAddress.state;
+    if (selectedState && this.kuwaitAreas[selectedState]) {
+      return this.kuwaitAreas[selectedState];
+    }
+    return [];
+  }
+
+  // Get filtered cities based on selected state for edit address
+  getFilteredCitiesForEdit(): string[] {
+    const selectedState = this.editAddress.state;
+    if (selectedState && this.kuwaitAreas[selectedState]) {
+      return this.kuwaitAreas[selectedState];
+    }
+    return [];
+  }
+
+  // Handle state change for new address - reset city if it's not in the new state's cities
+  onNewAddressStateChange() {
+    const filteredCities = this.getFilteredCitiesForNew();
+    if (this.newAddress.city && !filteredCities.includes(this.newAddress.city)) {
+      this.newAddress.city = '';
+    }
+  }
+
+  // Handle state change for edit address - reset city if it's not in the new state's cities
+  onEditAddressStateChange() {
+    const filteredCities = this.getFilteredCitiesForEdit();
+    if (this.editAddress.city && !filteredCities.includes(this.editAddress.city)) {
+      this.editAddress.city = '';
+    }
+  }
 
   // Translation helper
   t(key: string): string {
@@ -193,7 +263,7 @@ export class Setting implements OnInit, OnDestroy {
     phoneNumber: '',
     addressLine1: '',
     addressLine2: '',
-    country: '',
+    country: 'Kuwait',
     city: '',
     state: '',
     postalCode: '',
@@ -435,7 +505,7 @@ export class Setting implements OnInit, OnDestroy {
       phoneNumber: '',
       addressLine1: '',
       addressLine2: '',
-      country: '',
+      country: 'Kuwait',
       city: '',
       state: '',
       postalCode: '',

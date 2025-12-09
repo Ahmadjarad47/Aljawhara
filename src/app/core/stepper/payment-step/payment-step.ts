@@ -33,6 +33,7 @@ export class PaymentStepComponent {
       orderSummary: 'ملخص الطلب',
       subtotal: 'المجموع الفرعي',
       tax: 'الضريبة',
+      deliveryFee: 'رسوم التوصيل',
       total: 'الإجمالي',
       shippingTo: 'الشحن إلى',
       orderItems: 'عناصر الطلب',
@@ -57,6 +58,7 @@ export class PaymentStepComponent {
       orderSummary: 'Order Summary',
       subtotal: 'Subtotal',
       tax: 'Tax',
+      deliveryFee: 'Delivery Fee',
       total: 'Total',
       shippingTo: 'Shipping To',
       orderItems: 'Order Items',
@@ -97,7 +99,9 @@ export class PaymentStepComponent {
   
   tax = computed(() => 0); // Tax set to zero
 
-  total = computed(() => this.subtotal());
+  deliveryFee = computed(() => this.checkoutData().deliveryFee || 2);
+
+  total = computed(() => this.subtotal() + this.deliveryFee());
   
   // Format card number
   formatCardNumber(value: string): void {

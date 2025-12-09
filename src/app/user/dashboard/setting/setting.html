@@ -185,15 +185,25 @@
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('country')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.country" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('city')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.city" />
+              <input class="input input-bordered" [(ngModel)]="newAddress.country" placeholder="Kuwait" />
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('state')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.state" />
+              <select class="select select-bordered" [(ngModel)]="newAddress.state" (ngModelChange)="onNewAddressStateChange()">
+                <option value="">{{t('selectState')}}</option>
+                @for (state of states; track state) {
+                  <option [value]="state">{{ state }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">{{t('city')}}</span></label>
+              <select class="select select-bordered" [(ngModel)]="newAddress.city" [disabled]="!newAddress.state">
+                <option value="">{{t('selectCity')}}</option>
+                @for (city of getFilteredCitiesForNew(); track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
+              </select>
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('postalCode')}}</span></label>
@@ -262,15 +272,25 @@
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('country')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.country" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('city')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.city" />
+              <input class="input input-bordered" [(ngModel)]="editAddress.country" placeholder="Kuwait" />
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('state')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.state" />
+              <select class="select select-bordered" [(ngModel)]="editAddress.state" (ngModelChange)="onEditAddressStateChange()">
+                <option value="">{{t('selectState')}}</option>
+                @for (state of states; track state) {
+                  <option [value]="state">{{ state }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">{{t('city')}}</span></label>
+              <select class="select select-bordered" [(ngModel)]="editAddress.city" [disabled]="!editAddress.state">
+                <option value="">{{t('selectCity')}}</option>
+                @for (city of getFilteredCitiesForEdit(); track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
+              </select>
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('postalCode')}}</span></label>

@@ -16,6 +16,7 @@ export interface CheckoutData {
   updateAddressDto?: UpdateAddressDto;
   selectedAddressId?: number;
   paymentTiming?: PaymentTiming;
+  deliveryFee?: number;
 }
 
 @Injectable({

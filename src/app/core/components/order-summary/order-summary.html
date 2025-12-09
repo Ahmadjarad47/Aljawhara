@@ -20,6 +20,11 @@
         </div>
       }
 
+      <div class="flex items-center justify-between py-1">
+        <span class="text-base-content/70">{{t('deliveryFee')}}</span>
+        <span class="font-medium text-base-content">{{ deliveryFee() | currency:'KWD' }}</span>
+      </div>
+
       <div class="divider my-3"></div>
 
       <div class="flex items-center justify-between py-1">

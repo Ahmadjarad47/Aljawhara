@@ -73,30 +73,39 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">{{ t('city') }} *</span>
+                <span class="label-text font-medium">{{ t('state') }} *</span>
               </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="City"
-                [(ngModel)]="formData.city"
-                name="city"
+              <select 
+                class="select select-bordered w-full" 
+                [(ngModel)]="formData.state"
+                (ngModelChange)="onStateChange()"
+                name="state"
                 required
-              />
+              >
+                <option value="">{{ t('selectState') }}</option>
+                @for (state of states; track state) {
+                  <option [value]="state">{{ state }}</option>
+                }
+              </select>
             </div>
             
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">{{ t('state') }} *</span>
+                <span class="label-text font-medium">{{ t('city') }} *</span>
               </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="State"
-                [(ngModel)]="formData.state"
-                name="state"
+              <select 
+                class="select select-bordered w-full" 
+                [(ngModel)]="formData.city"
+                (ngModelChange)="onCityChange()"
+                name="city"
+                [disabled]="!formData.state"
                 required
-              />
+              >
+                <option value="">{{ t('selectCity') }}</option>
+                @for (city of getFilteredCities(); track city) {
+                  <option [value]="city">{{ city }}</option>
+                }
+              </select>
             </div>
           </div>
           
@@ -122,7 +131,7 @@
               <input 
                 type="text" 
                 class="input input-bordered w-full" 
-                placeholder="Saudi Arabia"
+                placeholder="Kuwait"
                 [(ngModel)]="formData.country"
                 name="country"
                 required

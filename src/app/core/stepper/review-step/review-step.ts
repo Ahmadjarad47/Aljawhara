@@ -31,6 +31,7 @@ export class ReviewStepComponent {
       subtotal: 'المجموع الفرعي',
       items: 'عناصر',
       tax: 'الضريبة',
+      deliveryFee: 'رسوم التوصيل',
       total: 'الإجمالي',
       orderDetails: 'تفاصيل الطلب',
       cartEmpty: 'سلة التسوق فارغة',
@@ -45,6 +46,7 @@ export class ReviewStepComponent {
       subtotal: 'Subtotal',
       items: 'items',
       tax: 'Tax',
+      deliveryFee: 'Delivery Fee',
       total: 'Total',
       orderDetails: 'Order Details',
       cartEmpty: 'Your cart is empty',
@@ -69,7 +71,9 @@ export class ReviewStepComponent {
   
   tax = computed(() => 0); // Tax set to zero
 
-  total = computed(() => this.subtotal());
+  deliveryFee = computed(() => this.checkoutData().deliveryFee || 2);
+
+  total = computed(() => this.subtotal() + this.deliveryFee());
   
   itemCount = computed(() => 
     this.cartItems().reduce((total, item) => total + item.quantity, 0)

@@ -49,8 +49,8 @@ export class ShippingStepComponent implements OnInit {
       phoneNumber: 'رقم الجوال',
       addressLine1: 'العنوان الأول',
       addressLine2Optional: 'العنوان الثاني (اختياري)',
-      city: 'المدينة',
-      state: 'المنطقة',
+      city: 'المنطقة',
+      state: 'المحافظة',
       postalCode: 'الرمز البريدي',
       country: 'الدولة',
       alQataa: 'القطعة',
@@ -63,6 +63,8 @@ export class ShippingStepComponent implements OnInit {
       saving: 'جاري الحفظ...',
       updateAddressBtn: 'تحديث العنوان',
       saveAddressBtn: 'حفظ العنوان',
+      selectCity: 'اختر المنطقة',
+      selectState: 'اختر المحافظة',
     },
     en: {
       shippingTitle: 'Shipping Address',
@@ -72,8 +74,8 @@ export class ShippingStepComponent implements OnInit {
       phoneNumber: 'Phone Number',
       addressLine1: 'Address Line 1',
       addressLine2Optional: 'Address Line 2 (Optional)',
-      city: 'City',
-      state: 'State',
+      city: 'Area',
+      state: 'Governorate',
       postalCode: 'Postal Code',
       country: 'Country',
       alQataa: 'District/Block',
@@ -86,8 +88,89 @@ export class ShippingStepComponent implements OnInit {
       saving: 'Saving...',
       updateAddressBtn: 'Update Address',
       saveAddressBtn: 'Save Address',
+      selectCity: 'Select Area',
+      selectState: 'Select Governorate',
     },
   } as const;
+
+  // Kuwait areas by governorate
+  kuwaitAreas: { [key: string]: string[] } = {
+    "محافظة العاصمة": [
+      "مدينة الكويت", "دسمان", "شرق", "الصوابر", "المرقاب", "القبلة", "الصالحية", "بنيد القار", "الدسمة",
+      "الدوحة", "الشامية", "الشويخ", "الصليبيخات", "الروضة", "الخالدية", "العديلية", "القادسية",
+      "الفيحاء", "النزهة", "قرطبة", "غرناطة", "مدينة جابر الأحمد"
+    ],
+    "محافظة حولي": [
+      "حولي", "السالمية", "الجابرية", "مشرف", "بيان", "الرميثية", "سلوى", "الشعب", "البدع",
+      "النقرة", "الصديق", "السلام", "الزهراء", "حطين", "سعد العبدالله"
+    ],
+    "محافظة الفروانية": [
+      "الفروانية", "خيطان", "جليب الشيوخ", "أشبيلية", "الأندلس", "العباسية", "الرابية", "العمرية",
+      "العارضية", "الرحاب", "الرقعي", "الفردوس", "ضاحية صباح الناصر", "ضاحية عبدالله المبارك"
+    ],
+    "محافظة الجهراء": [
+      "الجهراء", "الواحة", "القصر", "النعيم", "العيون", "النسيم", "تيماء", "أمغرة", "الصليبية",
+      "المطلاع", "العبدلي", "السالمي", "سعد العبدالله"
+    ],
+    "محافظة الأحمدي": [
+      "الأحمدي", "الفحيحيل", "المنقف", "المهبولة", "الرقة", "الصباحية", "الفنطاس", "أبو حليفة",
+      "ميناء عبدالله", "الزور", "الخيران", "الوفرة", "مدينة صباح الأحمد"
+    ],
+    "محافظة مبارك الكبير": [
+      "مبارك الكبير", "صباح السالم", "العدان", "القرين", "القصور", "المسايل",
+      "الفنطيس", "أبو فطيرة", "صبحان"
+    ]
+  };
+  // Kuwait governorates (المحافظة)
+  states = Object.keys(this.kuwaitAreas);
+
+  // Get filtered cities based on selected state
+  getFilteredCities(): string[] {
+    const selectedState = this.formData.state;
+    if (selectedState && this.kuwaitAreas[selectedState]) {
+      return this.kuwaitAreas[selectedState];
+    }
+    return [];
+  }
+
+  // Handle state change - reset city if it's not in the new state's cities
+  onStateChange() {
+    const filteredCities = this.getFilteredCities();
+    if (this.formData.city && !filteredCities.includes(this.formData.city)) {
+      this.formData.city = '';
+      this.updateDeliveryFee();
+    }
+  }
+
+  // Calculate delivery fee based on city
+  calculateDeliveryFee(city: string | null | undefined): number {
+    if (!city) return 2; // Default fee
+    
+    const highFeeCities = ['الأحمدي', 'الخيران', 'العبدلي', 'الوفرة'];
+    const mediumFeeCity = 'صباح السالم';
+    const mediumHighFeeCity = 'المطلاع';
+    
+    if (highFeeCities.includes(city)) {
+      return 6;
+    } else if (city === mediumFeeCity) {
+      return 3;
+    } else if (city === mediumHighFeeCity) {
+      return 4;
+    }
+    
+    return 2; // Default fee for all other cities
+  }
+
+  // Update delivery fee in checkout data
+  updateDeliveryFee() {
+    const deliveryFee = this.calculateDeliveryFee(this.formData.city);
+    this.stepperService.updateCheckoutData({ deliveryFee });
+  }
+
+  // Handle city change
+  onCityChange() {
+    this.updateDeliveryFee();
+  }
 
   t(key: keyof typeof this.translations.ar): string {
     const lang = this.currentLanguage();
@@ -102,7 +185,7 @@ export class ShippingStepComponent implements OnInit {
     city: '',
     state: '',
     postalCode: '',
-    country: 'Saudi Arabia',
+    country: 'Kuwait',
     phoneNumber: '',
     isDefault: true,
     alQataa: null,
@@ -116,6 +199,10 @@ export class ShippingStepComponent implements OnInit {
   async ngOnInit() {
     await this.loadAddresses();
     this.checkExistingData();
+    // Initialize delivery fee if city is already set
+    if (this.formData.city) {
+      this.updateDeliveryFee();
+    }
   }
   
   async loadAddresses() {
@@ -155,9 +242,11 @@ export class ShippingStepComponent implements OnInit {
           };
 
           // Sync with stepper data so payment step has the latest address
+          const deliveryFee = this.calculateDeliveryFee(selected.city);
           this.stepperService.updateCheckoutData({
             address: selected,
-            selectedAddressId: selected.id
+            selectedAddressId: selected.id,
+            deliveryFee
           });
         } else {
           // No address yet → allow creating a new one
@@ -170,7 +259,7 @@ export class ShippingStepComponent implements OnInit {
             city: '',
             state: '',
             postalCode: '',
-            country: 'Saudi Arabia',
+            country: 'Kuwait',
             phoneNumber: '',
             isDefault: true,
             alQataa: null,
@@ -212,15 +301,21 @@ export class ShippingStepComponent implements OnInit {
         alDor: (data.address as any).alDor || null,
         alShakka: (data.address as any).alShakka || null
       };
+      
+      // Update delivery fee for existing address
+      const deliveryFee = this.calculateDeliveryFee(data.address.city);
+      this.stepperService.updateCheckoutData({ deliveryFee });
     }
   }
   
   selectAddress(address: UserAddressDto) {
     this.selectedAddressId.set(address.id);
     this.isCreatingNew.set(false);
+    const deliveryFee = this.calculateDeliveryFee(address.city);
     this.stepperService.updateCheckoutData({
       address,
-      selectedAddressId: address.id
+      selectedAddressId: address.id,
+      deliveryFee
     });
   }
   
@@ -234,7 +329,7 @@ export class ShippingStepComponent implements OnInit {
       city: '',
       state: '',
       postalCode: '',
-      country: 'Saudi Arabia',
+      country: 'Kuwait',
       phoneNumber: '',
       isDefault: true,
       alQataa: null,
@@ -292,10 +387,12 @@ export class ShippingStepComponent implements OnInit {
           await this.loadAddresses();
           
           // Update stepper data
+          const deliveryFee = this.calculateDeliveryFee(response.data.city);
           this.stepperService.updateCheckoutData({
             address: response.data,
             updateAddressDto: updateDto,
-            selectedAddressId: response.data.id
+            selectedAddressId: response.data.id,
+            deliveryFee
           });
         }
       } else {
@@ -310,10 +407,12 @@ export class ShippingStepComponent implements OnInit {
           await this.loadAddresses();
           
           // Update stepper data
+          const deliveryFee = this.calculateDeliveryFee(response.data.city);
           this.stepperService.updateCheckoutData({
             address: response.data,
             createAddressDto: this.formData,
-            selectedAddressId: response.data.id
+            selectedAddressId: response.data.id,
+            deliveryFee
           });
           
           this.selectedAddressId.set(response.data.id);
@@ -340,11 +439,23 @@ export class ShippingStepComponent implements OnInit {
   }
   
   canProceed(): boolean {
+    // Always update delivery fee before checking if can proceed
+    if (this.formData.city) {
+      this.updateDeliveryFee();
+    }
+    
     if (this.selectedAddressId()) {
       const data = this.stepperService.checkoutData();
       return !!(data.address || data.selectedAddressId);
     }
     return false;
+  }
+  
+  // Method to ensure delivery fee is updated before proceeding
+  prepareForNextStep(): void {
+    if (this.formData.city) {
+      this.updateDeliveryFee();
+    }
   }
 }
 

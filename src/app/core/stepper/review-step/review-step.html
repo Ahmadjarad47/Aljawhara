@@ -61,6 +61,11 @@
             <span class="font-medium">{{ subtotal() | currency:'KWD' }}</span>
           </div>
           
+          <div class="flex justify-between text-sm">
+            <span class="text-base-content/70">{{ t('deliveryFee') }}</span>
+            <span class="font-medium">{{ deliveryFee() | currency:'KWD' }}</span>
+          </div>
+          
           <div class="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-base-300">
             <span>{{ t('total') }}</span>
             <span>{{ total() | currency:'KWD' }}</span>

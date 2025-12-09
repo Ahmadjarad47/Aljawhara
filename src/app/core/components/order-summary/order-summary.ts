@@ -26,6 +26,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       items: 'العناصر',
       estimatedTax: 'الضريبة المقدرة',
       discount: 'الخصم',
+      deliveryFee: 'رسوم التوصيل',
       total: 'الإجمالي',
       checkout: 'إتمام الطلب',
       cartEmpty: 'سلة التسوق فارغة.'
@@ -35,6 +36,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       items: 'Items',
       estimatedTax: 'Estimated tax',
       discount: 'Discount',
+      deliveryFee: 'Delivery Fee',
       total: 'Total',
       checkout: 'Checkout',
       cartEmpty: 'Your cart is empty.'
@@ -99,12 +101,14 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   hasAppliedCoupon = computed(() => this.cartService.hasAppliedCoupon());
   
   total = computed(() => {
-    return this.hasAppliedCoupon() ? this.cartService.getTotalPriceWithDiscount() : this.subtotal();
+    const baseTotal = this.hasAppliedCoupon() ? this.cartService.getTotalPriceWithDiscount() : this.subtotal();
+    return baseTotal + this.deliveryFee();
   });
   
   // Optional inputs
   showTax = input<boolean>(true);
   showCheckoutButton = input<boolean>(false);
   showEmptyMessage = input<boolean>(true);
+  deliveryFee = input<number>(0); // Default delivery fee
 }
 
