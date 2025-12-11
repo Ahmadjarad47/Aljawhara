@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { ServiceStepper, StepperStep } from '../service-stepper';
 import { UserAddressDto, CreateAddressDto, UpdateAddressDto } from '../../Models/shipping';
 import { environment } from '../../../../environments/environment.development';
+import { ToastService } from '../../../services/toast.service';
+import { ToastComponent } from '../../components/toast/toast.component';
 
 interface ApiResponseDto<T = any> {
   success: boolean;
@@ -16,13 +18,14 @@ interface ApiResponseDto<T = any> {
 @Component({
   selector: 'app-shipping-step',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './shipping-step.html',
   styleUrl: './shipping-step.css'
 })
 export class ShippingStepComponent implements OnInit {
   private stepperService = inject(ServiceStepper);
   private http = inject(HttpClient);
+  public toastService = inject(ToastService);
   
   // Loading state
   isLoading = signal<boolean>(false);
@@ -34,6 +37,7 @@ export class ShippingStepComponent implements OnInit {
   // Form state
   isCreatingNew = signal<boolean>(true);
   selectedAddressId = signal<number | null>(null);
+  isEditMode = signal<boolean>(false);
 
   // Language / translations
   currentLanguage = signal<'ar' | 'en'>(
@@ -65,6 +69,11 @@ export class ShippingStepComponent implements OnInit {
       saveAddressBtn: 'حفظ العنوان',
       selectCity: 'اختر المنطقة',
       selectState: 'اختر المحافظة',
+      editBtn: 'تعديل',
+      addressSaved: 'تم حفظ العنوان بنجاح',
+      addressUpdated: 'تم تحديث العنوان بنجاح',
+      error: 'خطأ',
+      failedToSave: 'فشل حفظ العنوان',
     },
     en: {
       shippingTitle: 'Shipping Address',
@@ -90,6 +99,11 @@ export class ShippingStepComponent implements OnInit {
       saveAddressBtn: 'Save Address',
       selectCity: 'Select Area',
       selectState: 'Select Governorate',
+      editBtn: 'Edit',
+      addressSaved: 'Address saved successfully',
+      addressUpdated: 'Address updated successfully',
+      error: 'Error',
+      failedToSave: 'Failed to save address',
     },
   } as const;
 
@@ -146,13 +160,13 @@ export class ShippingStepComponent implements OnInit {
   calculateDeliveryFee(city: string | null | undefined): number {
     if (!city) return 2; // Default fee
     
-    const highFeeCities = ['الأحمدي', 'الخيران', 'العبدلي', 'الوفرة'];
-    const mediumFeeCity = 'صباح السالم';
+    const highFeeCities = [ 'الخيران', 'العبدلي', 'الوفرة','مدينة صباح الأحمد'];
+    const mediumFeeCity = ['صباح السالم','الأحمدي'];
     const mediumHighFeeCity = 'المطلاع';
     
     if (highFeeCities.includes(city)) {
       return 6;
-    } else if (city === mediumFeeCity) {
+    } else if (mediumFeeCity.includes(city)) {
       return 3;
     } else if (city === mediumHighFeeCity) {
       return 4;
@@ -197,11 +211,41 @@ export class ShippingStepComponent implements OnInit {
   };
   
   async ngOnInit() {
+    // First check if there's saved checkout data and restore it
+    this.restoreFromCheckoutData();
     await this.loadAddresses();
     this.checkExistingData();
     // Initialize delivery fee if city is already set
     if (this.formData.city) {
       this.updateDeliveryFee();
+    }
+    // Set edit mode to false by default (read-only mode)
+    this.isEditMode.set(false);
+  }
+  
+  restoreFromCheckoutData() {
+    const data = this.stepperService.checkoutData();
+    if (data.address && data.selectedAddressId) {
+      // Restore form data from saved checkout data
+      this.selectedAddressId.set(data.selectedAddressId);
+      this.isCreatingNew.set(false);
+      this.formData = {
+        fullName: data.address.fullName,
+        addressLine1: data.address.addressLine1,
+        addressLine2: data.address.addressLine2,
+        city: data.address.city,
+        state: data.address.state,
+        postalCode: data.address.postalCode,
+        country: data.address.country,
+        phoneNumber: data.address.phoneNumber,
+        isDefault: data.address.isDefault,
+        alQataa: data.address.alQataa,
+        alSharee: data.address.alSharee,
+        alJada: data.address.alJada,
+        alManzil: data.address.alManzil,
+        alDor: data.address.alDor,
+        alShakka: data.address.alShakka
+      };
     }
   }
   
@@ -217,9 +261,26 @@ export class ShippingStepComponent implements OnInit {
 
         // If user already has at least one address, use it for update (no multiple addresses)
         if (response.data.length > 0) {
-          const selected =
-            response.data.find(a => a.isDefault) ?? response.data[0];
+          // Check if we have a saved selectedAddressId in checkout data
+          const savedAddressId = this.stepperService.checkoutData().selectedAddressId;
+          let selected: UserAddressDto;
+          
+          if (savedAddressId) {
+            // Try to find the saved address
+            const savedAddress = response.data.find(a => a.id === savedAddressId);
+            if (savedAddress) {
+              // Use the saved address if it exists
+              selected = savedAddress;
+            } else {
+              // Saved address not found, use default or first
+              selected = response.data.find(a => a.isDefault) ?? response.data[0];
+            }
+          } else {
+            // No saved address, use default or first address
+            selected = response.data.find(a => a.isDefault) ?? response.data[0];
+          }
 
+          // Update form data with the selected address
           this.selectedAddressId.set(selected.id);
           this.isCreatingNew.set(false);
 
@@ -394,6 +455,13 @@ export class ShippingStepComponent implements OnInit {
             selectedAddressId: response.data.id,
             deliveryFee
           });
+          
+          // Show success toast and exit edit mode
+          this.toastService.success(
+            this.t('addressUpdated'),
+            ''
+          );
+          this.isEditMode.set(false);
         }
       } else {
         // Create new address
@@ -417,13 +485,28 @@ export class ShippingStepComponent implements OnInit {
           
           this.selectedAddressId.set(response.data.id);
           this.isCreatingNew.set(false);
+          
+          // Show success toast and exit edit mode
+          this.toastService.success(
+            this.t('addressSaved'),
+            ''
+          );
+          this.isEditMode.set(false);
         }
       }
     } catch (error) {
       console.error('Error saving address:', error);
+      this.toastService.error(
+        this.t('error'),
+        this.t('failedToSave')
+      );
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+  
+  enableEditMode() {
+    this.isEditMode.set(true);
   }
   
   isFormValid(): boolean {

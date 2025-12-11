@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ServiceStepper, StepperStep } from './service-stepper';
 import { ShippingStepComponent } from './shipping-step/shipping-step';
@@ -19,8 +19,13 @@ import { PaymentStepComponent } from './payment-step/payment-step';
   templateUrl: './stepper.html',
   styleUrl: './stepper.css'
 })
-export class StepperComponent {
+export class StepperComponent implements OnInit {
   private stepperService = inject(ServiceStepper);
+  
+  ngOnInit(): void {
+    // Validate current step and redirect to first incomplete step if needed
+    this.stepperService.validateAndRedirect();
+  }
   
   // Language / translations
   currentLanguage = signal<'ar' | 'en'>(
@@ -74,18 +79,8 @@ export class StepperComponent {
   }
   
   canProceed(): boolean {
-    const data = this.stepperService.checkoutData();
-    // Check if current step data is complete
-    if (this.currentStep() === StepperStep.SHIPPING) {
-      return !!(data.address || data.createAddressDto || data.selectedAddressId);
-    }
-    if (this.currentStep() === StepperStep.REVIEW) {
-      return true;
-    }
-    if (this.currentStep() === StepperStep.PAYMENT_TIMING) {
-      return !!data.paymentTiming;
-    }
-    return false;
+    // Use the stepper service's validation method
+    return this.stepperService.isStepComplete(this.currentStep());
   }
   
   getNextStepName(): string {

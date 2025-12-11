@@ -8,9 +8,20 @@
 
     <!-- Address Form: create first address or update existing one -->
     <div class="border-t pt-4 md:pt-6">
-      <h3 class="text-base md:text-lg font-semibold text-base-content mb-3 md:mb-4">
-        {{ selectedAddressId() ? t('editAddressTitle') : t('newAddressTitle') }}
-      </h3>
+      <div class="flex justify-between items-center mb-3 md:mb-4">
+        <h3 class="text-base md:text-lg font-semibold text-base-content">
+          {{ selectedAddressId() ? t('editAddressTitle') : t('newAddressTitle') }}
+        </h3>
+        @if (selectedAddressId() && !isEditMode()) {
+          <button 
+            type="button"
+            class="btn btn-sm border-none bg-[#054239] text-white hover:bg-[#04352f]"
+            (click)="enableEditMode()"
+          >
+            {{ t('editBtn') }}
+          </button>
+        }
+      </div>
         
         <form class="space-y-4" (ngSubmit)="saveAddress()">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -24,6 +35,8 @@
                 placeholder="John Doe"
                 [(ngModel)]="formData.fullName"
                 name="fullName"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               />
             </div>
@@ -38,6 +51,8 @@
                 placeholder="+965 67070814"
                 [(ngModel)]="formData.phoneNumber"
                 name="phoneNumber"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               />
             </div>
@@ -53,6 +68,8 @@
               placeholder="Street address, building number"
               [(ngModel)]="formData.addressLine1"
               name="addressLine1"
+              [readonly]="!isEditMode() && !!selectedAddressId()"
+              [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               required
             />
           </div>
@@ -67,6 +84,8 @@
               placeholder="Apartment, suite, etc."
               [(ngModel)]="formData.addressLine2"
               name="addressLine2"
+              [readonly]="!isEditMode() && !!selectedAddressId()"
+              [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
             />
           </div>
           
@@ -80,6 +99,8 @@
                 [(ngModel)]="formData.state"
                 (ngModelChange)="onStateChange()"
                 name="state"
+                [disabled]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               >
                 <option value="">{{ t('selectState') }}</option>
@@ -98,7 +119,8 @@
                 [(ngModel)]="formData.city"
                 (ngModelChange)="onCityChange()"
                 name="city"
-                [disabled]="!formData.state"
+                [disabled]="!formData.state || (!isEditMode() && !!selectedAddressId())"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               >
                 <option value="">{{ t('selectCity') }}</option>
@@ -120,6 +142,8 @@
                 placeholder="12345"
                 [(ngModel)]="formData.postalCode"
                 name="postalCode"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               />
             </div>
@@ -134,6 +158,8 @@
                 placeholder="Kuwait"
                 [(ngModel)]="formData.country"
                 name="country"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required
               />
             </div>
@@ -150,6 +176,8 @@
                 placeholder="{{ t('alQataa') }}"
                 [(ngModel)]="formData.alQataa"
                 name="alQataa"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
             
@@ -163,6 +191,8 @@
                 placeholder="{{ t('alSharee') }}"
                 [(ngModel)]="formData.alSharee"
                 name="alSharee"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
           </div>
@@ -178,6 +208,8 @@
                 placeholder="{{ t('alJada') }}"
                 [(ngModel)]="formData.alJada"
                 name="alJada"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
             
@@ -191,6 +223,8 @@
                 placeholder="{{ t('alManzil') }}"
                 [(ngModel)]="formData.alManzil"
                 name="alManzil"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
           </div>
@@ -206,6 +240,8 @@
                 placeholder="{{ t('alDor') }}"
                 [(ngModel)]="formData.alDor"
                 name="alDor"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
             
@@ -219,38 +255,34 @@
                 placeholder="{{ t('alShakka') }}"
                 [(ngModel)]="formData.alShakka"
                 name="alShakka"
+                [readonly]="!isEditMode() && !!selectedAddressId()"
+                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
               />
             </div>
           </div>
           
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start gap-3">
-              <input 
-                type="checkbox" 
-                class="checkbox accent-[#054239]" 
-                [(ngModel)]="formData.isDefault"
-                name="isDefault"
-              />
-              <span class="label-text">{{ t('setAsDefault') }}</span>
-            </label>
-          </div>
           
-          <div class="flex gap-3 mt-4 md:mt-6">
-            <button 
-              type="submit" 
-              class="btn border-none bg-[#054239] text-white hover:bg-[#04352f]"
-              [disabled]="!isFormValid() || isSubmitting()"
-            >
-              @if (isSubmitting()) {
-                <span class="loading loading-spinner loading-sm"></span>
-                {{ t('saving') }}
-              } @else {
-                {{ selectedAddressId() ? t('updateAddressBtn') : t('saveAddressBtn') }}
-              }
-            </button>
-          </div>
+          
+          @if (isEditMode() || !selectedAddressId()) {
+            <div class="flex gap-3 mt-4 md:mt-6">
+              <button 
+                type="submit" 
+                class="btn border-none bg-[#054239] text-white hover:bg-[#04352f]"
+                [disabled]="!isFormValid() || isSubmitting()"
+              >
+                @if (isSubmitting()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                  {{ t('saving') }}
+                } @else {
+                  {{ selectedAddressId() ? t('updateAddressBtn') : t('saveAddressBtn') }}
+                }
+              </button>
+            </div>
+          }
         </form>
     </div>
   </div>
 }
+
+<app-toast [toasts]="toastService.toasts$()" (close)="toastService.removeToast($event)"></app-toast>
 
