@@ -2,6 +2,7 @@
   <!-- Wishlist Toggle Button (if not showing wishlist) -->
   @if (!showWishlist()) {
   <!-- Hero Carousel Section - Full Width -->
+  <main>
   <section class="hero-carousel-section relative w-full h-screen overflow-hidden" (mouseenter)="pauseCarousel()"
     (mouseleave)="resumeCarousel()">
 
@@ -16,8 +17,14 @@
         <!-- Background Image with Overlay -->
         <div class="absolute inset-0 w-full h-full">
           <div class="img-container w-full h-full">
-            <img [src]="slide.image" [alt]="slide.title" loading="lazy" (load)="$event.target.classList.add('loaded')"
-              (error)="$event.target.classList.add('loaded')" class="w-full h-full object-cover">
+            <img [src]="slide.image" [alt]="slide.title" 
+              [loading]="i === 0 ? 'eager' : 'lazy'"
+              [fetchpriority]="i === 0 ? 'high' : 'auto'"
+              (load)="$event.target.classList.add('loaded')"
+              (error)="$event.target.classList.add('loaded')" 
+              class="w-full h-full object-cover"
+              width="1671"
+              height="940">
             <!-- <div class="img-loading"></div> -->
           </div>
           <!-- Dark overlay for better text readability -->
@@ -120,18 +127,20 @@
       class="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between px-2 sm:px-4 md:px-8 pointer-events-none">
       <!-- Previous Button -->
       <button (click)="prevSlide()"
+        aria-label="Previous slide"
         class="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/30 active:bg-white/40 transition-all duration-300 active:scale-95 sm:hover:scale-110 group shadow-lg">
         <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:-translate-x-0.5" fill="none"
-          stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
         </svg>
       </button>
 
       <!-- Next Button -->
       <button (click)="nextSlide()"
+        aria-label="Next slide"
         class="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/30 active:bg-white/40 transition-all duration-300 active:scale-95 sm:hover:scale-110 group shadow-lg">
         <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-0.5" fill="none"
-          stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
         </svg>
       </button>
@@ -196,7 +205,7 @@
       </div>
 
       <!-- Products Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 min-h-[600px]">
         @if (isLoadingProducts) {
         <!-- Skeleton loading for products -->
         @for (skeleton of [1,2,3,4]; track skeleton) {
@@ -343,9 +352,10 @@
             </div>
           </div>
         </div>
-        }
-        }
-      </div>
+  }
+  }
+  </main>
+</div>
 
       <!-- View All Products CTA -->
       <div class="text-center mt-8 sm:mt-12 md:mt-16 px-4">
@@ -552,6 +562,7 @@
       </div>
     </div>
   </section>
+  </main>
   }
 
   <!-- Wishlist Section -->

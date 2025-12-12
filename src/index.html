@@ -74,7 +74,9 @@
   
   <!-- Performance: Resource Hints - Critical for mobile -->
   <link rel="preconnect" href="https://api.aljawharaplus.com" crossorigin>
+  <link rel="preconnect" href="https://pub-f74e7f2ba8e642ce869f4e0826b90ff8.r2.dev" crossorigin>
   <link rel="dns-prefetch" href="https://api.aljawharaplus.com">
+  <link rel="dns-prefetch" href="https://pub-f74e7f2ba8e642ce869f4e0826b90ff8.r2.dev">
   
   <!-- Performance: Preload critical resources with proper priorities -->
   <link rel="preload" href="/logo.png" as="image" type="image/png" fetchpriority="high">
@@ -213,11 +215,11 @@
   <!-- Disable automatic translation -->
   <meta name="google" content="notranslate">
 
-  <!-- jsPDF Library for PDF Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Arabic Reshaper and Bidi for RTL text support -->
-  <script src="https://cdn.jsdelivr.net/npm/arabic-reshaper@1.1.0/dist/arabic-reshaper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bidi-js@1.0.3/dist/bidi.min.js"></script>
+  <!-- jsPDF Library for PDF Generation - Deferred to reduce render blocking -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <!-- Arabic Reshaper and Bidi for RTL text support - Deferred to reduce render blocking -->
+  <script src="https://cdn.jsdelivr.net/npm/arabic-reshaper@1.1.0/dist/arabic-reshaper.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/bidi-js@1.0.3/dist/bidi.min.js" defer></script>
 
 </head>
 
