@@ -215,12 +215,6 @@
   <!-- Disable automatic translation -->
   <meta name="google" content="notranslate">
 
-  <!-- jsPDF Library for PDF Generation - Deferred to reduce render blocking -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-  <!-- Arabic Reshaper and Bidi for RTL text support - Deferred to reduce render blocking -->
-  <script src="https://cdn.jsdelivr.net/npm/arabic-reshaper@1.1.0/dist/arabic-reshaper.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/bidi-js@1.0.3/dist/bidi.min.js" defer></script>
-
 </head>
 
 <body>
@@ -231,6 +225,12 @@
       <p>This application requires JavaScript to be enabled. Please enable JavaScript in your browser settings.</p>
     </div>
   </noscript>
+  
+  <!-- jsPDF Library for PDF Generation - Loaded at end to avoid render blocking -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <!-- Arabic Reshaper and Bidi for RTL text support - Loaded at end to avoid render blocking -->
+  <script src="https://cdn.jsdelivr.net/npm/arabic-reshaper@1.1.0/dist/arabic-reshaper.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/bidi-js@1.0.3/dist/bidi.min.js" defer></script>
 </body>
 
 </html>

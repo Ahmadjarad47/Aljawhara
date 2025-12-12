@@ -425,6 +425,7 @@ button[style*='border: 2px solid #054239']:hover {
   object-fit: cover;
   opacity: 0;
   transition: opacity 0.6s ease-in-out, transform 0.7s ease-in-out;
+  aspect-ratio: 16 / 9;
 }
 .carousel-slide .img-container img.loaded {
   opacity: 1;

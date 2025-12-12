@@ -1,8 +1,8 @@
 <div class="home-page-theme">
+  <main>
   <!-- Wishlist Toggle Button (if not showing wishlist) -->
   @if (!showWishlist()) {
   <!-- Hero Carousel Section - Full Width -->
-  <main>
   <section class="hero-carousel-section relative w-full h-screen overflow-hidden" (mouseenter)="pauseCarousel()"
     (mouseleave)="resumeCarousel()">
 
@@ -33,7 +33,7 @@
 
         <!-- Slide Content -->
         <div class="relative z-10 h-full flex items-center py-20 sm:py-0">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full" style="min-height: 400px;">
             <div class="max-w-3xl space-y-4 sm:space-y-6 md:space-y-8">
 
               <!-- Trust Badge -->
@@ -246,7 +246,9 @@
             <div class="img-container w-full h-48 lg:h-56">
               <img [src]="product.image" [alt]="product.name" loading="lazy"
                 (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                width="400"
+                height="300">
               <div class="img-loading"></div>
             </div>
 
@@ -288,8 +290,9 @@
             <div
               class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <button class="btn btn-sm" (click)="goToProduct(product); $event.stopPropagation()"
-                style="background: #054239; color: white; border: none;">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                style="background: #054239; color: white; border: none;"
+                [attr.aria-label]="t('quickView') + ' ' + product.name">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -562,7 +565,6 @@
       </div>
     </div>
   </section>
-  </main>
   }
 
   <!-- Wishlist Section -->
@@ -728,4 +730,5 @@
     </div>
   </section>
   }
+  </main>
 </div>
