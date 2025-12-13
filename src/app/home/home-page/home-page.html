@@ -19,7 +19,7 @@
           <div class="img-container w-full h-full">
             <img [src]="slide.image" [alt]="slide.title" 
               [loading]="i === 0 ? 'eager' : 'lazy'"
-              [fetchpriority]="i === 0 ? 'high' : 'auto'"
+              [attr.fetchpriority]="i === 0 ? 'high' : 'auto'"
               (load)="$event.target.classList.add('loaded')"
               (error)="$event.target.classList.add('loaded')" 
               class="w-full h-full object-cover"
@@ -355,10 +355,9 @@
             </div>
           </div>
         </div>
-  }
-  }
-  </main>
-</div>
+        }
+        }
+      </div>
 
       <!-- View All Products CTA -->
       <div class="text-center mt-8 sm:mt-12 md:mt-16 px-4">
