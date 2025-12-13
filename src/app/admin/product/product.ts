@@ -35,6 +35,276 @@ export class Product implements OnInit, OnDestroy {
   public subCategoryService = inject(Subcategory);
   public toastService = inject(ToastService);
   public imageCompressionService = inject(ImageCompressionService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      productManagement: 'إدارة المنتجات',
+      manageProducts: 'إدارة المنتجات والمخزون والأسعار',
+      deleteSelected: 'حذف المحدد',
+      addProduct: 'إضافة منتج',
+      searchProducts: 'البحث في المنتجات...',
+      allCategories: 'جميع الفئات',
+      allSubcategories: 'جميع الفئات الفرعية',
+      allStatus: 'جميع الحالات',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      inStock: 'متوفر',
+      outOfStock: 'غير متوفر',
+      perPage: 'لكل صفحة',
+      clearFilters: 'مسح الفلاتر',
+      minPrice: 'الحد الأدنى للسعر',
+      maxPrice: 'الحد الأقصى للسعر',
+      pageSize: 'حجم الصفحة',
+      product: 'المنتج',
+      category: 'الفئة',
+      price: 'السعر',
+      stock: 'المخزون',
+      status: 'الحالة',
+      rating: 'التقييم',
+      actions: 'الإجراءات',
+      details: 'التفاصيل',
+      edit: 'تعديل',
+      deactivate: 'إلغاء التفعيل',
+      activate: 'تفعيل',
+      noProductsFound: 'لم يتم العثور على منتجات',
+      showing: 'عرض',
+      to: 'إلى',
+      of: 'من',
+      products: 'منتجات',
+      error: 'خطأ',
+      success: 'نجح',
+      loadFailed: 'فشل تحميل المنتجات',
+      deleteProducts: 'حذف المنتجات',
+      deletingProducts: 'جاري حذف المنتجات',
+      productsDeleted: 'تم حذف المنتجات بنجاح',
+      failedToDelete: 'فشل حذف المنتجات',
+      validationFailed: 'فشل التحقق',
+      fillRequiredFields: 'يرجى ملء جميع الحقول المطلوبة بشكل صحيح',
+      creatingProduct: 'إنشاء منتج جديد',
+      productCreated: 'تم إنشاء المنتج بنجاح',
+      failedToCreate: 'فشل إنشاء المنتج',
+      updatingProduct: 'تحديث معلومات المنتج',
+      productUpdated: 'تم تحديث المنتج بنجاح',
+      failedToUpdate: 'فشل تحديث المنتج',
+      updatingStatus: 'تحديث حالة المنتج',
+      statusUpdated: 'تم تحديث الحالة بنجاح',
+      failedToUpdateStatus: 'فشل تحديث الحالة',
+      loadDetailsFailed: 'فشل تحميل تفاصيل المنتج',
+      fillDetailFields: 'يرجى ملء جميع حقول التفاصيل',
+      detailAdded: 'تم إضافة تفصيل المنتج بنجاح',
+      failedToAddDetail: 'فشل إضافة تفصيل المنتج',
+      imageValidationFailed: 'فشل التحقق من الصور',
+      compressingImages: 'ضغط الصور',
+      imageProcessingFailed: 'فشل معالجة الصور',
+      imageMarkedForDeletion: 'تم تحديد الصورة للحذف',
+      variantNameRequired: 'اسم المتغير مطلوب',
+      variantArabicNameRequired: 'اسم المتغير بالعربية مطلوب',
+      variantMustHaveValue: 'يجب أن يحتوي المتغير على قيمة واحدة على الأقل',
+      variantAdded: 'تم إضافة المتغير بنجاح',
+      valueRequired: 'القيمة مطلوبة',
+      arabicValueRequired: 'القيمة بالعربية مطلوبة',
+      priceMustBeGreater: 'يجب أن يكون السعر أكبر من 0',
+      valueAdded: 'تم إضافة القيمة بنجاح',
+      variantNotFound: 'لم يتم العثور على المتغير',
+      cancel: 'إلغاء',
+      updateProduct: 'تحديث المنتج',
+      productTitleEN: 'عنوان المنتج (إنجليزي)',
+      productTitleAR: 'عنوان المنتج (عربي)',
+      descriptionEN: 'الوصف (إنجليزي)',
+      descriptionAR: 'الوصف (عربي)',
+      subcategory: 'الفئة الفرعية',
+      searchSubcategory: 'البحث في الفئة الفرعية...',
+      stockQuantity: 'كمية المخزون',
+      enterStockQuantity: 'أدخل كمية المخزون',
+      oldPrice: 'السعر القديم',
+      enterOldPrice: 'أدخل السعر القديم',
+      newPrice: 'السعر الجديد',
+      enterNewPrice: 'أدخل السعر الجديد',
+      stockStatus: 'حالة المخزون',
+      productDetails: 'تفاصيل المنتج',
+      detailLabelEN: 'تسمية التفصيل (إنجليزي)',
+      detailLabelAR: 'تسمية التفصيل (عربي)',
+      detailValueEN: 'قيمة التفصيل (إنجليزي)',
+      detailValueAR: 'قيمة التفصيل (عربي)',
+      enterDetailLabel: 'أدخل تسمية التفصيل',
+      enterDetailValue: 'أدخل قيمة التفصيل',
+      addDetail: 'إضافة تفصيل',
+      addedDetails: 'التفاصيل المضافة',
+      remove: 'إزالة',
+      productVariants: 'متغيرات المنتج',
+      variantNameEN: 'اسم المتغير (إنجليزي)',
+      variantNameAR: 'اسم المتغير (عربي)',
+      variantValues: 'قيم المتغير',
+      valueEN: 'القيمة (إنجليزي)',
+      valueAR: 'القيمة (عربي)',
+      addValue: 'إضافة قيمة',
+      addedVariants: 'المتغيرات المضافة',
+      productImages: 'صور المنتج',
+      selectedImages: 'الصور المحددة',
+      newImages: 'صور جديدة',
+      existingImages: 'الصور الموجودة',
+      clickToMarkDeletion: 'انقر لتحديد الحذف',
+      willDelete: 'سيتم الحذف',
+      imagesMarkedForDeletion: 'صورة محددة للحذف',
+      addNewImages: 'إضافة صور جديدة',
+      editProduct: 'تعديل المنتج',
+      productDetailsTitle: 'تفاصيل المنتج',
+      basicInformation: 'المعلومات الأساسية',
+      titleEN: 'العنوان (إنجليزي)',
+      titleAR: 'العنوان (عربي)',
+      pricingStock: 'التسعير والمخزون',
+      stockQuantityLabel: 'كمية المخزون',
+      units: 'وحدات',
+      ratingsReviews: 'التقييمات والمراجعات',
+      averageRating: 'متوسط التقييم',
+      totalReviews: 'إجمالي المراجعات',
+      timestamps: 'الطوابع الزمنية',
+      created: 'تم الإنشاء',
+      lastUpdated: 'آخر تحديث',
+      noImagesAvailable: 'لا توجد صور متاحة',
+      noProductDetailsAvailable: 'لا توجد تفاصيل منتج متاحة',
+      close: 'إغلاق'
+    },
+    en: {
+      productManagement: 'Product Management',
+      manageProducts: 'Manage products, inventory, and pricing',
+      deleteSelected: 'Delete Selected',
+      addProduct: 'Add Product',
+      searchProducts: 'Search products...',
+      allCategories: 'All Categories',
+      allSubcategories: 'All Subcategories',
+      allStatus: 'All Status',
+      active: 'Active',
+      inactive: 'Inactive',
+      inStock: 'In Stock',
+      outOfStock: 'Out of Stock',
+      perPage: 'per page',
+      clearFilters: 'Clear Filters',
+      minPrice: 'Min Price',
+      maxPrice: 'Max Price',
+      pageSize: 'Page Size',
+      product: 'Product',
+      category: 'Category',
+      price: 'Price',
+      stock: 'Stock',
+      status: 'Status',
+      rating: 'Rating',
+      actions: 'Actions',
+      details: 'Details',
+      edit: 'Edit',
+      deactivate: 'Deactivate',
+      activate: 'Activate',
+      noProductsFound: 'No products found',
+      showing: 'Showing',
+      to: 'to',
+      of: 'of',
+      products: 'products',
+      error: 'Error',
+      success: 'Success',
+      loadFailed: 'Failed to load products',
+      deleteProducts: 'Deleting Products',
+      deletingProducts: 'Deleting products',
+      productsDeleted: 'Products deleted successfully',
+      failedToDelete: 'Failed to delete products',
+      validationFailed: 'Validation Failed',
+      fillRequiredFields: 'Please fill in all required fields correctly',
+      creatingProduct: 'Creating new product',
+      productCreated: 'Product created successfully',
+      failedToCreate: 'Failed to create product',
+      updatingProduct: 'Updating product information',
+      productUpdated: 'Product updated successfully',
+      failedToUpdate: 'Failed to update product',
+      updatingStatus: 'Updating product status',
+      statusUpdated: 'Status updated successfully',
+      failedToUpdateStatus: 'Failed to update status',
+      loadDetailsFailed: 'Failed to load product details',
+      fillDetailFields: 'Please fill in all detail fields',
+      detailAdded: 'Product detail has been added successfully',
+      failedToAddDetail: 'Failed to add product detail',
+      imageValidationFailed: 'Image Validation Failed',
+      compressingImages: 'Compressing Images',
+      imageProcessingFailed: 'Failed to process selected images',
+      imageMarkedForDeletion: 'Image will be deleted when you save the product',
+      variantNameRequired: 'Variant name is required',
+      variantArabicNameRequired: 'Variant Arabic name is required',
+      variantMustHaveValue: 'Variant must have at least one value',
+      variantAdded: 'Variant has been added successfully',
+      valueRequired: 'Value is required',
+      arabicValueRequired: 'Arabic value is required',
+      priceMustBeGreater: 'Price must be greater than 0',
+      valueAdded: 'Variant value has been added',
+      variantNotFound: 'Variant not found',
+      cancel: 'Cancel',
+      updateProduct: 'Update Product',
+      productTitleEN: 'Product Title (English)',
+      productTitleAR: 'Product Title (Arabic)',
+      descriptionEN: 'Description (English)',
+      descriptionAR: 'Description (Arabic)',
+      subcategory: 'Subcategory',
+      searchSubcategory: 'Search subcategory...',
+      stockQuantity: 'Stock Quantity',
+      enterStockQuantity: 'Enter stock quantity',
+      oldPrice: 'Old Price',
+      enterOldPrice: 'Enter old price',
+      newPrice: 'New Price',
+      enterNewPrice: 'Enter new price',
+      stockStatus: 'Stock Status',
+      productDetails: 'Product Details',
+      detailLabelEN: 'Detail Label (English)',
+      detailLabelAR: 'Detail Label (Arabic)',
+      detailValueEN: 'Detail Value (English)',
+      detailValueAR: 'Detail Value (Arabic)',
+      enterDetailLabel: 'Enter detail label',
+      enterDetailValue: 'Enter detail value',
+      addDetail: 'Add Detail',
+      addedDetails: 'Added Details',
+      remove: 'Remove',
+      productVariants: 'Product Variants',
+      variantNameEN: 'Variant Name (English)',
+      variantNameAR: 'Variant Name (Arabic)',
+      variantValues: 'Variant Values',
+      valueEN: 'Value (EN)',
+      valueAR: 'القيمة (AR)',
+      addValue: 'Add Value',
+      addedVariants: 'Added Variants',
+      productImages: 'Product Images',
+      selectedImages: 'Selected Images',
+      newImages: 'New Images',
+      existingImages: 'Existing Images',
+      clickToMarkDeletion: 'Click to mark for deletion',
+      willDelete: 'Will Delete',
+      imagesMarkedForDeletion: 'image(s) marked for deletion',
+      addNewImages: 'Add New Images',
+      editProduct: 'Edit Product',
+      productDetailsTitle: 'Product Details',
+      basicInformation: 'Basic Information',
+      titleEN: 'Title (English)',
+      titleAR: 'Title (Arabic)',
+      pricingStock: 'Pricing & Stock',
+      stockQuantityLabel: 'Stock Quantity',
+      units: 'units',
+      ratingsReviews: 'Ratings & Reviews',
+      averageRating: 'Average Rating',
+      totalReviews: 'Total Reviews',
+      timestamps: 'Timestamps',
+      created: 'Created',
+      lastUpdated: 'Last Updated',
+      noImagesAvailable: 'No images available',
+      noProductDetailsAvailable: 'No product details available',
+      close: 'Close'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
   
   // Signals for reactive state management
   selectedProducts = signal<number[]>([]);
@@ -262,6 +532,27 @@ export class Product implements OnInit, OnDestroy {
   ngOnInit() {
     // Initial load
     // this.loadProducts(this.filters$());
+    
+    // Check language on initialization
+    this.checkLanguage();
+    
+    // Set up periodic language checking
+    this.languageCheckInterval = setInterval(() => {
+      this.checkLanguage();
+    }, 1000);
+  }
+
+  checkLanguage(): void {
+    const htmlLang = document.documentElement.lang || document.documentElement.getAttribute('lang');
+    const dir = document.documentElement.dir;
+    
+    if (htmlLang === 'ar' || dir === 'rtl') {
+      this.currentLanguage.set('ar');
+      document.documentElement.dir = 'rtl';
+    } else {
+      this.currentLanguage.set('en');
+      document.documentElement.dir = 'ltr';
+    }
   }
   
   loadProducts(filters: ProductFilters) {
@@ -273,7 +564,7 @@ export class Product implements OnInit, OnDestroy {
       error: (error) => {
         this.errorMessage.set('Failed to load products');
         this.isLoading.set(false);
-        this.toastService.error('Load Failed', 'Failed to load products. Please try again.');
+        this.toastService.error(this.t('error'), this.t('loadFailed'));
         console.error('Error loading products:', error);
       }
     });
@@ -349,7 +640,7 @@ export class Product implements OnInit, OnDestroy {
     const selected = this.selectedProducts();
     if (selected.length === 0) return;
 
-    const loadingToastId = this.toastService.loading('Deleting Products', `Deleting ${selected.length} product(s)...`);
+    const loadingToastId = this.toastService.loading(this.t('deleteProducts'), `${this.t('deletingProducts')} ${selected.length}...`);
     this.isLoading.set(true);
     
     this.productService.deleteProducts(selected).subscribe({
@@ -357,12 +648,12 @@ export class Product implements OnInit, OnDestroy {
         this.selectedProducts.set([]);
         this.loadProducts(this.filters$()); // Reload products after deletion
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Products Deleted', `Successfully deleted ${selected.length} product(s).`);
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), `${selected.length} ${this.t('productsDeleted')}`);
       },
       error: (error) => {
-        this.errorMessage.set('Failed to delete selected products');
+        this.errorMessage.set(this.t('failedToDelete'));
         this.isLoading.set(false);
-        this.toastService.updateToError(loadingToastId, 'Delete Failed', 'Failed to delete selected products. Please try again.');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToDelete'));
         console.error('Error deleting products:', error);
       }
     });
@@ -374,7 +665,7 @@ export class Product implements OnInit, OnDestroy {
     
     if (!this.validateProductForm()) {
       console.error('❌ Form validation failed - stopping product creation');
-      this.toastService.error('Validation Failed', 'Please fill in all required fields correctly.');
+      this.toastService.error(this.t('validationFailed'), this.t('fillRequiredFields'));
       return;
     }
     
@@ -419,7 +710,7 @@ export class Product implements OnInit, OnDestroy {
     console.log('🔍 Final product variants before sending:', this.newProduct.variants);
     console.log('🔍 Final variants count:', this.newProduct.variants?.length || 0);
 
-    const loadingToastId = this.toastService.loading('Creating Product', 'Creating new product...');
+    const loadingToastId = this.toastService.loading(this.t('creatingProduct'), this.t('creatingProduct'));
     console.log('Setting loading state to true...');
     this.isLoading.set(true);
     
@@ -431,7 +722,7 @@ export class Product implements OnInit, OnDestroy {
         this.showAddModal.set(false);
         this.loadProducts(this.filters$()); // Reload products after creation
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Product Created', `"${newProduct.title}" has been created successfully.`);
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('productCreated'));
         console.log('=== PRODUCT CREATION COMPLETED SUCCESSFULLY ===');
       },
       error: (error) => {
@@ -457,7 +748,7 @@ export class Product implements OnInit, OnDestroy {
         
         this.errorMessage.set('Failed to create product');
         this.isLoading.set(false);
-        this.toastService.updateToError(loadingToastId, 'Creation Failed', 'Failed to create product. Please check your data and try again.');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToCreate'));
         console.log('=== PRODUCT CREATION FAILED ===');
       }
     });
@@ -515,7 +806,7 @@ export class Product implements OnInit, OnDestroy {
 
   async updateProduct() {
     if (!this.validateProductForm()) {
-      this.toastService.error('Validation Failed', 'Please fill in all required fields correctly.');
+      this.toastService.error(this.t('validationFailed'), this.t('fillRequiredFields'));
       return;
     }
 
@@ -544,7 +835,7 @@ export class Product implements OnInit, OnDestroy {
     console.log('🔍 Final edit product variants before sending:', this.editProduct.variants);
     console.log('🔍 Final edit variants count:', this.editProduct.variants?.length || 0);
 
-    const loadingToastId = this.toastService.loading('Updating Product', 'Updating product information...');
+    const loadingToastId = this.toastService.loading(this.t('updatingProduct'), this.t('updatingProduct'));
     this.isLoading.set(true);
     
     this.productService.updateProduct(this.editProduct.id, this.editProduct).subscribe({
@@ -552,31 +843,31 @@ export class Product implements OnInit, OnDestroy {
         this.showEditModal.set(false);
         this.loadProducts(this.filters$()); // Reload products after update
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Product Updated', `"${updatedProduct.title}" has been updated successfully.`);
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('productUpdated'));
       },
       error: (error) => {
-        this.errorMessage.set('Failed to update product');
+        this.errorMessage.set(this.t('failedToUpdate'));
         this.isLoading.set(false);
-        this.toastService.updateToError(loadingToastId, 'Update Failed', 'Failed to update product. Please check your data and try again.');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdate'));
         console.error('Error updating product:', error);
       }
     });
   }
 
   toggleProductStatus(productId: number) {
-    const loadingToastId = this.toastService.loading('Updating Status', 'Updating product status...');
+    const loadingToastId = this.toastService.loading(this.t('updatingStatus'), this.t('updatingStatus'));
     this.isLoading.set(true);
     
     this.productService.toggleProductActive(productId).subscribe({
       next: (response) => {
         this.loadProducts(this.filters$());
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Status Updated', 'Product status has been updated successfully.');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('statusUpdated'));
       },
       error: (error) => {
-        this.errorMessage.set('Failed to update product status');
+        this.errorMessage.set(this.t('failedToUpdateStatus'));
         this.isLoading.set(false);
-        this.toastService.updateToError(loadingToastId, 'Status Update Failed', 'Failed to update product status. Please try again.');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdateStatus'));
         console.error('Error updating product status:', error);
       }
     });
@@ -598,7 +889,7 @@ export class Product implements OnInit, OnDestroy {
         console.error('❌ Error loading product details:', error);
         this.errorMessage.set('Failed to load product details');
         this.isLoading.set(false);
-        this.toastService.error('Load Failed', 'Failed to load product details. Please try again.');
+        this.toastService.error(this.t('error'), this.t('loadDetailsFailed'));
       }
     });
   }
@@ -634,7 +925,7 @@ export class Product implements OnInit, OnDestroy {
     if (errors.length > 0) {
       console.error('❌ Product detail validation failed:', errors);
       this.errorMessage.set(errors.join(', '));
-      this.toastService.error('Validation Failed', 'Please fill in all detail fields.');
+      this.toastService.error(this.t('validationFailed'), this.t('fillDetailFields'));
       return;
     }
     
@@ -643,7 +934,7 @@ export class Product implements OnInit, OnDestroy {
       console.log('✅ Product detail added successfully');
       console.log('Total product details:', this.productDetails().length);
       
-      this.toastService.success('Detail Added', 'Product detail has been added successfully.');
+      this.toastService.success(this.t('success'), this.t('detailAdded'));
       
       this.newProductDetail = {
         label: '',
@@ -654,7 +945,7 @@ export class Product implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ Error adding product detail:', error);
       this.errorMessage.set('Error adding product detail');
-      this.toastService.error('Add Failed', 'Failed to add product detail. Please try again.');
+      this.toastService.error(this.t('error'), this.t('failedToAddDetail'));
     }
   }
 
@@ -696,7 +987,7 @@ export class Product implements OnInit, OnDestroy {
       if (errors.length > 0) {
         console.error('❌ Image validation errors:', errors);
         this.errorMessage.set(errors.join(', '));
-        this.toastService.error('Image Validation Failed', errors.join(', '));
+        this.toastService.error(this.t('imageValidationFailed'), errors.join(', '));
       }
       
       if (validFiles.length > 0) {
@@ -734,7 +1025,7 @@ export class Product implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ Error processing image selection:', error);
       this.errorMessage.set('Error processing selected images');
-      this.toastService.error('Image Processing Failed', 'Failed to process selected images. Please try again.');
+      this.toastService.error(this.t('error'), this.t('imageProcessingFailed'));
     }
   }
 
@@ -763,7 +1054,7 @@ export class Product implements OnInit, OnDestroy {
     } else {
       // Add to deletion list
       this.imagesToDelete.set([...imagesToDelete, imageUrl]);
-      this.toastService.warning('Image Marked for Deletion', 'Image will be deleted when you save the product.');
+      this.toastService.warning(this.t('imageMarkedForDeletion'), this.t('imageMarkedForDeletion'));
     }
   }
 
@@ -947,6 +1238,10 @@ export class Product implements OnInit, OnDestroy {
       URL.revokeObjectURL(blobUrl);
     });
     this.imagePreviewCache.clear();
+    
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 
   validateProductForm(): boolean {
@@ -1082,15 +1377,15 @@ export class Product implements OnInit, OnDestroy {
   // Variants management methods
   addVariant() {
     if (!this.newVariant.name || !this.newVariant.name.trim()) {
-      this.toastService.error('Validation Failed', 'Variant name is required');
+      this.toastService.error(this.t('validationFailed'), this.t('variantNameRequired'));
       return;
     }
     if (!this.newVariant.nameAr || !this.newVariant.nameAr.trim()) {
-      this.toastService.error('Validation Failed', 'Variant Arabic name is required');
+      this.toastService.error(this.t('validationFailed'), this.t('variantArabicNameRequired'));
       return;
     }
     if (this.newVariant.values.length === 0) {
-      this.toastService.error('Validation Failed', 'Variant must have at least one value');
+      this.toastService.error(this.t('validationFailed'), this.t('variantMustHaveValue'));
       return;
     }
 
@@ -1111,7 +1406,7 @@ export class Product implements OnInit, OnDestroy {
       nameAr: '',
       values: []
     };
-    this.toastService.success('Variant Added', 'Variant has been added successfully.');
+    this.toastService.success(this.t('success'), this.t('variantAdded'));
   }
 
   removeVariant(index: number) {
@@ -1122,15 +1417,15 @@ export class Product implements OnInit, OnDestroy {
 
   addVariantValue() {
     if (!this.newVariantValue.value || !this.newVariantValue.value.trim()) {
-      this.toastService.error('Validation Failed', 'Value is required');
+      this.toastService.error(this.t('validationFailed'), this.t('valueRequired'));
       return;
     }
     if (!this.newVariantValue.valueAr || !this.newVariantValue.valueAr.trim()) {
-      this.toastService.error('Validation Failed', 'Arabic value is required');
+      this.toastService.error(this.t('validationFailed'), this.t('arabicValueRequired'));
       return;
     }
     if (!this.newVariantValue.price || this.newVariantValue.price <= 0) {
-      this.toastService.error('Validation Failed', 'Price must be greater than 0');
+      this.toastService.error(this.t('validationFailed'), this.t('priceMustBeGreater'));
       return;
     }
 
@@ -1140,7 +1435,7 @@ export class Product implements OnInit, OnDestroy {
       valueAr: '',
       price: 0
     };
-    this.toastService.success('Value Added', 'Variant value has been added.');
+    this.toastService.success(this.t('success'), this.t('valueAdded'));
   }
 
   removeVariantValue(variantIndex: number, valueIndex: number) {
@@ -1164,15 +1459,15 @@ export class Product implements OnInit, OnDestroy {
   // Edit variants management methods
   addEditVariant() {
     if (!this.newVariant.name || !this.newVariant.name.trim()) {
-      this.toastService.error('Validation Failed', 'Variant name is required');
+      this.toastService.error(this.t('validationFailed'), this.t('variantNameRequired'));
       return;
     }
     if (!this.newVariant.nameAr || !this.newVariant.nameAr.trim()) {
-      this.toastService.error('Validation Failed', 'Variant Arabic name is required');
+      this.toastService.error(this.t('validationFailed'), this.t('variantArabicNameRequired'));
       return;
     }
     if (this.newVariant.values.length === 0) {
-      this.toastService.error('Validation Failed', 'Variant must have at least one value');
+      this.toastService.error(this.t('validationFailed'), this.t('variantMustHaveValue'));
       return;
     }
 
@@ -1199,7 +1494,7 @@ export class Product implements OnInit, OnDestroy {
       nameAr: '',
       values: []
     };
-    this.toastService.success('Variant Added', 'Variant has been added successfully.');
+    this.toastService.success(this.t('success'), this.t('variantAdded'));
   }
 
   removeEditVariant(index: number) {
@@ -1210,15 +1505,15 @@ export class Product implements OnInit, OnDestroy {
 
   addEditVariantValue(variantIndex: number) {
     if (!this.newVariantValue.value || !this.newVariantValue.value.trim()) {
-      this.toastService.error('Validation Failed', 'Value is required');
+      this.toastService.error(this.t('validationFailed'), this.t('valueRequired'));
       return;
     }
     if (!this.newVariantValue.valueAr || !this.newVariantValue.valueAr.trim()) {
-      this.toastService.error('Validation Failed', 'Arabic value is required');
+      this.toastService.error(this.t('validationFailed'), this.t('arabicValueRequired'));
       return;
     }
     if (!this.newVariantValue.price || this.newVariantValue.price <= 0) {
-      this.toastService.error('Validation Failed', 'Price must be greater than 0');
+      this.toastService.error(this.t('validationFailed'), this.t('priceMustBeGreater'));
       return;
     }
 
@@ -1238,14 +1533,14 @@ export class Product implements OnInit, OnDestroy {
         valueAr: '',
         price: 0
       };
-      this.toastService.success('Value Added', 'Variant value has been added to new variant.');
+      this.toastService.success(this.t('success'), this.t('valueAdded'));
       return;
     }
 
     const variant = variants[variantIndex];
     if (!variant) {
       console.error('❌ Variant not found at index:', variantIndex);
-      this.toastService.error('Error', 'Variant not found');
+      this.toastService.error(this.t('error'), this.t('variantNotFound'));
       return;
     }
     
@@ -1268,7 +1563,7 @@ export class Product implements OnInit, OnDestroy {
       price: 0
     };
     console.log('✅ Value added to variant:', updatedVariants[variantIndex]);
-    this.toastService.success('Value Added', 'Variant value has been added.');
+    this.toastService.success(this.t('success'), this.t('valueAdded'));
   }
 
   removeEditVariantValue(variantIndex: number, valueIndex: number) {

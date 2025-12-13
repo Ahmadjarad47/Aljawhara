@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -49,8 +49,134 @@ ChartJS.register(
   templateUrl: './dashboard-content.html',
   styleUrl: './dashboard-content.css'
 })
-export class DashboardContent implements OnInit {
+export class DashboardContent implements OnInit, OnDestroy {
   private readonly dashService = inject(DashService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      dashboardOverview: 'نظرة عامة على لوحة التحكم',
+      welcomeMessage: 'مرحباً بك في لوحة تحكم إدارة منصة الجوهرة - بوابتك لإدارة نظام العمل الحر السوري',
+      systemStatus: 'حالة النظام',
+      online: 'متصل',
+      lastUpdated: 'آخر تحديث',
+      minutesAgo: 'منذ دقيقتين',
+      exportReport: 'تصدير التقرير',
+      refresh: 'تحديث',
+      total: 'الإجمالي',
+      totalUsers: 'إجمالي المستخدمين',
+      totalOrders: 'إجمالي الطلبات',
+      transactions: 'المعاملات',
+      totalSales: 'إجمالي المبيعات',
+      vsLastMonth: 'مقارنة بالشهر الماضي',
+      userGrowthAnalytics: 'تحليلات نمو المستخدمين',
+      trackUserRegistration: 'تتبع اتجاهات تسجيل المستخدمين والمشاركة',
+      revenueAnalytics: 'تحليلات الإيرادات',
+      transactionRevenue: 'أداء إيرادات المعاملات والاتجاهات',
+      growth: 'نمو',
+      vsFirstPeriod: 'مقارنة بالفترة الأولى',
+      recentRegistrations: 'التسجيلات الأخيرة',
+      latestUserSignups: 'أحدث تسجيلات المستخدمين والتحقق',
+      live: 'مباشر',
+      realTime: 'في الوقت الفعلي',
+      noRecentUsers: 'لم يتم العثور على مستخدمين حديثين',
+      user: 'مستخدم',
+      verified: 'موثق',
+      pending: 'قيد الانتظار',
+      viewAll: 'عرض الكل',
+      recentOrder: 'الطلبات الأخيرة',
+      latestJobOpportunities: 'أحدث فرص العمل والطلبات',
+      active: 'نشط',
+      noRecentOrders: 'لم يتم العثور على طلبات حديثة',
+      items: 'عناصر',
+      firstPeriod: 'الفترة الأولى',
+      latestPeriod: 'آخر فترة',
+      growthRate: 'معدل النمو',
+      totalUsersLabel: 'إجمالي المستخدمين',
+      activeUsersLabel: 'المستخدمون النشطون',
+      revenue: 'الإيرادات',
+      unknownUser: 'مستخدم غير معروف',
+      unknown: 'غير معروف',
+      pendingStatus: 'قيد الانتظار',
+      processingStatus: 'قيد المعالجة',
+      shippedStatus: 'تم الشحن',
+      deliveredStatus: 'تم التسليم',
+      cancelledStatus: 'ملغي',
+      day: 'يوم',
+      days: 'أيام',
+      hour: 'ساعة',
+      hours: 'ساعات',
+      minute: 'دقيقة',
+      minutes: 'دقائق',
+      ago: 'منذ'
+    },
+    en: {
+      dashboardOverview: 'Dashboard Overview',
+      welcomeMessage: 'Welcome to the admin dashboard for Aljawhara platform - Your gateway to managing the Syrian freelance ecosystem',
+      systemStatus: 'System Status',
+      online: 'Online',
+      lastUpdated: 'Last updated',
+      minutesAgo: '2 minutes ago',
+      exportReport: 'Export Report',
+      refresh: 'Refresh',
+      total: 'Total',
+      totalUsers: 'Total Users',
+      totalOrders: 'Total Orders',
+      transactions: 'Transactions',
+      totalSales: 'Total Sales',
+      vsLastMonth: 'vs last month',
+      userGrowthAnalytics: 'User Growth Analytics',
+      trackUserRegistration: 'Track user registration trends and engagement',
+      revenueAnalytics: 'Revenue Analytics',
+      transactionRevenue: 'Transaction revenue performance and trends',
+      growth: 'Growth',
+      vsFirstPeriod: 'vs first period',
+      recentRegistrations: 'Recent Registrations',
+      latestUserSignups: 'Latest user signups and verifications',
+      live: 'Live',
+      realTime: 'Real-time',
+      noRecentUsers: 'No recent users found',
+      user: 'User',
+      verified: 'Verified',
+      pending: 'Pending',
+      viewAll: 'View All',
+      recentOrder: 'Recent Order',
+      latestJobOpportunities: 'Latest job opportunities and applications',
+      active: 'Active',
+      noRecentOrders: 'No recent orders found',
+      items: 'items',
+      firstPeriod: 'First Period',
+      latestPeriod: 'Latest Period',
+      growthRate: 'Growth Rate',
+      totalUsersLabel: 'Total Users',
+      activeUsersLabel: 'Active Users',
+      revenue: 'Revenue',
+      unknownUser: 'Unknown User',
+      unknown: 'Unknown',
+      pendingStatus: 'Pending',
+      processingStatus: 'Processing',
+      shippedStatus: 'Shipped',
+      deliveredStatus: 'Delivered',
+      cancelledStatus: 'Cancelled',
+      day: 'day',
+      days: 'days',
+      hour: 'hour',
+      hours: 'hours',
+      minute: 'minute',
+      minutes: 'minutes',
+      ago: 'ago'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
 
   // Signals for reactive state management
   summary = signal<DashboardSummaryDto | null>(null);
@@ -125,6 +251,33 @@ export class DashboardContent implements OnInit {
 
   ngOnInit() {
     this.loadDashboardData();
+    
+    // Check language on initialization
+    this.checkLanguage();
+    
+    // Set up periodic language checking
+    this.languageCheckInterval = setInterval(() => {
+      this.checkLanguage();
+    }, 1000);
+  }
+
+  checkLanguage(): void {
+    const htmlLang = document.documentElement.lang || document.documentElement.getAttribute('lang');
+    const dir = document.documentElement.dir;
+    
+    if (htmlLang === 'ar' || dir === 'rtl') {
+      this.currentLanguage.set('ar');
+      document.documentElement.dir = 'rtl';
+    } else {
+      this.currentLanguage.set('en');
+      document.documentElement.dir = 'ltr';
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
 
   loadDashboardData() {
@@ -184,7 +337,9 @@ export class DashboardContent implements OnInit {
   }
 
   updateUserGrowthChart(data: TimeSeriesPointDto[]) {
-    const labels = data.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const lang = this.currentLanguage();
+    const locale = lang === 'ar' ? 'ar-SA' : 'en-US';
+    const labels = data.map(d => new Date(d.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }));
     const values = data.map(d => d.count);
     
     // Calculate cumulative values for total users
@@ -203,7 +358,7 @@ export class DashboardContent implements OnInit {
       datasets: [
         {
           data: cumulativeValues,
-          label: 'Total Users',
+          label: this.t('totalUsersLabel'),
           borderColor: 'rgb(59, 130, 246)',
           backgroundColor: 'rgba(59, 130, 246, 0.08)',
           tension: 0.4,
@@ -216,7 +371,7 @@ export class DashboardContent implements OnInit {
         },
         {
           data: activeValues,
-          label: 'Active Users',
+          label: this.t('activeUsersLabel'),
           borderColor: 'rgb(16, 185, 129)',
           backgroundColor: 'rgba(16, 185, 129, 0.08)',
           tension: 0.4,
@@ -232,7 +387,9 @@ export class DashboardContent implements OnInit {
   }
 
   updateRevenueChart(data: TimeSeriesPointDto[]) {
-    const labels = data.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const lang = this.currentLanguage();
+    const locale = lang === 'ar' ? 'ar-SA' : 'en-US';
+    const labels = data.map(d => new Date(d.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }));
     const values = data.map(d => d.count);
 
     this.revenueChartDataDisplay = {
@@ -240,7 +397,7 @@ export class DashboardContent implements OnInit {
       datasets: [
         {
           data: values,
-          label: 'Revenue',
+          label: this.t('revenue'),
           backgroundColor: 'rgba(16, 185, 129, 0.8)',
           borderColor: 'rgb(16, 185, 129)',
           borderWidth: 1,
@@ -265,12 +422,12 @@ export class DashboardContent implements OnInit {
 
   getOrderStatusText(status: number): string {
     switch (status) {
-      case 0: return 'Pending';
-      case 1: return 'Processing';
-      case 2: return 'Shipped';
-      case 3: return 'Delivered';
-      case 4: return 'Cancelled';
-      default: return 'Unknown';
+      case 0: return this.t('pendingStatus');
+      case 1: return this.t('processingStatus');
+      case 2: return this.t('shippedStatus');
+      case 3: return this.t('deliveredStatus');
+      case 4: return this.t('cancelledStatus');
+      default: return this.t('unknown');
     }
   }
 
@@ -282,12 +439,12 @@ export class DashboardContent implements OnInit {
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffDays > 0) {
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      return `${diffDays} ${diffDays > 1 ? this.t('days') : this.t('day')} ${this.t('ago')}`;
     } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      return `${diffHours} ${diffHours > 1 ? this.t('hours') : this.t('hour')} ${this.t('ago')}`;
     } else {
       const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+      return `${diffMinutes} ${diffMinutes > 1 ? this.t('minutes') : this.t('minute')} ${this.t('ago')}`;
     }
   }
   // User Growth Chart

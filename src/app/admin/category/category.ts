@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceCategory } from './service-category';
@@ -15,9 +15,135 @@ import { ToastComponent } from '../../core/components/toast/toast.component';
   styleUrl: './category.css',
 
 })
-export class Category implements OnInit {
+export class Category implements OnInit, OnDestroy {
   public categoryService = inject(ServiceCategory);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      categoryManagement: 'إدارة الفئات',
+      manageJobCategories: 'إدارة فئات الوظائف وإعداداتها',
+      deleteSelected: 'حذف المحدد',
+      addCategory: 'إضافة فئة',
+      searchCategories: 'البحث في الفئات...',
+      allStatus: 'جميع الحالات',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      perPage: 'لكل صفحة',
+      clearFilters: 'مسح الفلاتر',
+      categoryNameEN: 'اسم الفئة (إنجليزي)',
+      categoryNameAR: 'اسم الفئة (عربي)',
+      descriptionEN: 'الوصف (إنجليزي)',
+      descriptionAR: 'الوصف (عربي)',
+      productCount: 'عدد المنتجات',
+      status: 'الحالة',
+      actions: 'الإجراءات',
+      products: 'منتجات',
+      edit: 'تعديل',
+      deactivate: 'إلغاء التفعيل',
+      activate: 'تفعيل',
+      noCategoriesFound: 'لم يتم العثور على فئات',
+      addNewCategory: 'إضافة فئة جديدة',
+      enterCategoryNameEN: 'أدخل اسم الفئة بالإنجليزية',
+      enterCategoryNameAR: 'أدخل اسم الفئة بالعربية',
+      enterDescriptionEN: 'أدخل وصف الفئة بالإنجليزية',
+      enterDescriptionAR: 'أدخل وصف الفئة بالعربية',
+      cancel: 'إلغاء',
+      updateCategory: 'تحديث الفئة',
+      editCategory: 'تعديل الفئة',
+      showing: 'عرض',
+      to: 'إلى',
+      of: 'من',
+      categories: 'فئات',
+      error: 'خطأ',
+      success: 'نجح',
+      failedToLoad: 'فشل تحميل الفئات',
+      deleting: 'جاري الحذف',
+      deletingCategories: 'جاري حذف الفئات',
+      categoriesDeleted: 'تم حذف الفئات بنجاح',
+      failedToDelete: 'فشل حذف الفئات المحددة',
+      validationError: 'خطأ في التحقق',
+      allFieldsRequired: 'جميع الحقول مطلوبة',
+      creating: 'جاري الإنشاء',
+      creatingCategory: 'جاري إنشاء فئة جديدة',
+      categoryCreated: 'تم إنشاء الفئة بنجاح',
+      failedToCreate: 'فشل إنشاء الفئة',
+      updating: 'جاري التحديث',
+      updatingCategory: 'جاري تحديث الفئة',
+      categoryUpdated: 'تم تحديث الفئة بنجاح',
+      failedToUpdate: 'فشل تحديث الفئة',
+      updatingStatus: 'جاري تحديث حالة الفئة',
+      statusUpdated: 'تم تحديث حالة الفئة بنجاح',
+      failedToUpdateStatus: 'فشل تحديث حالة الفئة'
+    },
+    en: {
+      categoryManagement: 'Category Management',
+      manageJobCategories: 'Manage job categories and their settings',
+      deleteSelected: 'Delete Selected',
+      addCategory: 'Add Category',
+      searchCategories: 'Search categories...',
+      allStatus: 'All Status',
+      active: 'Active',
+      inactive: 'Inactive',
+      perPage: 'per page',
+      clearFilters: 'Clear Filters',
+      categoryNameEN: 'Category Name (EN)',
+      categoryNameAR: 'Category Name (AR)',
+      descriptionEN: 'Description (EN)',
+      descriptionAR: 'Description (AR)',
+      productCount: 'Product Count',
+      status: 'Status',
+      actions: 'Actions',
+      products: 'products',
+      edit: 'Edit',
+      deactivate: 'Deactivate',
+      activate: 'Activate',
+      noCategoriesFound: 'No categories found',
+      addNewCategory: 'Add New Category',
+      enterCategoryNameEN: 'Enter category name in English',
+      enterCategoryNameAR: 'Enter category name in Arabic',
+      enterDescriptionEN: 'Enter category description in English',
+      enterDescriptionAR: 'Enter category description in Arabic',
+      cancel: 'Cancel',
+      updateCategory: 'Update Category',
+      editCategory: 'Edit Category',
+      showing: 'Showing',
+      to: 'to',
+      of: 'of',
+      categories: 'categories',
+      error: 'Error',
+      success: 'Success',
+      failedToLoad: 'Failed to load categories',
+      deleting: 'Deleting',
+      deletingCategories: 'Deleting categories',
+      categoriesDeleted: 'categories deleted successfully',
+      failedToDelete: 'Failed to delete selected categories',
+      validationError: 'Validation Error',
+      allFieldsRequired: 'All fields are required',
+      creating: 'Creating',
+      creatingCategory: 'Creating new category',
+      categoryCreated: 'Category created successfully',
+      failedToCreate: 'Failed to create category',
+      updating: 'Updating',
+      updatingCategory: 'Updating category',
+      categoryUpdated: 'Category updated successfully',
+      failedToUpdate: 'Failed to update category',
+      updatingStatus: 'Updating category status',
+      statusUpdated: 'Category status updated successfully',
+      failedToUpdateStatus: 'Failed to update category status'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
   
   // Signals for reactive state management
   selectedCategories = signal<number[]>([]);
@@ -125,6 +251,33 @@ export class Category implements OnInit {
   ngOnInit() {
     // Initial load
     // this.loadCategories(this.filters$());
+    
+    // Check language on initialization
+    this.checkLanguage();
+    
+    // Set up periodic language checking
+    this.languageCheckInterval = setInterval(() => {
+      this.checkLanguage();
+    }, 1000);
+  }
+
+  checkLanguage(): void {
+    const htmlLang = document.documentElement.lang || document.documentElement.getAttribute('lang');
+    const dir = document.documentElement.dir;
+    
+    if (htmlLang === 'ar' || dir === 'rtl') {
+      this.currentLanguage.set('ar');
+      document.documentElement.dir = 'rtl';
+    } else {
+      this.currentLanguage.set('en');
+      document.documentElement.dir = 'ltr';
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
   
   loadCategories(filters: CategoryFilters) {
@@ -134,7 +287,7 @@ export class Category implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load categories');
+        this.toastService.error(this.t('error'), this.t('failedToLoad'));
         this.isLoading.set(false);
         console.error('Error loading categories:', error);
       }
@@ -191,17 +344,17 @@ export class Category implements OnInit {
     const selected = this.selectedCategories();
     if (selected.length === 0) return;
 
-    const loadingToastId = this.toastService.loading('Deleting', `Deleting ${selected.length} categories...`);
+    const loadingToastId = this.toastService.loading(this.t('deleting'), `${this.t('deletingCategories')} ${selected.length}...`);
     this.isLoading.set(true);
     this.categoryService.deleteCategories(selected).subscribe({
       next: () => {
         this.selectedCategories.set([]);
         this.loadCategories(this.filters$()); // Reload categories after deletion
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', `${selected.length} categories deleted successfully`);
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), `${selected.length} ${this.t('categoriesDeleted')}`);
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to delete selected categories');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToDelete'));
         this.isLoading.set(false);
         console.error('Error deleting categories:', error);
       }
@@ -210,11 +363,11 @@ export class Category implements OnInit {
 
   addCategory() {
     if (!this.newCategory.name || !this.newCategory.nameAr || !this.newCategory.description || !this.newCategory.descriptionAr) {
-      this.toastService.warning('Validation Error', 'All fields are required');
+      this.toastService.warning(this.t('validationError'), this.t('allFieldsRequired'));
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Creating', 'Creating new category...');
+    const loadingToastId = this.toastService.loading(this.t('creating'), this.t('creatingCategory'));
     this.isLoading.set(true);
     this.categoryService.createCategory(this.newCategory).subscribe({
       next: (newCategory) => {
@@ -222,10 +375,10 @@ export class Category implements OnInit {
         this.showAddModal.set(false);
         this.loadCategories(this.filters$()); // Reload categories after creation
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Category created successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('categoryCreated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to create category');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToCreate'));
         this.isLoading.set(false);
         console.error('Error creating category:', error);
       }
@@ -245,21 +398,21 @@ export class Category implements OnInit {
 
   updateCategory() {
     if (!this.editCategory.name || !this.editCategory.nameAr || !this.editCategory.description || !this.editCategory.descriptionAr) {
-      this.toastService.warning('Validation Error', 'All fields are required');
+      this.toastService.warning(this.t('validationError'), this.t('allFieldsRequired'));
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Updating', 'Updating category...');
+    const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingCategory'));
     this.isLoading.set(true);
     this.categoryService.updateCategory(this.editCategory.id, this.editCategory).subscribe({
       next: (updatedCategory) => {
         this.showEditModal.set(false);
         this.loadCategories(this.filters$()); // Reload categories after update
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Category updated successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('categoryUpdated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update category');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdate'));
         this.isLoading.set(false);
         console.error('Error updating category:', error);
       }
@@ -267,16 +420,16 @@ export class Category implements OnInit {
   }
 
   toggleCategoryStatus(categoryId: number) {
-    const loadingToastId = this.toastService.loading('Updating', 'Updating category status...');
+    const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingStatus'));
     this.isLoading.set(true);
     this.categoryService.toggleCategoryActive(categoryId).subscribe({
       next: (response) => {
         this.loadCategories(this.filters$());
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Category status updated successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('statusUpdated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update category status');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdateStatus'));
         this.isLoading.set(false);
         console.error('Error updating category status:', error);
       }

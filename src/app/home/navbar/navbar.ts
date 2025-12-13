@@ -1,8 +1,27 @@
-import { Component, OnInit, TemplateRef, ViewChild, OnDestroy, inject, signal, effect, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  OnDestroy,
+  inject,
+  signal,
+  effect,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { Subscription, debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of, filter } from 'rxjs';
+import {
+  Subscription,
+  debounceTime,
+  distinctUntilChanged,
+  Subject,
+  switchMap,
+  catchError,
+  of,
+  filter,
+} from 'rxjs';
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserResponseDto } from '../../auth/auth.models';
 import { CartService } from '../../core/service/cart-service';
@@ -15,24 +34,25 @@ import { ProductSummaryDto, CategoryDto } from '../product/product.models';
   imports: [CommonModule, FormsModule, RouterModule],
   standalone: true,
   templateUrl: './navbar.html',
-  styleUrl: './navbar.css'
+  styleUrl: './navbar.css',
 })
 export class Navbar implements OnInit, OnDestroy {
   @ViewChild('mobileMenuTemplate', { static: true }) mobileMenuTemplate!: TemplateRef<any>;
-  @ViewChild('mobileSearchInput', { static: false }) mobileSearchInput!: ElementRef<HTMLInputElement>;
-  
+  @ViewChild('mobileSearchInput', { static: false })
+  mobileSearchInput!: ElementRef<HTMLInputElement>;
+
   // Services
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private productService = inject(ProductService);
   private activatedRoute = inject(ActivatedRoute);
-  
+
   // Authentication
   private authSubscription?: Subscription;
   private userSubscription?: Subscription;
   private searchSubscription?: Subscription;
   private categoriesSubscription?: Subscription;
-  
+
   // Search functionality - Using signals for reactive state management
   searchQuery = signal('');
   searchSuggestions = signal<string[]>([]);
@@ -40,20 +60,20 @@ export class Navbar implements OnInit, OnDestroy {
   showSearchSuggestions = signal(false);
   isSearching = signal(false);
   selectedSuggestionIndex = signal(-1);
-  
+
   // Debounced search subject
   private searchSubject = new Subject<string>();
-  
+
   // Language and currency
   currentLanguage = signal<'ar' | 'en'>('ar');
   selectedLanguage: string = 'العربية';
   selectedCurrency: string = 'KWD';
-  
+
   // Translations object - Simple translation system without libraries
   translations = {
     ar: {
-      // Top bar
-      freeShipping: 'شحن مجاني للطلبات أكثر من 50$',
+      // Top bar20KWD
+      freeShipping: 'شحن مجاني للطلبات أكثر من 20KWD',
       followUs: 'تابعنا:',
       // Search
       searchPlaceholder: 'ابحث عن المنتجات، العلامات التجارية، الفئات...',
@@ -94,11 +114,11 @@ export class Navbar implements OnInit, OnDestroy {
       freeShippingText: 'شحن مجاني',
       // Account overlay
       welcomeToAljawhara: 'مرحباً بك في الجوهرة',
-      signInToAccess: 'سجل الدخول للوصول إلى حسابك'
+      signInToAccess: 'سجل الدخول للوصول إلى حسابك',
     },
     en: {
       // Top bar
-      freeShipping: 'Free shipping on orders over 15 KWD',
+      freeShipping: 'Free shipping on orders over 20 KWD',
       followUs: 'Follow us:',
       // Search
       searchPlaceholder: 'Search products, brands, categories...',
@@ -139,44 +159,44 @@ export class Navbar implements OnInit, OnDestroy {
       freeShippingText: 'Free Shipping',
       // Account overlay
       welcomeToAljawhara: 'Welcome to Aljawhara',
-      signInToAccess: 'Sign in to access your account'
-    }
+      signInToAccess: 'Sign in to access your account',
+    },
   };
-  
+
   // Helper method to get translation
   t(key: string): string {
     const lang = this.currentLanguage();
-    return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
+    return this.translations[lang][key as keyof (typeof this.translations)['ar']] || key;
   }
-  
+
   // Dropdown states
   isLanguageDropdownOpen: boolean = false;
   isCurrencyDropdownOpen: boolean = false;
   isUserDropdownOpen: boolean = false;
-  
+
   // Cart and wishlist counts
   cartItems = this.cartService.getCartItemsSignal();
   wishlistItems = this.wishlistService.getWishlistItemsSignal();
-  
+
   // Computed cart count
   get cartCount(): number {
     return this.cartItems().reduce((total, item) => total + item.quantity, 0);
   }
-  
+
   // Computed wishlist count
   get wishlistCount(): number {
     return this.wishlistItems().length;
   }
-  
+
   // Mobile menu state
   isMobileMenuOpen: boolean = false;
-  
+
   // Mobile bottom navbar state
   activeTab: string = 'home';
   showMobileSearch: boolean = false;
   showMobileCategories: boolean = false;
   showMobileAccount: boolean = false;
-  
+
   // Popular searches for mobile
   popularSearches: string[] = [
     'iPhone 15',
@@ -186,9 +206,9 @@ export class Navbar implements OnInit, OnDestroy {
     'Adidas',
     'Sony Headphones',
     'Apple Watch',
-    'iPad Pro'
+    'iPad Pro',
   ];
-  
+
   // User authentication state
   isLoggedIn: boolean = false;
   userProfile: UserResponseDto | null = null;
@@ -199,16 +219,12 @@ export class Navbar implements OnInit, OnDestroy {
     { code: 'en', name: 'English', flag: '🇺🇸' },
   ];
 
-
-
   // Categories - using signal for reactive updates
-  categories = signal<Array<{ name: string; icon: string; href: string; id: number; subCategories?: any[] }>>([]);
-  
- 
-  constructor(
-    public router: Router,
-    private authService: ServiceAuth
-  ) {
+  categories = signal<
+    Array<{ name: string; icon: string; href: string; id: number; subCategories?: any[] }>
+  >([]);
+
+  constructor(public router: Router, private authService: ServiceAuth) {
     // Set up debounced search effect
     effect(() => {
       const query = this.searchQuery();
@@ -224,7 +240,7 @@ export class Navbar implements OnInit, OnDestroy {
     // Sync activeTab with current route (for bottom mobile navbar)
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(event => {
+      .subscribe((event) => {
         this.updateActiveTabFromRoute(event.urlAfterRedirects);
       });
   }
@@ -232,7 +248,7 @@ export class Navbar implements OnInit, OnDestroy {
   ngOnInit() {
     // Initialize component - defer non-critical operations
     this.loadUserData();
-    
+
     // Load saved language from localStorage
     const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
     if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
@@ -253,63 +269,65 @@ export class Navbar implements OnInit, OnDestroy {
       document.documentElement.setAttribute('dir', 'rtl');
       document.documentElement.setAttribute('lang', 'ar');
     }
-    
+
     // Load categories from API (defer to avoid blocking initial render)
     setTimeout(() => {
       this.loadCategories();
     }, 100);
-    
+
     // Subscribe to authentication state changes
-    this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuth) => {
       this.isLoggedIn = isAuth;
     });
-    
-    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => {
       this.userProfile = user;
     });
-    
+
     // Set up debounced search subscription
-    this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(150), // Wait for 150ms pause in events (faster search)
-      distinctUntilChanged(), // Only proceed if the value has changed
-      switchMap(query => {
-        if (!query || query.length < 2) {
-          this.searchSuggestions.set([]);
-          this.searchProducts.set([]);
-          return of([]);
-        }
-        
-        this.isSearching.set(true);
-        return this.productService.searchProducts(query).pipe(
-          catchError(error => {
-            console.error('Search error:', error);
-            this.isSearching.set(false);
+    this.searchSubscription = this.searchSubject
+      .pipe(
+        debounceTime(150), // Wait for 150ms pause in events (faster search)
+        distinctUntilChanged(), // Only proceed if the value has changed
+        switchMap((query) => {
+          if (!query || query.length < 2) {
+            this.searchSuggestions.set([]);
+            this.searchProducts.set([]);
             return of([]);
-          })
-        );
-      })
-    ).subscribe(products => {
-      this.isSearching.set(false);
-      
-      // Store products directly (we'll show products with images instead of just titles)
-      const limitedProducts = products.slice(0, 5); // Limit to 5 results
-      
-      // Keep suggestions for backward compatibility, but we'll primarily use products
-      const suggestions = limitedProducts
-        .map(p => p.title)
-        .filter((title, index, self) => self.indexOf(title) === index); // Remove duplicates
-      
-      this.searchSuggestions.set(suggestions);
-      this.searchProducts.set(limitedProducts);
-      
-      // Show suggestions if we have results and query is still active
-      if (limitedProducts.length > 0 && this.searchQuery().trim()) {
-        this.showSearchSuggestions.set(true);
-      }
-    });
-    
+          }
+
+          this.isSearching.set(true);
+          return this.productService.searchProducts(query).pipe(
+            catchError((error) => {
+              console.error('Search error:', error);
+              this.isSearching.set(false);
+              return of([]);
+            })
+          );
+        })
+      )
+      .subscribe((products) => {
+        this.isSearching.set(false);
+
+        // Store products directly (we'll show products with images instead of just titles)
+        const limitedProducts = products.slice(0, 5); // Limit to 5 results
+
+        // Keep suggestions for backward compatibility, but we'll primarily use products
+        const suggestions = limitedProducts
+          .map((p) => p.title)
+          .filter((title, index, self) => self.indexOf(title) === index); // Remove duplicates
+
+        this.searchSuggestions.set(suggestions);
+        this.searchProducts.set(limitedProducts);
+
+        // Show suggestions if we have results and query is still active
+        if (limitedProducts.length > 0 && this.searchQuery().trim()) {
+          this.showSearchSuggestions.set(true);
+        }
+      });
+
     // Check if there's a search query in route params
-    this.activatedRoute.queryParams.subscribe(params => {
+    this.activatedRoute.queryParams.subscribe((params) => {
       if (params['search'] && params['search'] !== this.searchQuery()) {
         this.searchQuery.set(params['search']);
       }
@@ -334,8 +352,8 @@ export class Navbar implements OnInit, OnDestroy {
     if (query) {
       this.showSearchSuggestions.set(false);
       // Navigate to products page with search query
-      this.router.navigate(['/product'], { 
-        queryParams: { search: query } 
+      this.router.navigate(['/product'], {
+        queryParams: { search: query },
       });
     }
   }
@@ -343,7 +361,7 @@ export class Navbar implements OnInit, OnDestroy {
   onSearchKeyPress(event: KeyboardEvent) {
     const products = this.searchProducts();
     const currentIndex = this.selectedSuggestionIndex();
-    
+
     if (event.key === 'Enter') {
       event.preventDefault();
       if (currentIndex >= 0 && currentIndex < products.length) {
@@ -436,7 +454,7 @@ export class Navbar implements OnInit, OnDestroy {
     this.selectedLanguage = language.name;
     this.currentLanguage.set(language.code);
     this.isLanguageDropdownOpen = false;
-    
+
     // Update document direction for RTL/LTR
     if (language.code === 'ar') {
       document.documentElement.setAttribute('dir', 'rtl');
@@ -445,10 +463,10 @@ export class Navbar implements OnInit, OnDestroy {
       document.documentElement.setAttribute('dir', 'ltr');
       document.documentElement.setAttribute('lang', 'en');
     }
-    
+
     // Save to localStorage
     localStorage.setItem('language', language.code);
-    
+
     console.log('Language changed to:', language.code);
     // Reload categories with new language
     this.loadCategories();
@@ -553,7 +571,7 @@ export class Navbar implements OnInit, OnDestroy {
         console.error('Logout error:', error);
         // Even if API call fails, user is logged out locally
         this.router.navigate(['/']);
-      }
+      },
     });
   }
 
@@ -588,8 +606,8 @@ export class Navbar implements OnInit, OnDestroy {
   navigateToCategory(category: any) {
     console.log('Navigate to category:', category.name);
     this.activeTab = 'categories';
-    this.router.navigate(['/product'], { 
-      queryParams: { categoryId: category.id } 
+    this.router.navigate(['/product'], {
+      queryParams: { categoryId: category.id },
     });
   }
 
@@ -639,32 +657,33 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   private loadCategories() {
-    this.categoriesSubscription = this.productService.getCategories(true).pipe(
-      catchError(error => {
-        console.error('Error loading categories:', error);
-        return of([]);
-      })
-    ).subscribe(categories => {
-      // Transform API categories to match the template structure
-      const transformedCategories = categories
-        .filter(cat => cat.isActive) // Only show active categories
-        .map(cat => {
-          const categoryName = this.selectedLanguage === 'العربية' ? cat.nameAr : cat.name;
-          const categoryNameLower = categoryName.toLowerCase();
-          
-        
-          
-          return {
-            id: cat.id,
-            name: categoryName,
-            icon: '',
-            href: `/product?categoryId=${cat.id}`,
-            subCategories: cat.subCategories || []
-          };
-        });
-      
-      this.categories.set(transformedCategories);
-    });
+    this.categoriesSubscription = this.productService
+      .getCategories(true)
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading categories:', error);
+          return of([]);
+        })
+      )
+      .subscribe((categories) => {
+        // Transform API categories to match the template structure
+        const transformedCategories = categories
+          .filter((cat) => cat.isActive) // Only show active categories
+          .map((cat) => {
+            const categoryName = this.selectedLanguage === 'العربية' ? cat.nameAr : cat.name;
+            const categoryNameLower = categoryName.toLowerCase();
+
+            return {
+              id: cat.id,
+              name: categoryName,
+              icon: '',
+              href: `/product?categoryId=${cat.id}`,
+              subCategories: cat.subCategories || [],
+            };
+          });
+
+        this.categories.set(transformedCategories);
+      });
   }
 
   // Get category display name based on current language
@@ -672,5 +691,4 @@ export class Navbar implements OnInit, OnDestroy {
     // Categories are already transformed with the correct language in loadCategories
     return category.name;
   }
-
 }

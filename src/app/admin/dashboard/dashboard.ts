@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserResponseDto } from '../../auth/auth.models';
@@ -16,6 +16,60 @@ export class Dashboard implements OnInit, OnDestroy {
   currentUser: UserResponseDto | null = null;
   private destroy$ = new Subject<void>();
   isLoggingOut = false;
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      adminDashboard: 'لوحة تحكم الإدارة',
+      welcomeBack: 'مرحباً بعودتك',
+      administrator: 'المدير',
+      dashboard: 'لوحة التحكم',
+      categories: 'الفئات',
+      subCategories: 'الفئات الفرعية',
+      products: 'المنتجات',
+      carousels: 'العروض المتحركة',
+      coupons: 'الكوبونات',
+      transactions: 'المعاملات',
+      orders: 'الطلبات',
+      userManagement: 'إدارة المستخدمين',
+      health: 'الصحة',
+      english: 'English',
+      arabic: 'العربية',
+      logout: 'تسجيل الخروج',
+      loggingOut: 'جاري تسجيل الخروج...',
+      open: 'فتح'
+    },
+    en: {
+      adminDashboard: 'Admin Dashboard',
+      welcomeBack: 'Welcome back',
+      administrator: 'Administrator',
+      dashboard: 'Dashboard',
+      categories: 'Categories',
+      subCategories: 'Sub-Categories',
+      products: 'Products',
+      carousels: 'Carousels',
+      coupons: 'Coupons',
+      transactions: 'Transactions',
+      orders: 'Orders',
+      userManagement: 'User Management',
+      health: 'Health',
+      english: 'English',
+      arabic: 'العربية',
+      logout: 'Logout',
+      loggingOut: 'Logging out...',
+      open: 'Open'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
 
   constructor(
     private authService: ServiceAuth,
@@ -29,6 +83,33 @@ export class Dashboard implements OnInit, OnDestroy {
       .subscribe(user => {
         this.currentUser = user;
       });
+
+    // Check language on initialization
+    this.checkLanguage();
+    
+    // Set up periodic language checking
+    this.languageCheckInterval = setInterval(() => {
+      this.checkLanguage();
+    }, 1000);
+  }
+
+  checkLanguage(): void {
+    const htmlLang = document.documentElement.lang || document.documentElement.getAttribute('lang');
+    const dir = document.documentElement.dir;
+    
+    if (htmlLang === 'ar' || dir === 'rtl') {
+      this.currentLanguage.set('ar');
+      document.documentElement.dir = 'rtl';
+    } else {
+      this.currentLanguage.set('en');
+      document.documentElement.dir = 'ltr';
+    }
+  }
+
+  switchLanguage(lang: 'ar' | 'en'): void {
+    this.currentLanguage.set(lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }
 
   logout(): void {
@@ -83,10 +164,13 @@ export class Dashboard implements OnInit, OnDestroy {
     // Since UserResponseDto doesn't have a role field,
     // we'll display based on the route or default to Administrator
     // This can be updated when role information is available
-    return 'Administrator';
+    return this.t('administrator');
   }
 
   ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subcategory } from './subcategory';
@@ -15,10 +15,144 @@ import { Observable, map, switchMap, startWith, catchError, of, combineLatest, B
   templateUrl: './sub-category.html',
   styleUrl: './sub-category.css',
 })
-export class SubCategory implements OnInit {
+export class SubCategory implements OnInit, OnDestroy {
   public subCategoryService = inject(Subcategory);
   public categoryService = inject(ServiceCategory);
   public toastService = inject(ToastService);
+  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
+  // Language management
+  currentLanguage = signal<'ar' | 'en'>('ar');
+
+  // Translations object
+  translations = {
+    ar: {
+      subCategoryManagement: 'إدارة الفئات الفرعية',
+      manageSubCategories: 'إدارة الفئات الفرعية وإعداداتها',
+      deleteSelected: 'حذف المحدد',
+      addSubCategory: 'إضافة فئة فرعية',
+      searchSubCategories: 'البحث في الفئات الفرعية...',
+      allCategories: 'جميع الفئات',
+      allStatus: 'جميع الحالات',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      perPage: 'لكل صفحة',
+      clearFilters: 'مسح الفلاتر',
+      subCategoryNameEN: 'اسم الفئة الفرعية (إنجليزي)',
+      subCategoryNameAR: 'اسم الفئة الفرعية (عربي)',
+      descriptionEN: 'الوصف (إنجليزي)',
+      descriptionAR: 'الوصف (عربي)',
+      category: 'الفئة',
+      productCount: 'عدد المنتجات',
+      status: 'الحالة',
+      actions: 'الإجراءات',
+      products: 'منتجات',
+      edit: 'تعديل',
+      deactivate: 'إلغاء التفعيل',
+      activate: 'تفعيل',
+      noSubCategoriesFound: 'لم يتم العثور على فئات فرعية',
+      addNewSubCategory: 'إضافة فئة فرعية جديدة',
+      enterSubCategoryNameEN: 'أدخل اسم الفئة الفرعية بالإنجليزية',
+      enterSubCategoryNameAR: 'أدخل اسم الفئة الفرعية بالعربية',
+      enterDescriptionEN: 'أدخل وصف الفئة الفرعية بالإنجليزية',
+      enterDescriptionAR: 'أدخل وصف الفئة الفرعية بالعربية',
+      parentCategory: 'الفئة الرئيسية',
+      selectCategory: 'اختر فئة',
+      cancel: 'إلغاء',
+      updateSubCategory: 'تحديث الفئة الفرعية',
+      editSubCategory: 'تعديل الفئة الفرعية',
+      showing: 'عرض',
+      to: 'إلى',
+      of: 'من',
+      subCategories: 'فئات فرعية',
+      error: 'خطأ',
+      success: 'نجح',
+      failedToLoad: 'فشل تحميل الفئات الفرعية',
+      deleting: 'جاري الحذف',
+      deletingSubCategories: 'جاري حذف الفئات الفرعية',
+      subCategoriesDeleted: 'تم حذف الفئات الفرعية بنجاح',
+      failedToDelete: 'فشل حذف الفئات الفرعية المحددة',
+      validationError: 'خطأ في التحقق',
+      allFieldsRequired: 'جميع الحقول مطلوبة',
+      creating: 'جاري الإنشاء',
+      creatingSubCategory: 'جاري إنشاء فئة فرعية جديدة',
+      subCategoryCreated: 'تم إنشاء الفئة الفرعية بنجاح',
+      failedToCreate: 'فشل إنشاء الفئة الفرعية',
+      updating: 'جاري التحديث',
+      updatingSubCategory: 'جاري تحديث الفئة الفرعية',
+      subCategoryUpdated: 'تم تحديث الفئة الفرعية بنجاح',
+      failedToUpdate: 'فشل تحديث الفئة الفرعية',
+      updatingStatus: 'جاري تحديث حالة الفئة الفرعية',
+      statusUpdated: 'تم تحديث حالة الفئة الفرعية بنجاح',
+      failedToUpdateStatus: 'فشل تحديث حالة الفئة الفرعية'
+    },
+    en: {
+      subCategoryManagement: 'Sub-Category Management',
+      manageSubCategories: 'Manage sub-categories and their settings',
+      deleteSelected: 'Delete Selected',
+      addSubCategory: 'Add Sub-Category',
+      searchSubCategories: 'Search sub-categories...',
+      allCategories: 'All Categories',
+      allStatus: 'All Status',
+      active: 'Active',
+      inactive: 'Inactive',
+      perPage: 'per page',
+      clearFilters: 'Clear Filters',
+      subCategoryNameEN: 'Sub-Category Name (EN)',
+      subCategoryNameAR: 'Sub-Category Name (AR)',
+      descriptionEN: 'Description (EN)',
+      descriptionAR: 'Description (AR)',
+      category: 'Category',
+      productCount: 'Product Count',
+      status: 'Status',
+      actions: 'Actions',
+      products: 'products',
+      edit: 'Edit',
+      deactivate: 'Deactivate',
+      activate: 'Activate',
+      noSubCategoriesFound: 'No sub-categories found',
+      addNewSubCategory: 'Add New Sub-Category',
+      enterSubCategoryNameEN: 'Enter sub-category name in English',
+      enterSubCategoryNameAR: 'Enter sub-category name in Arabic',
+      enterDescriptionEN: 'Enter sub-category description in English',
+      enterDescriptionAR: 'Enter sub-category description in Arabic',
+      parentCategory: 'Parent Category',
+      selectCategory: 'Select a category',
+      cancel: 'Cancel',
+      updateSubCategory: 'Update Sub-Category',
+      editSubCategory: 'Edit Sub-Category',
+      showing: 'Showing',
+      to: 'to',
+      of: 'of',
+      subCategories: 'sub-categories',
+      error: 'Error',
+      success: 'Success',
+      failedToLoad: 'Failed to load subcategories',
+      deleting: 'Deleting',
+      deletingSubCategories: 'Deleting sub-category(ies)',
+      subCategoriesDeleted: 'Successfully deleted sub-category(ies)',
+      failedToDelete: 'Failed to delete selected subcategories',
+      validationError: 'Validation Error',
+      allFieldsRequired: 'All fields are required',
+      creating: 'Creating',
+      creatingSubCategory: 'Creating new sub-category',
+      subCategoryCreated: 'Sub-category created successfully',
+      failedToCreate: 'Failed to create subcategory',
+      updating: 'Updating',
+      updatingSubCategory: 'Updating sub-category',
+      subCategoryUpdated: 'Sub-category updated successfully',
+      failedToUpdate: 'Failed to update subcategory',
+      updatingStatus: 'Updating sub-category status',
+      statusUpdated: 'Sub-category status updated successfully',
+      failedToUpdateStatus: 'Failed to update subcategory status'
+    }
+  };
+
+  // Translation helper
+  t(key: string): string {
+    const lang = this.currentLanguage();
+    return this.translations[lang][key as keyof typeof this.translations.ar] || key;
+  }
   
   // Signals for reactive state management
   selectedSubCategories = signal<number[]>([]);
@@ -158,6 +292,33 @@ export class SubCategory implements OnInit {
   ngOnInit() {
     // Initial load
     // this.loadSubCategories(this.filters$());
+    
+    // Check language on initialization
+    this.checkLanguage();
+    
+    // Set up periodic language checking
+    this.languageCheckInterval = setInterval(() => {
+      this.checkLanguage();
+    }, 1000);
+  }
+
+  checkLanguage(): void {
+    const htmlLang = document.documentElement.lang || document.documentElement.getAttribute('lang');
+    const dir = document.documentElement.dir;
+    
+    if (htmlLang === 'ar' || dir === 'rtl') {
+      this.currentLanguage.set('ar');
+      document.documentElement.dir = 'rtl';
+    } else {
+      this.currentLanguage.set('en');
+      document.documentElement.dir = 'ltr';
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.languageCheckInterval) {
+      clearInterval(this.languageCheckInterval);
+    }
   }
   
   loadSubCategories(filters: SubCategoryFilters) {
@@ -167,7 +328,7 @@ export class SubCategory implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load subcategories');
+        this.toastService.error(this.t('error'), this.t('failedToLoad'));
         this.isLoading.set(false);
         console.error('Error loading subcategories:', error);
       }
@@ -231,17 +392,17 @@ export class SubCategory implements OnInit {
     const selected = this.selectedSubCategories();
     if (selected.length === 0) return;
 
-    const loadingToastId = this.toastService.loading('Deleting', `Deleting ${selected.length} sub-category(ies)...`);
+    const loadingToastId = this.toastService.loading(this.t('deleting'), `${this.t('deletingSubCategories')} ${selected.length}...`);
     this.isLoading.set(true);
     this.subCategoryService.deleteSubCategories(selected).subscribe({
       next: () => {
         this.selectedSubCategories.set([]);
         this.loadSubCategories(this.filters$()); // Reload subcategories after deletion
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', `Successfully deleted ${selected.length} sub-category(ies)`);
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), `${selected.length} ${this.t('subCategoriesDeleted')}`);
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to delete selected subcategories');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToDelete'));
         this.isLoading.set(false);
         console.error('Error deleting subcategories:', error);
       }
@@ -250,11 +411,11 @@ export class SubCategory implements OnInit {
 
   addSubCategory() {
     if (!this.newSubCategory.name || !this.newSubCategory.nameAr || !this.newSubCategory.description || !this.newSubCategory.descriptionAr || !this.newSubCategory.categoryId) {
-      this.toastService.warning('Validation Error', 'All fields are required');
+      this.toastService.warning(this.t('validationError'), this.t('allFieldsRequired'));
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Creating', 'Creating new sub-category...');
+    const loadingToastId = this.toastService.loading(this.t('creating'), this.t('creatingSubCategory'));
     this.isLoading.set(true);
     this.subCategoryService.createSubCategory(this.newSubCategory).subscribe({
       next: (newSubCategory) => {
@@ -262,10 +423,10 @@ export class SubCategory implements OnInit {
         this.showAddModal.set(false);
         this.loadSubCategories(this.filters$()); // Reload subcategories after creation
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Sub-category created successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('subCategoryCreated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to create subcategory');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToCreate'));
         this.isLoading.set(false);
         console.error('Error creating subcategory:', error);
       }
@@ -296,21 +457,21 @@ export class SubCategory implements OnInit {
 
   updateSubCategory() {
     if (!this.editSubCategory.name || !this.editSubCategory.nameAr || !this.editSubCategory.description || !this.editSubCategory.descriptionAr || !this.editSubCategory.categoryId) {
-      this.toastService.warning('Validation Error', 'All fields are required');
+      this.toastService.warning(this.t('validationError'), this.t('allFieldsRequired'));
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Updating', 'Updating sub-category...');
+    const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingSubCategory'));
     this.isLoading.set(true);
     this.subCategoryService.updateSubCategory(this.editSubCategory.id, this.editSubCategory).subscribe({
       next: (updatedSubCategory) => {
         this.showEditModal.set(false);
         this.loadSubCategories(this.filters$()); // Reload subcategories after update
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Sub-category updated successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('subCategoryUpdated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update subcategory');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdate'));
         this.isLoading.set(false);
         console.error('Error updating subcategory:', error);
       }
@@ -318,16 +479,16 @@ export class SubCategory implements OnInit {
   }
 
   toggleSubCategoryStatus(subCategoryId: number) {
-    const loadingToastId = this.toastService.loading('Updating', 'Updating sub-category status...');
+    const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingStatus'));
     this.isLoading.set(true);
     this.subCategoryService.toggleSubCategoryActive(subCategoryId).subscribe({
       next: (response) => {
         this.loadSubCategories(this.filters$());
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Sub-category status updated successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('statusUpdated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update subcategory status');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('failedToUpdateStatus'));
         this.isLoading.set(false);
         console.error('Error updating subcategory status:', error);
       }

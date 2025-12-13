@@ -2,8 +2,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-base-content">Category Management</h1>
-            <p class="text-base-content/70 mt-2">Manage job categories and their settings</p>
+            <h1 class="text-3xl font-bold text-base-content">{{ t('categoryManagement') }}</h1>
+            <p class="text-base-content/70 mt-2">{{ t('manageJobCategories') }}</p>
         </div>
         <div class="flex gap-2">
             @if (selectedCategories().length > 0) {
@@ -18,14 +18,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     }
-                    Delete Selected ({{selectedCategories().length}})
+                    {{ t('deleteSelected') }} ({{selectedCategories().length}})
                 </button>
             }
             <button (click)="showAddModal.set(true)" [disabled]="isLoading()" class="btn btn-primary btn-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Category
+                {{ t('addCategory') }}
             </button>
         </div>
     </div>
@@ -41,7 +41,7 @@
                         <div class="input-group">
                             <input 
                                 type="text" 
-                                placeholder="Search categories..." 
+                                [placeholder]="t('searchCategories')" 
                                 class="input input-bordered flex-1" 
                                 [ngModel]="searchTerm()"
                                 (ngModelChange)="searchTerm.set($event)"
@@ -65,9 +65,9 @@
                         class="select select-bordered" 
                         [ngModel]="statusFilter()"
                         (ngModelChange)="statusFilter.set($event); onStatusFilterChange($event)">
-                        <option [value]="null">All Status</option>
-                        <option [value]="true">Active</option>
-                        <option [value]="false">Inactive</option>
+                        <option [value]="null">{{ t('allStatus') }}</option>
+                        <option [value]="true">{{ t('active') }}</option>
+                        <option [value]="false">{{ t('inactive') }}</option>
                     </select>
                 </div>
 
@@ -77,16 +77,16 @@
                         class="select select-bordered" 
                         [ngModel]="pageSize()"
                         (ngModelChange)="pageSize.set($event); onPageSizeChange($event)">
-                        <option [value]="10">10 per page</option>
-                        <option [value]="20">20 per page</option>
-                        <option [value]="50">50 per page</option>
-                        <option [value]="100">100 per page</option>
+                        <option [value]="10">10 {{ t('perPage') }}</option>
+                        <option [value]="20">20 {{ t('perPage') }}</option>
+                        <option [value]="50">50 {{ t('perPage') }}</option>
+                        <option [value]="100">100 {{ t('perPage') }}</option>
                     </select>
                 </div>
 
                 <!-- Clear Filters -->
                 <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
-                    Clear Filters
+                    {{ t('clearFilters') }}
                 </button>
             </div>
         </div>
@@ -114,13 +114,13 @@
                                             (change)="toggleSelectAll()" />
                                     </label>
                                 </th>
-                                <th>Category Name (EN)</th>
-                                <th>Category Name (AR)</th>
-                                <th>Description (EN)</th>
-                                <th>Description (AR)</th>
-                                <th>Product Count</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>{{ t('categoryNameEN') }}</th>
+                                <th>{{ t('categoryNameAR') }}</th>
+                                <th>{{ t('descriptionEN') }}</th>
+                                <th>{{ t('descriptionAR') }}</th>
+                                <th>{{ t('productCount') }}</th>
+                                <th>{{ t('status') }}</th>
+                                <th>{{ t('actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,11 +150,11 @@
                                     <div class="text-sm text-base-content/70 max-w-xs truncate" dir="rtl">{{category.descriptionAr}}</div>
                                 </td>
                                 <td>
-                                    <div class="badge badge-outline">{{category.productCount}} products</div>
+                                    <div class="badge badge-outline">{{category.productCount}} {{ t('products') }}</div>
                                 </td>
                                 <td>
                                     <div class="badge" [class.badge-success]="category.isActive" [class.badge-error]="!category.isActive">
-                                        {{category.isActive ? 'Active' : 'Inactive'}}
+                                        {{category.isActive ? t('active') : t('inactive')}}
                                     </div>
                                 </td>
                                 <th>
@@ -168,14 +168,14 @@
                                             @if (isLoading()) {
                                                 <span class="loading loading-spinner loading-xs"></span>
                                             } @else {
-                                                {{category.isActive ? 'Deactivate' : 'Activate'}}
+                                                {{category.isActive ? t('deactivate') : t('activate')}}
                                             }
                                         </button>
                                         <button 
                                             (click)="editCategoryStart(category)"
                                             [disabled]="isLoading()"
                                             class="btn btn-ghost btn-xs">
-                                            Edit
+                                            {{ t('edit') }}
                                         </button>
                                     </div>
                                 </th>
@@ -184,7 +184,7 @@
                             @if (getCategoriesLength() === 0 && !isLoading()) {
                                 <tr>
                                     <td colspan="8" class="text-center py-8 text-base-content/50">
-                                        No categories found
+                                        {{ t('noCategoriesFound') }}
                                     </td>
                                 </tr>
                             }
@@ -235,7 +235,7 @@
         <!-- Pagination Info -->
         <div class="text-center mt-4 text-sm text-base-content/70">
             @if (pagination$ | async; as pagination) {
-                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} categories
+                {{ t('showing') }} {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} {{ t('to') }} {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} {{ t('of') }} {{pagination.totalCount}} {{ t('categories') }}
             }
         </div>
     }
@@ -244,17 +244,17 @@
     @if (showAddModal()) {
         <div class="modal modal-open">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg mb-4">Add New Category</h3>
+            <h3 class="font-bold text-lg mb-4">{{ t('addNewCategory') }}</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- English Name -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Category Name (English)</span>
+                        <span class="label-text">{{ t('categoryNameEN') }}</span>
                     </label>
                     <input 
                         type="text" 
-                        placeholder="Enter category name in English" 
+                        [placeholder]="t('enterCategoryNameEN')" 
                         class="input input-bordered w-full" 
                         [(ngModel)]="newCategory.name" />
                 </div>
@@ -262,11 +262,11 @@
                 <!-- Arabic Name -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Category Name (Arabic)</span>
+                        <span class="label-text">{{ t('categoryNameAR') }}</span>
                     </label>
                     <input 
                         type="text" 
-                        placeholder="أدخل اسم الفئة بالعربية" 
+                        [placeholder]="t('enterCategoryNameAR')" 
                         class="input input-bordered w-full" 
                         dir="rtl"
                         [(ngModel)]="newCategory.nameAr" />
@@ -277,34 +277,34 @@
                 <!-- English Description -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Description (English)</span>
+                        <span class="label-text">{{ t('descriptionEN') }}</span>
                     </label>
                     <textarea 
                         class="textarea textarea-bordered h-24" 
-                        placeholder="Enter category description in English"
+                        [placeholder]="t('enterDescriptionEN')"
                         [(ngModel)]="newCategory.description"></textarea>
                 </div>
 
                 <!-- Arabic Description -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Description (Arabic)</span>
+                        <span class="label-text">{{ t('descriptionAR') }}</span>
                     </label>
                     <textarea 
                         class="textarea textarea-bordered h-24" 
-                        placeholder="أدخل وصف الفئة بالعربية"
+                        [placeholder]="t('enterDescriptionAR')"
                         dir="rtl"
                         [(ngModel)]="newCategory.descriptionAr"></textarea>
                 </div>
             </div>
 
             <div class="modal-action">
-                <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
                 <button (click)="addCategory()" [disabled]="isLoading()" class="btn btn-primary">
                     @if (isLoading()) {
                         <span class="loading loading-spinner loading-sm"></span>
                     }
-                    Add Category
+                    {{ t('addCategory') }}
                 </button>
             </div>
         </div>
@@ -315,17 +315,17 @@
     @if (showEditModal()) {
         <div class="modal modal-open">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg mb-4">Edit Category</h3>
+            <h3 class="font-bold text-lg mb-4">{{ t('editCategory') }}</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- English Name -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Category Name (English)</span>
+                        <span class="label-text">{{ t('categoryNameEN') }}</span>
                     </label>
                     <input 
                         type="text" 
-                        placeholder="Enter category name in English" 
+                        [placeholder]="t('enterCategoryNameEN')" 
                         class="input input-bordered w-full" 
                         [(ngModel)]="editCategory.name" />
                 </div>
@@ -333,11 +333,11 @@
                 <!-- Arabic Name -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Category Name (Arabic)</span>
+                        <span class="label-text">{{ t('categoryNameAR') }}</span>
                     </label>
                     <input 
                         type="text" 
-                        placeholder="أدخل اسم الفئة بالعربية" 
+                        [placeholder]="t('enterCategoryNameAR')" 
                         class="input input-bordered w-full" 
                         dir="rtl"
                         [(ngModel)]="editCategory.nameAr" />
@@ -348,34 +348,34 @@
                 <!-- English Description -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Description (English)</span>
+                        <span class="label-text">{{ t('descriptionEN') }}</span>
                     </label>
                     <textarea 
                         class="textarea textarea-bordered h-24" 
-                        placeholder="Enter category description in English"
+                        [placeholder]="t('enterDescriptionEN')"
                         [(ngModel)]="editCategory.description"></textarea>
                 </div>
 
                 <!-- Arabic Description -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text">Description (Arabic)</span>
+                        <span class="label-text">{{ t('descriptionAR') }}</span>
                     </label>
                     <textarea 
                         class="textarea textarea-bordered h-24" 
-                        placeholder="أدخل وصف الفئة بالعربية"
+                        [placeholder]="t('enterDescriptionAR')"
                         dir="rtl"
                         [(ngModel)]="editCategory.descriptionAr"></textarea>
                 </div>
             </div>
 
             <div class="modal-action">
-                <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
                 <button (click)="updateCategory()" [disabled]="isLoading()" class="btn btn-primary">
                     @if (isLoading()) {
                         <span class="loading loading-spinner loading-sm"></span>
                     }
-                    Update Category
+                    {{ t('updateCategory') }}
                 </button>
             </div>
         </div>
