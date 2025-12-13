@@ -37,6 +37,7 @@
     "@tailwindcss/postcss": "^4.1.15",
     "arabic-reshaper": "^1.1.0",
     "bidi-js": "^1.0.3",
+    "browser-image-compression": "^2.0.2",
     "chart.js": "^4.5.1",
     "express": "^5.1.0",
     "html2canvas": "^1.4.1",

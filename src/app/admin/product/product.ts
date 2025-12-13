@@ -5,6 +5,7 @@ import { ServiceProduct } from './service-product';
 import { ServiceCategory } from '../category/service-category';
 import { Subcategory } from '../sub-category/subcategory';
 import { ToastService } from '../../services/toast.service';
+import { ImageCompressionService } from '../../services/image-compression.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 import { 
   ProductDto, 
@@ -33,6 +34,7 @@ export class Product implements OnInit, OnDestroy {
   public categoryService = inject(ServiceCategory);
   public subCategoryService = inject(Subcategory);
   public toastService = inject(ToastService);
+  public imageCompressionService = inject(ImageCompressionService);
   
   // Signals for reactive state management
   selectedProducts = signal<number[]>([]);
@@ -366,7 +368,7 @@ export class Product implements OnInit, OnDestroy {
     });
   }
 
-  addProduct() {
+  async addProduct() {
     console.log('=== PRODUCT CREATION STARTED ===');
     console.log('Form validation started...');
     
@@ -400,7 +402,19 @@ export class Product implements OnInit, OnDestroy {
 
     this.newProduct.productDetails = this.productDetails();
     this.newProduct.variants = currentVariants.length > 0 ? [...currentVariants] : undefined;
-    this.newProduct.images = this.selectedImages().length > 0 ? this.selectedImages() : null;
+    
+    // Compress images one more time before sending (in case they weren't compressed during selection)
+    let imagesToSend = this.selectedImages();
+    if (imagesToSend.length > 0) {
+      try {
+        console.log('🔄 Compressing images before upload...');
+        imagesToSend = await this.imageCompressionService.compressImages(imagesToSend);
+        console.log('✅ Images compressed for upload');
+      } catch (error) {
+        console.warn('⚠️ Image compression failed, using original images:', error);
+      }
+    }
+    this.newProduct.images = imagesToSend.length > 0 ? imagesToSend : null;
     
     console.log('🔍 Final product variants before sending:', this.newProduct.variants);
     console.log('🔍 Final variants count:', this.newProduct.variants?.length || 0);
@@ -499,7 +513,7 @@ export class Product implements OnInit, OnDestroy {
     this.showEditModal.set(true);
   }
 
-  updateProduct() {
+  async updateProduct() {
     if (!this.validateProductForm()) {
       this.toastService.error('Validation Failed', 'Please fill in all required fields correctly.');
       return;
@@ -512,7 +526,19 @@ export class Product implements OnInit, OnDestroy {
 
     this.editProduct.productDetails = this.productDetails();
     this.editProduct.variants = currentEditVariants.length > 0 ? [...currentEditVariants] : [];
-    this.editProduct.images = this.selectedImages().length > 0 ? this.selectedImages() : null;
+    
+    // Compress images one more time before sending (in case they weren't compressed during selection)
+    let imagesToSend = this.selectedImages();
+    if (imagesToSend.length > 0) {
+      try {
+        console.log('🔄 Compressing images before upload...');
+        imagesToSend = await this.imageCompressionService.compressImages(imagesToSend);
+        console.log('✅ Images compressed for upload');
+      } catch (error) {
+        console.warn('⚠️ Image compression failed, using original images:', error);
+      }
+    }
+    this.editProduct.images = imagesToSend.length > 0 ? imagesToSend : null;
     this.editProduct.imagesToDelete = this.imagesToDelete();
     
     console.log('🔍 Final edit product variants before sending:', this.editProduct.variants);
@@ -639,13 +665,13 @@ export class Product implements OnInit, OnDestroy {
   }
 
   // Image management
-  onImageSelected(event: any) {
+  async onImageSelected(event: any) {
     console.log('📷 Image selection started...');
     try {
       const files = Array.from(event.target.files) as File[];
       console.log('Selected files:', files.map(f => ({ name: f.name, size: f.size, type: f.type })));
       
-      // Validate file types and sizes
+      // Validate file types and sizes (allow up to 50MB as they will be compressed)
       const validFiles: File[] = [];
       const errors: string[] = [];
       
@@ -656,18 +682,10 @@ export class Product implements OnInit, OnDestroy {
           type: file.type
         });
         
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-          errors.push(`${file.name} is not a valid image file`);
-          console.error('❌ Invalid file type:', file.name, file.type);
-          return;
-        }
-        
-        // Check file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-          errors.push(`${file.name} is too large (max 5MB)`);
-          console.error('❌ File too large:', file.name, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        const validation = this.imageCompressionService.validateImage(file, 50); // Allow up to 50MB
+        if (!validation.isValid) {
+          errors.push(validation.error!);
+          console.error('❌ Validation failed:', validation.error);
           return;
         }
         
@@ -682,10 +700,36 @@ export class Product implements OnInit, OnDestroy {
       }
       
       if (validFiles.length > 0) {
-        this.selectedImages.set([...this.selectedImages(), ...validFiles]);
-        console.log('✅ Images added successfully. Total images:', this.selectedImages().length);
-        this.toastService.success('Images Added', `${validFiles.length} image(s) added successfully.`);
+        // Show loading toast for compression
+        const compressionToastId = this.toastService.loading('Compressing Images', `Compressing ${validFiles.length} image(s)...`);
+        
+        try {
+          // Compress images before adding them
+          const compressedFiles = await this.imageCompressionService.compressImages(validFiles);
+          
+          // Add compressed images to selection
+          this.selectedImages.set([...this.selectedImages(), ...compressedFiles]);
+          console.log('✅ Images compressed and added successfully. Total images:', this.selectedImages().length);
+          
+          this.toastService.updateToSuccess(
+            compressionToastId, 
+            'Images Added', 
+            `${compressedFiles.length} image(s) compressed and added successfully.`
+          );
+        } catch (compressionError) {
+          console.error('❌ Error compressing images:', compressionError);
+          // If compression fails, add original files
+          this.selectedImages.set([...this.selectedImages(), ...validFiles]);
+          this.toastService.updateToError(
+            compressionToastId,
+            'Compression Failed',
+            'Images added but compression failed. Original files will be used.'
+          );
+        }
       }
+      
+      // Reset file input
+      event.target.value = '';
       
     } catch (error) {
       console.error('❌ Error processing image selection:', error);
