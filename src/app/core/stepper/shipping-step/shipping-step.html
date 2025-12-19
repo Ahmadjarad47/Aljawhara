@@ -138,12 +138,11 @@
               </label>
               <input 
                 type="text" 
-                class="input input-bordered w-full" 
-                placeholder="12345"
-                [(ngModel)]="formData.postalCode"
+                class="input input-bordered w-full bg-base-200" 
+                placeholder="0000"
+                [value]="'0000'"
                 name="postalCode"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
+                readonly
                 required
               />
             </div>
@@ -154,12 +153,11 @@
               </label>
               <input 
                 type="text" 
-                class="input input-bordered w-full" 
+                class="input input-bordered w-full bg-base-200" 
                 placeholder="Kuwait"
-                [(ngModel)]="formData.country"
+                [value]="'Kuwait'"
                 name="country"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
+                readonly
                 required
               />
             </div>

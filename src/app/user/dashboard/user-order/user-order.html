@@ -297,13 +297,11 @@
                                 <span class="font-medium">المحافظة:</span> {{selectedOrderDetails()!.shippingAddress.state}}
                             </p>
                         }
-                        @if (selectedOrderDetails()!.shippingAddress.postalCode) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الرمز البريدي:</span> {{selectedOrderDetails()!.shippingAddress.postalCode}}
-                            </p>
-                        }
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">الدولة:</span> {{selectedOrderDetails()!.shippingAddress.country}}
+                            <span class="font-medium">الرمز البريدي:</span> 0000
+                        </p>
+                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                            <span class="font-medium">الدولة:</span> Kuwait
                         </p>
                     </div>
                 </div>

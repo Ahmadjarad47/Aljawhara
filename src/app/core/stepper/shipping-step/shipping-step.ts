@@ -198,7 +198,7 @@ export class ShippingStepComponent implements OnInit {
     addressLine2: null,
     city: '',
     state: '',
-    postalCode: '',
+    postalCode: '0000',
     country: 'Kuwait',
     phoneNumber: '',
     isDefault: true,
@@ -235,8 +235,8 @@ export class ShippingStepComponent implements OnInit {
         addressLine2: data.address.addressLine2,
         city: data.address.city,
         state: data.address.state,
-        postalCode: data.address.postalCode,
-        country: data.address.country,
+        postalCode: '0000',
+        country: 'Kuwait',
         phoneNumber: data.address.phoneNumber,
         isDefault: data.address.isDefault,
         alQataa: data.address.alQataa,
@@ -290,8 +290,8 @@ export class ShippingStepComponent implements OnInit {
             addressLine2: selected.addressLine2,
             city: selected.city,
             state: selected.state,
-            postalCode: selected.postalCode,
-            country: selected.country,
+            postalCode: '0000',
+            country: 'Kuwait',
             phoneNumber: selected.phoneNumber,
             isDefault: selected.isDefault,
             alQataa: selected.alQataa,
@@ -319,7 +319,7 @@ export class ShippingStepComponent implements OnInit {
             addressLine2: null,
             city: '',
             state: '',
-            postalCode: '',
+            postalCode: '0000',
             country: 'Kuwait',
             phoneNumber: '',
             isDefault: true,
@@ -351,8 +351,8 @@ export class ShippingStepComponent implements OnInit {
         addressLine2: data.address.addressLine2,
         city: data.address.city,
         state: data.address.state,
-        postalCode: data.address.postalCode,
-        country: data.address.country,
+        postalCode: '0000',
+        country: 'Kuwait',
         phoneNumber: data.address.phoneNumber,
         isDefault: data.address.isDefault,
         alQataa: (data.address as any).alQataa || null,
@@ -389,7 +389,7 @@ export class ShippingStepComponent implements OnInit {
       addressLine2: null,
       city: '',
       state: '',
-      postalCode: '',
+      postalCode: '0000',
       country: 'Kuwait',
       phoneNumber: '',
       isDefault: true,
@@ -411,8 +411,8 @@ export class ShippingStepComponent implements OnInit {
       addressLine2: address.addressLine2,
       city: address.city,
       state: address.state,
-      postalCode: address.postalCode,
-      country: address.country,
+      postalCode: '0000',
+      country: 'Kuwait',
       phoneNumber: address.phoneNumber,
       isDefault: address.isDefault,
       alQataa: address.alQataa,
@@ -431,6 +431,10 @@ export class ShippingStepComponent implements OnInit {
     
     this.isSubmitting.set(true);
     try {
+      // Ensure country and postalCode are always set to fixed values
+      this.formData.country = 'Kuwait';
+      this.formData.postalCode = '0000';
+      
       if (this.selectedAddressId()) {
         // Update existing address
         const updateDto: UpdateAddressDto = {
@@ -510,13 +514,15 @@ export class ShippingStepComponent implements OnInit {
   }
   
   isFormValid(): boolean {
+    // Ensure country and postalCode are always set to fixed values
+    this.formData.country = 'Kuwait';
+    this.formData.postalCode = '0000';
+    
     return !!(
       this.formData.fullName &&
       this.formData.addressLine1 &&
       this.formData.city &&
       this.formData.state &&
-      this.formData.postalCode &&
-      this.formData.country &&
       this.formData.phoneNumber
     );
   }

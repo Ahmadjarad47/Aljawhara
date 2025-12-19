@@ -902,8 +902,8 @@ export class UserOrderComponent implements OnInit, OnDestroy {
               ${address.alShakka ? `<div><strong>الشقة:</strong> ${escapeHtml(address.alShakka)}</div>` : ''}
               <div><strong>المدينة:</strong> ${escapeHtml(address.city)}</div>
               ${address.state ? `<div><strong>المحافظة:</strong> ${escapeHtml(address.state)}</div>` : ''}
-              ${address.postalCode ? `<div><strong>الرمز البريدي:</strong> ${escapeHtml(address.postalCode)}</div>` : ''}
-              <div><strong>الدولة:</strong> ${escapeHtml(address.country)}</div>
+              <div><strong>الرمز البريدي:</strong> 0000</div>
+              <div><strong>الدولة:</strong> Kuwait</div>
             </div>
           </div>
 
