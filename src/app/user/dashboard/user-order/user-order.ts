@@ -824,11 +824,19 @@ export class UserOrderComponent implements OnInit, OnDestroy {
           <div class="section">
             <div class="section-title">عنوان الشحن</div>
             <div class="address-info">
-              <div>${escapeHtml(address.fullName)}</div>
-              <div>${escapeHtml(address.phone)}</div>
-              <div>${escapeHtml(address.street)}</div>
-              <div>${escapeHtml(cityState)}</div>
-              <div>${escapeHtml(address.country)}</div>
+              <div><strong>الاسم:</strong> ${escapeHtml(address.fullName)}</div>
+              <div><strong>الهاتف:</strong> ${escapeHtml(address.phone)}</div>
+              ${address.street ? `<div><strong>الشارع:</strong> ${escapeHtml(address.street)}</div>` : ''}
+              ${address.alQataa ? `<div><strong>القطعة:</strong> ${escapeHtml(address.alQataa)}</div>` : ''}
+              ${address.alSharee ? `<div><strong>الشارع:</strong> ${escapeHtml(address.alSharee)}</div>` : ''}
+              ${address.alJada ? `<div><strong>الجادة:</strong> ${escapeHtml(address.alJada)}</div>` : ''}
+              ${address.alManzil ? `<div><strong>المنزل:</strong> ${escapeHtml(address.alManzil)}</div>` : ''}
+              ${address.alDor ? `<div><strong>الدور:</strong> ${escapeHtml(address.alDor)}</div>` : ''}
+              ${address.alShakka ? `<div><strong>الشقة:</strong> ${escapeHtml(address.alShakka)}</div>` : ''}
+              <div><strong>المدينة:</strong> ${escapeHtml(address.city)}</div>
+              ${address.state ? `<div><strong>المحافظة:</strong> ${escapeHtml(address.state)}</div>` : ''}
+              ${address.postalCode ? `<div><strong>الرمز البريدي:</strong> ${escapeHtml(address.postalCode)}</div>` : ''}
+              <div><strong>الدولة:</strong> ${escapeHtml(address.country)}</div>
             </div>
           </div>
 

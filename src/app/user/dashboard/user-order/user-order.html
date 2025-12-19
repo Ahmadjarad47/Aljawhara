@@ -247,13 +247,63 @@
                 <!-- Shipping Address -->
                 <div class="mb-4">
                     <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('shippingAddress')}}</h4>
-                    <div class="bg-base-200 p-3 sm:p-4 rounded-lg">
-                        <p class="font-medium text-sm sm:text-base break-words">{{selectedOrderDetails()!.shippingAddress.fullName}}</p>
-                        <p class="text-xs sm:text-sm text-base-content/70 break-words">{{selectedOrderDetails()!.shippingAddress.phone}}</p>
+                    <div class="bg-base-200 p-3 sm:p-4 rounded-lg space-y-1">
+                        <p class="font-medium text-sm sm:text-base break-words">
+                            <span class="text-base-content/70">الاسم:</span> {{selectedOrderDetails()!.shippingAddress.fullName}}
+                        </p>
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            {{selectedOrderDetails()!.shippingAddress.street}}<br>
-                            {{selectedOrderDetails()!.shippingAddress.city}}@if (selectedOrderDetails()!.shippingAddress.state) {, {{selectedOrderDetails()!.shippingAddress.state}}} {{selectedOrderDetails()!.shippingAddress.postalCode}}<br>
-                            {{selectedOrderDetails()!.shippingAddress.country}}
+                            <span class="font-medium">الهاتف:</span> {{selectedOrderDetails()!.shippingAddress.phone}}
+                        </p>
+                        @if (selectedOrderDetails()!.shippingAddress.street) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الشارع:</span> {{selectedOrderDetails()!.shippingAddress.street}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alQataa) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">القطعة:</span> {{selectedOrderDetails()!.shippingAddress.alQataa}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alSharee) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الشارع:</span> {{selectedOrderDetails()!.shippingAddress.alSharee}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alJada) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الجادة:</span> {{selectedOrderDetails()!.shippingAddress.alJada}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alManzil) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">المنزل:</span> {{selectedOrderDetails()!.shippingAddress.alManzil}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alDor) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الدور:</span> {{selectedOrderDetails()!.shippingAddress.alDor}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.alShakka) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الشقة:</span> {{selectedOrderDetails()!.shippingAddress.alShakka}}
+                            </p>
+                        }
+                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                            <span class="font-medium">المدينة:</span> {{selectedOrderDetails()!.shippingAddress.city}}
+                        </p>
+                        @if (selectedOrderDetails()!.shippingAddress.state) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">المحافظة:</span> {{selectedOrderDetails()!.shippingAddress.state}}
+                            </p>
+                        }
+                        @if (selectedOrderDetails()!.shippingAddress.postalCode) {
+                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                                <span class="font-medium">الرمز البريدي:</span> {{selectedOrderDetails()!.shippingAddress.postalCode}}
+                            </p>
+                        }
+                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
+                            <span class="font-medium">الدولة:</span> {{selectedOrderDetails()!.shippingAddress.country}}
                         </p>
                     </div>
                 </div>
