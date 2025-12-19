@@ -448,7 +448,8 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       iframe.style.left = '-9999px';
       iframe.style.top = '0px';
       iframe.style.width = '210mm';
-      iframe.style.height = '297mm'; // A4 height
+      iframe.style.height = 'auto'; // Allow content to expand
+      iframe.style.minHeight = '297mm'; // Minimum A4 height
       iframe.style.border = 'none';
       document.body.appendChild(iframe);
 
@@ -489,6 +490,22 @@ export class UserOrderComponent implements OnInit, OnDestroy {
         throw new Error('Invoice container not found');
       }
 
+      // Calculate actual content height and adjust iframe height
+      const actualHeight = Math.max(
+        invoiceContainer.scrollHeight,
+        invoiceContainer.offsetHeight,
+        iframeDoc.body.scrollHeight,
+        iframeDoc.body.offsetHeight,
+        iframeDoc.documentElement.scrollHeight,
+        iframeDoc.documentElement.offsetHeight
+      );
+      
+      // Set iframe height to accommodate all content
+      iframe.style.height = `${actualHeight}px`;
+      
+      // Wait a bit for iframe to resize
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Convert HTML to canvas with optimized settings
       const canvas = await html2canvas(invoiceContainer, {
         scale: 6, // Higher scale for maximum resolution
@@ -521,24 +538,71 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Calculate dimensions to fill the entire PDF page
+      // Calculate dimensions to fit width of PDF page
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       
-      // Calculate ratio to fit the page exactly (fill entire page)
+      // Calculate ratio to fit the width of the page
       const widthRatio = pdfWidth / imgWidth;
-      const heightRatio = pdfHeight / imgHeight;
-      const ratio = Math.max(widthRatio, heightRatio); // Use max to fill entire page
+      const ratio = widthRatio; // Fit to width, not max
       
       const imgScaledWidth = imgWidth * ratio;
       const imgScaledHeight = imgHeight * ratio;
       
-      // Center the image if it's larger than page, or start from top-left
-      const xOffset = imgScaledWidth > pdfWidth ? (pdfWidth - imgScaledWidth) / 2 : 0;
-      const yOffset = imgScaledHeight > pdfHeight ? (pdfHeight - imgScaledHeight) / 2 : 0;
-
-      // Add image to fill the entire PDF page
-      pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgScaledWidth, imgScaledHeight, undefined, 'FAST');
+      // Check if image height exceeds one page
+      if (imgScaledHeight <= pdfHeight) {
+        // Image fits in one page
+        const xOffset = 0;
+        const yOffset = 0;
+        pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgScaledWidth, imgScaledHeight, undefined, 'FAST');
+      } else {
+        // Image is taller than one page - split into multiple pages
+        const totalPages = Math.ceil(imgScaledHeight / pdfHeight);
+        
+        for (let page = 0; page < totalPages; page++) {
+          if (page > 0) {
+            pdf.addPage();
+          }
+          
+          // Calculate source Y position in the original canvas (in pixels)
+          const sourceY = Math.floor((page * pdfHeight) / ratio);
+          const remainingHeight = imgHeight - sourceY;
+          const sourceHeight = Math.min(Math.ceil(pdfHeight / ratio), remainingHeight);
+          
+          // Ensure we don't go beyond the canvas bounds
+          if (sourceY >= imgHeight || sourceHeight <= 0) {
+            break;
+          }
+          
+          // Create a temporary canvas for this page
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = imgWidth;
+          pageCanvas.height = sourceHeight;
+          const pageCtx = pageCanvas.getContext('2d');
+          
+          if (pageCtx) {
+            // Fill with white background
+            pageCtx.fillStyle = '#ffffff';
+            pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            
+            // Draw the portion of the image for this page
+            pageCtx.drawImage(
+              canvas,
+              0, sourceY, imgWidth, sourceHeight,  // Source rectangle from original canvas
+              0, 0, imgWidth, sourceHeight          // Destination rectangle in page canvas
+            );
+            
+            // Convert page canvas to image
+            const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+            
+            // Calculate scaled height for this page
+            const pageScaledHeight = sourceHeight * ratio;
+            
+            // Add to PDF (fill the entire page height)
+            pdf.addImage(pageImgData, 'JPEG', 0, 0, imgScaledWidth, pageScaledHeight, undefined, 'FAST');
+          }
+        }
+      }
 
       // Save the PDF
       const fileName = `Invoice_${invoice.orderNumber}_${new Date().getTime()}.pdf`;
@@ -614,7 +678,8 @@ export class UserOrderComponent implements OnInit, OnDestroy {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            min-height: 100%;
+            height: auto;
           }
           body {
             font-family: Arial, DejaVu Sans, Tahoma, sans-serif;
@@ -624,6 +689,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
             padding: 0;
             margin: 0;
             overflow: visible;
+            height: auto;
           }
           .invoice-container {
             width: 100%;
@@ -632,6 +698,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
             background-color: rgb(255, 255, 255);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             position: relative;
+            min-height: 297mm;
           }
           .header {
             background-color: rgb(5, 66, 57);
