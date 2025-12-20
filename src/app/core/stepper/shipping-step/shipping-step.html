@@ -48,9 +48,12 @@
               <input 
                 type="tel" 
                 class="input input-bordered w-full" 
-                placeholder="+965 67070814"
+                placeholder="67070814"
                 [(ngModel)]="formData.phoneNumber"
                 name="phoneNumber"
+                maxlength="9"
+                pattern="[0-9]{9}"
+                (keypress)="onPhoneKeyPress($event)"
                 [readonly]="!isEditMode() && !!selectedAddressId()"
                 [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
                 required

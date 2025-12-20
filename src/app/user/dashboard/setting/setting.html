@@ -45,10 +45,17 @@
       <div class="card bg-base-100 shadow-sm border border-base-300 lg:col-span-2">
         <div class="card-body">
           <h3 class="card-title">{{t('updatePhoneNumber')}}</h3>
-          <div class="form-control">
-            <label class="label"><span class="label-text">{{t('phoneNumber')}}</span></label>
-            <input class="input input-bordered" type="tel" [(ngModel)]="updatePhoneModel.phoneNumber" />
-          </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">{{t('phoneNumber')}}</span></label>
+              <input 
+                class="input input-bordered" 
+                type="tel" 
+                [(ngModel)]="updatePhoneModel.phoneNumber"
+                maxlength="9"
+                pattern="[0-9]{9}"
+                (keypress)="onPhoneKeyPress($event)"
+              />
+            </div>
           <div class="card-actions justify-end mt-3">
             <button class="btn btn-primary" (click)="onUpdatePhone()">{{t('save')}}</button>
           </div>
@@ -173,7 +180,14 @@
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('phone')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.phoneNumber" />
+              <input 
+                class="input input-bordered" 
+                type="tel"
+                [(ngModel)]="newAddress.phoneNumber"
+                maxlength="9"
+                pattern="[0-9]{9}"
+                (keypress)="onPhoneKeyPress($event)"
+              />
             </div>
             <div class="form-control md:col-span-2">
               <label class="label"><span class="label-text">{{t('addressLine1')}}</span></label>
@@ -260,7 +274,14 @@
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">{{t('phone')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.phoneNumber" />
+              <input 
+                class="input input-bordered" 
+                type="tel"
+                [(ngModel)]="editAddress.phoneNumber"
+                maxlength="9"
+                pattern="[0-9]{9}"
+                (keypress)="onPhoneKeyPress($event)"
+              />
             </div>
             <div class="form-control md:col-span-2">
               <label class="label"><span class="label-text">{{t('addressLine1')}}</span></label>

@@ -75,7 +75,7 @@ export class Setting implements OnInit, OnDestroy {
       success: 'نجح',
       usernameUpdated: 'تم تحديث اسم المستخدم',
       failedToUpdateUsername: 'فشل تحديث اسم المستخدم',
-      phoneMinLength: 'يجب أن يكون رقم الهاتف 10 أرقام على الأقل',
+      phoneMinLength: 'يجب أن يكون رقم الهاتف 9 أرقام بالضبط',
       updatingPhone: 'جاري تحديث رقم الهاتف...',
       phoneUpdated: 'تم تحديث رقم الهاتف',
       failedToUpdatePhone: 'فشل تحديث رقم الهاتف',
@@ -148,7 +148,7 @@ export class Setting implements OnInit, OnDestroy {
       success: 'Success',
       usernameUpdated: 'Username updated',
       failedToUpdateUsername: 'Failed to update username',
-      phoneMinLength: 'Phone number must be at least 10 digits',
+      phoneMinLength: 'Phone number must be exactly 9 digits',
       updatingPhone: 'Updating phone number...',
       phoneUpdated: 'Phone number updated',
       failedToUpdatePhone: 'Failed to update phone number',
@@ -370,7 +370,7 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   onUpdatePhone() {
-    if (!this.updatePhoneModel.phoneNumber || this.updatePhoneModel.phoneNumber.length < 10) {
+    if (!this.updatePhoneModel.phoneNumber || !/^[0-9]{9}$/.test(this.updatePhoneModel.phoneNumber)) {
       this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
       return;
     }
@@ -443,6 +443,10 @@ export class Setting implements OnInit, OnDestroy {
       this.toastService.warning(this.t('validation'), this.t('requiredFields'));
       return;
     }
+    if (!/^[0-9]{9}$/.test(this.newAddress.phoneNumber)) {
+      this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
+      return;
+    }
     const toastId = this.toastService.loading(this.t('creating'), this.t('creatingAddress'));
     this.settingService.createAddress(this.newAddress).subscribe({
       next: (res) => {
@@ -463,6 +467,10 @@ export class Setting implements OnInit, OnDestroy {
   updateAddress() {
     if (!this.editAddress.fullName || !this.editAddress.phoneNumber || !this.editAddress.addressLine1) {
       this.toastService.warning(this.t('validation'), this.t('requiredFields'));
+      return;
+    }
+    if (!/^[0-9]{9}$/.test(this.editAddress.phoneNumber)) {
+      this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
       return;
     }
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingAddress'));
@@ -517,5 +525,20 @@ export class Setting implements OnInit, OnDestroy {
       alDor: '',
       alShakka: ''
     };
+  }
+
+  // Handle phone number input - only allow digits and limit to 9 digits
+  onPhoneKeyPress(event: KeyboardEvent): boolean {
+    const char = String.fromCharCode(event.which);
+    if (!/[0-9]/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+    const currentValue = (event.target as HTMLInputElement).value;
+    if (currentValue.length >= 9) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
 }

@@ -186,6 +186,21 @@ export class ShippingStepComponent implements OnInit {
     this.updateDeliveryFee();
   }
 
+  // Handle phone number input - only allow digits and limit to 9 digits
+  onPhoneKeyPress(event: KeyboardEvent): boolean {
+    const char = String.fromCharCode(event.which);
+    if (!/[0-9]/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+    const currentValue = (event.target as HTMLInputElement).value;
+    if (currentValue.length >= 9) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
   t(key: keyof typeof this.translations.ar): string {
     const lang = this.currentLanguage();
     return this.translations[lang][key] ?? key;
@@ -518,12 +533,16 @@ export class ShippingStepComponent implements OnInit {
     this.formData.country = 'Kuwait';
     this.formData.postalCode = '0000';
     
+    // Validate phone number is exactly 9 digits
+    const phoneValid = this.formData.phoneNumber && 
+                      /^[0-9]{9}$/.test(this.formData.phoneNumber);
+    
     return !!(
       this.formData.fullName &&
       this.formData.addressLine1 &&
       this.formData.city &&
       this.formData.state &&
-      this.formData.phoneNumber
+      phoneValid
     );
   }
   
