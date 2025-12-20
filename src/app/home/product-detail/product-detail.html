@@ -147,32 +147,28 @@
           }
         </div>
 
-        <!-- Variants Selection -->
-        @if (product()?.variants && product()?.variants?.length) {
-        <div class="space-y-4">
-          @for (variant of (product()?.variants || []); track variant.id ?? $index) {
+
+          <!-- Description -->
           <div class="space-y-2">
-            <h3 class="text-lg font-semibold">{{getVariantName(variant)}}</h3>
-            <div class="flex flex-wrap gap-2">
-              @for (value of variant.values; track value.id ?? $index) {
-              <button 
-                (click)="selectVariantValue(variant.id!, value.id!, value.price)"
-                [class.bg-primary]="isVariantValueSelected(variant.id!, value.id!)"
-                [class.text-white]="isVariantValueSelected(variant.id!, value.id!)"
-                [class.border-primary]="isVariantValueSelected(variant.id!, value.id!)"
-                [class.bg-base-200]="!isVariantValueSelected(variant.id!, value.id!)"
-                class="px-4 py-2 rounded-lg border-2 border-base-300 hover:border-primary transition-colors">
-                <span>{{getVariantValue(value)}}</span>
-                @if (value.price !== product()!.newPrice) {
-                <span class="text-xs ml-1">({{(value.price |currency:'KWD')}})</span>
-                }
-              </button>
-              }
-            </div>
+            <p class="">{{getProductDescription(product())}}</p>
+            @if (showFullDescription && currentLanguage() === 'ar' && product()?.description) {
+            <p class="text-gray-600">{{product()?.description}}</p>
+            <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+              {{t('showLess')}}
+            </button>
+            } @else if (showFullDescription && currentLanguage() === 'en' && product()?.descriptionAr) {
+            <p class="text-gray-600">{{product()?.descriptionAr}}</p>
+            <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+              {{t('showLess')}}
+            </button>
+            } @else if (!showFullDescription && ((currentLanguage() === 'ar' && product()?.description) || (currentLanguage() === 'en' && product()?.descriptionAr))) {
+            <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
+              {{t('readMore')}}
+            </button>
+            }
           </div>
-          }
-        </div>
-        }
+  
+    
 
         <!-- Stock Status -->
         <div class="flex flex-col space-y-2">
@@ -231,27 +227,33 @@
           </div>
           }
         </div>
-
-        <!-- Description -->
+    <!-- Variants Selection -->
+    @if (product()?.variants && product()?.variants?.length) {
+      <div class="space-y-4">
+        @for (variant of (product()?.variants || []); track variant.id ?? $index) {
         <div class="space-y-2">
-          <p class="">{{getProductDescription(product())}}</p>
-          @if (showFullDescription && currentLanguage() === 'ar' && product()?.description) {
-          <p class="text-gray-600">{{product()?.description}}</p>
-          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
-            {{t('showLess')}}
-          </button>
-          } @else if (showFullDescription && currentLanguage() === 'en' && product()?.descriptionAr) {
-          <p class="text-gray-600">{{product()?.descriptionAr}}</p>
-          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
-            {{t('showLess')}}
-          </button>
-          } @else if (!showFullDescription && ((currentLanguage() === 'ar' && product()?.description) || (currentLanguage() === 'en' && product()?.descriptionAr))) {
-          <button (click)="toggleDescription()" class="text-primary hover:text-primary-focus font-medium">
-            {{t('readMore')}}
-          </button>
-          }
+          <h3 class="text-lg font-semibold">{{getVariantName(variant)}}</h3>
+          <div class="flex flex-wrap gap-2">
+            @for (value of variant.values; track value.id ?? $index) {
+            <button 
+              (click)="selectVariantValue(variant.id!, value.id!, value.price)"
+              [class.bg-primary]="isVariantValueSelected(variant.id!, value.id!)"
+              [class.text-white]="isVariantValueSelected(variant.id!, value.id!)"
+              [class.border-primary]="isVariantValueSelected(variant.id!, value.id!)"
+              [class.bg-base-200]="!isVariantValueSelected(variant.id!, value.id!)"
+              class="px-4 py-2 rounded-lg border-2 border-base-300 hover:border-primary transition-colors">
+              <span>{{getVariantValue(value)}}</span>
+              @if (value.price !== product()!.newPrice) {
+              <span class="text-xs ml-1">({{(value.price |currency:'KWD')}})</span>
+              }
+            </button>
+            }
+          </div>
         </div>
-
+        }
+      </div>
+      }
+      
 
         <!-- Quantity -->
         <div class="space-y-3">
