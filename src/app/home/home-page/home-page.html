@@ -23,8 +23,7 @@
               (load)="$event.target.classList.add('loaded')"
               (error)="$event.target.classList.add('loaded')" 
               class="w-full h-full object-cover"
-              width="1671"
-              height="940">
+              >
             <!-- <div class="img-loading"></div> -->
           </div>
           <!-- Dark overlay for better text readability -->
@@ -240,15 +239,14 @@
         } @else {
         @for (product of featuredProducts; track product.id) {
         <div
-          class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden">
+          class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden product-card">
           <!-- Product Image -->
           <figure class="relative overflow-hidden cursor-pointer" (click)="goToProduct(product)">
             <div class="img-container w-full h-48 lg:h-56">
               <img [src]="product.image" [alt]="product.name" loading="lazy"
                 (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                width="400"
-                height="300">
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" style="width: 280px; height: 300px;"
+               >
               <div class="img-loading"></div>
             </div>
 
@@ -314,7 +312,7 @@
             </h3>
 
             <!-- Product Description -->
-            <p class="text-base-content/70 text-sm mb-4 line-clamp-2">{{product.description}}</p>
+            <p class="text-base-content/70 text-sm mb-4 line-clamp-2">{{product.shortDescription}}</p>
 
             <!-- Rating -->
             <div class="flex items-center gap-1 mb-4">
@@ -640,14 +638,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         @for (item of wishlistItems(); track item.id) {
         <div
-          class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden">
+          class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden product-card">
           <!-- Product Image -->
           <figure class="relative overflow-hidden cursor-pointer"
             (click)="goToProduct({id: item.id, name: item.product.title || item.product.titleAr})">
             <div class="img-container w-full h-48 sm:h-56">
               <img [src]="item.product.mainImage" [alt]="item.product.title || item.product.titleAr" loading="lazy"
                 (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" style="width: 200px; height: 280px;">
               <div class="img-loading"></div>
             </div>
 

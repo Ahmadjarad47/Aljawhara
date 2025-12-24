@@ -546,6 +546,23 @@ export class HomePage implements OnInit, OnDestroy {
     return response.Products || response.products || [];
   }
 
+  // Trim product descriptions so cards stay compact
+  private shortenDescription(description: string, maxLength: number = 110): string {
+    if (!description) {
+      return '';
+    }
+
+    const clean = description.trim();
+    if (clean.length <= maxLength) {
+      return clean;
+    }
+
+    const truncated = clean.slice(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    const safeCut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+    return `${safeCut}...`;
+  }
+
   // Transform API product to HTML expected format
   private transformProduct(product: ProductSummaryDto): any {
     const hasDiscount = product.oldPrice > product.newPrice;
@@ -562,6 +579,7 @@ export class HomePage implements OnInit, OnDestroy {
       id: product.id,
       name: productName,
       description: productDescription,
+      shortDescription: this.shortenDescription(productDescription),
       price: product.newPrice,
       originalPrice: hasDiscount ? product.oldPrice : null,
       image: product.mainImage || 'https://via.placeholder.com/400x300?text=No+Image',

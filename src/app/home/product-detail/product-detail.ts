@@ -544,15 +544,6 @@ export class ProductDetail implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if variants are required and all are selected
-    if (product.variants && product.variants.length > 0 && !this.areAllVariantsSelected()) {
-      this.toastService.warning(
-        this.t('selectionRequired'),
-        this.t('pleaseSelectAll')
-      );
-      return;
-    }
-
     // Respect stock including existing cart quantity
     const existingItem = this.cartService.getItemByProductId(product.id);
     const existingQty = existingItem ? existingItem.quantity : 0;

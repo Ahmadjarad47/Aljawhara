@@ -44,7 +44,10 @@ export class Cart implements OnInit, OnDestroy {
       failedToValidate: 'فشل التحقق من الكوبون. يرجى المحاولة مرة أخرى.',
       failedToApply: 'فشل تطبيق الكوبون. يرجى المحاولة مرة أخرى.',
       each: 'لكل',
-      clearCartConfirm: 'هل أنت متأكد أنك تريد مسح سلة التسوق؟'
+      clearCartConfirm: 'هل أنت متأكد أنك تريد مسح سلة التسوق؟',
+      variants: 'متغيرات',
+      total: 'الإجمالي',
+      quantity: 'الكمية'
     },
     en: {
       yourCart: 'Your Cart',
@@ -65,7 +68,10 @@ export class Cart implements OnInit, OnDestroy {
       failedToValidate: 'Failed to validate coupon. Please try again.',
       failedToApply: 'Failed to apply coupon. Please try again.',
       each: 'each',
-      clearCartConfirm: 'Are you sure you want to clear your cart?'
+      clearCartConfirm: 'Are you sure you want to clear your cart?',
+      variants: 'variants',
+      total: 'Total',
+      quantity: 'Quantity'
     }
   };
 
@@ -116,6 +122,17 @@ export class Cart implements OnInit, OnDestroy {
   // Get item total
   getItemTotal(price: number, quantity: number): number {
     return price * quantity;
+  }
+
+  // Check if item has variants
+  hasVariants(item: any): boolean {
+    return item.selectedVariants && Object.keys(item.selectedVariants).length > 0;
+  }
+
+  // Get variant count
+  getVariantCount(item: any): number {
+    if (!item.selectedVariants) return 0;
+    return Object.keys(item.selectedVariants).length;
   }
 
   // Apply coupon
