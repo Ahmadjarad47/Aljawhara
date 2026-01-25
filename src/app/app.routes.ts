@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -45,13 +44,11 @@ export const routes: Routes = [
     },
     {
         path: 'checkout',
-        loadComponent: () => import('./core/stepper/stepper').then(m => m.StepperComponent),
-        canActivate: [authGuard]
+        loadComponent: () => import('./core/stepper/stepper').then(m => m.StepperComponent)
     },
     {
         path: 'checkout/success',
-        loadComponent: () => import('./core/components/checkout-success/checkout-success').then(m => m.CheckoutSuccessComponent),
-        canActivate: [authGuard]
+        loadComponent: () => import('./core/components/checkout-success/checkout-success').then(m => m.CheckoutSuccessComponent)
     },
     {
         path: 'auth',

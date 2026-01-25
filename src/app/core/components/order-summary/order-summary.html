@@ -46,3 +46,136 @@
   </div>
 }
 
+@if (showGuestLoginModal()) {
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-2">{{ t('guestCheckoutTitle') }}</h3>
+      <p class="text-base-content/70 mb-6">{{ t('guestCheckoutPrompt') }}</p>
+      <div class="modal-action">
+        <button class="btn btn-outline" (click)="onLoginChoice(false)">
+          {{ t('continueAsGuest') }}
+        </button>
+        <button class="btn btn-primary" (click)="onLoginChoice(true)">
+          {{ t('login') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showGuestWarningModal()) {
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-2">{{ t('warningTitle') }}</h3>
+      <p class="text-base-content/70 mb-6">{{ t('warningMessage') }}</p>
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="showGuestWarningModal.set(false)">
+          {{ t('back') }}
+        </button>
+        <button class="btn btn-primary" (click)="onGuestWarningContinue()">
+          {{ t('continueAsGuest') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showGuestDetailsModal()) {
+  <div class="modal modal-open">
+    <div class="modal-box max-w-2xl">
+      <h3 class="font-bold text-lg mb-4">{{ t('guestDetailsTitle') }}</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('fullName') }} *</span>
+          </label>
+          <input class="input input-bordered" [(ngModel)]="guestForm.fullName" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('phoneNumber') }} *</span>
+          </label>
+          <input
+            class="input input-bordered"
+            type="tel"
+            inputmode="numeric"
+            maxlength="9"
+            [ngModel]="guestForm.phoneNumber"
+            (ngModelChange)="onPhoneChange($event)"
+            (keypress)="onPhoneKeyPress($event)"
+          />
+        </div>
+
+        <div class="form-control md:col-span-2">
+          <label class="label">
+            <span class="label-text">{{ t('addressLine1') }} *</span>
+          </label>
+          <input class="input input-bordered" [(ngModel)]="guestForm.addressLine1" />
+        </div>
+
+        <div class="form-control md:col-span-2">
+          <label class="label">
+            <span class="label-text">{{ t('addressLine2Optional') }}</span>
+          </label>
+          <input class="input input-bordered" [(ngModel)]="guestForm.addressLine2" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('state') }} *</span>
+          </label>
+          <select class="select select-bordered" [(ngModel)]="guestForm.state" (ngModelChange)="onStateChange()">
+            <option value="">{{ t('selectState') }}</option>
+            @for (state of states; track state) {
+              <option [value]="state">{{ state }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('city') }} *</span>
+          </label>
+          <select class="select select-bordered" [(ngModel)]="guestForm.city">
+            <option value="">{{ t('selectCity') }}</option>
+            @for (city of getFilteredCities(); track city) {
+              <option [value]="city">{{ city }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('postalCode') }}</span>
+          </label>
+          <input class="input input-bordered" [(ngModel)]="guestForm.postalCode" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('country') }}</span>
+          </label>
+          <input class="input input-bordered" [(ngModel)]="guestForm.country" />
+        </div>
+      </div>
+
+      @if (guestFormSubmitted() && !isGuestFormValid()) {
+        <div class="alert alert-error mt-4">
+          <span>{{ t('requiredFields') }}</span>
+        </div>
+      }
+
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="closeGuestDetails()">
+          {{ t('cancel') }}
+        </button>
+        <button class="btn btn-primary" (click)="submitGuestDetails()" [disabled]="isCreatingOrder()">
+          {{ t('proceedToCheckout') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
