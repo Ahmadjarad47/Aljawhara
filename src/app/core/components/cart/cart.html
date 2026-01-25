@@ -35,13 +35,13 @@
                 <!-- Product Image Card -->
                 <a [routerLink]="['/product', item.productId]" class="shrink-0">
                   <div class="bg-base-200 rounded-lg p-2 border border-base-300 shadow-sm">
-                    <div class="img-container rounded-md w-[50px] h-[50px] overflow-hidden">
+                    <div class="img-container rounded-md w-[70px] h-[70px] overflow-hidden">
                       <img [src]="item.image" 
                            [alt]="item.name" 
                            loading="lazy"
                            (load)="$event.target.classList.add('loaded')"
                            (error)="$event.target.classList.add('loaded')"
-                         style="width: 200px;"  class=" h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" />
+                          class="w-full h-full object-contain cursor-pointer hover:opacity-80 transition-opacity" />
                       <div class="img-loading"></div>
                     </div>
                   </div>
