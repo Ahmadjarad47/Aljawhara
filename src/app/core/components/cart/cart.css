@@ -3,10 +3,3 @@
   pointer-events: none;
 }
 
-/* Mobile: prevent horizontal overflow and improve touch targets */
-@media (max-width: 640px) {
-  .touch-manipulation {
-    touch-action: manipulation;
-  }
-}
-

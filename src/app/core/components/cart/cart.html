@@ -1,12 +1,12 @@
 
-<div class="container mx-auto px-3 sm:px-4 py-4 md:py-6 pb-8 md:pb-6 min-w-0">
-  <div class="bg-base-100 rounded-xl sm:rounded-2xl shadow-sm border border-base-300 px-3 py-3 sm:px-5 sm:py-4 mb-3 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<div class="container mx-auto px-4 py-4 md:py-6">
+  <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 px-4 py-3 md:px-5 md:py-4 mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
       <h1 class="text-xl md:text-2xl font-bold text-base-content">{{t('yourCart')}}</h1>
       <p class="text-xs md:text-sm text-base-content/70">{{ itemCount }} {{t('itemsInCart')}}</p>
     </div>
 
-    <button type="button" class="btn btn-soft btn-sm w-full sm:w-auto justify-center min-h-10 touch-manipulation" (click)="clearCart()" [disabled]="itemCount === 0">
+    <button class="btn btn-soft btn-sm w-full sm:w-auto justify-center" (click)="clearCart()" [disabled]="itemCount === 0">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mr-2">
         <path fill-rule="evenodd" d="M16.5 4.478V4.125A2.625 2.625 0 0013.875 1.5h-3.75A2.625 2.625 0 007.5 4.125v.353c-.44.051-.875.11-1.304.175a.75.75 0 10.232 1.482l.262-.041 1.017 12.2A3.375 3.375 0 0011.06 21h1.879a3.375 3.375 0 003.353-3.706l1.017-12.2.262.041a.75.75 0 10.232-1.482 43.384 43.384 0 00-1.303-.175zM9 4.125c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V4.5H9v-.375z" clip-rule="evenodd" />
         <path d="M10.25 8.25a.75.75 0 00-1.5 0l.34 8.159a.75.75 0 001.5 0L10.25 8.25zM15.25 8.25a.75.75 0 10-1.5 0l-.34 8.159a.75.75 0 001.5 0L15.25 8.25z" />
@@ -16,7 +16,7 @@
   </div>
 
   @if (cartItems().length === 0) {
-    <div class="bg-base-100 rounded-xl sm:rounded-2xl shadow-sm border border-base-300 p-5 sm:p-10 text-center">
+    <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-6 md:p-10 text-center">
       <svg class="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.5 5h13m-10.5 0a1.5 1.5 0 11-3 0m13 0a1.5 1.5 0 11-3 0" />
       </svg>
@@ -25,23 +25,23 @@
       <a routerLink="/" class="btn btn-soft btn-primary btn-sm md:btn-md w-full sm:w-auto">{{t('continueShopping')}}</a>
     </div>
   } @else {
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 min-w-0">
-      <div class="lg:col-span-2 min-w-0">
-        <ul class="space-y-3 sm:space-y-4 list-none p-0 m-0">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <div class="lg:col-span-2">
+        <ul class="space-y-3 md:space-y-4 list-none">
           @for (item of cartItems(); track item.id) {
-            <li class="bg-base-100 rounded-xl sm:rounded-2xl shadow-lg border border-base-300 overflow-hidden hover:shadow-xl transition-all duration-300">
-              <div class="p-3 sm:p-5">
-              <div class="flex flex-row items-stretch sm:items-center gap-3 sm:gap-6 rtl:flex-row-reverse min-w-0">
+            <li class="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden hover:shadow-xl transition-all duration-300">
+              <div class="p-4 md:p-5">
+              <div class="flex flex-row items-center gap-4 md:gap-6 rtl:flex-row-reverse">
                 <!-- Product Image Card -->
-                <a [routerLink]="['/product', item.productId]" class="shrink-0 self-center">
-                  <div class="bg-base-200 rounded-lg p-1.5 sm:p-2 border border-base-300 shadow-sm">
-                    <div class="img-container rounded-md w-14 h-14 sm:w-[70px] sm:h-[70px] overflow-hidden">
+                <a [routerLink]="['/product', item.productId]" class="shrink-0">
+                  <div class="bg-base-200 rounded-lg p-2 border border-base-300 shadow-sm">
+                    <div class="img-container rounded-md w-[70px] h-[70px] overflow-hidden">
                       <img [src]="item.image" 
                            [alt]="item.name" 
                            loading="lazy"
                            (load)="$event.target.classList.add('loaded')"
                            (error)="$event.target.classList.add('loaded')"
-                          class="w-full h-full object-contain cursor-pointer hover:opacity-80 transition-opacity" />
+                          class="w-32 h-full object-contain cursor-pointer hover:opacity-80 transition-opacity" />
                       <div class="img-loading"></div>
                     </div>
                   </div>
@@ -75,7 +75,7 @@
                     </div>
                     
                     <!-- Remove Button -->
-                    <button type="button" class="btn btn-soft btn-error btn-sm shrink-0 min-h-8 min-w-8 touch-manipulation" (click)="$event.stopPropagation(); removeItem(item.id)" [attr.aria-label]="t('removeItem')">
+                    <button class="btn btn-soft btn-error btn-xs md:btn-sm shrink-0" (click)="$event.stopPropagation(); removeItem(item.id)">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3 md:size-4">
                         <path fill-rule="evenodd" d="M16.5 4.478V4.125A2.625 2.625 0 0013.875 1.5h-3.75A2.625 2.625 0 007.5 4.125v.353c-.44.051-.875.11-1.304.175a.75.75 0 10.232 1.482l.262-.041 1.017 12.2A3.375 3.375 0 0011.06 21h1.879a3.375 3.375 0 003.353-3.706l1.017-12.2.262.041a.75.75 0 10.232-1.482 43.384 43.384 0 00-1.303-.175zM9 4.125c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V4.5H9v-.375z" clip-rule="evenodd" />
                         <path d="M10.25 8.25a.75.75 0 00-1.5 0l.34 8.159a.75.75 0 001.5 0L10.25 8.25zM15.25 8.25a.75.75 0 10-1.5 0l-.34 8.159a.75.75 0 001.5 0L15.25 8.25z" />
@@ -84,17 +84,17 @@
                   </div>
 
                   <!-- Quantity and Total -->
-                  <div class="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pt-2 border-t border-base-300">
+                  <div class="flex items-center justify-between gap-3 pt-2 border-t border-base-300">
                     <div class="flex items-center gap-2">
-                      <span class="text-xs text-base-content/70 shrink-0">{{t('quantity') || 'Quantity'}}:</span>
+                      <span class="text-xs text-base-content/70">{{t('quantity') || 'Quantity'}}:</span>
                       <div class="join">
-                        <button type="button" class="btn btn-soft btn-sm join-item min-h-9 min-w-9 touch-manipulation" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity - 1)" [disabled]="item.quantity <= 1" aria-label="Decrease quantity">-</button>
-                        <span class="btn btn-ghost btn-sm join-item no-pointer-events min-w-8 px-2">{{ item.quantity }}</span>
-                        <button type="button" class="btn btn-soft btn-sm join-item min-h-9 min-w-9 touch-manipulation" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity + 1)" aria-label="Increase quantity">+</button>
+                        <button class="btn btn-soft btn-xs join-item" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity - 1)" [disabled]="item.quantity <= 1">-</button>
+                        <button class="btn btn-ghost btn-xs join-item no-pointer-events min-w-[2rem]">{{ item.quantity }}</button>
+                        <button class="btn btn-soft btn-xs join-item" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity + 1)">+</button>
                       </div>
                     </div>
-                    <div class="text-right rtl:text-left shrink-0">
-                      <div class="font-bold text-base-content text-sm sm:text-base">{{ getItemTotal(item.price, item.quantity) | currency:'KWD' }}</div>
+                    <div class="text-right rtl:text-left">
+                      <div class="font-bold text-base-content text-sm md:text-base">{{ getItemTotal(item.price, item.quantity) | currency:'KWD' }}</div>
                       <div class="text-xs text-base-content/60">{{t('total') || 'Total'}}</div>
                     </div>
                   </div>
@@ -116,13 +116,13 @@
         </ul>
       </div>
 
-      <div class="lg:col-span-1 lg:sticky top-6 self-start space-y-4 mt-4 sm:mt-6 lg:mt-0 min-w-0">
+      <div class="lg:col-span-1 lg:sticky top-6 self-start space-y-4">
         <!-- Coupon Section -->
-        <div class="bg-base-100 rounded-xl sm:rounded-2xl shadow-sm border border-base-300 p-4 sm:p-5">
-          <h3 class="text-base sm:text-lg font-semibold text-base-content mb-3">{{t('applyCoupon')}}</h3>
+        <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+          <h3 class="text-lg font-semibold text-base-content mb-3">{{t('applyCoupon')}}</h3>
           
           @if (hasAppliedCoupon) {
-            <div class="alert alert-success mb-3 flex-wrap gap-2 items-start sm:items-center">
+            <div class="alert alert-success mb-3">
               <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -138,18 +138,17 @@
               </button>
             </div>
           } @else {
-            <div class="flex flex-col sm:flex-row gap-2">
+            <div class="flex gap-2">
               <input 
                 type="text" 
                 [(ngModel)]="couponCode"
                 [placeholder]="t('enterCouponCode')"
-                class="input input-bordered flex-1 min-w-0 input-sm sm:input-md"
+                class="input input-bordered flex-1"
                 [class.input-error]="couponError"
                 (keyup.enter)="applyCoupon()"
               />
               <button 
-                type="button"
-                class="btn btn-primary w-full sm:w-auto btn-sm sm:btn-md min-h-10 touch-manipulation"
+                class="btn btn-primary"
                 (click)="applyCoupon()"
                 [disabled]="isApplyingCoupon() || !couponCode.trim()"
               >

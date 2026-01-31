@@ -47,8 +47,7 @@ export class Cart implements OnInit, OnDestroy {
       clearCartConfirm: 'هل أنت متأكد أنك تريد مسح سلة التسوق؟',
       variants: 'متغيرات',
       total: 'الإجمالي',
-      quantity: 'الكمية',
-      removeItem: 'إزالة العنصر'
+      quantity: 'الكمية'
     },
     en: {
       yourCart: 'Your Cart',
@@ -72,8 +71,7 @@ export class Cart implements OnInit, OnDestroy {
       clearCartConfirm: 'Are you sure you want to clear your cart?',
       variants: 'variants',
       total: 'Total',
-      quantity: 'Quantity',
-      removeItem: 'Remove item'
+      quantity: 'Quantity'
     }
   };
 
