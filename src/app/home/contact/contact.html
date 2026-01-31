@@ -31,14 +31,18 @@
             </div>
           </div>
 
-          <!-- Phone -->
+          <!-- Phone / WhatsApp -->
           <div class="mb-6">
             <div class="flex items-start space-x-4 mb-4">
               <div class="text-2xl">📞</div>
               <div>
-                <h3 class="font-semibold text-base-content mb-1">{{t('phone')}}</h3>
+                <h3 class="font-semibold text-base-content mb-1">{{t('phoneWhatsApp')}}</h3>
                 <a href="tel:{{contactInfo.phone}}" class="text-primary hover:underline">
                   {{contactInfo.phone}}
+                </a>
+                <a [href]="'https://wa.me/' + contactInfo.whatsapp" target="_blank" rel="noopener noreferrer"
+                  class="block mt-1 text-success hover:underline">
+                  {{t('chatWhatsApp')}}
                 </a>
               </div>
             </div>
@@ -66,6 +70,11 @@
                 <p class="text-base-content/70">{{contactInfo.workingHours}}</p>
               </div>
             </div>
+          </div>
+
+          <!-- Closing message -->
+          <div class="mb-6 p-4 bg-primary/5 rounded-lg">
+            <p class="text-base-content/80 font-medium">{{t('alwaysHappyToServe')}}</p>
           </div>
 
           <!-- Social Media -->

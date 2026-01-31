@@ -1,123 +1,17 @@
-
 <div class="min-h-screen bg-base-200">
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-r from-primary to-primary-focus text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div class="text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{t('aboutAljawhara')}}</h1>
-        <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-          {{t('heroDesc')}}
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Our Story Section -->
     <section class="mb-16">
       <div class="bg-base-100 rounded-xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold mb-6 text-base-content">{{t('ourStory')}}</h2>
-        <div class="prose max-w-none text-base-content/80 leading-relaxed">
+        <h1 class="text-3xl font-bold mb-6 text-base-content" dir="rtl">من نحن</h1>
+        <div class="prose max-w-none text-base-content/80 leading-relaxed" dir="rtl">
           <p class="text-lg mb-4">
-            Aljawhara was founded with a vision to revolutionize e-commerce in Syria, providing a seamless platform
-            where businesses and customers can connect effortlessly. Since our inception, we've been committed to
-            creating an inclusive marketplace that empowers local businesses while offering customers a diverse range
-            of quality products.
-          </p>
-          <p class="text-lg mb-4">
-            Our journey began with a simple idea: to make online shopping accessible, secure, and convenient for
-            everyone in Syria. Today, we're proud to be one of the leading e-commerce platforms in the region,
-            serving thousands of satisfied customers and hundreds of trusted merchants.
+            نحن متجر إلكتروني كويتي متخصص في توفير المنتجات الاستهلاكية، الورقية، المنظفات وأدواتها، بالإضافة إلى مستلزمات الكوفي شوب. نهدف إلى تسهيل حياة عملائنا وتوفير وقتهم من خلال تجربة تسوق سهلة، منتجات موثوقة، وخدمة توصيل سريعة تغطي جميع مناطق دولة الكويت.
           </p>
           <p class="text-lg">
-            We believe in the power of technology to transform lives and businesses. Through our platform, we're
-            not just facilitating transactions—we're building a community where innovation, trust, and excellence
-            thrive together.
+            نحرص على تلبية احتياجات الأفراد وأصحاب المشاريع بأسعار مناسبة وجودة عالية، مع التزامنا بالشفافية وسرعة الاستجابة وخدمة العملاء.
           </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('ourAchievements')}}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @for (stat of stats; track stat.label) {
-        <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
-          <div class="text-4xl mb-4">{{stat.icon}}</div>
-          <div class="text-3xl font-bold text-primary mb-2">{{stat.value}}</div>
-          <div class="text-base-content/70 font-medium">{{getStatLabel(stat)}}</div>
-        </div>
-        }
-      </div>
-    </section>
-
-    <!-- Values Section -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('ourValues')}}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @for (value of values; track value.title) {
-        <div class="bg-base-100 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-          <div class="flex items-start space-x-4">
-            <div class="text-4xl flex-shrink-0">{{value.icon}}</div>
-            <div>
-              <h3 class="text-xl font-bold mb-2 text-base-content">{{getValueTitle(value)}}</h3>
-              <p class="text-base-content/70">{{getValueDescription(value)}}</p>
-            </div>
-          </div>
-        </div>
-        }
-      </div>
-    </section>
-
-    <!-- Team Section -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center text-base-content">{{t('meetOurTeam')}}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        @for (member of team; track member.name) {
-        <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
-          <div class="w-24 h-24 bg-primary/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span class="text-4xl">👤</span>
-          </div>
-          <h3 class="text-xl font-bold mb-2 text-base-content">{{member.name}}</h3>
-          <p class="text-primary font-medium mb-3">{{member.role}}</p>
-          <p class="text-base-content/70 text-sm">{{member.bio}}</p>
-        </div>
-        }
-      </div>
-    </section>
-
-    <!-- Mission Section -->
-    <section class="mb-16">
-      <div class="bg-gradient-to-r from-primary/10 to-primary-focus/10 rounded-xl p-8 border border-primary/20">
-        <h2 class="text-3xl font-bold mb-6 text-base-content">{{t('ourMission')}}</h2>
-        <p class="text-lg text-base-content/80 leading-relaxed">
-          To empower Syrian businesses and consumers by providing a reliable, secure, and user-friendly e-commerce
-          platform that fosters economic growth and strengthens local communities. We strive to bridge the gap
-          between traditional commerce and modern digital solutions, making online shopping a trusted and accessible
-          experience for all.
-        </p>
-      </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="text-center">
-      <div class="bg-base-100 rounded-xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold mb-4 text-base-content">{{t('joinUsToday')}}</h2>
-        <p class="text-lg text-base-content/70 mb-6 max-w-2xl mx-auto">
-          {{t('joinUsDesc')}}
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <a routerLink="/product" class="btn btn-primary btn-lg">
-            {{t('browseProducts')}}
-          </a>
-          <a routerLink="/contact" class="btn btn-outline btn-primary btn-lg">
-            {{t('contactUs')}}
-          </a>
         </div>
       </div>
     </section>
   </div>
 </div>
-

@@ -24,11 +24,13 @@ export class Contact implements OnInit, OnDestroy {
   // Translations object
   translations = {
     ar: {
-      contactUs: 'اتصل بنا',
-      heroDesc: 'نحن هنا للمساعدة! تواصل معنا لأي أسئلة أو استفسارات',
+      contactUs: 'التواصل معنا',
+      heroDesc: 'في حال وجود أي استفسار أو شكوى، يمكنكم التواصل معنا عبر خدمة العملاء - واتساب / اتصال',
+      alwaysHappyToServe: 'نحن دائماً سعداء بخدمتكم',
       getInTouch: 'تواصل معنا',
       address: 'العنوان',
       phone: 'الهاتف',
+      phoneWhatsApp: 'الهاتف / واتساب',
       email: 'البريد الإلكتروني',
       workingHours: 'ساعات العمل',
       followUs: 'تابعنا',
@@ -52,6 +54,7 @@ export class Contact implements OnInit, OnDestroy {
       tellUs: 'أخبرنا كيف يمكننا مساعدتك...',
       sending: 'جاري الإرسال...',
       sendMessageBtn: 'إرسال الرسالة',
+      chatWhatsApp: 'محادثة واتساب',
       findUsOnMap: 'اعثر علينا على الخريطة',
       mapWillBeDisplayed: 'سيتم عرض الخريطة هنا',
       required: '*',
@@ -61,10 +64,12 @@ export class Contact implements OnInit, OnDestroy {
     },
     en: {
       contactUs: 'Contact Us',
-      heroDesc: 'We\'re here to help! Get in touch with us for any questions or concerns',
+      heroDesc: 'In case of any inquiry or complaint, you can contact us via Customer Service - WhatsApp / Call',
+      alwaysHappyToServe: 'We are always happy to serve you',
       getInTouch: 'Get in Touch',
       address: 'Address',
       phone: 'Phone',
+      phoneWhatsApp: 'Phone / WhatsApp',
       email: 'Email',
       workingHours: 'Working Hours',
       followUs: 'Follow Us',
@@ -88,6 +93,7 @@ export class Contact implements OnInit, OnDestroy {
       tellUs: 'Tell us how we can help you...',
       sending: 'Sending...',
       sendMessageBtn: 'Send Message',
+      chatWhatsApp: 'Chat on WhatsApp',
       findUsOnMap: 'Find Us on Map',
       mapWillBeDisplayed: 'Map will be displayed here',
       required: '*',
@@ -118,6 +124,7 @@ export class Contact implements OnInit, OnDestroy {
   contactInfo = {
     address: 'الكويت, الشويخ الصناعية',
     phone: '+965 67070814',
+    whatsapp: '96567070814',
     email: 'info@aljawhara.com',
     workingHours: 'Sunday - Thursday: 9:00 AM - 6:00 PM'
   };

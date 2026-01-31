@@ -37,9 +37,7 @@
             {{t('agreementToTerms')}}
           </h2>
           <p class="text-base-content/80 leading-relaxed">
-            By accessing and using the Aljawhara website and services, you agree to be bound by these Terms of Service. 
-            If you do not agree to these terms, please do not use our services. These terms apply to all visitors, users, 
-            and others who access or use our service.
+            {{t('agreementIntro')}}
           </p>
         </section>
 
@@ -96,18 +94,11 @@
             </div>
             {{t('productsAndPricing')}}
           </h2>
-          <div class="space-y-4">
-            <p class="text-base-content/80 leading-relaxed">
-              We strive to provide accurate product descriptions, images, and pricing. However, we do not warrant that 
-              product descriptions or other content is accurate, complete, reliable, current, or error-free.
-            </p>
-            <ul class="list-disc list-inside space-y-2 text-base-content/80 ml-4">
-              <li>Prices are subject to change without notice</li>
-              <li>We reserve the right to refuse or cancel any order</li>
-              <li>Product availability is subject to change</li>
-              <li>We may limit quantities available for purchase</li>
-            </ul>
-          </div>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80 ml-4">
+            <li>{{t('termsVatIncluded')}}</li>
+            <li>{{t('termsModifyPrices')}}</li>
+            <li>{{t('termsImagesIllustrative')}}</li>
+          </ul>
         </section>
 
         <!-- Orders and Payment -->
@@ -120,18 +111,12 @@
             </div>
             {{t('ordersAndPayment')}}
           </h2>
-          <div class="space-y-4">
-            <p class="text-base-content/80 leading-relaxed">
-              By placing an order, you make an offer to purchase products at the prices stated. We reserve the right to 
-              accept or reject your order for any reason.
-            </p>
-            <ul class="list-disc list-inside space-y-2 text-base-content/80 ml-4">
-              <li>Payment must be received before order processing</li>
-              <li>We accept various payment methods as displayed on our website</li>
-              <li>All prices are in the currency displayed and include applicable taxes</li>
-              <li>You are responsible for providing accurate payment information</li>
-            </ul>
-          </div>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80 ml-4">
+            <li>{{t('termsCustomerDataResponsibility')}}</li>
+            <li>{{t('termsCancelOrder')}}</li>
+            <li>{{t('paymentBeforeProcessing')}}</li>
+            <li>{{t('acceptPaymentMethods')}}</li>
+          </ul>
         </section>
 
         <!-- Shipping and Returns -->
