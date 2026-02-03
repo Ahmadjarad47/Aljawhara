@@ -78,7 +78,7 @@ export class HomePage implements OnInit, OnDestroy {
       privacyNote: 'نحترم خصوصيتك. يمكنك إلغاء الاشتراك في أي وقت.',
       // Features
       freeShipping: 'شحن مجاني',
-      freeShippingDesc: 'شحن مجاني للطلبات أكثر من 50 دولاراً. توصيل سريع وموثوق إلى باب منزلك.',
+      freeShippingDesc: 'شحن مجاني للطلبات أكثر من 20 دينار كويتي. توصيل سريع وموثوق إلى باب منزلك.',
       qualityGuaranteeTitle: 'ضمان الجودة',
       qualityGuaranteeDesc: 'منتجات أصلية 100% مع ضمان الجودة. تسوق بثقة.',
       support247: 'دعم 24/7',
