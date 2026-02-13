@@ -104,14 +104,14 @@
                             </label>
                             <select 
                                 class="select select-bordered select-sm" 
-                                [ngModel]="chartStatusFilter()"
-                                (ngModelChange)="chartStatusFilter.set($event)">
+                                [ngModel]="chartStatusFilter() !== null ? parseInt(chartStatusFilter()!, 10) : null"
+                                (ngModelChange)="chartStatusFilter.set($event !== null ? $event.toString() : null)">
                                 <option [value]="null">All Status</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Failed">Failed</option>
-                                <option value="Cancelled">Cancelled</option>
-                                <option value="Refunded">Refunded</option>
+                                <option [value]="TransactionStatus.Pending">Pending</option>
+                                <option [value]="TransactionStatus.Paid">Paid</option>
+                                <option [value]="TransactionStatus.Failed">Failed</option>
+                                <option [value]="TransactionStatus.Cancelled">Cancelled</option>
+                                <option [value]="TransactionStatus.Refunded">Refunded</option>
                             </select>
                         </div>
 
@@ -277,14 +277,14 @@
                 <div class="form-control">
                     <select 
                         class="select select-bordered" 
-                        [ngModel]="statusFilter()"
-                        (ngModelChange)="statusFilter.set($event); onSearch()">
+                        [ngModel]="statusFilter() !== null ? parseInt(statusFilter()!, 10) : null"
+                        (ngModelChange)="statusFilter.set($event !== null ? $event.toString() : null); onSearch()">
                         <option [value]="null">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Failed">Failed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Refunded">Refunded</option>
+                        <option [value]="TransactionStatus.Pending">Pending</option>
+                        <option [value]="TransactionStatus.Paid">Paid</option>
+                        <option [value]="TransactionStatus.Failed">Failed</option>
+                        <option [value]="TransactionStatus.Cancelled">Cancelled</option>
+                        <option [value]="TransactionStatus.Refunded">Refunded</option>
                     </select>
                 </div>
 
@@ -457,7 +457,7 @@
                                     </td>
                                     <td>
                                         <div class="badge" [class]="getStatusBadgeClass(transaction.status)">
-                                            {{transaction.status}}
+                                            {{getStatusName(transaction.status)}}
                                         </div>
                                     </td>
                                     <td>
@@ -490,7 +490,7 @@
                                                 class="btn btn-ghost btn-xs">
                                                 Status
                                             </button>
-                                            @if (transaction.status === 'Pending') {
+                                            @if (getStatusNumber(transaction.status) === TransactionStatus.Pending) {
                                                 <button 
                                                     (click)="markAsCompleted(transaction)"
                                                     [disabled]="isLoading()"
@@ -498,7 +498,7 @@
                                                     Complete
                                                 </button>
                                             }
-                                            @if (transaction.status !== 'Failed' && transaction.status !== 'Cancelled') {
+                                            @if (getStatusNumber(transaction.status) !== TransactionStatus.Failed && getStatusNumber(transaction.status) !== TransactionStatus.Cancelled) {
                                                 <button 
                                                     (click)="markAsFailed(transaction)"
                                                     [disabled]="isLoading()"
@@ -506,7 +506,7 @@
                                                     Fail
                                                 </button>
                                             }
-                                            @if (!transaction.isRefunded && (transaction.status === 'Completed' || transaction.status === 'Success')) {
+                                            @if (!transaction.isRefunded && getStatusNumber(transaction.status) === TransactionStatus.Paid) {
                                                 <button 
                                                     (click)="refundTransactionStart(transaction)"
                                                     [disabled]="isLoading()"
@@ -640,10 +640,10 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="newTransaction.status">
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Cancelled">Cancelled</option>
+                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
+                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
+                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
+                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
                         </select>
                     </div>
 
@@ -709,11 +709,11 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="editTransaction.status">
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Refunded">Refunded</option>
+                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
+                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
+                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
+                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
+                            <option [value]="TransactionStatus.Refunded.toString()">Refunded</option>
                         </select>
                     </div>
 
@@ -846,11 +846,11 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="statusUpdate.status">
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Refunded">Refunded</option>
+                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
+                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
+                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
+                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
+                            <option [value]="TransactionStatus.Refunded.toString()">Refunded</option>
                         </select>
                     </div>
 
@@ -950,7 +950,7 @@
                                     <div><span class="font-medium">Amount:</span> {{transaction.amount | currency:'KWD'}}</div>
                                     <div><span class="font-medium">Status:</span> 
                                         <span class="badge" [class]="getStatusBadgeClass(transaction.status)">
-                                            {{transaction.status}}
+                                            {{getStatusName(transaction.status)}}
                                         </span>
                                     </div>
                                 </div>

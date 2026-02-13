@@ -73,7 +73,7 @@ export class PaymentTimingStepComponent {
   async selectTiming(timing: PaymentTiming): Promise<void> {
     this.selectedTiming.set(timing);
     this.stepperService.updateCheckoutData({ paymentTiming: timing });
-    
+    await this.createOrder(); 
     // If Pay on Delivery is selected, create order immediately
     if (timing === 'on_delivery') {
       await this.createOrder();
@@ -143,9 +143,18 @@ export class PaymentTimingStepComponent {
         orderDto
       ).toPromise();
       
+      console.log('Order created:', response);
+      
       // Clear cart and reset stepper
       this.cartService.clearCart();
       this.stepperService.reset();
+      
+      // Open payment URL if returned (e.g. for Pay Now)
+      const paymentUrl = response?.paymentUrl ?? response?.transaction?.paymentUrl;
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+        return;
+      }
       
       // Navigate to user orders page
       await this.router.navigate(['/user/orders']);

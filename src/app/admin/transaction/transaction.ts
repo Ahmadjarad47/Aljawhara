@@ -27,7 +27,8 @@ import {
   TransactionFilterDto,
   TransactionAnalyticsDto,
   PaymentMethod,
-  PaymentProcessingDto
+  PaymentProcessingDto,
+  TransactionStatus
 } from './transaction.models';
 import { Observable, map, combineLatest } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
@@ -192,7 +193,7 @@ export class Transaction implements OnInit {
     orderId: 0,
     amount: 0,
     paymentMethod: PaymentMethod.Card,
-    status: 'Pending',
+    status: TransactionStatus.Pending.toString(),
     transactionReference: null,
     paymentGatewayResponse: null,
     notes: null
@@ -428,9 +429,10 @@ export class Transaction implements OnInit {
   }
 
   editTransactionStart(transaction: TransactionAdvancedDto) {
+    const statusNum = typeof transaction.status === 'string' ? parseInt(transaction.status, 10) : transaction.status;
     this.editTransaction = {
       id: transaction.id,
-      status: transaction.status,
+      status: statusNum.toString(),
       transactionReference: transaction.transactionReference,
       paymentGatewayResponse: transaction.paymentGatewayResponse,
       notes: transaction.notes
@@ -525,8 +527,9 @@ export class Transaction implements OnInit {
 
   updateStatusStart(transaction: TransactionAdvancedDto) {
     this.selectedTransaction.set(transaction);
+    const statusNum = typeof transaction.status === 'string' ? parseInt(transaction.status, 10) : transaction.status;
     this.statusUpdate = {
-      status: transaction.status,
+      status: statusNum.toString(),
       gatewayResponse: transaction.paymentGatewayResponse || ''
     };
     this.showStatusModal.set(true);
@@ -701,7 +704,7 @@ export class Transaction implements OnInit {
       orderId: 0,
       amount: 0,
       paymentMethod: PaymentMethod.Card,
-      status: 'Pending',
+      status: TransactionStatus.Pending.toString(),
       transactionReference: null,
       paymentGatewayResponse: null,
       notes: null
@@ -765,24 +768,52 @@ export class Transaction implements OnInit {
     }
   }
 
-  getStatusBadgeClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'success':
+  getStatusBadgeClass(status: string | number): string {
+    const statusNum = typeof status === 'string' ? parseInt(status, 10) : status;
+    
+    switch (statusNum) {
+      case TransactionStatus.Paid:
         return 'badge-success';
-      case 'pending':
+      case TransactionStatus.Pending:
         return 'badge-warning';
-      case 'failed':
-      case 'cancelled':
+      case TransactionStatus.Failed:
+      case TransactionStatus.Cancelled:
         return 'badge-error';
+      case TransactionStatus.Refunded:
+        return 'badge-info';
       default:
         return 'badge-info';
     }
   }
 
-  // Make Math available in template
+  getStatusName(status: string | number): string {
+    const statusNum = typeof status === 'string' ? parseInt(status, 10) : status;
+    
+    switch (statusNum) {
+      case TransactionStatus.Pending:
+        return 'Pending';
+      case TransactionStatus.Paid:
+        return 'Paid';
+      case TransactionStatus.Failed:
+        return 'Failed';
+      case TransactionStatus.Cancelled:
+        return 'Cancelled';
+      case TransactionStatus.Refunded:
+        return 'Refunded';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  getStatusNumber(status: string | number): number {
+    return typeof status === 'string' ? parseInt(status, 10) : status;
+  }
+
+  // Make Math and parseInt available in template
   Math = Math;
+  parseInt = parseInt;
   PaymentMethod = PaymentMethod;
+  TransactionStatus = TransactionStatus;
   
   // Toast methods
   onToastClose(toastId: string) {
@@ -841,7 +872,7 @@ export class Transaction implements OnInit {
       data: [],
       backgroundColor: [
         'rgba(251, 191, 36, 0.8)',   // Pending - Yellow
-        'rgba(16, 185, 129, 0.8)',    // Completed - Green
+        'rgba(16, 185, 129, 0.8)',    // Paid - Green
         'rgba(239, 68, 68, 0.8)',     // Failed - Red
         'rgba(107, 114, 128, 0.8)',   // Cancelled - Gray
         'rgba(139, 92, 246, 0.8)'     // Refunded - Purple
@@ -1127,26 +1158,28 @@ export class Transaction implements OnInit {
     if (transactions.length === 0) return;
 
     // Update Transactions by Status Chart
-    const statusCounts: { [key: string]: number } = {
-      'Pending': 0,
-      'Completed': 0,
-      'Failed': 0,
-      'Cancelled': 0,
-      'Refunded': 0
+    const statusCounts: { [key: number]: number } = {
+      [TransactionStatus.Pending]: 0,
+      [TransactionStatus.Paid]: 0,
+      [TransactionStatus.Failed]: 0,
+      [TransactionStatus.Cancelled]: 0,
+      [TransactionStatus.Refunded]: 0
     };
 
     transactions.forEach(transaction => {
-      if (statusCounts[transaction.status] !== undefined) {
-        statusCounts[transaction.status]++;
+      const statusNum = typeof transaction.status === 'string' ? parseInt(transaction.status, 10) : transaction.status;
+      if (statusCounts[statusNum] !== undefined) {
+        statusCounts[statusNum]++;
       }
     });
 
     const statusLabels: string[] = [];
     const statusData: number[] = [];
-    Object.keys(statusCounts).forEach(status => {
-      if (statusCounts[status] > 0) {
-        statusLabels.push(status);
-        statusData.push(statusCounts[status]);
+    Object.keys(statusCounts).forEach(statusKey => {
+      const statusNum = parseInt(statusKey, 10);
+      if (statusCounts[statusNum] > 0) {
+        statusLabels.push(this.getStatusName(statusNum));
+        statusData.push(statusCounts[statusNum]);
       }
     });
 
