@@ -143,6 +143,7 @@ export class PaymentTimingStepComponent {
         orderDto
       ).toPromise();
       
+      // 
       console.log('Order created:', response);
       
       // Clear cart and reset stepper
