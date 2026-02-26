@@ -15,7 +15,7 @@ export interface TransactionAdvancedDto {
   amount: number;
   paymentMethod: PaymentMethod;
   paymentMethodName: string;
-  status: string;
+  status: string | number;
   transactionDate: string; // ISO
   processedDate?: string | null; // ISO
   transactionReference?: string | null;

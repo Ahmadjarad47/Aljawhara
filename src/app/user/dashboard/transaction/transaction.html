@@ -57,7 +57,7 @@
                         <td><div class="badge badge-outline">{{transaction.amount | number:'1.2-2'}}</div></td>
                         <td>{{getPaymentMethodName(transaction.paymentMethod)}}</td>
                         <td>
-                          <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
+                          <div class="badge" [class.badge-success]="isSuccessStatus(transaction.status)" [class.badge-error]="isFailedStatus(transaction.status)" [class.badge-warning]="isPendingStatus(transaction.status)">
                             {{getStatusText(transaction.status)}}
                           </div>
                         </td>
@@ -99,7 +99,7 @@
                         </div>
                       </div>
                       <div class="shrink-0">
-                        <div class="badge" [class.badge-success]="transaction.status.toLowerCase()==='succeeded' || transaction.status.toLowerCase()==='paid'" [class.badge-error]="transaction.status.toLowerCase()==='failed'" [class.badge-warning]="transaction.status.toLowerCase()==='pending'">
+                        <div class="badge" [class.badge-success]="isSuccessStatus(transaction.status)" [class.badge-error]="isFailedStatus(transaction.status)" [class.badge-warning]="isPendingStatus(transaction.status)">
                           {{getStatusText(transaction.status)}}
                         </div>
                       </div>

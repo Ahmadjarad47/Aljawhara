@@ -127,18 +127,49 @@ export class Transaction implements OnInit, OnDestroy {
     }
   }
 
+  private normalizeStatus(status: string | number | null | undefined): 'paid' | 'pending' | 'failed' | 'unknown' {
+    if (typeof status === 'number') {
+      if (status === 1) return 'paid';
+      if (status === 0) return 'pending';
+      if (status === 2 || status === 3) return 'failed';
+      return 'unknown';
+    }
+
+    const statusLower = String(status ?? '').toLowerCase();
+    if (statusLower === 'succeeded' || statusLower === 'paid') return 'paid';
+    if (statusLower === 'pending') return 'pending';
+    if (statusLower === 'failed' || statusLower === 'cancelled') return 'failed';
+    return 'unknown';
+  }
+
   // Get status translation
-  getStatusText(status: string): string {
+  getStatusText(status: string | number | null | undefined): string {
     const isArabic = this.currentLanguage() === 'ar';
-    const statusLower = status.toLowerCase();
-    if (statusLower === 'succeeded' || statusLower === 'paid') {
+    const normalizedStatus = this.normalizeStatus(status);
+
+    if (normalizedStatus === 'paid') {
       return isArabic ? 'نجح' : 'Succeeded';
-    } else if (statusLower === 'failed') {
+    }
+    if (normalizedStatus === 'failed') {
       return isArabic ? 'فشل' : 'Failed';
-    } else if (statusLower === 'pending') {
+    }
+    if (normalizedStatus === 'pending') {
       return isArabic ? 'قيد الانتظار' : 'Pending';
     }
-    return status;
+
+    return String(status ?? '-');
+  }
+
+  isSuccessStatus(status: string | number | null | undefined): boolean {
+    return this.normalizeStatus(status) === 'paid';
+  }
+
+  isPendingStatus(status: string | number | null | undefined): boolean {
+    return this.normalizeStatus(status) === 'pending';
+  }
+
+  isFailedStatus(status: string | number | null | undefined): boolean {
+    return this.normalizeStatus(status) === 'failed';
   }
 
   // UI state
