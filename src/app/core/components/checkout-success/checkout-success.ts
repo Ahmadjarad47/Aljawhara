@@ -18,7 +18,7 @@ export class CheckoutSuccessComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
   private paymentCallbackHandled = false;
-  private paymentCallbackUrl = `${environment.apiUrl.replace(/\/?$/, '/')}Transactions/payment-callback`;
+  private paymentCallbackUrl = `${environment.apiUrl.replace(/\/?$/, '/')}Orders/payment-callback`;
   private readonly onStorage = (e: StorageEvent) => {
     if (e.key === 'language' && e.newValue) {
       const newLang = e.newValue as 'ar' | 'en';
