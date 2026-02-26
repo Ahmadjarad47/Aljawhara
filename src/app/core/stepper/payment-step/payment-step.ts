@@ -99,7 +99,7 @@ export class PaymentStepComponent {
   
   tax = computed(() => 0); // Tax set to zero
 
-  deliveryFee = computed(() => this.checkoutData().deliveryFee || 2);
+  deliveryFee = computed(() => this.checkoutData().deliveryFee ?? 2);
 
   total = computed(() => this.subtotal() + this.deliveryFee());
   

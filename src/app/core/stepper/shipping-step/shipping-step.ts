@@ -7,6 +7,7 @@ import { UserAddressDto, CreateAddressDto, UpdateAddressDto } from '../../Models
 import { environment } from '../../../../environments/environment.development';
 import { ToastService } from '../../../services/toast.service';
 import { ToastComponent } from '../../components/toast/toast.component';
+import { CartService } from '../../service/cart-service';
 
 interface ApiResponseDto<T = any> {
   success: boolean;
@@ -26,6 +27,7 @@ export class ShippingStepComponent implements OnInit {
   private stepperService = inject(ServiceStepper);
   private http = inject(HttpClient);
   public toastService = inject(ToastService);
+  private cartService = inject(CartService);
   
   // Loading state
   isLoading = signal<boolean>(false);
@@ -158,6 +160,13 @@ export class ShippingStepComponent implements OnInit {
 
   // Calculate delivery fee based on city
   calculateDeliveryFee(city: string | null | undefined): number {
+    const subtotal = this.cartService
+      .getCartItems()
+      .reduce((total, item) => total + (item.price * item.quantity), 0);
+
+    // Free shipping offer for orders >= 20 KWD
+    if (subtotal >= 20) return 0;
+
     if (!city) return 2; // Default fee
     
     const highFeeCities = [ 'الخيران', 'العبدلي', 'الوفرة','مدينة صباح الأحمد'];

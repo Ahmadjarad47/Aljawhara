@@ -20,6 +20,8 @@ export interface OrderSummaryDto {
     id: number;
     orderNumber: string;
     status: OrderStatus;
+    isPaid?: boolean;
+    paymentStatus?: string | number | null;
     total: number;
     createdAt: string;
     itemCount: number;
@@ -30,6 +32,8 @@ export interface OrderSummaryDto {
 export interface OrderDto extends BaseDto {
     orderNumber: string;
     status: OrderStatus;
+    isPaid?: boolean;
+    paymentStatus?: string | number | null;
     subtotal: number;
     shipping: number;
     tax: number;
@@ -137,5 +141,10 @@ export interface InvoicePaymentDto {
     // Success indicator
     success: boolean;
     message?: string;
+}
+
+export interface OrderPaymentLinkResponse {
+    orderId: number;
+    paymentLink: string;
 }
 

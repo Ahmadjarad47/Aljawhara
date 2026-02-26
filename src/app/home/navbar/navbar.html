@@ -106,7 +106,9 @@
                       style="opacity: 1 !important;" loading="lazy">
                   </div>
                   <div class="flex-1 min-w-0">
-                    <span class="text-sm font-medium text-base-content block truncate">{{product.title}}</span>
+                    <span class="text-sm font-medium text-base-content block truncate">
+                      {{ currentLanguage() === 'ar' ? (product.titleAr || product.title) : product.title }}
+                    </span>
                     @if (product.newPrice) {
                     <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
                     }
@@ -833,7 +835,9 @@
             style="opacity: 1 !important;" loading="lazy">
         </div>
         <div class="flex-1 min-w-0">
-          <span class="text-sm font-medium text-gray-700 block truncate">{{product.title}}</span>
+          <span class="text-sm font-medium text-gray-700 block truncate">
+            {{ currentLanguage() === 'ar' ? (product.titleAr || product.title) : product.title }}
+          </span>
           @if (product.newPrice) {
           <span class="text-xs text-base-content/60">{{product.newPrice}} {{selectedCurrency}}</span>
           }

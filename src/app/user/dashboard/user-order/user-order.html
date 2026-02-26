@@ -126,6 +126,14 @@
                                                     </svg>
                                                     {{t('view')}}
                                                 </button>
+                                                @if (canPayOrder(order)) {
+                                                    <button
+                                                        (click)="payOrder(order.id)"
+                                                        [disabled]="isLoading()"
+                                                        class="btn btn-ghost btn-xs btn-success">
+                                                        {{t('payNow')}}
+                                                    </button>
+                                                }
                                                 @if (canCancelOrder(order)) {
                                                     <button 
                                                         (click)="cancelOrder(order.id)"
@@ -199,6 +207,14 @@
                                         class="btn btn-ghost btn-xs">
                                         {{t('view')}}
                                     </button>
+                                    @if (canPayOrder(order)) {
+                                        <button
+                                            (click)="payOrder(order.id)"
+                                            [disabled]="isLoading()"
+                                            class="btn btn-success btn-xs btn-outline">
+                                            {{t('payNow')}}
+                                        </button>
+                                    }
                                     @if (canCancelOrder(order)) {
                                         <button 
                                             (click)="cancelOrder(order.id)"
@@ -433,6 +449,14 @@
                 </div>
 
                 <div class="modal-action flex-col sm:flex-row gap-2 mt-4">
+                    @if (canPayOrder(selectedOrderDetails()!)) {
+                        <button
+                            (click)="payOrder(selectedOrderDetails()!.id)"
+                            [disabled]="isLoading()"
+                            class="btn btn-success w-full sm:w-auto">
+                            <span class="text-xs sm:text-sm">{{t('payNow')}}</span>
+                        </button>
+                    }
                     <button 
                         (click)="downloadInvoice(selectedOrderDetails()!.id)" 
                         [disabled]="isLoading()" 

@@ -1,0 +1,80 @@
+<main
+  class="min-h-[70vh] flex items-center justify-center px-4 py-12"
+  [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'"
+>
+  <section
+    class="w-full max-w-2xl bg-base-100 rounded-3xl shadow-xl border border-base-300/70 p-6 sm:p-10"
+    role="alert"
+    aria-live="assertive"
+  >
+    <!-- Error icon -->
+    <div class="flex justify-center">
+      <div
+        class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-error text-error-content grid place-items-center shadow-sm"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          class="w-12 h-12 sm:w-14 sm:h-14"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M12 9v4m0 4h.01M10.29 3.86l-7.4 12.82A1.5 1.5 0 004.2 19h15.6a1.5 1.5 0 001.3-2.32L13.7 3.86a1.5 1.5 0 00-2.6 0z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Title + subtitle -->
+    <div class="text-center mt-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-base-content">
+        {{ t('title') }}
+      </h1>
+      <p class="mt-2 text-base text-base-content/70">
+        {{ t('subtitle') }}
+      </p>
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-8 bg-base-200/60 rounded-2xl border border-base-300/70 p-5 sm:p-6 text-start">
+      <h2 class="text-base font-bold text-base-content mb-3">{{ t('tipsTitle') }}</h2>
+      <ul class="text-sm sm:text-[15px] text-base-content/70 space-y-2 list-disc ps-6">
+        <li>{{ t('tip1') }}</li>
+        <li>{{ t('tip2') }}</li>
+        <li>{{ t('tip3') }}</li>
+      </ul>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-9 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+      <!-- main actions -->
+      <button class="btn btn-primary h-12 px-6 w-full sm:w-auto" type="button" (click)="retry()">
+        {{ t('retryCheckout') }}
+      </button>
+
+      <a class="btn btn-outline h-12 px-6 w-full sm:w-auto" routerLink="/cart">
+        {{ t('backToCart') }}
+      </a>
+
+      <!-- secondary actions -->
+      <div
+        class="w-full sm:w-auto flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+        [ngClass]="currentLanguage() === 'ar' ? 'sm:flex-row-reverse' : ''"
+      >
+        <a class="btn btn-ghost h-12 px-6 w-full sm:w-auto" routerLink="/contact">
+          {{ t('contactSupport') }}
+        </a>
+
+        <button class="btn btn-ghost h-12 px-6 w-full sm:w-auto" type="button" (click)="goHome()">
+          {{ t('goHome') }}
+        </button>
+      </div>
+    </div>
+  </section>
+</main>

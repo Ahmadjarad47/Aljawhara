@@ -3,7 +3,7 @@ import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, shareReplay, catchError } from 'rxjs/operators';
-import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto, InvoicePaymentDto } from './models.order';
+import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto, InvoicePaymentDto, OrderPaymentLinkResponse } from './models.order';
 
 @Injectable({
   providedIn: 'root'
@@ -83,6 +83,13 @@ export class UserOrderService {
   // Get invoice payment data
   getInvoicePaymentData(orderId: number): Observable<InvoicePaymentDto> {
     return this.http.get<InvoicePaymentDto>(`${this.api}/${orderId}/invoice-payment`).pipe(
+      shareReplay(1)
+    );
+  }
+
+  // Get payment link for unpaid order
+  getOrderPaymentLink(orderId: number): Observable<OrderPaymentLinkResponse> {
+    return this.http.post<OrderPaymentLinkResponse>(`${this.api}/${orderId}/payment-link`, {}).pipe(
       shareReplay(1)
     );
   }

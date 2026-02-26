@@ -1,4 +1,17 @@
-.step-primary {
-  color:#054239 !important;
+.step-primarys {
+  color: #054239 !important;
+}
+
+/* DaisyUI "steps" uses pseudo-elements for the dot and connector line */
+.steps .step.step-primarys::before {
+  background-color: #054239 !important;
+  border-color: #054239 !important;
+  /* number color inside the circle */
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 ) !important;
+}
+
+.steps .step.step-primarys::after {
+  background-color: #054239 !important;
 }
 

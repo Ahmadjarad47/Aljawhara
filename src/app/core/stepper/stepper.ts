@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ServiceStepper, StepperStep } from './service-stepper';
 import { ShippingStepComponent } from './shipping-step/shipping-step';
@@ -21,10 +21,24 @@ import { PaymentStepComponent } from './payment-step/payment-step';
 })
 export class StepperComponent implements OnInit {
   private stepperService = inject(ServiceStepper);
+  private lastStep?: StepperStep;
+
+  constructor() {
+    effect(() => {
+      const step = this.currentStep();
+
+      // Scroll only when user moves between steps (avoid initial jump).
+      if (this.lastStep !== undefined && this.lastStep !== step) {
+        this.scrollToTop();
+      }
+
+      this.lastStep = step;
+    });
+  }
   
   ngOnInit(): void {
-    // Validate current step and redirect to first incomplete step if needed
-    this.stepperService.validateAndRedirect();
+    // Always restart checkout from step 1 when entering checkout
+    this.stepperService.startFromFirstStep();
   }
   
   // Language / translations
@@ -94,6 +108,13 @@ export class StepperComponent implements OnInit {
       return this.t('paymentStep');
     }
     return '';
+  }
+
+  private scrollToTop(): void {
+    // Let Angular render the next step content, then scroll.
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, 0);
   }
 }
 

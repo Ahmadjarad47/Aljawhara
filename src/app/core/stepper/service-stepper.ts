@@ -36,6 +36,7 @@ export class ServiceStepper {
   
   constructor() {
     // Load saved step from localStorage
+    
     const savedStep = localStorage.getItem('checkout_step');
     if (savedStep) {
       this.currentStep.set(parseInt(savedStep, 10) as StepperStep);
@@ -116,6 +117,12 @@ export class ServiceStepper {
     this.checkoutData.set({});
     localStorage.removeItem('checkout_step');
     localStorage.removeItem('checkout_data');
+  }
+
+  // Force checkout to start from step 1 (Shipping)
+  startFromFirstStep(): void {
+    this.currentStep.set(StepperStep.SHIPPING);
+    localStorage.setItem('checkout_step', StepperStep.SHIPPING.toString());
   }
   
   // Check if step is complete

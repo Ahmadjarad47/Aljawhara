@@ -122,7 +122,8 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       shareExperience: 'شارك تجربتك مع هذا المنتج...',
       characters: 'حرف',
       submitRating: 'إرسال التقييم',
-      downloadInvoice: 'تحميل الفاتورة'
+      downloadInvoice: 'تحميل الفاتورة',
+      payNow: 'ادفع الآن'
     },
     en: {
       myOrders: 'My Orders',
@@ -171,7 +172,8 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       shareExperience: 'Share your experience with this product...',
       characters: 'characters',
       submitRating: 'Submit Rating',
-      downloadInvoice: 'Download Invoice'
+      downloadInvoice: 'Download Invoice',
+      payNow: 'Pay Now'
     }
   } as const;
 
@@ -261,6 +263,62 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
   canCancelOrder(order: OrderSummaryDto | OrderDto): boolean {
     return order.status === OrderStatus.Pending || order.status === OrderStatus.Processing;
+  }
+
+  canPayOrder(order: OrderSummaryDto | OrderDto): boolean {
+    if (typeof order.isPaid === 'boolean') {
+      return !order.isPaid;
+    }
+
+    const paymentStatus = order.paymentStatus;
+    if (typeof paymentStatus === 'string') {
+      const normalizedStatus = paymentStatus.trim().toLowerCase();
+      if (['paid', 'completed', 'captured', 'success'].includes(normalizedStatus)) {
+        return false;
+      }
+      if (['unpaid', 'pending', 'failed'].includes(normalizedStatus)) {
+        return true;
+      }
+    }
+
+    if (order.status === OrderStatus.Cancelled || order.status === OrderStatus.Delivered) {
+      return false;
+    }
+
+    return order.status === OrderStatus.Pending;
+  }
+
+  payOrder(orderId: number): void {
+    this.isLoading.set(true);
+    this.orderService.getOrderPaymentLink(orderId).pipe(
+      catchError(error => {
+        console.error('Error loading payment link:', error);
+        const title = this.currentLanguage() === 'ar' ? 'خطأ' : 'Error';
+        const message = this.currentLanguage() === 'ar'
+          ? 'فشل الحصول على رابط الدفع'
+          : 'Failed to get payment link';
+        this.toastService.error(title, message);
+        return of(null);
+      })
+    ).subscribe({
+      next: (response) => {
+        const paymentLink = response?.paymentLink;
+        if (paymentLink) {
+          window.location.href = paymentLink;
+          return;
+        }
+
+        const title = this.currentLanguage() === 'ar' ? 'خطأ' : 'Error';
+        const message = this.currentLanguage() === 'ar'
+          ? 'لم يتم العثور على رابط دفع صالح'
+          : 'No valid payment link found';
+        this.toastService.error(title, message);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
   }
 
   cancelOrder(orderId: number): void {

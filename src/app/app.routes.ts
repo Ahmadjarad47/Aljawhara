@@ -51,6 +51,10 @@ export const routes: Routes = [
         loadComponent: () => import('./core/components/checkout-success/checkout-success').then(m => m.CheckoutSuccessComponent)
     },
     {
+        path: 'checkout/failed',
+        loadComponent: () => import('./core/components/checkout-failed/checkout-failed').then(m => m.CheckoutFailedComponent)
+    },
+    {
         path: 'auth',
         loadChildren: () => import('./auth/auth.routes').then(m => m.authRoutes)
     },
