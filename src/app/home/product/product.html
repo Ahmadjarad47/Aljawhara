@@ -565,12 +565,13 @@
               <div class="md:hidden flex gap-3 p-3">
                 <div class="relative w-28 h-28 bg-base-200 rounded-xl overflow-hidden flex-shrink-0">
                   <div class="img-container w-full h-full">
-                    <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'"
+                    <a (click)="viewProductDetails(product.id)">
+                    <img  [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'"
                          [alt]="getProductName(product)"
                          loading="lazy"
                          (load)="$event.target.classList.add('loaded')"
                          (error)="$event.target.classList.add('loaded')"
-                         class="w-full h-full object-cover">
+                         class="w-full h-full object-cover"></a>
                     <div class="img-loading"></div>
                   </div>
 

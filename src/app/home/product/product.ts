@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService, ProductFilters, ProductResponse } from './product-service';
 import { CategoryDto, ProductSummaryDto, SubCategoryDto } from './product.models';
 import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
@@ -28,7 +28,7 @@ export interface Filters {
 
 @Component({
   selector: 'app-product',
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, RouterLink],
   templateUrl: './product.html',
   styleUrl: './product.css'
 })
