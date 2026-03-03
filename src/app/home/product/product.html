@@ -90,7 +90,7 @@
       </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6 flex-1">
+    <div class="container mx-auto px-2 py-6 flex-1">
       <div class="flex flex-col lg:flex-row gap-6">
         <!-- Desktop Left Sidebar - Hidden on Mobile -->
         <div class="hidden lg:block lg:w-80 lg:flex-shrink-0">
@@ -556,94 +556,187 @@
 
         <!-- Products Grid (Alternative View) -->
         @if (viewMode() === 'grid' && !isLoading()) {
-          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-            @for (product of products$ | async; track product.id) {
-              <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-all duration-300">
-            <div class="card-body p-4">
-              <div class="aspect-square bg-base-200 rounded-lg overflow-hidden mb-4">
-                <div class="img-container w-full h-full">
-                  <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
-                       [alt]="product.title"
-                       loading="lazy"
-                       (load)="$event.target.classList.add('loaded')"
-                       (error)="$event.target.classList.add('loaded')"
-                       class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                  <div class="img-loading"></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-6">
+            @for (product of products$ | async; track product.id; let i = $index) {
+              <div class=" border border-gray-200  "
+                   [style.animation-delay.ms]="i * 35">
+
+              <!-- Mobile/tablet: Amazon-like row card -->
+              <div class="md:hidden flex gap-3 p-3">
+                <div class="relative w-28 h-28 bg-base-200 rounded-xl overflow-hidden flex-shrink-0">
+                  <div class="img-container w-full h-full">
+                    <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'"
+                         [alt]="getProductName(product)"
+                         loading="lazy"
+                         (load)="$event.target.classList.add('loaded')"
+                         (error)="$event.target.classList.add('loaded')"
+                         class="w-full h-full object-cover">
+                    <div class="img-loading"></div>
+                  </div>
+
+                  <button class="absolute top-2 right-2 btn btn-xs btn-circle glass"
+                          [class.btn-error]="product.isInWishlist"
+                          (click)="toggleWishlist(product)"
+                          [attr.aria-label]="product.isInWishlist ? t('removeFromWishlist') : t('addToWishlist')"
+                          [attr.aria-pressed]="product.isInWishlist">
+                    <svg class="w-4 h-4"
+                         [class.fill-error]="product.isInWishlist"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                  </button>
                 </div>
-              </div>
-              <h4 class="text-lg font-semibold mb-2 transition-colors cursor-pointer" 
-                  style="color: #161616;"
-                  onmouseover="this.style.color='#054239'"
-                  onmouseout="this.style.color='#161616'">{{ getProductName(product) }}</h4>
-              <div class="flex items-center gap-2 mb-2">
-                <span class="badge badge-outline badge-sm">{{ currentLanguage() === 'ar' ? (product.subCategoryNameAr || product.subCategoryName) : product.subCategoryName }}</span>
-              </div>
-              <p class="text-base-content/70 text-sm mb-3 line-clamp-2">
-                {{ getProductDescription(product) }}
-              </p>
-              @if (product.averageRating > 0) {
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="rating rating-sm">
-                    @for (star of [1,2,3,4,5]; track star) {
-                      <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.averageRating">
+
+                <div class="min-w-0 flex-1 flex flex-col gap-2">
+                  <button type="button"
+                          class="text-left w-full text-sm font-bold leading-snug line-clamp-2 hover:text-primary"
+                          style="color: #161616;"
+                          (click)="viewProductDetails(product.id)"
+                          [attr.aria-label]="t('viewDetails') + ' ' + getProductName(product)">
+                    {{ getProductName(product) }}
+                  </button>
+
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="badge badge-outline badge-xs">
+                      {{ currentLanguage() === 'ar' ? (product.subCategoryNameAr || product.subCategoryName) : product.subCategoryName }}
+                    </span>
+                    @if (product.oldPrice > product.newPrice) {
+                      <span class="badge badge-secondary badge-xs">{{t('sale')}}</span>
+                    }
+                    @if (!product.isInStock) {
+                      <span class="badge badge-error badge-xs">{{t('outOfStock')}}</span>
                     }
                   </div>
-                  <span class="text-sm text-base-content/70">{{ product.averageRating | number:'1.1-1' }}/5</span>
+
+                  @if (product.averageRating > 0) {
+                    <div class="flex items-center gap-2">
+                      <div class="rating rating-xs">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.averageRating">
+                        }
+                      </div>
+                      <span class="text-xs text-base-content/70">{{ product.averageRating | number:'1.1-1' }}</span>
+                    </div>
+                  }
+
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="text-primary font-extrabold text-base leading-none">
+                        {{ product.newPrice | currency:'KWD' }}
+                      </div>
+                      @if (product.oldPrice > product.newPrice) {
+                        <div class="text-xs text-base-content/50 line-through mt-1">
+                          {{ product.oldPrice | currency:'KWD' }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="pt-1">
+                    <button class="btn btn-primary btn-sm w-full"
+                            [disabled]="!product.isInStock"
+                            (click)="addToCart(product)"
+                            [attr.aria-label]="t('addToCart') + ' ' + getProductName(product)">
+                      {{t('addToCart')}}
+                    </button>
+                  </div>
                 </div>
-              }
-              <div class="text-xl font-bold text-primary mb-4">
-                @if (product.oldPrice <= product.newPrice) {
-                  <span>{{ product.newPrice | currency:'KWD' }}</span>
-                }
-                @if (product.oldPrice > product.newPrice) {
-                  <span>
-                    <span class="text-primary">{{ product.newPrice | currency:'KWD' }}</span>
-                    <span class="text-base-content/50 line-through text-sm ml-2">{{ product.oldPrice | currency:'KWD' }}</span>
-                  </span>
-                }
               </div>
-              <button class="btn btn-primary w-full group relative overflow-hidden" 
-                      [disabled]="!product.isInStock" 
-                      (click)="addToCart(product)"
-                      [attr.aria-label]="t('addToCart') + ' ' + getProductName(product)"
-                      (mouseenter)="addBounceClass($event)"
-                      (mouseleave)="removeBounceClass($event)">
-                <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
-                <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                </svg>
-                <span class="relative z-10">{{t('addToCart')}}</span>
-              </button>
-              <div class="flex gap-2">
-                <button class="btn btn-outline btn-sm wishlist-btn tooltip tooltip-top flex-1" 
-                        [attr.data-tip]="t('addToWishlist')"
-                        [class.btn-error]="product.isInWishlist"
-                        [class.bg-error/10]="product.isInWishlist"
-                        (click)="toggleWishlist(product)"
-                        [attr.aria-label]="product.isInWishlist ? t('removeFromWishlist') : t('addToWishlist')"
-                        [attr.aria-pressed]="product.isInWishlist">
-                  <svg class="w-4 h-4 transition-all duration-300" 
-                       [class.fill-error]="product.isInWishlist"
-                       fill="none" 
-                       stroke="currentColor" 
-                       viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                  </svg>
-                </button>
-                <button class="btn btn-secondary btn-sm flex-1 group" 
-                        (click)="viewProductDetails(product.id)"
-                        [attr.aria-label]="t('viewDetails') + ' ' + getProductName(product)"
-                        (mouseenter)="addSlideClass($event)"
-                        (mouseleave)="removeSlideClass($event)">
-                  <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                  <span>{{t('details')}}</span>
-                </button>
+
+              <!-- Desktop: keep current grid card style -->
+              <div class="hidden md:block">
+                <div class="card-body p-4">
+                  <div class="aspect-square bg-base-200 rounded-lg overflow-hidden mb-4">
+                    <div class="img-container w-full h-full">
+                      <img [src]="product.mainImage || 'https://via.placeholder.com/400x400?text=No+Image'" 
+                           [alt]="getProductName(product)"
+                           loading="lazy"
+                           (load)="$event.target.classList.add('loaded')"
+                           (error)="$event.target.classList.add('loaded')"
+                           class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                      <div class="img-loading"></div>
+                    </div>
+                  </div>
+                  <button type="button"
+                          class="text-left w-full text-lg font-semibold mb-2 transition-colors cursor-pointer hover:text-primary"
+                          style="color: #161616;"
+                          (click)="viewProductDetails(product.id)"
+                          [attr.aria-label]="t('viewDetails') + ' ' + getProductName(product)">
+                    {{ getProductName(product) }}
+                  </button>
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="badge badge-outline badge-sm">{{ currentLanguage() === 'ar' ? (product.subCategoryNameAr || product.subCategoryName) : product.subCategoryName }}</span>
+                  </div>
+                  <p class="text-base-content/70 text-sm mb-3 line-clamp-2">
+                    {{ getProductDescription(product) }}
+                  </p>
+                  @if (product.averageRating > 0) {
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class="rating rating-sm">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.averageRating">
+                        }
+                      </div>
+                      <span class="text-sm text-base-content/70">{{ product.averageRating | number:'1.1-1' }}/5</span>
+                    </div>
+                  }
+                  <div class="text-xl font-bold text-primary mb-4">
+                    @if (product.oldPrice <= product.newPrice) {
+                      <span>{{ product.newPrice | currency:'KWD' }}</span>
+                    }
+                    @if (product.oldPrice > product.newPrice) {
+                      <span>
+                        <span class="text-primary">{{ product.newPrice | currency:'KWD' }}</span>
+                        <span class="text-base-content/50 line-through text-sm ml-2">{{ product.oldPrice | currency:'KWD' }}</span>
+                      </span>
+                    }
+                  </div>
+                  <button class="btn btn-primary w-full group relative overflow-hidden" 
+                          [disabled]="!product.isInStock" 
+                          (click)="addToCart(product)"
+                          [attr.aria-label]="t('addToCart') + ' ' + getProductName(product)"
+                          (mouseenter)="addBounceClass($event)"
+                          (mouseleave)="removeBounceClass($event)">
+                    <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
+                    <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                    </svg>
+                    <span class="relative z-10">{{t('addToCart')}}</span>
+                  </button>
+                  <div class="flex gap-2">
+                    <button class="btn btn-outline btn-sm wishlist-btn tooltip tooltip-top flex-1" 
+                            [attr.data-tip]="t('addToWishlist')"
+                            [class.btn-error]="product.isInWishlist"
+                            [class.bg-error/10]="product.isInWishlist"
+                            (click)="toggleWishlist(product)"
+                            [attr.aria-label]="product.isInWishlist ? t('removeFromWishlist') : t('addToWishlist')"
+                            [attr.aria-pressed]="product.isInWishlist">
+                      <svg class="w-4 h-4 transition-all duration-300" 
+                           [class.fill-error]="product.isInWishlist"
+                           fill="none" 
+                           stroke="currentColor" 
+                           viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                      </svg>
+                    </button>
+                    <button class="btn btn-secondary btn-sm flex-1 group" 
+                            (click)="viewProductDetails(product.id)"
+                            [attr.aria-label]="t('viewDetails') + ' ' + getProductName(product)"
+                            (mouseenter)="addSlideClass($event)"
+                            (mouseleave)="removeSlideClass($event)">
+                      <svg class="w-4 h-4 mr-1 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      <span>{{t('details')}}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+
+              </div>
             }
           </div>
         }

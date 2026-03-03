@@ -441,8 +441,12 @@
 
                     @if (editExistingImageUrl) {
                         <div class="mt-3 flex items-center gap-2">
-                            <button type="button" class="btn btn-outline btn-sm" (click)="toggleRemoveExistingImage()">
-                                {{ t('removeImage') }}
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm"
+                                [class.btn-warning]="editImageToDelete === editExistingImageUrl"
+                                (click)="toggleRemoveExistingImage()">
+                                {{ editImageToDelete === editExistingImageUrl ? t('undoRemoveImage') : t('removeImage') }}
                             </button>
                             @if (editImageToDelete === editExistingImageUrl && !editImagePreviewUrl) {
                                 <span class="badge badge-warning">{{ t('imageWillBeRemoved') }}</span>
