@@ -59,7 +59,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       country: 'الدولة',
       cancel: 'إلغاء',
       proceedToCheckout: 'متابعة لإتمام الطلب',
-      requiredFields: 'يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح.',
+      requiredFields: 'يرجى إدخال الاسم ورقم الجوال بشكل صحيح.',
       back: 'رجوع',
       selectCity: 'اختر المنطقة',
       selectState: 'اختر المحافظة'
@@ -91,7 +91,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       country: 'Country',
       cancel: 'Cancel',
       proceedToCheckout: 'Proceed to checkout',
-      requiredFields: 'Please fill in all required fields correctly.',
+      requiredFields: 'Please enter your name and phone number correctly.',
       back: 'Back',
       selectCity: 'Select Area',
       selectState: 'Select Governorate'
@@ -186,22 +186,11 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   async submitGuestDetails(): Promise<void> {
     this.guestFormSubmitted.set(true);
     this.normalizePhoneNumber();
-    if (!this.isGuestFormValid()) {
-      return;
-    }
+
     await this.createOrderFromGuest();
   }
 
-  isGuestFormValid(): boolean {
-    const phoneValid = /^[0-9]{9}$/.test(this.guestForm.phoneNumber || '');
-    return !!(
-      this.guestForm.fullName &&
-      this.guestForm.addressLine1 &&
-      this.guestForm.city &&
-      this.guestForm.state &&
-      phoneValid
-    );
-  }
+  
 
   onPhoneChange(value: string): void {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 9);
@@ -244,14 +233,19 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       selectedVariants: item.selectedVariants
     }));
 
+    const streetParts = [
+      this.guestForm.addressLine1?.trim(),
+      this.guestForm.addressLine2?.trim(),
+    ].filter(Boolean) as string[];
+
     const shippingAddress: ShippingAddressCreateDto = {
       fullName: this.guestForm.fullName.trim(),
       phone: this.guestForm.phoneNumber.trim(),
-      street: this.guestForm.addressLine1.trim() + (this.guestForm.addressLine2 ? `, ${this.guestForm.addressLine2.trim()}` : ''),
-      city: this.guestForm.city.trim(),
-      state: this.guestForm.state || null,
-      postalCode: this.guestForm.postalCode,
-      country: this.guestForm.country
+      street: streetParts.join(', ') || 'N/A',
+      city: this.guestForm.city?.trim() || 'N/A',
+      state: this.guestForm.state?.trim() || null,
+      postalCode: this.guestForm.postalCode || '0000',
+      country: this.guestForm.country || 'Kuwait'
     };
 
     const appliedCoupon = this.cartService.getAppliedCoupon();

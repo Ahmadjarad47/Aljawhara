@@ -28,7 +28,7 @@ export interface Filters {
 
 @Component({
   selector: 'app-product',
-  imports: [CommonModule, FormsModule, ToastComponent, RouterLink],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './product.html',
   styleUrl: './product.css'
 })

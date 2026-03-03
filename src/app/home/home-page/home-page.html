@@ -173,7 +173,9 @@
 <!-- Mobile Categories Tiles (after hero) -->
 <section class="mobile-categories-tiles-section lg:hidden py-6 bg-base-100">
   <div class="max-w-7xl mx-auto px-4 sm:px-6">
-    <h2 class="sr-only">{{ currentLanguage() === 'ar' ? 'الفئات' : 'Categories' }}</h2>
+    <h2 class="text-xl font-bold text-base-content mb-4" [class.text-right]="currentLanguage() === 'ar'">
+      {{ currentLanguage() === 'ar' ? 'الفئات' : 'Categories' }}
+    </h2>
 
     @if (isLoadingCategories) {
       <div class="mobile-categories-grid">

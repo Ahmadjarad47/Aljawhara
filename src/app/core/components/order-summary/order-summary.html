@@ -110,7 +110,7 @@
 
         <div class="form-control md:col-span-2">
           <label class="label">
-            <span class="label-text">{{ t('addressLine1') }} *</span>
+            <span class="label-text">{{ t('addressLine1') }}</span>
           </label>
           <input class="input input-bordered" [(ngModel)]="guestForm.addressLine1" />
         </div>
@@ -124,7 +124,7 @@
 
         <div class="form-control">
           <label class="label">
-            <span class="label-text">{{ t('state') }} *</span>
+            <span class="label-text">{{ t('state') }}</span>
           </label>
           <select class="select select-bordered" [(ngModel)]="guestForm.state" (ngModelChange)="onStateChange()">
             <option value="">{{ t('selectState') }}</option>
@@ -136,7 +136,7 @@
 
         <div class="form-control">
           <label class="label">
-            <span class="label-text">{{ t('city') }} *</span>
+            <span class="label-text">{{ t('city') }}</span>
           </label>
           <select class="select select-bordered" [(ngModel)]="guestForm.city">
             <option value="">{{ t('selectCity') }}</option>
@@ -161,7 +161,7 @@
         </div>
       </div>
 
-      @if (guestFormSubmitted() && !isGuestFormValid()) {
+      @if (guestFormSubmitted() ) {
         <div class="alert alert-error mt-4">
           <span>{{ t('requiredFields') }}</span>
         </div>
