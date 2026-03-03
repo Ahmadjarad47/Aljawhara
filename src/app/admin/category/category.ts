@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceCategory } from './service-category';
-import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters } from './category.model';
+import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters, CategoryCreateWithFileDto, CategoryUpdateWithFileDto } from './category.model';
 import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
@@ -40,6 +40,12 @@ export class Category implements OnInit, OnDestroy {
       categoryNameAR: 'اسم الفئة (عربي)',
       descriptionEN: 'الوصف (إنجليزي)',
       descriptionAR: 'الوصف (عربي)',
+      image: 'الصورة',
+      chooseImage: 'اختر صورة',
+      removeImage: 'حذف الصورة',
+      clearImage: 'مسح الصورة المختارة',
+      currentImage: 'الصورة الحالية',
+      imageWillBeRemoved: 'سيتم حذف الصورة عند الحفظ',
       productCount: 'عدد المنتجات',
       status: 'الحالة',
       actions: 'الإجراءات',
@@ -96,6 +102,12 @@ export class Category implements OnInit, OnDestroy {
       categoryNameAR: 'Category Name (AR)',
       descriptionEN: 'Description (EN)',
       descriptionAR: 'Description (AR)',
+      image: 'Image',
+      chooseImage: 'Choose image',
+      removeImage: 'Remove image',
+      clearImage: 'Clear selected image',
+      currentImage: 'Current image',
+      imageWillBeRemoved: 'Image will be removed on save',
       productCount: 'Product Count',
       status: 'Status',
       actions: 'Actions',
@@ -158,6 +170,16 @@ export class Category implements OnInit, OnDestroy {
   // Search and filter signals
   searchTerm = signal('');
   statusFilter = signal<boolean | null>(null);
+
+  // Image upload state (Add)
+  newImageFile: File | null = null;
+  newImagePreviewUrl: string | null = null;
+
+  // Image upload state (Edit)
+  editExistingImageUrl: string | null = null;
+  editImageFile: File | null = null;
+  editImagePreviewUrl: string | null = null;
+  editImageToDelete: string | null = null;
   
   // BehaviorSubjects for triggering API calls
   private filtersSubject = new BehaviorSubject<CategoryFilters>({});
@@ -361,6 +383,64 @@ export class Category implements OnInit, OnDestroy {
     });
   }
 
+  private revokeObjectUrl(url: string | null) {
+    if (!url) return;
+    try {
+      URL.revokeObjectURL(url);
+    } catch {
+      // ignore
+    }
+  }
+
+  onNewImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    this.revokeObjectUrl(this.newImagePreviewUrl);
+    this.newImageFile = file;
+    this.newImagePreviewUrl = file ? URL.createObjectURL(file) : null;
+    input.value = '';
+  }
+
+  clearNewImage() {
+    this.revokeObjectUrl(this.newImagePreviewUrl);
+    this.newImageFile = null;
+    this.newImagePreviewUrl = null;
+  }
+
+  onEditImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    this.revokeObjectUrl(this.editImagePreviewUrl);
+    this.editImageFile = file;
+    this.editImagePreviewUrl = file ? URL.createObjectURL(file) : null;
+    input.value = '';
+
+    // If we're selecting a new image and an old one exists, mark it for deletion (replace behavior)
+    if (file && this.editExistingImageUrl) {
+      this.editImageToDelete = this.editExistingImageUrl;
+    }
+  }
+
+  clearEditImageSelection() {
+    this.revokeObjectUrl(this.editImagePreviewUrl);
+    this.editImageFile = null;
+    this.editImagePreviewUrl = null;
+  }
+
+  toggleRemoveExistingImage() {
+    if (!this.editExistingImageUrl) return;
+
+    const willDelete = this.editImageToDelete !== this.editExistingImageUrl;
+    this.editImageToDelete = willDelete ? this.editExistingImageUrl : null;
+
+    // If user chooses to remove, clear any new selected file
+    if (willDelete) {
+      this.clearEditImageSelection();
+    }
+  }
+
   addCategory() {
     if (!this.newCategory.name || !this.newCategory.nameAr || !this.newCategory.description || !this.newCategory.descriptionAr) {
       this.toastService.warning(this.t('validationError'), this.t('allFieldsRequired'));
@@ -369,9 +449,14 @@ export class Category implements OnInit, OnDestroy {
 
     const loadingToastId = this.toastService.loading(this.t('creating'), this.t('creatingCategory'));
     this.isLoading.set(true);
-    this.categoryService.createCategory(this.newCategory).subscribe({
+    const request$ = this.newImageFile
+      ? this.categoryService.createCategoryWithImage({ ...(this.newCategory as CategoryCreateDto), image: this.newImageFile } satisfies CategoryCreateWithFileDto)
+      : this.categoryService.createCategory(this.newCategory);
+
+    request$.subscribe({
       next: (newCategory) => {
         this.resetNewCategory();
+        this.clearNewImage();
         this.showAddModal.set(false);
         this.loadCategories(this.filters$()); // Reload categories after creation
         this.isLoading.set(false);
@@ -393,6 +478,9 @@ export class Category implements OnInit, OnDestroy {
       description: category.description,
       descriptionAr: category.descriptionAr
     };
+    this.editExistingImageUrl = category.image ?? null;
+    this.editImageToDelete = null;
+    this.clearEditImageSelection();
     this.showEditModal.set(true);
   }
 
@@ -404,9 +492,24 @@ export class Category implements OnInit, OnDestroy {
 
     const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingCategory'));
     this.isLoading.set(true);
-    this.categoryService.updateCategory(this.editCategory.id, this.editCategory).subscribe({
+    const shouldUseMultipart = !!this.editImageFile || !!this.editImageToDelete;
+    const request$ = shouldUseMultipart
+      ? this.categoryService.updateCategoryWithImage(
+          this.editCategory.id,
+          ({
+            ...(this.editCategory as CategoryUpdateDto),
+            image: this.editImageFile,
+            imageToDelete: this.editImageToDelete
+          } satisfies CategoryUpdateWithFileDto)
+        )
+      : this.categoryService.updateCategory(this.editCategory.id, this.editCategory);
+
+    request$.subscribe({
       next: (updatedCategory) => {
         this.showEditModal.set(false);
+        this.editExistingImageUrl = null;
+        this.editImageToDelete = null;
+        this.clearEditImageSelection();
         this.loadCategories(this.filters$()); // Reload categories after update
         this.isLoading.set(false);
         this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('categoryUpdated'));
@@ -449,6 +552,10 @@ export class Category implements OnInit, OnDestroy {
     this.showAddModal.set(false);
     this.showEditModal.set(false);
     this.resetNewCategory();
+    this.clearNewImage();
+    this.editExistingImageUrl = null;
+    this.editImageToDelete = null;
+    this.clearEditImageSelection();
   }
 
   getPageNumbers(totalPages: number, currentPage: number): (number | string)[] {

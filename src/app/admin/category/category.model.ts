@@ -5,6 +5,7 @@ export interface CategoryDto extends BaseDto {
     nameAr: string;
     description: string;
     descriptionAr: string;
+    image?: string | null;
     productCount: number;
 }
 
@@ -21,6 +22,15 @@ export interface CategoryUpdateDto {
     nameAr: string;
     description: string;
     descriptionAr: string;
+}
+
+export interface CategoryCreateWithFileDto extends CategoryCreateDto {
+    image?: File | null;
+}
+
+export interface CategoryUpdateWithFileDto extends CategoryUpdateDto {
+    image?: File | null;
+    imageToDelete?: string | null;
 }
 
 export interface PagedResult<T> {

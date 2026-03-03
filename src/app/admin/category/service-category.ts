@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment.development';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, map, shareReplay } from 'rxjs/operators';
-import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters, ToggleResponse } from './category.model';
+import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters, ToggleResponse, CategoryCreateWithFileDto, CategoryUpdateWithFileDto } from './category.model';
 
 @Injectable({
   providedIn: 'root'
@@ -87,9 +87,37 @@ export class ServiceCategory {
     return this.http.post<CategoryDto>(`${this.api}/categories`, category);
   }
 
+  createCategoryWithImage(category: CategoryCreateWithFileDto): Observable<CategoryDto> {
+    const formData = new FormData();
+    formData.append('name', category.name);
+    formData.append('nameAr', category.nameAr);
+    formData.append('description', category.description);
+    formData.append('descriptionAr', category.descriptionAr);
+    if (category.image) {
+      formData.append('image', category.image);
+    }
+    return this.http.post<CategoryDto>(`${this.api}/categories/with-image`, formData);
+  }
+
   // Update existing category
   updateCategory(id: number, category: CategoryUpdateDto): Observable<CategoryDto> {
     return this.http.put<CategoryDto>(`${this.api}/categories/${id}`, category);
+  }
+
+  updateCategoryWithImage(id: number, category: CategoryUpdateWithFileDto): Observable<CategoryDto> {
+    const formData = new FormData();
+    formData.append('id', String(category.id ?? id));
+    formData.append('name', category.name);
+    formData.append('nameAr', category.nameAr);
+    formData.append('description', category.description);
+    formData.append('descriptionAr', category.descriptionAr);
+    if (category.image) {
+      formData.append('image', category.image);
+    }
+    if (category.imageToDelete) {
+      formData.append('imageToDelete', category.imageToDelete);
+    }
+    return this.http.put<CategoryDto>(`${this.api}/categories/${id}/with-image`, formData);
   }
 
   // Delete single category
