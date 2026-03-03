@@ -170,6 +170,50 @@
     </div>
   </section>
 
+<!-- Mobile Categories Tiles (after hero) -->
+<section class="mobile-categories-tiles-section lg:hidden py-6 bg-base-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <h2 class="sr-only">{{ currentLanguage() === 'ar' ? 'الفئات' : 'Categories' }}</h2>
+
+    @if (isLoadingCategories) {
+      <div class="mobile-categories-grid">
+        @for (skeleton of [1,2,3,4]; track skeleton) {
+          <div class="mobile-category-skeleton">
+            <div class="mobile-category-overlay"></div>
+            <div class="mobile-category-title">
+              <div style="height:20px;width:90px;background:rgba(255,255,255,.35);border-radius:6px;"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="mobile-categories-grid">
+        @for (cat of categoriesWithImages; track cat.id) {
+          <button
+            type="button"
+            class="mobile-category-tile"
+            (click)="goToCategoryTile(cat)"
+            [attr.aria-label]="(currentLanguage() === 'ar' ? 'اذهب إلى فئة ' : 'Go to category ') + getCategoryTileTitle(cat)"
+          >
+            <img
+              [src]="resolveCategoryTileImage(cat.image)"
+              [alt]="getCategoryTileTitle(cat)"
+              loading="lazy"
+              (load)="$event.target.classList.add('loaded')"
+              (error)="$event.target.classList.add('loaded')"
+            />
+
+            <div class="mobile-category-overlay"></div>
+
+            <div class="mobile-category-title">
+              <span>{{ getCategoryTileTitle(cat) }}</span>
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</section>
 
   <!-- Featured Products Section -->
   <section class="featured-section py-20 relative overflow-hidden">

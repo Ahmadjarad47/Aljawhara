@@ -14,6 +14,13 @@ import {
 } from '../../admin/carousel/carousel.models';
 import { environment } from '../../../environments/environment.development';
 
+type CategoryWithImageDto = {
+  id: number;
+  name: string;
+  nameAr: string;
+  image?: string | null;
+};
+
 @Component({
   selector: 'app-home-page',
   standalone: true,
@@ -27,6 +34,7 @@ import { environment } from '../../../environments/environment.development';
 })
 export class HomePage implements OnInit, OnDestroy {
   private countdownInterval?: ReturnType<typeof setInterval>;
+  private readonly apiOrigin = new URL(environment.apiUrl).origin;
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -196,6 +204,9 @@ export class HomePage implements OnInit, OnDestroy {
   // Store original products from API to avoid re-fetching
   private originalProducts: ProductSummaryDto[] = [];
 
+  // Mobile categories tiles (categories-with-images)
+  categoriesWithImages: CategoryWithImageDto[] = [];
+
   // Stats & testimonials data from backend
   customerSatisfaction: CustomerSatisfactionDto | null = null;
   latestReviews: ProductRatingSummaryDto[] = [];
@@ -357,6 +368,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.startCountdown();
     this.loadHeroSlides();
     this.startCarousel();
+    this.loadCategoriesWithImages();
     this.loadFeaturedProducts();
     this.loadCustomerSatisfaction();
     this.loadLatestReviews();
@@ -439,6 +451,47 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoadingHero = false;
       }
     });
+  }
+
+  private loadCategoriesWithImages() {
+    this.isLoadingCategories = true;
+
+    const cached = this.getCache<CategoryWithImageDto[]>('home_categories_with_images');
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      this.categoriesWithImages = cached;
+      this.isLoadingCategories = false;
+      return;
+    }
+
+    this.http.get<CategoryWithImageDto[]>(`${environment.apiUrl}Carousels/categories-with-images`).subscribe({
+      next: (categories) => {
+        this.categoriesWithImages = Array.isArray(categories) ? categories : [];
+        this.setCache('home_categories_with_images', this.categoriesWithImages);
+        this.isLoadingCategories = false;
+      },
+      error: (error) => {
+        console.error('[HomePage] Error loading categories with images:', error);
+        this.categoriesWithImages = [];
+        this.isLoadingCategories = false;
+      }
+    });
+  }
+
+  getCategoryTileTitle(category: CategoryWithImageDto): string {
+    const isArabic = this.currentLanguage() === 'ar';
+    return isArabic ? (category.nameAr || category.name) : category.name;
+  }
+
+  resolveCategoryTileImage(image?: string | null): string {
+    const placeholder = 'https://via.placeholder.com/800x800?text=Category';
+    if (!image) {
+      return placeholder;
+    }
+    try {
+      return new URL(image, this.apiOrigin).toString();
+    } catch {
+      return image;
+    }
   }
 
   // Load customer satisfaction stats from public API
@@ -716,6 +769,12 @@ export class HomePage implements OnInit, OnDestroy {
   goToCategory(category: any) {
     console.log('Navigate to category:', category.name);
     // Implement navigation logic
+  }
+
+  goToCategoryTile(category: CategoryWithImageDto) {
+    this.router.navigate(['/product'], {
+      queryParams: { categoryId: category.id }
+    });
   }
 
   goToProduct(product: any) {
