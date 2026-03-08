@@ -255,7 +255,7 @@ a:hover {
 }
 
 .img-container img.loaded + .img-loading {
-  display: none;
+  display: none !important;
 }
 
 @keyframes shimmer {
