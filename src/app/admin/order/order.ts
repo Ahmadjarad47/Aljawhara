@@ -23,11 +23,14 @@ import {
   OrderDto,
   OrderSummaryDto,
   OrderUpdateStatusDto,
-  OrderStatus
+  OrderStatus,
+  InvoicePaymentDto
 } from './order.models';
-import { Observable, map, combineLatest } from 'rxjs';
+import { Observable, map, combineLatest, catchError, of } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
+
+declare const window: any;
 
 // Register Chart.js components
 ChartJS.register(
@@ -503,6 +506,306 @@ export class Order implements OnInit {
   // Toast methods
   onToastClose(toastId: string) {
     this.toastService.removeToast(toastId);
+  }
+
+  // PDF Invoice Generation (same as user-order)
+  downloadInvoice(orderId: number): void {
+    this.isLoading.set(true);
+    this.orderService.getInvoicePaymentData(orderId).pipe(
+      catchError(error => {
+        console.error('Error loading invoice data:', error);
+        this.toastService.error('Error', 'Failed to load invoice data');
+        this.isLoading.set(false);
+        return of(null);
+      })
+    ).subscribe({
+      next: async (invoiceData) => {
+        if (invoiceData && invoiceData.success) {
+          await this.generatePDF(invoiceData);
+        } else {
+          this.toastService.error('Error', invoiceData?.message || 'Failed to load invoice data');
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private async generatePDF(invoice: InvoicePaymentDto): Promise<void> {
+    try {
+      if (typeof window === 'undefined' || !window.jspdf) {
+        this.toastService.error('Error', 'PDF library not available');
+        return;
+      }
+
+      const html2canvas = (await import('html2canvas')).default;
+      const invoiceHTML = this.createInvoiceHTML(invoice);
+
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '0px';
+      iframe.style.width = '210mm';
+      iframe.style.height = 'auto';
+      iframe.style.minHeight = '297mm';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        iframe.srcdoc = invoiceHTML;
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Could not access iframe document');
+      }
+
+      const images = iframeDoc.querySelectorAll('img');
+      const imagePromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+        });
+      });
+      await Promise.all(imagePromises);
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const invoiceContainer = iframeDoc.querySelector('.invoice-container') as HTMLElement;
+      if (!invoiceContainer) {
+        throw new Error('Invoice container not found');
+      }
+
+      const actualHeight = Math.max(
+        invoiceContainer.scrollHeight,
+        invoiceContainer.offsetHeight,
+        iframeDoc.body.scrollHeight,
+        iframeDoc.body.offsetHeight,
+        iframeDoc.documentElement.scrollHeight,
+        iframeDoc.documentElement.offsetHeight
+      );
+      iframe.style.height = `${actualHeight}px`;
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(invoiceContainer, {
+        scale: 6,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: invoiceContainer.scrollWidth,
+        height: invoiceContainer.scrollHeight,
+        windowWidth: invoiceContainer.scrollWidth,
+        windowHeight: invoiceContainer.scrollHeight,
+        allowTaint: false,
+        ignoreElements: () => false
+      });
+
+      document.body.removeChild(iframe);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const widthRatio = pdfWidth / imgWidth;
+      const ratio = widthRatio;
+      const imgScaledWidth = imgWidth * ratio;
+      const imgScaledHeight = imgHeight * ratio;
+
+      if (imgScaledHeight <= pdfHeight) {
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgScaledWidth, imgScaledHeight, undefined, 'FAST');
+      } else {
+        const totalPages = Math.ceil(imgScaledHeight / pdfHeight);
+        for (let page = 0; page < totalPages; page++) {
+          if (page > 0) {
+            pdf.addPage();
+          }
+          const sourceY = Math.floor((page * pdfHeight) / ratio);
+          const remainingHeight = imgHeight - sourceY;
+          const sourceHeight = Math.min(Math.ceil(pdfHeight / ratio), remainingHeight);
+          if (sourceY >= imgHeight || sourceHeight <= 0) {
+            break;
+          }
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = imgWidth;
+          pageCanvas.height = sourceHeight;
+          const pageCtx = pageCanvas.getContext('2d');
+          if (pageCtx) {
+            pageCtx.fillStyle = '#ffffff';
+            pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            pageCtx.drawImage(
+              canvas,
+              0, sourceY, imgWidth, sourceHeight,
+              0, 0, imgWidth, sourceHeight
+            );
+            const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+            const pageScaledHeight = sourceHeight * ratio;
+            pdf.addImage(pageImgData, 'JPEG', 0, 0, imgScaledWidth, pageScaledHeight, undefined, 'FAST');
+          }
+        }
+      }
+
+      const fileName = `Invoice_${invoice.orderNumber}_${new Date().getTime()}.pdf`;
+      pdf.save(fileName);
+      this.toastService.success('Success', 'Invoice downloaded successfully');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      this.toastService.error('Error', 'Failed to generate PDF');
+    }
+  }
+
+  private createInvoiceHTML(invoice: InvoicePaymentDto): string {
+    const orderDate = new Date(invoice.orderCreatedAt);
+    const address = invoice.shippingAddress;
+
+    const escapeHtml = (text: string) => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    };
+
+    const getStatusTextArabic = (status: OrderStatus): string => {
+      const statusMap: Record<OrderStatus, string> = {
+        [OrderStatus.Pending]: 'قيد الانتظار',
+        [OrderStatus.Processing]: 'قيد المعالجة',
+        [OrderStatus.Shipped]: 'تم الشحن',
+        [OrderStatus.Delivered]: 'تم التسليم',
+        [OrderStatus.Cancelled]: 'ملغي',
+        [OrderStatus.Refunded]: 'مسترد'
+      };
+      return statusMap[status] ?? '';
+    };
+
+    const getStatusBgColor = (status: OrderStatus): string => {
+      const colorMap: Record<OrderStatus, string> = {
+        [OrderStatus.Pending]: 'rgb(255, 193, 7)',
+        [OrderStatus.Processing]: 'rgb(13, 110, 253)',
+        [OrderStatus.Shipped]: 'rgb(13, 202, 240)',
+        [OrderStatus.Delivered]: 'rgb(25, 135, 84)',
+        [OrderStatus.Cancelled]: 'rgb(220, 53, 69)',
+        [OrderStatus.Refunded]: 'rgb(107, 114, 128)'
+      };
+      return colorMap[status] ?? 'rgb(108, 117, 125)';
+    };
+
+    const getStatusTextColor = (status: OrderStatus): string => {
+      const colorMap: Record<OrderStatus, string> = {
+        [OrderStatus.Pending]: 'rgb(0, 0, 0)',
+        [OrderStatus.Processing]: 'rgb(255, 255, 255)',
+        [OrderStatus.Shipped]: 'rgb(255, 255, 255)',
+        [OrderStatus.Delivered]: 'rgb(255, 255, 255)',
+        [OrderStatus.Cancelled]: 'rgb(255, 255, 255)',
+        [OrderStatus.Refunded]: 'rgb(255, 255, 255)'
+      };
+      return colorMap[status] ?? 'rgb(255, 255, 255)';
+    };
+
+    return `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; height: auto; }
+          body { font-family: Arial, DejaVu Sans, Tahoma, sans-serif; direction: rtl; color: rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding: 0; margin: 0; overflow: visible; height: auto; }
+          .invoice-container { width: 100%; max-width: 210mm; margin: 0 auto; background-color: rgb(255, 255, 255); box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); position: relative; min-height: 297mm; z-index: 1; }
+          .header { background-color: rgb(5, 66, 57); color: rgb(255, 255, 255); padding: 30px 20px; text-align: center; width: 100%; margin: 0; position: relative; }
+          .header h1 { font-size: 28px; margin: 0; font-weight: bold; }
+          .header h2 { font-size: 18px; font-weight: normal; margin: 0; }
+          .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: 0.08; z-index: 0; pointer-events: none; max-width: 600px; max-height: 600px; width: auto; height: auto; }
+          .invoice-info { padding: 25px 20px; background-color: rgb(250, 250, 250); border-bottom: 3px solid rgb(5, 66, 57); }
+          .invoice-info-row { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+          .invoice-info-row:last-child { margin-bottom: 0; }
+          .invoice-info-label { font-weight: bold; color: rgb(5, 66, 57); font-size: 14px; }
+          .status-badge { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px; }
+          .section { padding: 25px 20px; border-bottom: 1px solid rgb(230, 230, 230); background-color: rgb(255, 255, 255); }
+          .section:last-of-type { border-bottom: none; }
+          .section-title { font-size: 18px; font-weight: bold; color: rgb(5, 66, 57); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid rgb(5, 66, 57); display: inline-block; width: 100%; }
+          .customer-info, .address-info { line-height: 1.8; }
+          .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          .items-table thead { background-color: rgb(5, 66, 57); color: rgb(255, 255, 255); }
+          .items-table th { padding: 12px; text-align: right; font-weight: bold; }
+          .items-table td { padding: 10px 12px; border-bottom: 1px solid rgb(224, 224, 224); }
+          .items-table tbody tr:nth-child(even) { background-color: rgb(245, 245, 245); }
+          .summary { padding: 25px 20px; text-align: left; background-color: rgb(250, 250, 250); }
+          .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding: 8px 0; font-size: 14px; }
+          .summary-label { font-weight: bold; color: rgb(60, 60, 60); }
+          .summary-row-discount { color: rgb(0, 160, 0); font-weight: bold; }
+          .summary-total { border-top: 3px solid rgb(5, 66, 57); padding-top: 15px; margin-top: 15px; background-color: rgb(5, 66, 57); color: rgb(255, 255, 255); padding: 20px; border-radius: 0; display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
+          .footer { text-align: center; padding: 25px 20px; color: rgb(102, 102, 102); font-size: 13px; background-color: rgb(255, 255, 255); border-top: 1px solid rgb(230, 230, 230); }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <img src="/logo.png" alt="الجوهرة" class="watermark" />
+          <div class="header"><h1>الجوهرة</h1><h2>فاتورة</h2></div>
+          <div class="invoice-info">
+            <div class="invoice-info-row">
+              <div><span class="invoice-info-label">رقم الفاتورة:</span> ${escapeHtml(invoice.orderNumber)}</div>
+              <div><span class="invoice-info-label">الحالة:</span> <span class="status-badge" style="background-color: ${getStatusBgColor(invoice.status)}; color: ${getStatusTextColor(invoice.status)};">${escapeHtml(getStatusTextArabic(invoice.status))}</span></div>
+            </div>
+            <div class="invoice-info-row"><div><span class="invoice-info-label">تاريخ الطلب:</span> ${escapeHtml(orderDate.toLocaleDateString('ar-SA'))}</div></div>
+          </div>
+          <div class="section">
+            <div class="section-title">معلومات العميل</div>
+            <div class="customer-info">
+              <div><strong>الاسم:</strong> ${escapeHtml(invoice.customerName)}</div>
+              ${invoice.customerPhone ? `<div><strong>الهاتف:</strong> ${escapeHtml(invoice.customerPhone)}</div>` : ''}
+              ${invoice.customerEmail ? `<div><strong>البريد الإلكتروني:</strong> ${escapeHtml(invoice.customerEmail)}</div>` : ''}
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">عنوان الشحن</div>
+            <div class="address-info">
+              <div><strong>الاسم:</strong> ${escapeHtml(address.fullName)}</div>
+              <div><strong>الهاتف:</strong> ${escapeHtml(address.phone)}</div>
+              ${address.state ? `<div><strong>المحافظة:</strong> ${escapeHtml(address.state)}</div>` : ''}
+              <div><strong>المدينة:</strong> ${escapeHtml(address.city)}</div>
+              ${address.alQataa ? `<div><strong>القطعة:</strong> ${escapeHtml(address.alQataa)}</div>` : ''}
+              ${address.street ? `<div><strong>الشارع:</strong> ${escapeHtml(address.street)}</div>` : ''}
+              ${address.alSharee ? `<div><strong>الشارع:</strong> ${escapeHtml(address.alSharee)}</div>` : ''}
+              ${address.alJada ? `<div><strong>الجادة:</strong> ${escapeHtml(address.alJada)}</div>` : ''}
+              ${address.alManzil ? `<div><strong>المنزل:</strong> ${escapeHtml(address.alManzil)}</div>` : ''}
+              ${address.alShakka ? `<div><strong>الشقة:</strong> ${escapeHtml(address.alShakka)}</div>` : ''}
+              ${address.alDor ? `<div><strong>الدور:</strong> ${escapeHtml(address.alDor)}</div>` : ''}
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">عناصر الطلب</div>
+            <table class="items-table">
+              <thead><tr><th>المنتج</th><th>السعر</th><th>الكمية</th><th>الإجمالي</th></tr></thead>
+              <tbody>
+                ${invoice.items.map(item => `<tr><td>${escapeHtml(item.name)}</td><td>${item.price.toFixed(3)} KWD</td><td>${item.quantity}</td><td>${item.total.toFixed(3)} KWD</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="summary">
+            <div class="summary-row"><span class="summary-label">المجموع الفرعي:</span><span>${invoice.subtotal.toFixed(3)} KWD</span></div>
+            ${invoice.couponDiscountAmount && invoice.couponDiscountAmount > 0 ? `<div class="summary-row summary-row-discount"><span class="summary-label">الخصم (${escapeHtml(invoice.couponCode || '')}):</span><span>-${invoice.couponDiscountAmount.toFixed(3)} KWD</span></div>` : ''}
+            <div class="summary-row"><span class="summary-label">الشحن:</span><span>${invoice.shipping.toFixed(3)} KWD</span></div>
+            <div class="summary-row"><span class="summary-label">الضريبة:</span><span>${invoice.tax.toFixed(3)} KWD</span></div>
+            <div class="summary-total"><span>الإجمالي:</span><span>${invoice.total.toFixed(3)} KWD</span></div>
+          </div>
+          <div class="footer"><div>شكراً لاختيارك الجوهرة</div><div style="margin-top: 5px; color: rgb(102, 102, 102);">Thank you for choosing Aljawhara</div></div>
+        </div>
+      </body>
+      </html>
+    `;
   }
   
   // Chart Configurations

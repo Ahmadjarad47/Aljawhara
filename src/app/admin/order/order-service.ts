@@ -7,7 +7,8 @@ import {
   OrderDto,
   OrderSummaryDto,
   OrderUpdateStatusDto,
-  OrderStatus
+  OrderStatus,
+  InvoicePaymentDto
 } from './order.models';
 
 export interface PagedResult<T> {
@@ -119,5 +120,12 @@ export class OrderService {
       params = params.set('endDate', endDate.toISOString());
     }
     return this.http.get<{totalSales: number, startDate?: string, endDate?: string}>(`${this.api}/sales`, { params });
+  }
+
+  // Get invoice payment data for PDF export
+  getInvoicePaymentData(orderId: number): Observable<InvoicePaymentDto> {
+    return this.http.get<InvoicePaymentDto>(`${this.api.replace('admin/order', 'Orders')}/${orderId}/invoice-payment`).pipe(
+      shareReplay(1)
+    );
   }
 }

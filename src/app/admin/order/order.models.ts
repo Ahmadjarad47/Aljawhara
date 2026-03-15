@@ -73,3 +73,36 @@ export interface OrderSummaryDto {
     customerName: string;
     isActive: boolean;
 }
+
+/** Shipping address shape as returned by invoice-payment API (may include Arabic fields). */
+export interface InvoiceShippingAddressDto extends ShippingAddressDto {
+    alQataa?: string;
+    alSharee?: string;
+    alJada?: string;
+    alManzil?: string;
+    alDor?: string;
+    alShakka?: string;
+}
+
+export interface InvoicePaymentDto {
+    orderId: number;
+    orderNumber: string;
+    status: OrderStatus;
+    orderCreatedAt: string;
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    paymentAmount: number;
+    appUserId?: string;
+    customerName: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    couponId?: number;
+    couponCode?: string;
+    couponDiscountAmount?: number;
+    items: OrderItemDto[];
+    shippingAddress: InvoiceShippingAddressDto;
+    success: boolean;
+    message?: string;
+}
