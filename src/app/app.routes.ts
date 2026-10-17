@@ -1,7 +1,14 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/auth.guard';
+import { environment } from '../environments/environment';
 
-export const routes: Routes = [
+// Replace every route during maintenance, including direct links and guarded routes.
+export const routes: Routes = environment.maintenance.enabled ? [
+    {
+        path: '**',
+        loadComponent: () => import('./core/components/maintenance/maintenance').then(m => m.Maintenance)
+    }
+] : [
     {
         path: '',
         loadComponent: () => import('./home/home-page/home-page').then(m => m.HomePage)

@@ -1,0 +1,30 @@
+<main class="maintenance" dir="rtl" lang="ar" aria-labelledby="maintenance-title">
+  <div class="maintenance-card">
+    <div class="brand">الجوهرة<span>بلس</span></div>
+
+    <div class="illustration" aria-hidden="true">
+      <svg viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="48" stroke="currentColor" stroke-opacity=".18" />
+        <path d="M78 32a23 23 0 0 0-29 29L29 81a7 7 0 0 0 10 10l20-20a23 23 0 0 0 29-29L74 56 64 46l14-14Z"
+          stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M89 22v12M83 28h12M27 43v8M23 47h8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <span class="maintenance-status"><span class="maintenance-status-dot" aria-hidden="true"></span>الموقع قيد الصيانة</span>
+    <h1 id="maintenance-title">{{ settings.title }}</h1>
+    <p class="message">{{ settings.message }}</p>
+
+    @if (settings.showRetryButton) {
+      <button type="button" (click)="retry()">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 7v5h-5M4 17v-5h5" />
+          <path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
+        </svg>
+        إعادة المحاولة
+      </button>
+    }
+
+    <div class="thank-you">شكرًا لصبركم وتفهّمكم<span>فريق الجوهرة بلس</span></div>
+  </div>
+</main>
