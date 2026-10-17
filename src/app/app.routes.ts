@@ -1,14 +1,8 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/auth.guard';
-import { environment } from '../environments/environment';
+import { maintenanceAuthGuard, maintenanceGuard, maintenancePageGuard } from './core/guards/maintenance.guard';
 
-// Replace every route during maintenance, including direct links and guarded routes.
-export const routes: Routes = environment.maintenance.enabled ? [
-    {
-        path: '**',
-        loadComponent: () => import('./core/components/maintenance/maintenance').then(m => m.Maintenance)
-    }
-] : [
+const siteRoutes: Routes = [
     {
         path: '',
         loadComponent: () => import('./home/home-page/home-page').then(m => m.HomePage)
@@ -62,10 +56,6 @@ export const routes: Routes = environment.maintenance.enabled ? [
         loadComponent: () => import('./core/components/checkout-failed/checkout-failed').then(m => m.CheckoutFailedComponent)
     },
     {
-        path: 'auth',
-        loadChildren: () => import('./auth/auth.routes').then(m => m.authRoutes)
-    },
-    {
         path: 'admin',
         canActivate:[adminGuard],
         loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
@@ -77,5 +67,23 @@ export const routes: Routes = environment.maintenance.enabled ? [
     {
         path: '**',
         redirectTo: ''
+    }
+];
+
+export const routes: Routes = [
+    {
+        path: 'maintenance',
+        canActivate: [maintenancePageGuard],
+        loadComponent: () => import('./core/components/maintenance/maintenance').then(m => m.Maintenance)
+    },
+    {
+        path: 'auth',
+        canActivateChild: [maintenanceAuthGuard],
+        loadChildren: () => import('./auth/auth.routes').then(m => m.authRoutes)
+    },
+    {
+        path: '',
+        canActivateChild: [maintenanceGuard],
+        children: siteRoutes
     }
 ];

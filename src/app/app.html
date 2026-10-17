@@ -1,7 +1,7 @@
-@if(!maintenanceEnabled && !hideNavbar()) {
+@if(!maintenanceBlocked() && !hideNavbar()) {
 <app-navbar></app-navbar>
 }
 <router-outlet />
-@if(!maintenanceEnabled && !hideNavbar()) {
+@if(!maintenanceBlocked() && !hideNavbar()) {
 <app-footer></app-footer>
 }

@@ -147,12 +147,23 @@ export class ServiceAuth {
 
   // Check authentication status
   checkAuthStatus(): Observable<any> {
-    return this.http.get(`${this.apiUrl}isAuth`);
+    return this.http.get(`${this.apiUrl}isAuth`, { transferCache: false });
   }
 
   // Check if current user is admin via API
   checkAdmin(): Observable<boolean> {
-    return this.http.get<{ isAdmin: boolean }>(`${this.apiUrl}isAdmin`).pipe(
+    if (!this.isAuthenticated) return of(false);
+
+    // The current isAdmin endpoint only accepts Admin. For SuperAdmin, validate
+    // the same JWT with the authenticated endpoint before trusting its role claim.
+    if (this.tokenService.hasRole('SuperAdmin')) {
+      return this.checkAuthStatus().pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
+    }
+
+    return this.http.get<{ isAdmin: boolean }>(`${this.apiUrl}isAdmin`, { transferCache: false }).pipe(
       map(res => !!res?.isAdmin),
       catchError(() => of(false))
     );

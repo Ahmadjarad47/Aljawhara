@@ -56,6 +56,27 @@ export class TokenService {
     return null;
   }
 
+  hasRole(role: string): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return false;
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const claims = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+      const roles: unknown[] = [
+        claims.role,
+        claims.roles,
+        claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+      ].flat();
+      const normalize = (value: string) => value.replace(/[\s_-]/g, '').toLowerCase();
+      return roles.some(value => typeof value === 'string' && normalize(value) === normalize(role));
+    } catch {
+      return false;
+    }
+  }
+
   isTokenExpired(): boolean {
     const expiresAt = this.getExpiresAt();
     if (!expiresAt) return true;

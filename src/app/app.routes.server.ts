@@ -4,10 +4,10 @@ import { environment } from '../environments/environment';
 export const serverRoutes: ServerRoute[] = environment.maintenance.enabled ? [
   {
     path: '**',
-    renderMode: RenderMode.Server,
-    status: 503,
+    // Authentication is stored in localStorage. Check access in the browser so
+    // signed-in administrators can enter without receiving a cached 503 page.
+    renderMode: RenderMode.Client,
     headers: {
-      'Retry-After': '3600',
       'Cache-Control': 'no-store',
     },
   },

@@ -4,7 +4,7 @@ import { Navbar } from './home/navbar/navbar';
 import { Footer } from './home/footer/footer';
 import { ServiceAuth } from './auth/service-auth';
 import { PerformanceService } from './core/services/performance.service';
-import { environment } from '../environments/environment';
+import { MaintenanceService } from './core/services/maintenance.service';
 
 @Component({
   selector: 'app-root',
@@ -13,15 +13,13 @@ import { environment } from '../environments/environment';
   styleUrl: './app.css',
 })
 export class App implements OnInit {
-  protected readonly maintenanceEnabled = environment.maintenance.enabled;
+  protected readonly maintenanceBlocked = inject(MaintenanceService).blocked;
   protected readonly title = signal('Aljawhara.new.Angular');
   protected readonly url = inject(Router);
   private readonly authService = inject(ServiceAuth);
   private readonly performanceService = inject(PerformanceService);
 
   ngOnInit(): void {
-    if (this.maintenanceEnabled) return;
-
     // Initialize authentication state on app startup (non-blocking)
     // Use requestIdleCallback for better performance, fallback to setTimeout
     if (typeof window != 'undefined')
