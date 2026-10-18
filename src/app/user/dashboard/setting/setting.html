@@ -91,8 +91,6 @@
                       <th>{{t('name')}}</th>
                       <th>{{t('phone')}}</th>
                       <th>{{t('address')}}</th>
-                      <th>{{t('cityState')}}</th>
-                      <th>{{t('postal')}}</th>
                       <th>{{t('default')}}</th>
                       <th></th>
                     </tr>
@@ -102,9 +100,10 @@
                       <tr>
                         <td>{{addr.fullName}}</td>
                         <td>{{addr.phoneNumber}}</td>
-                        <td>{{addr.addressLine1}} <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span></td>
-                        <td>{{addr.city}} <span *ngIf="addr.state">/ {{addr.state}}</span></td>
-                        <td>{{addr.postalCode}}</td>
+                        <td>
+                          <div>{{addr.addressLine1}}</div>
+                          @if (addressDetails(addr)) { <div class="text-xs text-base-content/60 mt-1">{{addressDetails(addr)}}</div> }
+                        </td>
                         <td>
                           <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">{{addr.isDefault ? t('yes') : t('no')}}</div>
                         </td>
@@ -142,20 +141,9 @@
                   </div>
 
                   <div class="text-sm text-base-content">
-                    <div>
-                      {{addr.addressLine1}}
-                      <span class="opacity-70" *ngIf="addr.addressLine2">, {{addr.addressLine2}}</span>
-                    </div>
-                    <div class="mt-1">
-                      {{addr.city}}
-                      <span *ngIf="addr.state">/ {{addr.state}}</span>
-                      <span *ngIf="addr.postalCode">, {{addr.postalCode}}</span>
-                    </div>
-                    <div class="mt-1" *ngIf="addr.country">
-                      {{addr.country}}
-                    </div>
+                    <div>{{addr.addressLine1}}</div>
+                    @if (addressDetails(addr)) { <div class="text-xs text-base-content/60 mt-1">{{addressDetails(addr)}}</div> }
                   </div>
-
                   <div class="flex justify-end gap-2 pt-1">
                     <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
                     <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
@@ -168,186 +156,55 @@
       </div>
     </div>
 
-    <!-- Add Address Modal -->
-    @if (showAddAddress()) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-3xl">
-          <h3 class="font-bold text-lg mb-4">{{t('addAddress')}}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('fullName')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.fullName" />
+    @if (showAddAddress() || showEditAddress()) {
+      @let editing = showEditAddress();
+      @let address = editing ? editAddress : newAddress;
+      <div class="modal modal-open" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+        <form class="modal-box max-w-3xl address-editor" #addressForm="ngForm"
+          role="dialog" aria-modal="true" aria-labelledby="address-editor-heading"
+          (ngSubmit)="editing ? updateAddress() : addAddress()">
+          <h3 id="address-editor-heading" class="font-bold text-lg mb-5">{{t(editing ? 'editAddress' : 'addAddress')}}</h3>
+          <fieldset [disabled]="isSavingAddress()" class="address-editor-fields">
+            <div class="address-contact-grid">
+              <div class="form-control">
+                <label for="account-fullName">{{t('fullName')}} <span class="text-error">*</span></label>
+                <input id="account-fullName" name="fullName" class="input input-bordered" autocomplete="name"
+                  [(ngModel)]="address.fullName" required maxlength="100" />
+              </div>
+              <div class="form-control">
+                <label for="account-phoneNumber">{{t('phoneNumber')}} <span class="text-error">*</span></label>
+                <input id="account-phoneNumber" name="phoneNumber" class="input input-bordered" type="tel" autocomplete="tel"
+                  [(ngModel)]="address.phoneNumber" required maxlength="16" pattern="[+]?[0-9]{8,15}" />
+              </div>
             </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('phone')}}</span></label>
-              <input 
-                class="input input-bordered" 
-                type="tel"
-                [(ngModel)]="newAddress.phoneNumber"
-                maxlength="9"
-                pattern="[0-9]{9}"
-                (keypress)="onPhoneKeyPress($event)"
-              />
+            <div class="form-control my-4">
+              <label for="account-addressLine1">{{t('addressLine1')}} <span class="text-error">*</span></label>
+              <app-address-autocomplete fieldId="account-addressLine1" [value]="address.addressLine1" [language]="currentLanguage()"
+                [label]="t('addressLine1')" (locationChange)="onAddressLocationChange(address, $event)"></app-address-autocomplete>
             </div>
-            <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text">{{t('addressLine1')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.addressLine1" />
+            <div class="address-detail-grid">
+              @for (field of optionalFields; track field.key) {
+                <div class="form-control">
+                  <label [for]="'account-' + field.key">{{t(field.key)}}</label>
+                  <input [id]="'account-' + field.key" [name]="field.key" class="input input-bordered"
+                    [(ngModel)]="address[field.key]" [maxlength]="field.maxLength" />
+                </div>
+              }
             </div>
-            <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text">{{t('addressLine2')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.addressLine2" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('country')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.country" placeholder="Kuwait" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('state')}}</span></label>
-              <select class="select select-bordered" [(ngModel)]="newAddress.state" (ngModelChange)="onNewAddressStateChange()">
-                <option value="">{{t('selectState')}}</option>
-                @for (state of states; track state) {
-                  <option [value]="state">{{ state }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('city')}}</span></label>
-              <select class="select select-bordered" [(ngModel)]="newAddress.city" [disabled]="!newAddress.state">
-                <option value="">{{t('selectCity')}}</option>
-                @for (city of getFilteredCitiesForNew(); track city) {
-                  <option [value]="city">{{ city }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('postalCode')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.postalCode" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alQataa')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alQataa" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alSharee')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alSharee" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alJada')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alJada" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alManzil')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alManzil" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alDor')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alDor" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alShakka')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="newAddress.alShakka" />
-            </div>
-            <div class="form-control md:col-span-2">
-              <label class="cursor-pointer label justify-start gap-3">
-                <input type="checkbox" class="checkbox" [(ngModel)]="newAddress.isDefault">
-                <span class="label-text">{{t('setAsDefault')}}</span>
-              </label>
-            </div>
-          </div>
+            <label class="flex items-center gap-3 mt-5 cursor-pointer">
+              <input type="checkbox" name="isDefault" class="checkbox checkbox-sm" [(ngModel)]="address.isDefault" />
+              <span class="text-sm">{{t('setAsDefault')}}</span>
+            </label>
+          </fieldset>
           <div class="modal-action">
-            <button class="btn btn-ghost" (click)="showAddAddress.set(false)">{{t('cancel')}}</button>
-            <button class="btn btn-primary" (click)="addAddress()">{{t('save')}}</button>
+            <button class="btn btn-ghost" type="button" [disabled]="isSavingAddress()"
+              (click)="showAddAddress.set(false); showEditAddress.set(false)">{{t('cancel')}}</button>
+            <button class="btn address-save" type="submit" [disabled]="isSavingAddress() || !isAddressValid(address)">
+              @if (isSavingAddress()) { <span class="loading loading-spinner loading-sm"></span> }
+              {{t('save')}}
+            </button>
           </div>
-        </div>
-      </div>
-    }
-
-    <!-- Edit Address Modal -->
-    @if (showEditAddress()) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-3xl">
-          <h3 class="font-bold text-lg mb-4">{{t('editAddress')}}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('fullName')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.fullName" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('phone')}}</span></label>
-              <input 
-                class="input input-bordered" 
-                type="tel"
-                [(ngModel)]="editAddress.phoneNumber"
-                maxlength="9"
-                pattern="[0-9]{9}"
-                (keypress)="onPhoneKeyPress($event)"
-              />
-            </div>
-            <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text">{{t('addressLine1')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.addressLine1" />
-            </div>
-            <div class="form-control md:col-span-2">
-              <label class="label"><span class="label-text">{{t('addressLine2')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.addressLine2" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('country')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.country" placeholder="Kuwait" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('state')}}</span></label>
-              <select class="select select-bordered" [(ngModel)]="editAddress.state" (ngModelChange)="onEditAddressStateChange()">
-                <option value="">{{t('selectState')}}</option>
-                @for (state of states; track state) {
-                  <option [value]="state">{{ state }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('city')}}</span></label>
-              <select class="select select-bordered" [(ngModel)]="editAddress.city" [disabled]="!editAddress.state">
-                <option value="">{{t('selectCity')}}</option>
-                @for (city of getFilteredCitiesForEdit(); track city) {
-                  <option [value]="city">{{ city }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('postalCode')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.postalCode" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alQataa')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alQataa" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alSharee')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alSharee" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alJada')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alJada" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alManzil')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alManzil" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alDor')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alDor" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('alShakka')}}</span></label>
-              <input class="input input-bordered" [(ngModel)]="editAddress.alShakka" />
-            </div>
-           
-          </div>
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="showEditAddress.set(false)">{{t('cancel')}}</button>
-            <button class="btn btn-primary" (click)="updateAddress()">{{t('save')}}</button>
-          </div>
-        </div>
+        </form>
       </div>
     }
   }

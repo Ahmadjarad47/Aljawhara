@@ -1,17 +1,30 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink],
   templateUrl: './footer.html',
   styleUrl: './footer.css'
 })
 export class Footer implements OnInit, OnDestroy {
   currentYear = new Date().getFullYear();
-  private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly handleLanguageChange = (event: Event) => {
+    const language = (event as CustomEvent<'ar' | 'en'>).detail;
+    if (language === 'ar' || language === 'en') {
+      this.currentLanguage.set(language);
+      this.updateLinksLanguage();
+    }
+  };
+  private readonly handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'language' && (event.newValue === 'ar' || event.newValue === 'en')) {
+      this.currentLanguage.set(event.newValue);
+      this.updateLinksLanguage();
+    }
+  };
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -176,6 +189,11 @@ export class Footer implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    if (!this.isBrowser) {
+      this.updateLinksLanguage();
+      return;
+    }
+
     // Load saved language from localStorage
     const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
     if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
@@ -189,29 +207,14 @@ export class Footer implements OnInit, OnDestroy {
     this.updateLinksLanguage();
 
     // Listen for language changes from localStorage (when changed in navbar)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language' && e.newValue) {
-        const newLang = e.newValue as 'ar' | 'en';
-        if (newLang === 'ar' || newLang === 'en') {
-          this.currentLanguage.set(newLang);
-          this.updateLinksLanguage();
-        }
-      }
-    });
-
-    // Also check periodically for language changes (for same-window updates)
-    this.languageCheckInterval = setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-        this.updateLinksLanguage();
-      }
-    }, 500);
+    window.addEventListener('storage', this.handleStorageChange);
+    window.addEventListener('languagechange', this.handleLanguageChange);
   }
 
   ngOnDestroy() {
-    if (this.languageCheckInterval) {
-      clearInterval(this.languageCheckInterval);
+    if (this.isBrowser) {
+      window.removeEventListener('storage', this.handleStorageChange);
+      window.removeEventListener('languagechange', this.handleLanguageChange);
     }
   }
 
@@ -220,6 +223,8 @@ export class Footer implements OnInit, OnDestroy {
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (this.isBrowser) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

@@ -98,7 +98,9 @@ function addSecurityHeaders(request: HttpRequest<any>): HttpRequest<any> {
   };
 
   // Add cache headers for GET requests (mobile performance optimization)
-  if (request.method === 'GET' && !request.url.includes('/auth/')) {
+  if (/\/orders\/(?:\d+\/payment-status|payment-callback)(?:\?|$)/i.test(request.url)) {
+    headers['Cache-Control'] = 'no-store';
+  } else if (request.method === 'GET' && !request.url.includes('/auth/')) {
     // Cache static resources longer
     if (request.url.match(/\.(jpg|jpeg|png|gif|webp|svg|woff|woff2|ttf|eot)$/i)) {
       headers['Cache-Control'] = 'public, max-age=31536000, immutable';

@@ -1,0 +1,18 @@
+.address-editor { overflow: visible; max-height: none; }
+.address-editor-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.address-contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.address-detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.address-editor .form-control { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.address-editor .form-control label { font-size: 14px; color: #53575c; }
+.address-editor .input { width: 100%; height: 41px; min-width: 0; border: 1px solid #d8d8da; border-radius: 4px; background: #f8f8f8; padding: 8px 12px; font-size: 14px; color: #383b40; }
+.address-editor[dir='rtl'] input[type='tel'], [dir='rtl'] .address-editor input[type='tel'] { text-align: right; }
+.address-editor .input:focus { outline: 2px solid #054239; outline-offset: 2px; }
+.address-save { background: #054239; border-color: #054239; color: #fff; min-width: 100px; }
+.address-save:hover { background: #04352f; }
+.address-save:disabled { opacity: .5; }
+.modal { overflow-y: auto; padding-block: 24px; align-items: safe center; }
+@media (max-width: 540px) {
+  .address-contact-grid { grid-template-columns: 1fr; gap: 16px; }
+  .address-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+  .address-editor { padding: 20px; }
+}

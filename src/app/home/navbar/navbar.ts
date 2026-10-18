@@ -4,14 +4,14 @@ import {
   TemplateRef,
   ViewChild,
   OnDestroy,
+  PLATFORM_ID,
   inject,
   signal,
   effect,
   ElementRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { isPlatformBrowser, NgClass } from '@angular/common';
+import { RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import {
   Subscription,
   debounceTime,
@@ -31,12 +31,13 @@ import { ProductSummaryDto, CategoryDto } from '../product/product.models';
 
 @Component({
   selector: 'app-navbar',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [NgClass, RouterLink, RouterLinkActive],
   standalone: true,
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   @ViewChild('mobileMenuTemplate', { static: true }) mobileMenuTemplate!: TemplateRef<any>;
   @ViewChild('mobileSearchInput', { static: false })
   mobileSearchInput!: ElementRef<HTMLInputElement>;
@@ -250,15 +251,17 @@ export class Navbar implements OnInit, OnDestroy {
     this.loadUserData();
 
     // Load saved language from localStorage
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    const savedLang = this.isBrowser
+      ? (localStorage.getItem('language') as 'ar' | 'en' | null)
+      : null;
     if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
       this.currentLanguage.set(savedLang);
       this.selectedLanguage = savedLang === 'ar' ? 'العربية' : 'English';
       // Set document direction
-      if (savedLang === 'ar') {
+      if (this.isBrowser && savedLang === 'ar') {
         document.documentElement.setAttribute('dir', 'rtl');
         document.documentElement.setAttribute('lang', 'ar');
-      } else {
+      } else if (this.isBrowser) {
         document.documentElement.setAttribute('dir', 'ltr');
         document.documentElement.setAttribute('lang', 'en');
       }
@@ -266,8 +269,10 @@ export class Navbar implements OnInit, OnDestroy {
       // Default to Arabic
       this.currentLanguage.set('ar');
       this.selectedLanguage = 'العربية';
-      document.documentElement.setAttribute('dir', 'rtl');
-      document.documentElement.setAttribute('lang', 'ar');
+      if (this.isBrowser) {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+      }
     }
 
     // Load categories from API (defer to avoid blocking initial render)
@@ -456,6 +461,8 @@ export class Navbar implements OnInit, OnDestroy {
     this.isLanguageDropdownOpen = false;
 
     // Update document direction for RTL/LTR
+    if (!this.isBrowser) return;
+
     if (language.code === 'ar') {
       document.documentElement.setAttribute('dir', 'rtl');
       document.documentElement.setAttribute('lang', 'ar');
@@ -466,6 +473,7 @@ export class Navbar implements OnInit, OnDestroy {
 
     // Save to localStorage
     localStorage.setItem('language', language.code);
+    window.dispatchEvent(new CustomEvent('languagechange', { detail: language.code }));
 
     console.log('Language changed to:', language.code);
     // Reload categories with new language

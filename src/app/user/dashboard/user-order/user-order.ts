@@ -13,6 +13,7 @@ import {
   InvoicePaymentDto 
 } from './models.order';
 import { combineLatest, map, startWith, catchError, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 declare const window: any;
 
@@ -24,6 +25,7 @@ declare const window: any;
   styleUrl: './user-order.css'
 })
 export class UserOrderComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
   private orderService = inject(UserOrderService);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
@@ -289,38 +291,9 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   }
 
   payOrder(orderId: number): void {
-    this.isLoading.set(true);
-    this.orderService.getOrderPaymentLink(orderId).pipe(
-      catchError(error => {
-        console.error('Error loading payment link:', error);
-        const title = this.currentLanguage() === 'ar' ? 'خطأ' : 'Error';
-        const message = this.currentLanguage() === 'ar'
-          ? 'فشل الحصول على رابط الدفع'
-          : 'Failed to get payment link';
-        this.toastService.error(title, message);
-        return of(null);
-      })
-    ).subscribe({
-      next: (response) => {
-        const paymentLink = response?.paymentLink;
-        if (paymentLink) {
-          window.location.href = paymentLink;
-          return;
-        }
-
-        const title = this.currentLanguage() === 'ar' ? 'خطأ' : 'Error';
-        const message = this.currentLanguage() === 'ar'
-          ? 'لم يتم العثور على رابط دفع صالح'
-          : 'No valid payment link found';
-        this.toastService.error(title, message);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.isLoading.set(false);
-      }
-    });
+    // Inspect the existing attempt before opening payment or offering a terminal retry.
+    this.router.navigate(['/checkout/success'], { queryParams: { orderId, prepare: '1' } });
   }
-
   cancelOrder(orderId: number): void {
     if (!confirm(this.currentLanguage() === 'ar' ? 'هل أنت متأكد من إلغاء هذا الطلب؟' : 'Are you sure you want to cancel this order?')) {
       return;
@@ -489,14 +462,15 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
   private async generatePDF(invoice: InvoicePaymentDto): Promise<void> {
     try {
-      // Check if jsPDF and html2canvas are available
-      if (typeof window === 'undefined' || !window.jspdf) {
-        this.toastService.error('خطأ', 'مكتبة PDF غير متوفرة');
+      if (typeof window === 'undefined') {
         return;
       }
 
-      // Dynamically import html2canvas
-      const html2canvas = (await import('html2canvas')).default;
+      // Load the large PDF libraries only when the user requests an invoice.
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       // Create HTML invoice template
       const invoiceHTML = this.createInvoiceHTML(invoice);
       
@@ -585,7 +559,6 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
       // Convert canvas to JPEG with compression
       const imgData = canvas.toDataURL('image/jpeg', 0.85);
-      const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -1022,4 +995,3 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     `;
   }
 }
-

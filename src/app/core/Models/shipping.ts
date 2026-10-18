@@ -1,57 +1,27 @@
-export interface UserAddressDto {
-    id: number;
-    fullName: string;
-    addressLine1: string;
-    addressLine2: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    phoneNumber: string;
-    isDefault: boolean;
-    alQataa: string | null; // القطعة (District/Block)
-    alSharee: string | null; // الشارع (Street)
-    alJada: string | null; // الجادة (Avenue)
-    alManzil: string | null; // المنزل (House)
-    alDor: string | null; // الدور (Floor)
-    alShakka: string | null; // الشقة (Apartment)
-    createdAt: string;
-    updatedAt: string;
-}
-
 export interface CreateAddressDto {
-    fullName: string;
-    addressLine1: string;
-    addressLine2: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    phoneNumber: string;
-    isDefault: boolean;
-    alQataa: string | null; // القطعة (District/Block)
-    alSharee: string | null; // الشارع (Street)
-    alJada: string | null; // الجادة (Avenue)
-    alManzil: string | null; // المنزل (House)
-    alDor: string | null; // الدور (Floor)
-    alShakka: string | null; // الشقة (Apartment)
+  fullName: string;
+  phoneNumber: string;
+  addressLine1: string;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  isDefault: boolean;
+  alQataa?: string | null;
+  alSharee?: string | null;
+  alJada?: string | null;
+  alManzil?: string | null;
+  alDor?: string | null;
+  alShakka?: string | null;
 }
 
-export interface UpdateAddressDto {
-    id: number;
-    fullName: string;
-    addressLine1: string;
-    addressLine2: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    phoneNumber: string;
-    isDefault: boolean;
-    alQataa: string | null; // القطعة (District/Block)
-    alSharee: string | null; // الشارع (Street)
-    alJada: string | null; // الجادة (Avenue)
-    alManzil: string | null; // المنزل (House)
-    alDor: string | null; // الدور (Floor)
-    alShakka: string | null; // الشقة (Apartment)
+export interface UserAddressDto extends CreateAddressDto {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateAddressDto extends CreateAddressDto {
+  id: number;
 }

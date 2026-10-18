@@ -1,20 +1,15 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading, withInMemoryScrolling } from '@angular/router';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient, withFetch, withInterceptors, withJsonpSupport } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { SelectivePreloadingStrategy } from './core/strategies/selective-preloading.strategy';
-import { PerformanceService } from './core/services/performance.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     // Error handling
     provideBrowserGlobalErrorListeners(),
-    
-    // Performance monitoring service
-    PerformanceService,
     
     // Performance: Zoneless change detection for better performance
     provideZonelessChangeDetection(),
@@ -39,11 +34,7 @@ export const appConfig: ApplicationConfig = {
     // HTTP Client with security and performance optimizations
     provideHttpClient(
       withFetch(), // Use Fetch API instead of XHR for better performance and modern browser support
-      withInterceptors([authInterceptor]), // Auth interceptor with retry logic and token refresh
-      withJsonpSupport() // Support JSONP if needed
+      withInterceptors([authInterceptor]) // Auth interceptor with retry logic and token refresh
     ),
-    
-    // Animations (async for better initial load - loads animations after app bootstrap)
-    provideAnimationsAsync(),
   ]
 };

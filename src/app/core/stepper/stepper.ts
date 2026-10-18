@@ -1,120 +1,64 @@
-import { Component, inject, signal, OnInit, effect } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServiceStepper, StepperStep } from './service-stepper';
+import { RouterLink } from '@angular/router';
 import { ShippingStepComponent } from './shipping-step/shipping-step';
-import { ReviewStepComponent } from './review-step/review-step';
 import { PaymentTimingStepComponent } from './payment-timing-step/payment-timing-step';
-import { PaymentStepComponent } from './payment-step/payment-step';
+import { CartService } from '../service/cart-service';
+import { ServiceStepper } from './service-stepper';
 
 @Component({
   selector: 'app-stepper',
   standalone: true,
-  imports: [
-    CommonModule,
-    ShippingStepComponent,
-    ReviewStepComponent,
-    PaymentTimingStepComponent,
-    PaymentStepComponent
-  ],
+  imports: [CommonModule, RouterLink, ShippingStepComponent, PaymentTimingStepComponent],
   templateUrl: './stepper.html',
   styleUrl: './stepper.css'
 })
-export class StepperComponent implements OnInit {
+export class StepperComponent {
+  private cartService = inject(CartService);
   private stepperService = inject(ServiceStepper);
-  private lastStep?: StepperStep;
-
-  constructor() {
-    effect(() => {
-      const step = this.currentStep();
-
-      // Scroll only when user moves between steps (avoid initial jump).
-      if (this.lastStep !== undefined && this.lastStep !== step) {
-        this.scrollToTop();
-      }
-
-      this.lastStep = step;
-    });
-  }
-  
-  ngOnInit(): void {
-    // Always restart checkout from step 1 when entering checkout
-    this.stepperService.startFromFirstStep();
-  }
-  
-  // Language / translations
-  currentLanguage = signal<'ar' | 'en'>(
-    (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar'
-  );
-
+  shipping = viewChild(ShippingStepComponent);
+  payment = viewChild(PaymentTimingStepComponent);
+  isSubmitting = signal(false);
+  currentLanguage = signal<'ar' | 'en'>(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
+  cartItems = this.cartService.getCartItemsSignal();
+  subtotal = computed(() => this.cartItems().reduce((sum, item) => sum + item.price * item.quantity, 0));
+  deliveryFee = computed(() => this.stepperService.checkoutData().deliveryFee ?? (this.subtotal() >= 20 ? 0 : 2));
+  discount = computed(() => this.cartService.getDiscountAmount());
+  total = computed(() => this.cartService.getTotalPriceWithDiscount() + this.deliveryFee());
   translations = {
     ar: {
-      checkoutTitle: 'إتمام الشراء',
-      step: 'الخطوة',
-      of: 'من',
-      checkoutSubtitle: 'راجع تفاصيلك وأكمل طلبك بأمان.',
-      shippingStep: 'الشحن',
-      reviewStep: 'مراجعة الطلب',
-      paymentTimingStep: 'وقت الدفع',
-      paymentStep: 'الدفع',
-      previous: 'السابق',
-      continueTo: 'متابعة إلى',
+      checkoutTitle: 'إتمام الطلب', checkoutSubtitle: 'أدخل بيانات التوصيل واختر طريقة الدفع في صفحة واحدة',
+      orderSummary: 'ملخص الطلب', quantity: 'الكمية', subtotal: 'المجموع الفرعي', deliveryFee: 'رسوم التوصيل',
+      discount: 'الخصم', total: 'الإجمالي', confirmOrder: 'تأكيد الطلب', backToCart: 'العودة للسلة',
+      processing: 'جاري تأكيد الطلب...', cartEmpty: 'سلة التسوق فارغة',
     },
     en: {
-      checkoutTitle: 'Checkout',
-      step: 'Step',
-      of: 'of',
-      checkoutSubtitle: 'Review your details and place your order securely.',
-      shippingStep: 'Shipping',
-      reviewStep: 'Review Order',
-      paymentTimingStep: 'Payment Timing',
-      paymentStep: 'Payment',
-      previous: 'Previous',
-      continueTo: 'Continue to',
+      checkoutTitle: 'Checkout', checkoutSubtitle: 'Enter delivery details and choose your payment method on one page',
+      orderSummary: 'Order summary', quantity: 'Quantity', subtotal: 'Subtotal', deliveryFee: 'Delivery fee',
+      discount: 'Discount', total: 'Total', confirmOrder: 'Confirm order', backToCart: 'Back to cart',
+      processing: 'Confirming your order...', cartEmpty: 'Your cart is empty',
     },
   } as const;
 
   t(key: keyof typeof this.translations.ar): string {
-    const lang = this.currentLanguage();
-    return this.translations[lang][key] ?? key;
-  }
-  
-  currentStep = this.stepperService.currentStep;
-  
-  getProgress(): number {
-    return this.stepperService.getProgress();
-  }
-  
-  nextStep(): void {
-    this.stepperService.nextStep();
-  }
-  
-  previousStep(): void {
-    this.stepperService.previousStep();
-  }
-  
-  canProceed(): boolean {
-    // Use the stepper service's validation method
-    return this.stepperService.isStepComplete(this.currentStep());
-  }
-  
-  getNextStepName(): string {
-    if (this.currentStep() === StepperStep.SHIPPING) {
-      return this.t('reviewStep');
-    }
-    if (this.currentStep() === StepperStep.REVIEW) {
-      return this.t('paymentTimingStep');
-    }
-    if (this.currentStep() === StepperStep.PAYMENT_TIMING) {
-      return this.t('paymentStep');
-    }
-    return '';
+    return this.translations[this.currentLanguage()][key];
   }
 
-  private scrollToTop(): void {
-    // Let Angular render the next step content, then scroll.
-    setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }, 0);
+  canConfirm(): boolean {
+    const shipping = this.shipping();
+    return !!this.cartItems().length && !!shipping?.isFormValid()
+      && !shipping.isLoading() && !shipping.isSubmitting() && !this.isSubmitting();
+  }
+
+  async confirmOrder(): Promise<void> {
+    const shipping = this.shipping();
+    const payment = this.payment();
+    if (!this.canConfirm() || !shipping || !payment) return;
+    this.isSubmitting.set(true);
+    try {
+      if (await shipping.saveAddress()) await payment.createOrder();
+    } finally {
+      this.isSubmitting.set(false);
+    }
   }
 }
-

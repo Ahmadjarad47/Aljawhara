@@ -1,5 +1,6 @@
 import { Injectable, signal, effect } from '@angular/core';
 import { UserAddressDto, CreateAddressDto, UpdateAddressDto } from '../Models/shipping';
+import { isShippingAddressValid } from './shipping-address';
 
 export enum StepperStep {
   SHIPPING = 1,
@@ -130,7 +131,7 @@ export class ServiceStepper {
     const data = this.checkoutData();
     switch (step) {
       case StepperStep.SHIPPING:
-        return !!(data.address || data.selectedAddressId);
+        return !!data.address && isShippingAddressValid(data.address);
       case StepperStep.REVIEW:
         return this.isStepComplete(StepperStep.SHIPPING);
       case StepperStep.PAYMENT_TIMING:

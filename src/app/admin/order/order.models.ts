@@ -29,10 +29,10 @@ export interface ShippingAddressDto extends BaseDto {
     fullName: string;
     phone: string;
     street: string;
-    city: string;
-    state: string | null;
-    postalCode: string;
-    country: string;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
     appUserId: string | null;
 }
 export enum OrderStatus
@@ -48,15 +48,22 @@ export interface OrderCreateDto {
     items: OrderItemCreateDto[];
     shippingAddress: ShippingAddressCreateDto;
     couponCode: string | null;
+    paymentMethod?: 2 | 4; // Backend PaymentMethod: Cod = 2, Bank (Sadad) = 4.
 }
 export interface ShippingAddressCreateDto {
     fullName: string;
     phone: string;
     street: string;
-    city: string;
-    state: string | null;
-    postalCode: string;
-    country: string;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    alQataa?: string | null;
+    alSharee?: string | null;
+    alJada?: string | null;
+    alManzil?: string | null;
+    alDor?: string | null;
+    alShakka?: string | null;
 }
 export interface OrderUpdateStatusDto {
     id: number;

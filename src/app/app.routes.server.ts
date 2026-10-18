@@ -12,6 +12,13 @@ export const serverRoutes: ServerRoute[] = environment.maintenance.enabled ? [
     },
   },
 ] : [
+  { path: 'checkout/success', renderMode: RenderMode.Client },
+  { path: 'checkout/failed', renderMode: RenderMode.Client },
+  {
+    path: 'checkout',
+    // Checkout restores the customer's cart and saved delivery details in the browser.
+    renderMode: RenderMode.Client
+  },
   {
     path: 'product/:id',
     renderMode: RenderMode.Server

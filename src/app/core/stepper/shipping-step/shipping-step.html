@@ -1,289 +1,43 @@
-@if (isLoading()) {
-  <div class="flex items-center justify-center py-20">
-    <span class="loading loading-spinner loading-lg text-primary"></span>
-  </div>
-} @else {
-  <div>
-    <h2 class="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">{{ t('shippingTitle') }}</h2>
-
-    <!-- Address Form: create first address or update existing one -->
-    <div class="border-t pt-4 md:pt-6">
-      <div class="flex justify-between items-center mb-3 md:mb-4">
-        <h3 class="text-base md:text-lg font-semibold text-base-content">
-          {{ selectedAddressId() ? t('editAddressTitle') : t('newAddressTitle') }}
-        </h3>
-        @if (selectedAddressId() && !isEditMode()) {
-          <button 
-            type="button"
-            class="btn btn-sm border-none bg-[#054239] text-white hover:bg-[#04352f]"
-            (click)="enableEditMode()"
-          >
-            {{ t('editBtn') }}
-          </button>
+<section aria-labelledby="delivery-heading">
+  <h2 id="delivery-heading">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v6m8-6v6m-6 5h4"/></svg>
+    {{ t('shippingTitle') }}
+  </h2>
+  @if (isLoading()) {
+    <div class="address-loading" role="status"><span class="loading loading-spinner loading-lg"></span></div>
+  } @else {
+    <form id="shipping-address" #addressForm="ngForm" (ngSubmit)="submitted.emit()">
+      <div class="contact-fields">
+        <div class="field">
+          <label for="fullName">{{ t('fullName') }} <span>*</span></label>
+          <input id="fullName" name="fullName" autocomplete="name" [(ngModel)]="formData.fullName" (ngModelChange)="formChanged()" required maxlength="100" />
+        </div>
+        <div class="field">
+          <label for="phoneNumber">{{ t('phoneNumber') }} <span>*</span></label>
+          <input id="phoneNumber" name="phoneNumber" type="tel" autocomplete="tel" inputmode="tel"
+            [(ngModel)]="formData.phoneNumber" (ngModelChange)="formChanged()" required maxlength="16" pattern="[+]?[0-9]{8,15}"
+            #phone="ngModel" aria-describedby="phone-error" />
+          @if (phone.invalid && phone.touched) {
+            <small id="phone-error" role="alert">{{ t('phoneHint') }}</small>
+          }
+        </div>
+      </div>
+      <div class="field address-line">
+        <label for="addressLine1">{{ t('addressLine1') }} <span>*</span></label>
+        <app-address-autocomplete [value]="formData.addressLine1" [language]="currentLanguage()"
+          [label]="t('addressLine1')" (locationChange)="onAddressLocationChange($event)"></app-address-autocomplete>
+      </div>
+      <div class="address-fields">
+        @for (field of optionalFields; track field.key) {
+          <div class="field">
+            <label [for]="field.key">{{ t(field.key) }}</label>
+            <input [id]="field.key" [name]="field.key" [(ngModel)]="formData[field.key]" (ngModelChange)="formChanged()" [maxlength]="field.maxLength" />
+          </div>
         }
       </div>
-        
-        <form class="space-y-4" (ngSubmit)="saveAddress()">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('fullName') }} *</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="John Doe"
-                [(ngModel)]="formData.fullName"
-                name="fullName"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-                required
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('phoneNumber') }} *</span>
-              </label>
-              <input 
-                type="tel" 
-                class="input input-bordered w-full" 
-                placeholder="67070814"
-                [(ngModel)]="formData.phoneNumber"
-                name="phoneNumber"
-                maxlength="9"
-                pattern="[0-9]{9}"
-                (keypress)="onPhoneKeyPress($event)"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-                required
-              />
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">{{ t('addressLine1') }} *</span>
-            </label>
-            <input 
-              type="text" 
-              class="input input-bordered w-full" 
-              placeholder="Street address, building number"
-              [(ngModel)]="formData.addressLine1"
-              name="addressLine1"
-              [readonly]="!isEditMode() && !!selectedAddressId()"
-              [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              required
-            />
-          </div>
-          
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">{{ t('addressLine2Optional') }}</span>
-            </label>
-            <input 
-              type="text" 
-              class="input input-bordered w-full" 
-              placeholder="Apartment, suite, etc."
-              [(ngModel)]="formData.addressLine2"
-              name="addressLine2"
-              [readonly]="!isEditMode() && !!selectedAddressId()"
-              [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-            />
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('state') }} *</span>
-              </label>
-              <select 
-                class="select select-bordered w-full" 
-                [(ngModel)]="formData.state"
-                (ngModelChange)="onStateChange()"
-                name="state"
-                [disabled]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-                required
-              >
-                <option value="">{{ t('selectState') }}</option>
-                @for (state of states; track state) {
-                  <option [value]="state">{{ state }}</option>
-                }
-              </select>
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('city') }} *</span>
-              </label>
-              <select 
-                class="select select-bordered w-full" 
-                [(ngModel)]="formData.city"
-                (ngModelChange)="onCityChange()"
-                name="city"
-                [disabled]="!formData.state || (!isEditMode() && !!selectedAddressId())"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-                required
-              >
-                <option value="">{{ t('selectCity') }}</option>
-                @for (city of getFilteredCities(); track city) {
-                  <option [value]="city">{{ city }}</option>
-                }
-              </select>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('postalCode') }} *</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full bg-base-200" 
-                placeholder="0000"
-                [value]="'0000'"
-                name="postalCode"
-                readonly
-                required
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('country') }} *</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full bg-base-200" 
-                placeholder="Kuwait"
-                [value]="'Kuwait'"
-                name="country"
-                readonly
-                required
-              />
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alQataa') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alQataa') }}"
-                [(ngModel)]="formData.alQataa"
-                name="alQataa"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alSharee') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alSharee') }}"
-                [(ngModel)]="formData.alSharee"
-                name="alSharee"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alJada') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alJada') }}"
-                [(ngModel)]="formData.alJada"
-                name="alJada"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alManzil') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alManzil') }}"
-                [(ngModel)]="formData.alManzil"
-                name="alManzil"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alDor') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alDor') }}"
-                [(ngModel)]="formData.alDor"
-                name="alDor"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">{{ t('alShakka') }}</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full" 
-                placeholder="{{ t('alShakka') }}"
-                [(ngModel)]="formData.alShakka"
-                name="alShakka"
-                [readonly]="!isEditMode() && !!selectedAddressId()"
-                [class.bg-base-200]="!isEditMode() && !!selectedAddressId()"
-              />
-            </div>
-          </div>
-          
-          
-          
-          @if (isEditMode() || !selectedAddressId()) {
-            <div class="flex gap-3 mt-4 md:mt-6">
-              <button 
-                type="submit" 
-                class="btn border-none bg-[#054239] text-white hover:bg-[#04352f]"
-                [disabled]="!isFormValid() || isSubmitting()"
-              >
-                @if (isSubmitting()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                  {{ t('saving') }}
-                } @else {
-                  {{ selectedAddressId() ? t('updateAddressBtn') : t('saveAddressBtn') }}
-                }
-              </button>
-            </div>
-          }
-        </form>
-    </div>
-  </div>
-}
-
-<app-toast [toasts]="toastService.toasts$()" (close)="toastService.removeToast($event)"></app-toast>
-
+    </form>
+  }
+  @if (error()) {
+    <p class="address-error" role="alert">{{ error() }}</p>
+  }
+</section>

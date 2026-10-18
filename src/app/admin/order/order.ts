@@ -535,12 +535,14 @@ export class Order implements OnInit {
 
   private async generatePDF(invoice: InvoicePaymentDto): Promise<void> {
     try {
-      if (typeof window === 'undefined' || !window.jspdf) {
-        this.toastService.error('Error', 'PDF library not available');
+      if (typeof window === 'undefined') {
         return;
       }
 
-      const html2canvas = (await import('html2canvas')).default;
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const invoiceHTML = this.createInvoiceHTML(invoice);
 
       const iframe = document.createElement('iframe');
@@ -609,7 +611,6 @@ export class Order implements OnInit {
       document.body.removeChild(iframe);
 
       const imgData = canvas.toDataURL('image/jpeg', 0.85);
-      const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -775,7 +776,7 @@ export class Order implements OnInit {
               <div><strong>الاسم:</strong> ${escapeHtml(address.fullName)}</div>
               <div><strong>الهاتف:</strong> ${escapeHtml(address.phone)}</div>
               ${address.state ? `<div><strong>المحافظة:</strong> ${escapeHtml(address.state)}</div>` : ''}
-              <div><strong>المدينة:</strong> ${escapeHtml(address.city)}</div>
+              ${address.city ? `<div><strong>المدينة:</strong> ${escapeHtml(address.city)}</div>` : ''}
               ${address.alQataa ? `<div><strong>القطعة:</strong> ${escapeHtml(address.alQataa)}</div>` : ''}
               ${address.street ? `<div><strong>الشارع:</strong> ${escapeHtml(address.street)}</div>` : ''}
               ${address.alSharee ? `<div><strong>الشارع:</strong> ${escapeHtml(address.alSharee)}</div>` : ''}

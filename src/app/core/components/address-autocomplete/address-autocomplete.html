@@ -1,0 +1,27 @@
+<div class="address-combobox">
+  <input [id]="fieldId()" name="addressLine1" type="text" role="combobox"
+    [value]="value()" (input)="onInput($event)" (focus)="open()" (blur)="close()" (keydown)="onKeydown($event)"
+    [attr.aria-label]="label()" aria-autocomplete="list" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()"
+    [attr.aria-controls]="fieldId() + '-options'"
+    [attr.aria-activedescendant]="isOpen() && activeIndex() >= 0 ? fieldId() + '-option-' + activeIndex() : null"
+    [placeholder]="language() === 'ar' ? 'ابحث عن المحافظة أو المنطقة' : 'Search governorates or areas'"
+    autocomplete="off" required maxlength="200" />
+  <button class="dropdown-toggle" type="button" tabindex="-1"
+    (pointerdown)="$event.preventDefault()" (click)="toggle()"
+    [attr.aria-label]="language() === 'ar' ? 'عرض المحافظات والمناطق' : 'Show governorates and areas'">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 7 5 5 5-5"/></svg>
+  </button>
+  @if (isOpen()) {
+    <div class="address-options" [id]="fieldId() + '-options'" role="listbox" [attr.aria-label]="label()">
+      @for (option of filteredOptions(); track option.addressLine1; let index = $index) {
+        <button type="button" role="option" tabindex="-1" [id]="fieldId() + '-option-' + index"
+          [title]="option.addressLine1" [attr.aria-selected]="value() === option.addressLine1"
+          [class.active]="activeIndex() === index" (pointerdown)="$event.preventDefault()" (click)="select(option)">
+          <span class="option-state">{{ option.state }}</span><span class="separator" aria-hidden="true">—</span><span class="option-city">{{ option.city }}</span>
+        </button>
+      } @empty {
+        <p class="empty-options" role="status">{{ language() === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results' }}</p>
+      }
+    </div>
+  }
+</div>

@@ -6,11 +6,14 @@ import { ToastService } from '../../../services/toast.service';
 import { UserResponseDto } from '../../../auth/auth.models';
 import { SettingService } from './setting.service';
 import { CreateAddressDto, UpdateAddressDto, UserAddressDto } from './setting.models';
+import { AddressAutocompleteComponent } from '../../../core/components/address-autocomplete/address-autocomplete';
+import { AddressLocation } from '../../../core/data/kuwait-areas';
+import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAddressPayload } from '../../../core/stepper/shipping-address';
 
 @Component({
   selector: 'app-setting',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent],
   templateUrl: './setting.html',
   styleUrl: './setting.css'
 })
@@ -45,13 +48,14 @@ export class Setting implements OnInit, OnDestroy {
       cityState: 'المدينة/الولاية',
       postal: 'الرمز البريدي',
       default: 'افتراضي',
+      secondary: 'إضافي',
       yes: 'نعم',
       no: 'لا',
       edit: 'تعديل',
       delete: 'حذف',
       fullName: 'الاسم الكامل',
       phoneNumber: 'رقم الهاتف',
-      addressLine1: 'سطر العنوان 1',
+      addressLine1: 'العنوان الأول',
       addressLine2: 'سطر العنوان 2',
       country: 'الدولة',
       city: 'المنطقة',
@@ -82,7 +86,7 @@ export class Setting implements OnInit, OnDestroy {
       failedToLoadAddresses: 'فشل تحميل العناوين',
       limitReached: 'تم الوصول للحد الأقصى',
       onlyOneAddress: 'يمكنك إنشاء عنوان واحد فقط',
-      requiredFields: 'الاسم الكامل والهاتف والعنوان مطلوبة',
+      requiredFields: 'يرجى إدخال الاسم والعنوان ورقم جوال صحيح من 8 إلى 15 رقماً.',
       creating: 'جاري الإنشاء',
       creatingAddress: 'جاري إنشاء العنوان...',
       addressCreated: 'تم إنشاء العنوان',
@@ -118,6 +122,7 @@ export class Setting implements OnInit, OnDestroy {
       cityState: 'City/State',
       postal: 'Postal',
       default: 'Default',
+      secondary: 'Additional',
       yes: 'Yes',
       no: 'No',
       edit: 'Edit',
@@ -155,7 +160,7 @@ export class Setting implements OnInit, OnDestroy {
       failedToLoadAddresses: 'Failed to load addresses',
       limitReached: 'Limit reached',
       onlyOneAddress: 'You can only create one address',
-      requiredFields: 'Full name, phone, and address are required',
+      requiredFields: 'Enter a name, address, and a valid mobile number with 8 to 15 digits.',
       creating: 'Creating',
       creatingAddress: 'Creating address...',
       addressCreated: 'Address created',
@@ -172,72 +177,18 @@ export class Setting implements OnInit, OnDestroy {
     }
   };
 
-  // Kuwait areas by governorate
-  kuwaitAreas: { [key: string]: string[] } = {
-    "محافظة العاصمة": [
-      "مدينة الكويت", "دسمان", "شرق", "الصوابر", "المرقاب", "القبلة", "الصالحية", "بنيد القار", "الدسمة",
-      "الدوحة", "الشامية", "الشويخ", "الصليبيخات", "الروضة", "الخالدية", "العديلية", "القادسية",
-      "الفيحاء", "النزهة", "قرطبة", "غرناطة", "مدينة جابر الأحمد"
-    ],
-    "محافظة حولي": [
-      "حولي", "السالمية", "الجابرية", "مشرف", "بيان", "الرميثية", "سلوى", "الشعب", "البدع",
-      "النقرة", "الصديق", "السلام", "الزهراء", "حطين", "سعد العبدالله"
-    ],
-    "محافظة الفروانية": [
-      "الفروانية", "خيطان", "جليب الشيوخ", "أشبيلية", "الأندلس", "العباسية", "الرابية", "العمرية",
-      "العارضية", "الرحاب", "الرقعي", "الفردوس", "ضاحية صباح الناصر", "ضاحية عبدالله المبارك"
-    ],
-    "محافظة الجهراء": [
-      "الجهراء", "الواحة", "القصر", "النعيم", "العيون", "النسيم", "تيماء", "أمغرة", "الصليبية",
-      "المطلاع", "العبدلي", "السالمي", "سعد العبدالله"
-    ],
-    "محافظة الأحمدي": [
-      "الأحمدي", "الفحيحيل", "المنقف", "المهبولة", "الرقة", "الصباحية", "الفنطاس", "أبو حليفة",
-      "ميناء عبدالله", "الزور", "الخيران", "الوفرة", "مدينة صباح الأحمد"
-    ],
-    "محافظة مبارك الكبير": [
-      "مبارك الكبير", "صباح السالم", "العدان", "القرين", "القصور", "المسايل",
-      "الفنطيس", "أبو فطيرة", "صبحان"
-    ]
-  };
+  readonly optionalFields = ADDRESS_DETAIL_FIELDS;
+  readonly isAddressValid = isShippingAddressValid;
+  isSavingAddress = signal(false);
 
-  // Kuwait governorates (المحافظة)
-  states = Object.keys(this.kuwaitAreas);
-
-  // Get filtered cities based on selected state for new address
-  getFilteredCitiesForNew(): string[] {
-    const selectedState = this.newAddress.state;
-    if (selectedState && this.kuwaitAreas[selectedState]) {
-      return this.kuwaitAreas[selectedState];
-    }
-    return [];
+  onAddressLocationChange(address: CreateAddressDto, location: AddressLocation): void {
+    Object.assign(address, location);
   }
 
-  // Get filtered cities based on selected state for edit address
-  getFilteredCitiesForEdit(): string[] {
-    const selectedState = this.editAddress.state;
-    if (selectedState && this.kuwaitAreas[selectedState]) {
-      return this.kuwaitAreas[selectedState];
-    }
-    return [];
+  addressDetails(address: CreateAddressDto): string {
+    return this.optionalFields.filter(field => address[field.key])
+      .map(field => `${this.t(field.key)}: ${address[field.key]}`).join(' · ');
   }
-
-  // Handle state change for new address - reset city if it's not in the new state's cities
-  onNewAddressStateChange() {
-    const filteredCities = this.getFilteredCitiesForNew();
-    if (this.newAddress.city && !filteredCities.includes(this.newAddress.city)) {
-      this.newAddress.city = '';
-    }
-  }
-
-  // Handle state change for edit address - reset city if it's not in the new state's cities
-  onEditAddressStateChange() {
-    const filteredCities = this.getFilteredCitiesForEdit();
-    if (this.editAddress.city && !filteredCities.includes(this.editAddress.city)) {
-      this.editAddress.city = '';
-    }
-  }
-
   // Translation helper
   t(key: string): string {
     const lang = this.currentLanguage();
@@ -258,42 +209,8 @@ export class Setting implements OnInit, OnDestroy {
   addresses = signal<UserAddressDto[]>([]);
   showAddAddress = signal(false);
   showEditAddress = signal(false);
-  newAddress: CreateAddressDto = {
-    fullName: '',
-    phoneNumber: '',
-    addressLine1: '',
-    addressLine2: '',
-    country: 'Kuwait',
-    city: '',
-    state: '',
-    postalCode: '',
-    isDefault: false,
-    alQataa: '',
-    alSharee: '',
-    alJada: '',
-    alManzil: '',
-    alDor: '',
-    alShakka: ''
-  };
-  editAddress: UpdateAddressDto = {
-    id: 0,
-    fullName: '',
-    phoneNumber: '',
-    addressLine1: '',
-    addressLine2: '',
-    country: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    isDefault: false,
-    alQataa: '',
-    alSharee: '',
-    alJada: '',
-    alManzil: '',
-    alDor: '',
-    alShakka: ''
-  };
-
+  newAddress: CreateAddressDto = { ...createAddressForm(), isDefault: false };
+  editAddress: UpdateAddressDto = { ...createAddressForm(), id: 0 };
   ngOnInit(): void {
     // Load saved language
     const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
@@ -417,39 +334,21 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   openEditAddress(address: UserAddressDto) {
-    this.editAddress = {
-      id: address.id,
-      fullName: address.fullName,
-      phoneNumber: address.phoneNumber,
-      addressLine1: address.addressLine1,
-      addressLine2: address.addressLine2,
-      country: address.country,
-      city: address.city,
-      state: address.state,
-      postalCode: address.postalCode,
-      isDefault: !!address.isDefault,
-      alQataa: address.alQataa || '',
-      alSharee: address.alSharee || '',
-      alJada: address.alJada || '',
-      alManzil: address.alManzil || '',
-      alDor: address.alDor || '',
-      alShakka: address.alShakka || ''
-    };
+    this.editAddress = { ...createAddressForm(address), id: address.id };
     this.showEditAddress.set(true);
   }
 
   addAddress() {
-    if (!this.newAddress.fullName || !this.newAddress.phoneNumber || !this.newAddress.addressLine1) {
+    if (this.isSavingAddress()) return;
+    if (!this.isAddressValid(this.newAddress)) {
       this.toastService.warning(this.t('validation'), this.t('requiredFields'));
       return;
     }
-    if (!/^[0-9]{9}$/.test(this.newAddress.phoneNumber)) {
-      this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
-      return;
-    }
+    this.isSavingAddress.set(true);
     const toastId = this.toastService.loading(this.t('creating'), this.t('creatingAddress'));
-    this.settingService.createAddress(this.newAddress).subscribe({
+    this.settingService.createAddress(toAddressPayload(this.newAddress)).subscribe({
       next: (res) => {
+        this.isSavingAddress.set(false);
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressCreated'));
           this.showAddAddress.set(false);
@@ -459,23 +358,23 @@ export class Setting implements OnInit, OnDestroy {
         }
       },
       error: () => {
+        this.isSavingAddress.set(false);
         this.toastService.updateToError(toastId, this.t('error'), this.t('failedToCreateAddress'));
       }
     });
   }
 
   updateAddress() {
-    if (!this.editAddress.fullName || !this.editAddress.phoneNumber || !this.editAddress.addressLine1) {
+    if (this.isSavingAddress()) return;
+    if (!this.isAddressValid(this.editAddress)) {
       this.toastService.warning(this.t('validation'), this.t('requiredFields'));
       return;
     }
-    if (!/^[0-9]{9}$/.test(this.editAddress.phoneNumber)) {
-      this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
-      return;
-    }
+    this.isSavingAddress.set(true);
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingAddress'));
-    this.settingService.updateAddress(this.editAddress).subscribe({
+    this.settingService.updateAddress({ ...toAddressPayload(this.editAddress), id: this.editAddress.id }).subscribe({
       next: (res) => {
+        this.isSavingAddress.set(false);
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressUpdated'));
           this.showEditAddress.set(false);
@@ -485,6 +384,7 @@ export class Setting implements OnInit, OnDestroy {
         }
       },
       error: () => {
+        this.isSavingAddress.set(false);
         this.toastService.updateToError(toastId, this.t('error'), this.t('failedToUpdateAddress'));
       }
     });
@@ -508,23 +408,7 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   resetNewAddress() {
-    this.newAddress = {
-      fullName: '',
-      phoneNumber: '',
-      addressLine1: '',
-      addressLine2: '',
-      country: 'Kuwait',
-      city: '',
-      state: '',
-      postalCode: '',
-      isDefault: false,
-      alQataa: '',
-      alSharee: '',
-      alJada: '',
-      alManzil: '',
-      alDor: '',
-      alShakka: ''
-    };
+    this.newAddress = { ...createAddressForm(), isDefault: false };
   }
 
   // Handle phone number input - only allow digits and limit to 9 digits

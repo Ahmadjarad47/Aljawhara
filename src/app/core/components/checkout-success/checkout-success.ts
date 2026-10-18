@@ -1,150 +1,173 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { take } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { CheckoutPaymentService } from '../../service/checkout-payment.service';
+import { OrderPaymentStatus, PaymentAttemptStatus as Attempt, PaymentInitializationStatus as Init } from '../../Models/checkout-payment';
+
+type PaymentView = 'checking' | 'pending' | 'reconciliation' | 'ready' | 'paid' | 'cod'
+  | 'failed' | 'expired' | 'rejected' | 'unknown' | 'unavailable';
 
 @Component({
   selector: 'app-checkout-success',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './checkout-success.html',
-  styleUrl: './checkout-success.css'
+  styleUrl: './checkout-success.css',
 })
 export class CheckoutSuccessComponent implements OnInit, OnDestroy {
-  private http = inject(HttpClient);
+  private payments = inject(CheckoutPaymentService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private languageCheckInterval?: ReturnType<typeof setInterval>;
-  private paymentCallbackHandled = false;
-  private paymentCallbackUrl = `${environment.apiUrl.replace(/\/?$/, '/')}Orders/payment-callback`;
-  private readonly onStorage = (e: StorageEvent) => {
-    if (e.key === 'language' && e.newValue) {
-      const newLang = e.newValue as 'ar' | 'en';
-      if (newLang === 'ar' || newLang === 'en') {
-        this.currentLanguage.set(newLang);
-      }
-    }
+  private subscription = new Subscription();
+  private pollTimer?: ReturnType<typeof setTimeout>;
+  private polls = 0;
+  private orderId?: number;
+  private preparing = false;
+  private destroyed = false;
+  currentLanguage = signal<'ar' | 'en'>(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
+  state = signal<PaymentView>('checking');
+  busy = signal(false);
+  status = signal<OrderPaymentStatus | null>(null);
+  verifiedOrderId = signal<number | null>(null);
+
+  readonly messages: Record<PaymentView, { ar: string; en: string }> = {
+    checking: { ar: 'جارٍ التحقق من حالة الدفع', en: 'Checking payment status' },
+    pending: { ar: 'جارٍ تجهيز الدفع', en: 'Preparing your payment' },
+    reconciliation: { ar: 'الدفع قيد التحقق', en: 'Payment verification in progress' },
+    ready: { ar: 'رابط الدفع جاهز', en: 'Your payment link is ready' },
+    paid: { ar: 'تم تأكيد الدفع بنجاح', en: 'Payment confirmed' },
+    cod: { ar: 'تم استلام طلبك — الدفع عند الاستلام', en: 'Order received — pay on delivery' },
+    failed: { ar: 'لم تكتمل محاولة الدفع', en: 'The payment attempt did not complete' },
+    expired: { ar: 'انتهت مهلة حجز المخزون', en: 'The stock reservation has expired' },
+    rejected: { ar: 'رُفض طلب التحقق من الدفع', en: 'The payment verification request was rejected' },
+    unknown: { ar: 'تعذر الوصول إلى بيانات الدفع', en: 'Payment information is unavailable' },
+    unavailable: { ar: 'تعذر التحقق من الدفع حالياً', en: 'Unable to check payment right now' },
   };
 
-  // Language management
-  currentLanguage = signal<'ar' | 'en'>('ar');
-  paymentUpdateState = signal<'idle' | 'updating' | 'updated' | 'failed'>('idle');
-  paymentUpdateMessage = signal('');
+  text(ar: string, en: string): string { return this.currentLanguage() === 'ar' ? ar : en; }
+  title(): string { return this.messages[this.state()][this.currentLanguage()]; }
+  isSuccess(): boolean { return this.state() === 'paid' || this.state() === 'cod'; }
 
-  // Translations object
-  translations = {
-    ar: {
-      orderPlacedSuccessfully: 'تم إتمام الطلب بنجاح!',
-      thankYouPurchase: 'شكراً لك على الشراء. تم استلام طلبك وهو قيد المعالجة.',
-      continueShopping: 'متابعة التسوق',
-      viewMyOrders: 'عرض طلباتي',
-      nextStepsTitle: 'الخطوات التالية',
-      nextStepProcessing: 'جارٍ تجهيز طلبك الآن.',
-      nextStepConfirmation: 'ستصلك رسالة تأكيد عند تحديث حالة الطلب.',
-      nextStepOrders: 'يمكنك متابعة طلباتك من صفحة طلباتي.',
-      needHelp: 'تحتاج مساعدة؟',
-      paymentUpdateProcessing: 'جارٍ التحقق من حالة الدفع...',
-      paymentUpdateSuccess: 'تم تحديث حالة الدفع بنجاح.',
-      paymentUpdateFailed: 'تعذر تحديث حالة الدفع. يرجى التواصل مع الدعم.'
-    },
-    en: {
-      orderPlacedSuccessfully: 'Order Placed Successfully!',
-      thankYouPurchase: 'Thank you for your purchase. Your order has been received and is being processed.',
-      continueShopping: 'Continue Shopping',
-      viewMyOrders: 'View My Orders',
-      nextStepsTitle: 'What happens next?',
-      nextStepProcessing: 'We’re preparing your order now.',
-      nextStepConfirmation: 'You’ll receive a confirmation when the order status updates.',
-      nextStepOrders: 'You can track your order anytime from My Orders.',
-      needHelp: 'Need help?',
-      paymentUpdateProcessing: 'Verifying payment status...',
-      paymentUpdateSuccess: 'Payment status was updated successfully.',
-      paymentUpdateFailed: 'Could not update payment status. Please contact support.'
-    }
-  };
-
-  t(key: string): string {
-    const lang = this.currentLanguage();
-    return this.translations[lang][key as keyof typeof this.translations['ar']] || key;
-  }
-  
-  goHome() {
-    this.router.navigate(['/']);
-  }
-
-  ngOnInit() {
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
-      this.currentLanguage.set(savedLang);
-    } else {
-      this.currentLanguage.set('ar');
-    }
-
-    window.addEventListener('storage', this.onStorage);
-
-    this.languageCheckInterval = setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-      }
-    }, 500);
-
-    this.route.queryParams.pipe(take(1)).subscribe(params => {
-      const invoiceIdRaw = params['invoice_id'];
-      const paymentRaw = params['payment'];
-
-      if (!invoiceIdRaw || !paymentRaw || this.paymentCallbackHandled) {
-        return;
-      }
-
-      const invoiceId = Number(invoiceIdRaw);
-      const payment = String(paymentRaw);
-
-      if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
-        this.paymentUpdateState.set('failed');
-        this.paymentUpdateMessage.set(this.t('paymentUpdateFailed'));
-        return;
-      }
-
-      if (payment.toLowerCase() !== 'success') {
-        this.paymentUpdateState.set('failed');
-        this.paymentUpdateMessage.set(this.t('paymentUpdateFailed'));
-        return;
-      }
-
-      this.paymentCallbackHandled = true;
-      this.paymentUpdateState.set('updating');
-
-      const paramsObj = new HttpParams()
-        .set('invoice_id', String(invoiceId))
-        .set('payment', payment);
-
-      this.http.get<{ updated?: boolean; message?: string }>(this.paymentCallbackUrl, { params: paramsObj }).subscribe({
-        next: (response) => {
-          if (response?.updated) {
-            this.paymentUpdateState.set('updated');
-            this.paymentUpdateMessage.set(response.message || this.t('paymentUpdateSuccess'));
-            return;
-          }
-
-          this.paymentUpdateState.set('failed');
-          this.paymentUpdateMessage.set(response?.message || this.t('paymentUpdateFailed'));
+  ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const rawId = params.get('orderId');
+    const parsedId = rawId === null ? this.payments.context()?.orderId : Number(rawId);
+    if (parsedId && Number.isSafeInteger(parsedId) && parsedId > 0) this.orderId = parsedId;
+    const invoiceId = params.get('invoice_id');
+    // The return URL's payment value never determines success or failure.
+    this.preparing = params.get('prepare') === '1' && !invoiceId;
+    if (invoiceId !== null) {
+      if (!/^[1-9][0-9]*$/.test(invoiceId)) { this.state.set('rejected'); return; }
+      this.busy.set(true);
+      this.subscription.add(this.payments.triggerCallback(invoiceId, params.get('payment') ?? undefined).subscribe({
+        next: response => {
+          this.busy.set(false);
+          if (response.status === 200 || response.status === 202) this.checkStatus();
+          else this.state.set('unavailable');
         },
-        error: (error) => {
-          this.paymentUpdateState.set('failed');
-          this.paymentUpdateMessage.set(error?.error?.message || this.t('paymentUpdateFailed'));
-        }
-      });
-    });
+        error: error => {
+          this.busy.set(false);
+          this.state.set(error.status === 404 ? 'unknown' : error.status === 400 ? 'rejected' : 'unavailable');
+        },
+      }));
+    } else this.checkStatus();
   }
 
-  ngOnDestroy() {
-    if (this.languageCheckInterval) {
-      clearInterval(this.languageCheckInterval);
+  checkStatus(): void {
+    if (this.destroyed || this.busy()) return;
+    if (!this.orderId) { this.state.set('unknown'); return; }
+    clearTimeout(this.pollTimer);
+    this.busy.set(true);
+    this.subscription.add(this.payments.getStatus(this.orderId).subscribe({
+      next: status => { this.busy.set(false); this.applyStatus(status); },
+      error: error => {
+        this.busy.set(false);
+        if (error.status === 404 || error.status === 403 || error.status === 401) {
+          this.status.set(null);
+          this.verifiedOrderId.set(null);
+          this.state.set('unknown');
+        } else {
+          this.state.set('unavailable');
+          this.schedulePoll();
+        }
+      },
+    }));
+  }
+
+  private applyStatus(status: OrderPaymentStatus): void {
+    this.status.set(status);
+    this.verifiedOrderId.set(status.orderId);
+    if (status.initializationStatus === Init.Paid) { this.state.set('paid'); return; }
+    if (status.initializationStatus === Init.NotApplicable) { this.state.set('cod'); return; }
+    if (status.initializationStatus === Init.RequiresReconciliation || status.attemptStatus === Attempt.RequiresReconciliation) {
+      this.state.set('reconciliation');
+      this.schedulePoll();
+      return;
     }
-    window.removeEventListener('storage', this.onStorage);
+    if (this.reservationExpired()) { this.state.set('expired'); return; }
+    if (status.initializationStatus === Init.Failed) { this.state.set('failed'); return; }
+    if (status.initializationStatus === Init.Ready && status.paymentUrl) {
+      this.state.set('ready');
+      if (this.preparing) this.openPayment();
+      else this.schedulePoll();
+      return;
+    }
+    this.state.set('pending');
+    this.schedulePoll();
+  }
+
+  private schedulePoll(): void {
+    if (this.destroyed || this.polls >= 30) return;
+    const delay = Math.min(3000 + this.polls++ * 1000, 15000);
+    this.pollTimer = setTimeout(() => this.checkStatus(), delay);
+  }
+
+  reservationExpired(): boolean {
+    const expires = this.status()?.reservationExpiresAtUtc;
+    return !!expires && Date.parse(expires) <= Date.now();
+  }
+
+  canRetry(): boolean {
+    const status = this.status();
+    const expires = status?.reservationExpiresAtUtc;
+    return this.state() === 'failed' && status?.initializationStatus === Init.Failed
+      && [Attempt.Failed, Attempt.Cancelled, Attempt.Expired].includes(status.attemptStatus!)
+      && !!status.paymentAttemptId && !!expires && Date.parse(expires) > Date.now();
+  }
+
+  retryPayment(): void {
+    if (!this.canRetry() || this.busy() || !this.orderId) return;
+    this.busy.set(true);
+    // Recheck immediately before retry so an already-paid or live attempt is never replaced.
+    this.subscription.add(this.payments.getStatus(this.orderId).subscribe({
+      next: status => {
+        this.applyStatus(status);
+        if (!this.canRetry()) { this.busy.set(false); return; }
+        this.subscription.add(this.payments.retryPayment(status.orderId, status.paymentAttemptId!).subscribe({
+          next: nextStatus => {
+            this.busy.set(false);
+            this.preparing = true;
+            this.polls = 0;
+            this.applyStatus(nextStatus);
+          },
+          error: () => { this.busy.set(false); this.checkStatus(); },
+        }));
+      },
+      error: () => { this.busy.set(false); this.state.set('unavailable'); },
+    }));
+  }
+
+  openPayment(): void {
+    const status = this.status();
+    if (status?.initializationStatus !== Init.Ready || !status.paymentUrl || this.reservationExpired()) return;
+    const url = new URL(status.paymentUrl, window.location.origin);
+    if (!['https:', 'http:'].includes(url.protocol)) return;
+    window.location.assign(url.href);
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    clearTimeout(this.pollTimer);
+    this.subscription.unsubscribe();
   }
 }
-

@@ -1,36 +1,17 @@
-/* Payment timing step styles */
-
-/* Smooth transitions for better UX */
-.payment-timing-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover states for unselected cards */
-.payment-timing-card.border-base-300:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border-color: rgba(5, 66, 57, 0.5) !important;
-}
-
-/* Focus states for accessibility */
-.payment-timing-card:focus-visible {
-  outline: 2px solid #054239;
-  outline-offset: 2px;
-}
-
-/* Active state for better feedback */
-.payment-timing-card:active {
-  transform: scale(0.98);
-}
-
-/* RTL Support */
-[dir="rtl"] .payment-timing-card {
-  direction: rtl;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .payment-timing-card {
-    margin-bottom: 1rem;
-  }
-}
-
+:host { display: block; }
+h2 { display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 700; margin: 0 0 18px; }
+h2 > svg { width: 24px; height: 24px; color: #054239; }
+.payment-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.payment-option { position: relative; display: flex; align-items: center; gap: 12px; padding: 16px 14px; padding-inline-end: 38px; border: 1px solid #dedee1; border-radius: 6px; cursor: pointer; min-width: 0; }
+.payment-option.selected { border-color: #075448; background: #f2f6f5; box-shadow: 0 0 0 1px #07544840; }
+.payment-option input { position: absolute; inset-inline-end: 14px; top: 18px; width: 19px; height: 19px; accent-color: #075448; cursor: pointer; }
+.payment-option:focus-within { outline: 2px solid #054239; outline-offset: 3px; }
+.payment-icon { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%; color: #777; background: #f5f5f5; }
+.selected .payment-icon { color: #075448; background: #e9f0ee; }
+.payment-icon svg { width: 22px; height: 22px; }
+.payment-copy { display: flex; flex-direction: column; gap: 5px; }
+.payment-copy strong { font-size: 15px; font-weight: 600; }
+.selected strong { color: #054239; }
+.payment-copy > span { font-size: 12px; color: #7b8085; line-height: 1.6; }
+.payment-error { color: #dc3545; font-size: 14px; margin-top: 12px; }
+@media (max-width: 600px) { .payment-options { grid-template-columns: 1fr; } h2 { font-size: 19px; } }

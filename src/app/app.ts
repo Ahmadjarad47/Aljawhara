@@ -3,7 +3,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Navbar } from './home/navbar/navbar';
 import { Footer } from './home/footer/footer';
 import { ServiceAuth } from './auth/service-auth';
-import { PerformanceService } from './core/services/performance.service';
 import { MaintenanceService } from './core/services/maintenance.service';
 
 @Component({
@@ -17,7 +16,6 @@ export class App implements OnInit {
   protected readonly title = signal('Aljawhara.new.Angular');
   protected readonly url = inject(Router);
   private readonly authService = inject(ServiceAuth);
-  private readonly performanceService = inject(PerformanceService);
 
   ngOnInit(): void {
     // Initialize authentication state on app startup (non-blocking)

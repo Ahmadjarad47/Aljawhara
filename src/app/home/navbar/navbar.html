@@ -54,7 +54,7 @@
             class="flex items-center space-x-3 group cursor-pointer">
             <div class="relative">
               <div class="h-12 w-full">
-                <img src="/logo.png" style="opacity: 1 !important;" alt="Aljawhara Logo" loading="lazy"
+                <img src="/logo.png" style="opacity: 1 !important;" alt="Aljawhara Logo" fetchpriority="high"
                   class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80" width="74"
                   height="48">
               </div>
@@ -80,7 +80,7 @@
 
 
 
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            <input type="text" [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
               (keypress)="onSearchKeyPress($event)" (focus)="onSearchFocus()" (blur)="onSearchBlur()"
               [placeholder]="t('searchPlaceholder')"
               class="block w-full pl-12 pr-16 py-3 border-2 border-base-300 rounded-xl focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 search-input bg-base-200 focus:bg-base-100 shadow-sm focus:shadow-lg"
@@ -369,7 +369,7 @@
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
-          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+          <input type="text" [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
             (keypress)="onSearchKeyPress($event)" [placeholder]="t('searchPlaceholder')"
             class="block w-full pl-10 pr-3 py-2 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent search-input">
         </div>
@@ -519,7 +519,7 @@
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            <input type="text" [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
               (keypress)="onSearchKeyPress($event)" placeholder="Search products..."
               class="block w-full pl-10 pr-3 py-2 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
           </div>
@@ -813,7 +813,7 @@
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
       </div>
-      <input #mobileSearchInput type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+      <input #mobileSearchInput type="text" [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
         (keypress)="onSearchKeyPress($event)" [placeholder]="t('searchPlaceholder')" autofocus
         class="w-full pl-12 pr-4 py-3 border-2 border-base-300 rounded-xl focus:outline-none focus:ring-0 focus:border-primary transition-colors duration-300 bg-base-200 focus:bg-base-100">
     </div>
