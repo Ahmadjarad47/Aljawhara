@@ -4,12 +4,14 @@ import {
   TemplateRef,
   ViewChild,
   OnDestroy,
+  DestroyRef,
   PLATFORM_ID,
   inject,
   signal,
   effect,
   ElementRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser, NgClass } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import {
@@ -37,6 +39,7 @@ import { ProductSummaryDto, CategoryDto } from '../product/product.models';
   styleUrl: './navbar.css',
 })
 export class Navbar implements OnInit, OnDestroy {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   @ViewChild('mobileMenuTemplate', { static: true }) mobileMenuTemplate!: TemplateRef<any>;
   @ViewChild('mobileSearchInput', { static: false })
@@ -240,7 +243,10 @@ export class Navbar implements OnInit, OnDestroy {
 
     // Sync activeTab with current route (for bottom mobile navbar)
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((event) => {
         this.updateActiveTabFromRoute(event.urlAfterRedirects);
       });
@@ -275,10 +281,8 @@ export class Navbar implements OnInit, OnDestroy {
       }
     }
 
-    // Load categories from API (defer to avoid blocking initial render)
-    setTimeout(() => {
-      this.loadCategories();
-    }, 100);
+    // Start during initialization so SSR tracks the request before teardown.
+    this.loadCategories();
 
     // Subscribe to authentication state changes
     this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuth) => {
@@ -332,7 +336,7 @@ export class Navbar implements OnInit, OnDestroy {
       });
 
     // Check if there's a search query in route params
-    this.activatedRoute.queryParams.subscribe((params) => {
+    this.activatedRoute.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       if (params['search'] && params['search'] !== this.searchQuery()) {
         this.searchQuery.set(params['search']);
       }
@@ -671,7 +675,8 @@ export class Navbar implements OnInit, OnDestroy {
         catchError((error) => {
           console.error('Error loading categories:', error);
           return of([]);
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((categories) => {
         // Transform API categories to match the template structure

@@ -1,8 +1,9 @@
-import { inject, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment.development';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CategoryDto, ProductDto, ProductSummaryDto } from './product.models';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { RatingDto } from '../../admin/product/product.models';
 
 export interface ProductFilters {
@@ -35,12 +36,33 @@ export interface ProductResponse {
   providedIn: 'root'
 })
 export class ProductService {
+  private readonly destroyRef = inject(DestroyRef);
   api = environment.apiUrl;
   http = inject(HttpClient);
+  private readonly categoriesCacheDuration = 5 * 60 * 1000;
+  private readonly categoriesCache = new Map<boolean, {
+    expiresAt: number;
+    request$: Observable<CategoryDto[]>;
+  }>();
 
   getCategories(includeSubCategories: boolean = true): Observable<CategoryDto[]> {
+    const cached = this.categoriesCache.get(includeSubCategories);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.request$;
+    }
+
     const params = new HttpParams().set('includeSubCategories', includeSubCategories.toString());
-    return this.http.get<CategoryDto[]>(`${this.api}Categories`, { params });
+    // Navbar and all desktop/mobile filter subscriptions share the same HTTP request.
+    const request$ = this.http.get<CategoryDto[]>(`${this.api}Categories`, { params }).pipe(
+      // Stop shared requests and retry delays when the SSR application is destroyed.
+      takeUntilDestroyed(this.destroyRef),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    this.categoriesCache.set(includeSubCategories, {
+      expiresAt: Date.now() + this.categoriesCacheDuration,
+      request$
+    });
+    return request$;
   }
 
   getProducts(filters?: ProductFilters): Observable<ProductSummaryDto[] | ProductResponse> {

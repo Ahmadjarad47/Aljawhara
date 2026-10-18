@@ -1,5 +1,5 @@
-import { Component, computed, input, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, input, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartItem } from '../../../Models/order';
 import { CartService } from '../../service/cart-service';
@@ -13,6 +13,7 @@ import { ServiceAuth } from '../../../auth/service-auth';
   styleUrl: './order-summary.css'
 })
 export class OrderSummaryComponent implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private router = inject(Router);
   private cartService = inject(CartService);
   private authService = inject(ServiceAuth);
@@ -64,17 +65,22 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   }
 
   private updateLanguage = (): void => {
-    this.currentLanguage.set(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
+    try {
+      this.currentLanguage.set(window.localStorage.getItem('language') === 'en' ? 'en' : 'ar');
+    } catch {
+      // Keep the default language if browser storage is blocked.
+    }
   };
 
   ngOnInit(): void {
+    if (!this.isBrowser) return;
     this.updateLanguage();
     window.addEventListener('storage', this.updateLanguage);
     this.languageCheckInterval = setInterval(this.updateLanguage, 500);
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('storage', this.updateLanguage);
+    if (this.isBrowser) window.removeEventListener('storage', this.updateLanguage);
     if (this.languageCheckInterval) clearInterval(this.languageCheckInterval);
   }
 

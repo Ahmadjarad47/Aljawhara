@@ -288,10 +288,10 @@
           class="group card bg-base-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-base-300/50 hover:border-primary/30 overflow-hidden product-card">
           <!-- Product Image -->
           <figure class="relative overflow-hidden cursor-pointer" (click)="goToProduct(product)">
-            <div class="img-container w-full h-48 lg:h-56">
+            <div class="img-container product-media">
               <img [src]="product.image" [alt]="product.name" loading="lazy"
                 (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" style="width: 280px; height: 300px;"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                >
               <div class="img-loading"></div>
             </div>
@@ -348,46 +348,47 @@
           </figure>
 
           <!-- Product Info -->
-          <div class="card-body p-4 lg:p-6">
+          <div class="card-body product-info">
             <!-- Product Name -->
             <h3
-              class="card-title text-lg font-bold text-base-content mb-2 cursor-pointer transition-colors duration-300"
+              class="card-title product-name font-bold text-base-content cursor-pointer transition-colors duration-300"
               (click)="goToProduct(product)" style="--hover-color: #054239;" onmouseover="this.style.color='#054239'"
               onmouseout="this.style.color=''">
               {{product.name}}
             </h3>
 
             <!-- Product Description -->
-            <p class="text-base-content/70 text-sm mb-4 line-clamp-2">{{product.shortDescription}}</p>
+            <p class="product-description text-base-content/70 line-clamp-2">{{product.shortDescription}}</p>
 
             <!-- Rating -->
-            <div class="flex items-center gap-1 mb-4">
-              <div class="rating rating-sm">
+            <div class="product-rating" role="img" [attr.aria-label]="(product.rating | number:'1.1-1') + ' / 5'">
+              <div class="product-rating-stars" aria-hidden="true">
                 @for (star of [1,2,3,4,5]; track star) {
-                <input type="radio" class="mask mask-star-2 bg-warning" disabled [checked]="star <= product.rating">
+                <span class="mask mask-star-2 product-rating-star"
+                  [style.--star-fill]="Math.max(0, Math.min(1, product.rating - star + 1)) * 100 + '%'"></span>
                 }
               </div>
-              <span class="text-sm text-base-content/60 ml-2">({{product.rating}})</span>
+              <span class="product-rating-value" dir="ltr" aria-hidden="true">{{product.rating | number:'1.1-1'}} / 5</span>
             </div>
 
             <!-- Price and Actions -->
-            <div class="card-actions justify-between items-center">
-              <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl font-bold" style="color: #054239;">{{product.price | currency:'KWD'}}</span>
+            <div class="card-actions product-purchase">
+              <div class="product-pricing">
+                <div class="product-prices">
+                  <bdi class="product-current-price" dir="ltr">{{product.price | currency:'KWD'}}</bdi>
                   @if (product.originalPrice) {
-                  <span class="text-lg text-base-content/40 line-through">{{product.originalPrice | currency:'KWD'}}</span>
+                  <bdi class="product-original-price" dir="ltr">{{product.originalPrice | currency:'KWD'}}</bdi>
                   }
                 </div>
                 @if (product.originalPrice) {
-                <div class="text-xs font-medium" style="color: #054239;">
-                  {{t('save')}} {{(product.originalPrice - product.price) | currency:'KWD'}}
+                <div class="product-savings">
+                  {{t('save')}} <bdi dir="ltr">{{(product.originalPrice - product.price) | currency:'KWD'}}</bdi>
                 </div>
                 }
               </div>
 
               <!-- Add to Cart Button -->
-              <button (click)="addToCart(product)" class="btn btn-sm group/btn"
+              <button (click)="addToCart(product)" class="btn btn-sm product-cart-button group/btn"
                 style="background: #054239; color: white; border: none;">
                 <svg class="w-4 h-4 mr-1 group-hover/btn:scale-110 transition-transform duration-200" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
@@ -688,10 +689,10 @@
           <!-- Product Image -->
           <figure class="relative overflow-hidden cursor-pointer"
             (click)="goToProduct({id: item.id, name: item.product.title || item.product.titleAr})">
-            <div class="img-container w-full h-48 sm:h-56">
+            <div class="img-container product-media">
               <img [src]="item.product.mainImage" [alt]="item.product.title || item.product.titleAr" loading="lazy"
                 (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" style="width: 200px; height: 280px;">
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
               <div class="img-loading"></div>
             </div>
 
@@ -717,33 +718,33 @@
           </figure>
 
           <!-- Product Info -->
-          <div class="card-body p-4 sm:p-6">
+          <div class="card-body product-info">
             <!-- Product Name -->
             <h3
-              class="card-title text-base sm:text-lg font-bold text-base-content mb-2 cursor-pointer transition-colors duration-300 line-clamp-2"
+              class="card-title product-name font-bold text-base-content cursor-pointer transition-colors duration-300"
               (click)="goToProduct({id: item.id, name: item.product.title || item.product.titleAr})"
               style="--hover-color: #054239;" onmouseover="this.style.color='#054239'" onmouseout="this.style.color=''">
               {{currentLanguage() === 'ar' ? (item.product.titleAr || item.product.title) : item.product.title}}
             </h3>
 
             <!-- Rating -->
-            <div class="flex items-center gap-1 mb-3">
-              <div class="rating rating-sm">
+            <div class="product-rating" role="img" [attr.aria-label]="((item.product.averageRating || 0) | number:'1.1-1') + ' / 5'">
+              <div class="product-rating-stars" aria-hidden="true">
                 @for (star of [1,2,3,4,5]; track star) {
-                <input type="radio" class="mask mask-star-2 bg-warning" disabled
-                  [checked]="star <= (item.product.averageRating || 0)">
+                <span class="mask mask-star-2 product-rating-star"
+                  [style.--star-fill]="Math.max(0, Math.min(1, (item.product.averageRating || 0) - star + 1)) * 100 + '%'"></span>
                 }
               </div>
-              <span class="text-xs sm:text-sm text-base-content/60 ml-1">({{item.product.averageRating || 0}})</span>
+              <span class="product-rating-value" dir="ltr" aria-hidden="true">{{(item.product.averageRating || 0) | number:'1.1-1'}} / 5</span>
             </div>
 
             <!-- Price and Actions -->
-            <div class="card-actions justify-between items-center mt-auto">
-              <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl font-bold" style="color: #054239;">{{item.product.newPrice | currency:'KWD'}}</span>
+            <div class="card-actions product-purchase">
+              <div class="product-pricing">
+                <div class="product-prices">
+                  <bdi class="product-current-price" dir="ltr">{{item.product.newPrice | currency:'KWD'}}</bdi>
                   @if (item.product.oldPrice > item.product.newPrice) {
-                  <span class="text-base sm:text-lg text-base-content/40 line-through">{{item.product.oldPrice | currency:'KWD'}}</span>
+                  <bdi class="product-original-price" dir="ltr">{{item.product.oldPrice | currency:'KWD'}}</bdi>
                   }
                 </div>
                 @if (!item.product.isInStock) {
@@ -754,7 +755,7 @@
 
               <!-- Move to Cart Button -->
               <button (click)="moveToCartFromWishlist(item)" [disabled]="!item.product.isInStock"
-                class="btn btn-sm sm:btn-md group/btn" style="background: #054239; color: white; border: none;"
+                class="btn btn-sm product-cart-button group/btn" style="background: #054239; color: white; border: none;"
                 [class.btn-disabled]="!item.product.isInStock">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 group-hover/btn:scale-110 transition-transform duration-200"
                   fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

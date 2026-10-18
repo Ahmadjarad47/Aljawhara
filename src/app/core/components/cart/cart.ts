@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { catchError, finalize, of } from 'rxjs';
@@ -16,9 +16,24 @@ import { CouponDto, CouponValidationDto, CouponValidationResultDto } from '../..
   styleUrl: './cart.css'
 })
 export class Cart implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private cartService = inject(CartService);
   private couponService = inject(CouponService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private readonly handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'language' && (event.newValue === 'ar' || event.newValue === 'en')) {
+      this.currentLanguage.set(event.newValue);
+    }
+  };
+
+  private readonly updateLanguage = () => {
+    try {
+      const language = window.localStorage.getItem('language');
+      if (language === 'ar' || language === 'en') this.currentLanguage.set(language);
+    } catch {
+      // Keep the default language if browser storage is blocked.
+    }
+  };
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -214,31 +229,14 @@ export class Cart implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
-      this.currentLanguage.set(savedLang);
-    } else {
-      this.currentLanguage.set('ar');
-    }
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language' && e.newValue) {
-        const newLang = e.newValue as 'ar' | 'en';
-        if (newLang === 'ar' || newLang === 'en') {
-          this.currentLanguage.set(newLang);
-        }
-      }
-    });
-
-    this.languageCheckInterval = setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-      }
-    }, 500);
+    if (!this.isBrowser) return;
+    this.updateLanguage();
+    window.addEventListener('storage', this.handleStorageChange);
+    this.languageCheckInterval = setInterval(this.updateLanguage, 500);
   }
 
   ngOnDestroy() {
+    if (this.isBrowser) window.removeEventListener('storage', this.handleStorageChange);
     if (this.languageCheckInterval) {
       clearInterval(this.languageCheckInterval);
     }

@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, signal, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -33,8 +33,23 @@ type CategoryWithImageDto = {
   styleUrl: './home-page.css'
 })
 export class HomePage implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private languageInterval?: ReturnType<typeof setInterval>;
   private countdownInterval?: ReturnType<typeof setInterval>;
   private readonly apiOrigin = new URL(environment.apiUrl).origin;
+
+  private readonly handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'language') {
+      this.applyLanguage(event.newValue);
+    }
+  };
+
+  private applyLanguage(language: string | null): void {
+    if ((language === 'ar' || language === 'en') && language !== this.currentLanguage()) {
+      this.currentLanguage.set(language);
+      this.updateProductsLanguage();
+    }
+  }
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -291,9 +306,27 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // --------- Simple localStorage cache helpers ----------
+  private readStorage(key: string): string | null {
+    if (!this.isBrowser) return null;
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  private removeStorage(key: string): void {
+    if (!this.isBrowser) return;
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // Storage may be unavailable or blocked by browser settings.
+    }
+  }
+
   private getCache<T>(key: string): T | null {
     try {
-      const raw = localStorage.getItem(key);
+      const raw = this.readStorage(key);
       if (!raw) {
         return null;
       }
@@ -303,24 +336,25 @@ export class HomePage implements OnInit, OnDestroy {
       }
       const isExpired = Date.now() - parsed.timestamp > this.CACHE_TTL;
       if (isExpired) {
-        localStorage.removeItem(key);
+        this.removeStorage(key);
         return null;
       }
       return parsed.data;
     } catch {
       // In case of malformed JSON or access error, clear the key
-      localStorage.removeItem(key);
+      this.removeStorage(key);
       return null;
     }
   }
 
   private setCache<T>(key: string, data: T): void {
+    if (!this.isBrowser) return;
     try {
       const wrapped = {
         timestamp: Date.now(),
         data
       };
-      localStorage.setItem(key, JSON.stringify(wrapped));
+      window.localStorage.setItem(key, JSON.stringify(wrapped));
     } catch {
       // Ignore storage errors (e.g. quota exceeded, private mode, etc.)
     }
@@ -335,8 +369,22 @@ export class HomePage implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
+    if (this.isBrowser) {
+      this.initializeBrowserState();
+      this.startCountdown();
+      this.startCarousel();
+    }
+
+    this.loadHeroSlides();
+    this.loadCategoriesWithImages();
+    this.loadFeaturedProducts();
+    this.loadCustomerSatisfaction();
+    this.loadLatestReviews();
+  }
+
+  private initializeBrowserState(): void {
     // Load saved language from localStorage
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
+    const savedLang = this.readStorage('language');
     if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
       this.currentLanguage.set(savedLang);
     } else {
@@ -346,38 +394,18 @@ export class HomePage implements OnInit, OnDestroy {
     console.log('[HomePage] ngOnInit - currentLanguage =', this.currentLanguage());
 
     // Listen for language changes from localStorage (when changed in navbar)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language' && e.newValue) {
-        const newLang = e.newValue as 'ar' | 'en';
-        if (newLang === 'ar' || newLang === 'en') {
-          this.currentLanguage.set(newLang);
-        }
-      }
-    });
+    window.addEventListener('storage', this.handleStorageChange);
 
     // Also check periodically for language changes (for same-window updates)
-    setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-        // Update products language when language changes (without re-fetching)
-        this.updateProductsLanguage();
-      }
+    this.languageInterval = setInterval(() => {
+      this.applyLanguage(this.readStorage('language'));
     }, 500);
-
-    this.startCountdown();
-    this.loadHeroSlides();
-    this.startCarousel();
-    this.loadCategoriesWithImages();
-    this.loadFeaturedProducts();
-    this.loadCustomerSatisfaction();
-    this.loadLatestReviews();
     
     // Check if we should show wishlist (from route or query param)
-    const showWishlistParam = localStorage.getItem('showWishlist');
+    const showWishlistParam = this.readStorage('showWishlist');
     if (showWishlistParam === 'true') {
       this.showWishlist.set(true);
-      localStorage.removeItem('showWishlist');
+      this.removeStorage('showWishlist');
     }
   }
 
@@ -687,6 +715,12 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.isBrowser) {
+      window.removeEventListener('storage', this.handleStorageChange);
+    }
+    if (this.languageInterval) {
+      clearInterval(this.languageInterval);
+    }
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }

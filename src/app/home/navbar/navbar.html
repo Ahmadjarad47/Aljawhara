@@ -136,12 +136,13 @@
         <!-- Right Side Actions -->
         <div class="flex items-center space-x-2">
           <!-- Language Dropdown -->
-          <div class="relative group">
-            <button
+          <div class="relative group" (keydown.escape)="closeLanguageDropdown(); languageToggle.focus(); $event.stopPropagation()">
+            <button #languageToggle type="button"
               class="flex items-center space-x-2 px-4 py-2.5 text-base-content hover:text-primary hover:bg-base-200 rounded-lg transition-colors duration-200 font-medium"
-              [attr.aria-expanded]="isLanguageDropdownOpen" [attr.aria-haspopup]="true"
-              (click)="toggleLanguageDropdown()" (keydown.enter)="toggleLanguageDropdown()"
-              (keydown.escape)="closeLanguageDropdown()">
+              [attr.aria-expanded]="isLanguageDropdownOpen" aria-haspopup="menu"
+              [attr.aria-label]="t('language') + ': ' + selectedLanguage"
+              [attr.aria-controls]="isLanguageDropdownOpen ? 'navbar-language-menu' : null"
+              (click)="toggleLanguageDropdown()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -155,29 +156,24 @@
               </svg>
             </button>
             @if (isLanguageDropdownOpen) {
-            <div
-              class="absolute right-0 mt-2 w-56 bg-base-100 rounded-xl shadow-xl border border-base-300 z-50 dropdown-menu"
-              role="menu" aria-orientation="vertical">
-              <div class="py-2">
-                @for (lang of languages; track lang.code; let i = $index) {
-                <div (click)="changeLanguage(lang)" (keydown.enter)="changeLanguage(lang)"
-                  class="flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 dropdown-item cursor-pointer transition-colors duration-150"
-                  [class.bg-primary]="selectedLanguage === lang.name" role="menuitem" [tabindex]="i">
-                  <span class="text-lg mr-3">{{lang.flag}}</span>
-                  <span class="font-medium">{{lang.name}}</span>
-                  @if (selectedLanguage === lang.name) {
-                  <span class="ml-auto">
-                    <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20"
+            <div id="navbar-language-menu" class="language-menu"
+              role="menu" [attr.aria-label]="t('language')" aria-orientation="vertical">
+                @for (lang of languages; track lang.code) {
+                <button type="button" (click)="changeLanguage(lang); languageToggle.focus()"
+                  class="language-option" [class.is-selected]="currentLanguage() === lang.code"
+                  role="menuitemradio" [attr.aria-checked]="currentLanguage() === lang.code">
+                  <span class="language-code" aria-hidden="true" dir="ltr">{{lang.code.toUpperCase()}}</span>
+                  <bdi class="language-name" [attr.lang]="lang.code" [attr.dir]="lang.code === 'ar' ? 'rtl' : 'ltr'">{{lang.name}}</bdi>
+                  @if (currentLanguage() === lang.code) {
+                    <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
                       xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd"
                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clip-rule="evenodd"></path>
                     </svg>
-                  </span>
                   }
-                </div>
+                </button>
                 }
-              </div>
             </div>
             }
           </div>
@@ -573,10 +569,10 @@
           <div class="space-y-2">
             @for (lang of languages; track lang.code) {
             <button (click)="changeLanguage(lang); toggleMobileMenu()"
-              class="w-full flex items-center px-4 py-3 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium"
-              [class.bg-primary]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
-              <span class="text-lg mr-3">{{lang.flag}}</span>
-              <span class="flex-1 text-left">{{lang.name}}</span>
+              type="button" class="language-option"
+              [class.is-selected]="currentLanguage() === lang.code" [attr.aria-pressed]="currentLanguage() === lang.code">
+              <span class="language-code" aria-hidden="true" dir="ltr">{{lang.code.toUpperCase()}}</span>
+              <bdi class="language-name" [attr.lang]="lang.code" [attr.dir]="lang.code === 'ar' ? 'rtl' : 'ltr'">{{lang.name}}</bdi>
               @if (selectedLanguage === lang.name) {
               <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg">
@@ -925,10 +921,10 @@
         <div class="space-y-1">
           @for (lang of languages; track lang.code) {
           <button (click)="changeLanguage(lang); closeMobileAccount()"
-            class="w-full flex items-center px-3 py-2.5 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium"
-            [class.bg-primary]="selectedLanguage === lang.name" [class.text-primary]="selectedLanguage === lang.name">
-            <span class="text-lg mr-3">{{lang.flag}}</span>
-            <span class="flex-1 text-left">{{lang.name}}</span>
+            type="button" class="language-option"
+            [class.is-selected]="currentLanguage() === lang.code" [attr.aria-pressed]="currentLanguage() === lang.code">
+            <span class="language-code" aria-hidden="true" dir="ltr">{{lang.code.toUpperCase()}}</span>
+            <bdi class="language-name" [attr.lang]="lang.code" [attr.dir]="lang.code === 'ar' ? 'rtl' : 'ltr'">{{lang.name}}</bdi>
             @if (selectedLanguage === lang.name) {
             <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg">
@@ -999,11 +995,10 @@
           <div class="space-y-1">
             @for (lang of languages; track lang.code) {
             <button (click)="changeLanguage(lang); closeMobileAccount()"
-              class="w-full flex items-center px-3 py-2.5 text-sm text-base-content hover:bg-base-200 rounded-lg transition-colors duration-150 font-medium"
-              [class.bg-primary/10]="selectedLanguage === lang.name"
-              [class.text-primary]="selectedLanguage === lang.name">
-              <span class="text-lg mr-3">{{lang.flag}}</span>
-              <span class="flex-1 text-left">{{lang.name}}</span>
+              type="button" class="language-option"
+              [class.is-selected]="currentLanguage() === lang.code" [attr.aria-pressed]="currentLanguage() === lang.code">
+              <span class="language-code" aria-hidden="true" dir="ltr">{{lang.code.toUpperCase()}}</span>
+              <bdi class="language-name" [attr.lang]="lang.code" [attr.dir]="lang.code === 'ar' ? 'rtl' : 'ltr'">{{lang.name}}</bdi>
               @if (selectedLanguage === lang.name) {
               <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg">

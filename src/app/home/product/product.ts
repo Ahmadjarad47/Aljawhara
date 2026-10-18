@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, DestroyRef, PLATFORM_ID, inject, signal, computed, effect } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService, ProductFilters, ProductResponse } from './product-service';
@@ -33,6 +34,8 @@ export interface Filters {
   styleUrl: './product.css'
 })
 export class Product implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly destroyRef = inject(DestroyRef);
   public productService = inject(ProductService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
@@ -40,6 +43,20 @@ export class Product implements OnInit, OnDestroy {
   public toastService = inject(ToastService);
   private wishlistService = inject(WishlistService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private readonly handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'language' && (event.newValue === 'ar' || event.newValue === 'en')) {
+      this.currentLanguage.set(event.newValue);
+    }
+  };
+
+  private readonly updateLanguage = () => {
+    try {
+      const language = window.localStorage.getItem('language');
+      if (language === 'ar' || language === 'en') this.currentLanguage.set(language);
+    } catch {
+      // Keep the default language if browser storage is blocked.
+    }
+  };
   
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -277,38 +294,17 @@ export class Product implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Load saved language from localStorage
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
-      this.currentLanguage.set(savedLang);
-    } else {
-      // Default to Arabic
-      this.currentLanguage.set('ar');
+    if (this.isBrowser) {
+      this.updateLanguage();
+      window.addEventListener('storage', this.handleStorageChange);
+      this.languageCheckInterval = setInterval(this.updateLanguage, 500);
     }
-
-    // Listen for language changes from localStorage (when changed in navbar)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language' && e.newValue) {
-        const newLang = e.newValue as 'ar' | 'en';
-        if (newLang === 'ar' || newLang === 'en') {
-          this.currentLanguage.set(newLang);
-        }
-      }
-    });
-
-    // Also check periodically for language changes (for same-window updates)
-    this.languageCheckInterval = setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-      }
-    }, 500);
 
     this.loadCategories();
     this.loadSubCategories();
     
     // Read query params from route
-    this.activatedRoute.queryParams.subscribe(params => {
+    this.activatedRoute.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       // Handle search parameter
       if (params['search'] && params['search'] !== this.searchQuery()) {
         this.searchQuery.set(params['search']);
@@ -356,7 +352,7 @@ export class Product implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.errorMessage.set('');
     
-    this.productService.getProducts(filters).subscribe({
+    this.productService.getProducts(filters).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         const wishlistIds = new Set(
           this.wishlistService.getWishlistItems().map(item => item.id)
@@ -648,7 +644,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Cleanup if needed
+    if (this.isBrowser) window.removeEventListener('storage', this.handleStorageChange);
     if (this.languageCheckInterval) {
       clearInterval(this.languageCheckInterval);
     }
