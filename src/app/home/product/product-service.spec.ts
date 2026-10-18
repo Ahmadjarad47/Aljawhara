@@ -100,4 +100,18 @@ describe('ProductService category requests', () => {
     http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
     expect(received).toEqual([]);
   });
+
+  it('cancels shared categories when the SSR injector is destroyed', () => {
+    const categories$ = service.getCategories();
+    const first = categories$.subscribe();
+    const second = categories$.subscribe();
+    const request = http.expectOne(`${service.api}Categories?includeSubCategories=true`);
+
+    TestBed.resetTestingModule();
+
+    expect(request.cancelled).toBeTrue();
+    expect(first.closed).toBeTrue();
+    expect(second.closed).toBeTrue();
+    expect(() => categories$.subscribe()).not.toThrow();
+  });
 });

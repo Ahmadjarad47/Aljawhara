@@ -1,4 +1,4 @@
-import { PLATFORM_ID, provideZonelessChangeDetection, signal } from '@angular/core';
+import { ChangeDetectorRef, PLATFORM_ID, provideZonelessChangeDetection, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ describe('HomePage browser state and server rendering', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        { provide: ChangeDetectorRef, useValue: { markForCheck: () => {} } },
         { provide: PLATFORM_ID, useValue: platform },
         { provide: WishlistService, useValue: { getWishlistItemsSignal: () => signal([]) } },
         { provide: CartService, useValue: {} },

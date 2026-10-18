@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, PLATFORM_ID, signal, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, PLATFORM_ID, signal, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { finalize } from 'rxjs';
 import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
 import { WishlistService } from '../../core/service/wishlist-service';
@@ -33,6 +34,7 @@ type CategoryWithImageDto = {
   styleUrl: './home-page.css'
 })
 export class HomePage implements OnInit, OnDestroy {
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private languageInterval?: ReturnType<typeof setInterval>;
   private countdownInterval?: ReturnType<typeof setInterval>;
@@ -424,7 +426,8 @@ export class HomePage implements OnInit, OnDestroy {
 
     console.log('[HomePage] loadHeroSlides - calling API:', `${environment.apiUrl}Carousels`);
 
-    this.http.get<CarouselDto[]>(`${environment.apiUrl}Carousels`).subscribe({
+    this.http.get<CarouselDto[]>(`${environment.apiUrl}Carousels`)
+      .pipe(finalize(() => this.changeDetector.markForCheck())).subscribe({
       next: (carousels) => {
         console.log('[HomePage] loadHeroSlides - API raw response:', carousels);
 
@@ -491,7 +494,8 @@ export class HomePage implements OnInit, OnDestroy {
       return;
     }
 
-    this.http.get<CategoryWithImageDto[]>(`${environment.apiUrl}Carousels/categories-with-images`).subscribe({
+    this.http.get<CategoryWithImageDto[]>(`${environment.apiUrl}Carousels/categories-with-images`)
+      .pipe(finalize(() => this.changeDetector.markForCheck())).subscribe({
       next: (categories) => {
         this.categoriesWithImages = Array.isArray(categories) ? categories : [];
         this.setCache('home_categories_with_images', this.categoriesWithImages);
@@ -536,6 +540,7 @@ export class HomePage implements OnInit, OnDestroy {
 
     this.http
       .get<CustomerSatisfactionDto>(`${environment.apiUrl}Carousels/customer-satisfaction`)
+      .pipe(finalize(() => this.changeDetector.markForCheck()))
       .subscribe({
         next: (data) => {
           this.customerSatisfaction = data;
@@ -563,6 +568,7 @@ export class HomePage implements OnInit, OnDestroy {
 
     this.http
       .get<ProductRatingSummaryDto[]>(`${environment.apiUrl}Carousels/latest-third-reviews`)
+      .pipe(finalize(() => this.changeDetector.markForCheck()))
       .subscribe({
         next: (reviews) => {
           this.latestReviews = Array.isArray(reviews) ? reviews : [];
@@ -595,6 +601,7 @@ export class HomePage implements OnInit, OnDestroy {
         pageSize: 8,
         sortBy: 'highRating' // Get highest rated products
       })
+      .pipe(finalize(() => this.changeDetector.markForCheck()))
       .subscribe({
         next: (response) => {
           const products = this.extractProducts(response);
@@ -710,6 +717,7 @@ export class HomePage implements OnInit, OnDestroy {
           this.countdown.minutes = 59;
           this.countdown.seconds = 59;
         }
+        this.changeDetector.markForCheck();
       }, 0);
     }, 1000);
   }
@@ -852,6 +860,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   nextSlide() {
     this.currentSlide = (this.currentSlide + 1) % this.heroSlides.length;
+    this.changeDetector.markForCheck();
   }
 
   prevSlide() {
