@@ -7,6 +7,7 @@ import { ProductService } from '../product/product-service';
 import { ProductDto, ProductSummaryDto } from '../product/product.models';
 import { Observable, catchError, of } from 'rxjs';
 import { CartService } from '../../core/service/cart-service';
+import { ShippingService } from '../../core/service/shipping.service';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
@@ -21,6 +22,7 @@ import { RatingDto } from '../../admin/product/product.models';
   styleUrl: './product-detail.css'
 })
 export class ProductDetail implements OnInit, OnDestroy {
+  readonly shipping = inject(ShippingService);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly destroyRef = inject(DestroyRef);
   private readonly changeDetector = inject(ChangeDetectorRef);

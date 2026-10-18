@@ -12,6 +12,7 @@ export const adminRoutes: Routes = [
             { path: 'sub-category', loadComponent: () => import('./sub-category/sub-category').then(m => m.SubCategory) },
             { path: 'product', loadComponent: () => import('./product/product').then(m => m.Product) },
             { path: 'coupons', loadComponent: () => import('./copone/copone').then(m => m.Copone) },
+            { path: 'shipping', loadComponent: () => import('./shipping/shipping').then(m => m.Shipping) },
             { path: 'transaction', loadComponent: () => import('./transaction/transaction').then(m => m.Transaction) },
             { path: 'order', loadComponent: () => import('./order/order').then(m => m.Order) },
             { path: 'user-management', loadComponent: () => import('./user-mangment/user-mangment').then(m => m.UserMangment) },

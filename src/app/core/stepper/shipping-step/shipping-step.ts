@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, output, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -11,6 +11,7 @@ import { ServiceAuth } from '../../../auth/service-auth';
 import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAddressPayload } from '../shipping-address';
 import { AddressAutocompleteComponent } from '../../components/address-autocomplete/address-autocomplete';
 import { AddressLocation } from '../../data/kuwait-areas';
+import { ShippingService } from '../../service/shipping.service';
 
 interface AddressResponse<T> {
   success: boolean;
@@ -29,6 +30,8 @@ export class ShippingStepComponent implements OnInit {
   private http = inject(HttpClient);
   private cartService = inject(CartService);
   private authService = inject(ServiceAuth);
+  private shippingService = inject(ShippingService);
+  shippingReady = signal(false);
   submitted = output<void>();
   isLoading = signal(false);
   isSubmitting = signal(false);
@@ -39,6 +42,17 @@ export class ShippingStepComponent implements OnInit {
   formData: CreateAddressDto = createAddressForm();
 
   readonly optionalFields = ADDRESS_DETAIL_FIELDS;
+  readonly deliveryFee = computed(() => {
+    this.formRevision();
+    return this.calculateDeliveryFee(this.formData.city);
+  });
+
+  constructor() {
+    effect(() => {
+      const deliveryFee = this.deliveryFee();
+      untracked(() => this.stepperService.updateCheckoutData({ deliveryFee: deliveryFee ?? undefined }));
+    });
+  }
 
   translations = {
     ar: {
@@ -46,7 +60,7 @@ export class ShippingStepComponent implements OnInit {
       addressLine1: 'العنوان الأول', alQataa: 'القطعة', alSharee: 'الشارع', alJada: 'الجادة',
       alManzil: 'المنزل', alDor: 'الدور', alShakka: 'الشقة',
       phoneHint: 'أدخل رقم جوال صحيحاً من 8 إلى 15 رقماً.',
-      failedToLoad: 'تعذر تحميل العنوان المحفوظ. يرجى إعادة تحميل الصفحة للمحاولة مجدداً.',
+      failedToLoad: 'تعذر تحميل بيانات التوصيل. يرجى إعادة تحميل الصفحة للمحاولة مجدداً.',
       failedToSave: 'تعذر حفظ العنوان. يرجى المحاولة مجدداً.',
     },
     en: {
@@ -54,7 +68,7 @@ export class ShippingStepComponent implements OnInit {
       addressLine1: 'Address line 1', alQataa: 'Block', alSharee: 'Street', alJada: 'Avenue',
       alManzil: 'House', alDor: 'Floor', alShakka: 'Apartment',
       phoneHint: 'Enter a valid mobile number with 8 to 15 digits.',
-      failedToLoad: 'Unable to load your saved address. Please reload the page to try again.',
+      failedToLoad: 'Unable to load delivery details. Please reload the page to try again.',
       failedToSave: 'Unable to save your address. Please try again.',
     },
   } as const;
@@ -66,19 +80,23 @@ export class ShippingStepComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const saved = this.stepperService.checkoutData().address;
     if (saved) this.populateAddress(saved);
-    this.updateDeliveryFee();
-    if (!this.authService.isAuthenticated) return;
-
     this.isLoading.set(true);
     try {
-      const response = await firstValueFrom(this.http.get<AddressResponse<UserAddressDto[]>>(
+      const [, response] = await Promise.all([
+        firstValueFrom(this.shippingService.load()),
+        this.authService.isAuthenticated ? firstValueFrom(this.http.get<AddressResponse<UserAddressDto[]>>(
         `${environment.apiUrl}Auth/addresses`
-      ));
-      if (!response.success || !response.data) throw new Error('Unable to load addresses');
-      const savedId = this.stepperService.checkoutData().selectedAddressId;
-      const selected = response.data.find(address => address.id === savedId)
-        ?? response.data.find(address => address.isDefault) ?? response.data[0];
-      if (selected) this.populateAddress(selected);
+        )) : Promise.resolve(null),
+      ]);
+      if (response) {
+        if (!response.success || !response.data) throw new Error('Unable to load addresses');
+        const savedId = this.stepperService.checkoutData().selectedAddressId;
+        const selected = response.data.find(address => address.id === savedId)
+          ?? response.data.find(address => address.isDefault) ?? response.data[0];
+        if (selected) this.populateAddress(selected);
+      }
+      this.shippingReady.set(true);
+      this.updateDeliveryFee();
     } catch {
       this.error.set(this.t('failedToLoad'));
     } finally {
@@ -94,16 +112,14 @@ export class ShippingStepComponent implements OnInit {
     this.updateDeliveryFee();
   }
 
-  calculateDeliveryFee(city?: string | null): number {
+  calculateDeliveryFee(city?: string | null): number | null {
     const subtotal = this.cartService.getCartItems().reduce((sum, item) => sum + item.price * item.quantity, 0);
-    if (subtotal >= 20) return 0;
-    if (city && ['الخيران', 'العبدلي', 'الوفرة', 'مدينة صباح الأحمد'].includes(city)) return 6;
-    if (city && ['صباح السالم', 'الأحمدي'].includes(city)) return 3;
-    return city === 'المطلاع' ? 4 : 2;
+    return this.shippingService.calculateFee(subtotal, city,
+      this.cartService.hasAppliedCoupon() && this.cartService.getAppliedCoupon()?.type === 3);
   }
 
   updateDeliveryFee(): void {
-    this.stepperService.updateCheckoutData({ deliveryFee: this.calculateDeliveryFee(this.formData.city) });
+    this.stepperService.updateCheckoutData({ deliveryFee: this.calculateDeliveryFee(this.formData.city) ?? undefined });
   }
 
   isFormValid(): boolean {

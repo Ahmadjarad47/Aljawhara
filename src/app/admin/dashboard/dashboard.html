@@ -139,6 +139,15 @@
                     </a>
                 </li>
 
+                <li>
+                    <a routerLink="shipping" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                       class="is-drawer-close:tooltip is-drawer-close:tooltip-right transition-colors duration-200 hover:bg-primary/10 active:bg-primary/20"
+                       [attr.data-tip]="t('shipping')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-block size-4 my-1.5" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 4v3h-7M3 17h2m4 0h7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+                        <span class="is-drawer-close:hidden">{{ t('shipping') }}</span>
+                    </a>
+                </li>
+
                 <!-- Transactions -->
                 <li>
                     <a routerLink="transaction" 

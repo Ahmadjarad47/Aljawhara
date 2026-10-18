@@ -24,7 +24,7 @@
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
-          <span class="font-medium">{{t('freeShipping')}}</span>
+          <span class="font-medium">{{ shipping.offerText(currentLanguage()) ?? (currentLanguage() === 'ar' ? 'التوصيل لجميع مناطق الكويت' : 'Delivery across Kuwait') }}</span>
         </div>
         <div class="flex items-center space-x-3">
           <span class="hidden sm:block text-sm font-medium">{{t('followUs')}}</span>
@@ -463,7 +463,7 @@
           </div>
           <div class="flex items-center space-x-2 text-sm text-base-content/70">
             <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">{{t('new')}}</span>
-            <span>{{t('freeShippingText')}}</span>
+            <span>{{ shipping.offerText(currentLanguage()) ?? (currentLanguage() === 'ar' ? 'التوصيل لجميع مناطق الكويت' : 'Delivery across Kuwait') }}</span>
           </div>
         </div>
       </div>

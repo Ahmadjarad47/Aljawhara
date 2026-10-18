@@ -22,9 +22,9 @@ export class StepperComponent {
   currentLanguage = signal<'ar' | 'en'>(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
   cartItems = this.cartService.getCartItemsSignal();
   subtotal = computed(() => this.cartItems().reduce((sum, item) => sum + item.price * item.quantity, 0));
-  deliveryFee = computed(() => this.stepperService.checkoutData().deliveryFee ?? (this.subtotal() >= 20 ? 0 : 2));
+  deliveryFee = computed(() => this.shipping()?.deliveryFee() ?? null);
   discount = computed(() => this.cartService.getDiscountAmount());
-  total = computed(() => this.cartService.getTotalPriceWithDiscount() + this.deliveryFee());
+  total = computed(() => this.deliveryFee() === null ? null : this.cartService.getTotalPriceWithDiscount() + this.deliveryFee()!);
   translations = {
     ar: {
       checkoutTitle: 'إتمام الطلب', checkoutSubtitle: 'أدخل بيانات التوصيل واختر طريقة الدفع في صفحة واحدة',
@@ -47,6 +47,7 @@ export class StepperComponent {
   canConfirm(): boolean {
     const shipping = this.shipping();
     return !!this.cartItems().length && !!shipping?.isFormValid()
+      && shipping.shippingReady() && this.deliveryFee() !== null
       && !shipping.isLoading() && !shipping.isSubmitting() && !this.isSubmitting();
   }
 

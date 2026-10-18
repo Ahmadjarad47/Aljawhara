@@ -71,9 +71,9 @@ export class ReviewStepComponent {
   
   tax = computed(() => 0); // Tax set to zero
 
-  deliveryFee = computed(() => this.checkoutData().deliveryFee ?? 2);
+  deliveryFee = computed(() => this.checkoutData().deliveryFee ?? null);
 
-  total = computed(() => this.subtotal() + this.deliveryFee());
+  total = computed(() => this.deliveryFee() === null ? null : this.subtotal() + this.deliveryFee()!);
   
   itemCount = computed(() => 
     this.cartItems().reduce((total, item) => total + item.quantity, 0)

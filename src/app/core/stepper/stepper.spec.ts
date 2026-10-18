@@ -6,6 +6,7 @@ import { provideRouter, Router } from '@angular/router';
 import { StepperComponent } from './stepper';
 import { ServiceStepper, StepperStep } from './service-stepper';
 import { CartService } from '../service/cart-service';
+import { ShippingService } from '../service/shipping.service';
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserAddressDto } from '../Models/shipping';
 import { environment } from '../../../environments/environment.development';
@@ -73,6 +74,8 @@ describe('Single-page checkout', () => {
     fixture = TestBed.createComponent(StepperComponent);
     checkout = fixture.componentInstance;
     fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}shipping`).flush({ currency: 'KWD', defaultFee: 2, freeShippingThreshold: 20, version: 1,
+      areas: [{ city: 'الخيران', fee: 6 }, { city: 'المطلاع', fee: 4 }] });
     if (authenticated) http.expectOne(addressUrl).flush({ success: true, data: addresses });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -264,6 +267,35 @@ describe('Single-page checkout', () => {
   it('does not consider an address ID alone sufficient to bypass shipping validation', () => {
     state.updateCheckoutData({ selectedAddressId: 7 });
     expect(state.isStepComplete(StepperStep.SHIPPING)).toBeFalse();
+  });
+
+  it('uses server settings and recalculates shipping when cart quantities change', async () => {
+    await render();
+    await fillRequired();
+    const settings = TestBed.inject(ShippingService);
+    settings.load().subscribe();
+    http.expectOne(`${environment.apiUrl}shipping`).flush({ currency: 'KWD', defaultFee: 4.125,
+      freeShippingThreshold: 10, version: 2, areas: [] });
+    expect(checkout.deliveryFee()).toBe(4.125);
+    cart.updateQuantity('item-1', 4);
+    expect(checkout.deliveryFee()).toBe(0);
+    expect(checkout.total()).toBe(10);
+  });
+
+  it('blocks confirmation when shipping settings cannot be loaded', async () => {
+    fixture = TestBed.createComponent(StepperComponent);
+    checkout = fixture.componentInstance;
+    fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}shipping`).flush('Unavailable', { status: 503, statusText: 'Unavailable' });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await fillRequired();
+    expect(checkout.deliveryFee()).toBeNull();
+    expect(checkout.shipping()!.error()).toBeTruthy();
+    expect(confirmButton().disabled).toBeTrue();
+    await checkout.confirmOrder();
+    http.expectNone(ordersUrl);
   });
 
   it('selects a combined governorate/area, recalculates delivery, and sends matching geography', async () => {

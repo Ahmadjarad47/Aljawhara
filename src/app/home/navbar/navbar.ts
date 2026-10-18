@@ -27,6 +27,7 @@ import {
 import { ServiceAuth } from '../../auth/service-auth';
 import { UserResponseDto } from '../../auth/auth.models';
 import { CartService } from '../../core/service/cart-service';
+import { ShippingService } from '../../core/service/shipping.service';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { ProductService } from '../product/product-service';
 import { ProductSummaryDto, CategoryDto } from '../product/product.models';
@@ -39,6 +40,7 @@ import { ProductSummaryDto, CategoryDto } from '../product/product.models';
   styleUrl: './navbar.css',
 })
 export class Navbar implements OnInit, OnDestroy {
+  readonly shipping = inject(ShippingService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   @ViewChild('mobileMenuTemplate', { static: true }) mobileMenuTemplate!: TemplateRef<any>;
@@ -253,6 +255,7 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    if (this.isBrowser) this.shipping.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => {} });
     // Initialize component - defer non-critical operations
     this.loadUserData();
 

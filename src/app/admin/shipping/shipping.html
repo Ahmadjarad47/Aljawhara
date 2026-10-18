@@ -1,0 +1,57 @@
+<section class="p-4 md:p-8 max-w-5xl mx-auto" dir="rtl" aria-labelledby="shipping-settings-title">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 id="shipping-settings-title" class="text-2xl font-bold">إعدادات الشحن</h1>
+      <p class="text-base-content/70 mt-2">تُطبّق التعديلات على الطلبات الجديدة. جميع الأسعار بالدينار الكويتي.</p>
+    </div>
+    <button type="button" class="btn btn-outline" (click)="load()" [disabled]="loading() || saving()">إعادة تحميل</button>
+  </div>
+  @if (error()) { <div class="alert alert-error mb-4" role="alert">{{ error() }}</div> }
+  @if (success()) { <div class="alert alert-success mb-4" role="status">تم حفظ إعدادات الشحن.</div> }
+  @if (loading()) {
+    <div class="py-12 text-center" role="status" aria-label="جاري تحميل إعدادات الشحن"><span class="loading loading-spinner loading-lg"></span></div>
+  } @else if (settings; as config) {
+    <form #shippingForm="ngForm" (ngSubmit)="save(shippingForm)">
+      <fieldset [disabled]="saving()" class="space-y-6">
+        <div class="card bg-base-100 shadow-sm border border-base-300 p-6 space-y-5">
+          <h2 class="text-lg font-semibold">القواعد العامة</h2>
+          <label class="form-control max-w-md gap-2">
+            <span>سعر الشحن الافتراضي (د.ك)</span>
+            <input class="input input-bordered w-full" name="defaultFee" type="number" min="0" max="1000000" step="0.001" required [(ngModel)]="config.defaultFee" />
+            <span class="text-sm text-base-content/60">يُستخدم للمناطق التي لا تملك سعراً خاصاً أو عند عدم تحديد المنطقة.</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input class="toggle toggle-primary" name="freeShippingEnabled" type="checkbox" [ngModel]="freeShippingEnabled" (ngModelChange)="toggleFreeShipping($event)" />
+            <span>تفعيل الشحن المجاني حسب قيمة الطلب</span>
+          </label>
+          @if (freeShippingEnabled) {
+            <label class="form-control max-w-md gap-2">
+              <span>الحد الأدنى للشحن المجاني (د.ك)</span>
+              <input class="input input-bordered w-full" name="threshold" type="number" min="0" max="1000000" step="0.001" required [(ngModel)]="config.freeShippingThreshold" />
+              <span class="text-sm text-base-content/60">يُحتسب من مجموع المنتجات قبل خصم الكوبون. القيمة صفر تجعل الشحن مجانياً لجميع الطلبات.</span>
+            </label>
+          }
+          <p class="text-sm text-base-content/60">كوبونات الشحن المجاني الصالحة تستمر بالعمل حتى عند تعطيل هذا العرض.</p>
+        </div>
+        <div class="card bg-base-100 shadow-sm border border-base-300 p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-lg font-semibold">أسعار المناطق</h2>
+            <button type="button" class="btn btn-sm btn-outline" (click)="addArea()" [disabled]="config.areas.length >= 100">إضافة منطقة</button>
+          </div>
+          <p class="text-sm text-base-content/60 mb-4">استخدم اسم المنطقة كما يظهر في عنوان التوصيل. حذفها يعيد تطبيق السعر الافتراضي عليها.</p>
+          @for (area of config.areas; track $index; let i = $index) {
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_10rem_auto] gap-3 items-end mb-4">
+              <label class="form-control gap-1"><span>المنطقة</span><input class="input input-bordered w-full" [id]="'shipping-city-' + i" [name]="'city-' + i" maxlength="100" required [(ngModel)]="area.city" /></label>
+              <label class="form-control gap-1"><span>السعر (د.ك)</span><input class="input input-bordered w-full" [id]="'shipping-fee-' + i" [name]="'fee-' + i" type="number" min="0" max="1000000" step="0.001" required [(ngModel)]="area.fee" /></label>
+              <button type="button" class="btn btn-outline btn-error" (click)="removeArea(i)" [attr.aria-label]="'حذف منطقة ' + area.city">حذف</button>
+            </div>
+          } @empty { <p class="py-6 text-base-content/60">لا توجد أسعار خاصة. يُستخدم السعر الافتراضي لكل المناطق.</p> }
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="shippingForm.invalid || saving()">
+          @if (saving()) { <span class="loading loading-spinner loading-sm"></span> }
+          {{ saving() ? 'جاري الحفظ...' : 'حفظ إعدادات الشحن' }}
+        </button>
+      </fieldset>
+    </form>
+  }
+</section>

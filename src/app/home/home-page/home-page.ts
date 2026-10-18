@@ -8,6 +8,7 @@ import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { CartService } from '../../core/service/cart-service';
+import { ShippingService } from '../../core/service/shipping.service';
 import {
   CarouselDto,
   CustomerSatisfactionDto,
@@ -34,6 +35,7 @@ type CategoryWithImageDto = {
   styleUrl: './home-page.css'
 })
 export class HomePage implements OnInit, OnDestroy {
+  readonly shipping = inject(ShippingService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private languageInterval?: ReturnType<typeof setInterval>;
