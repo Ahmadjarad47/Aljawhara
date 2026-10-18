@@ -122,10 +122,10 @@ export class Contact implements OnInit, OnDestroy {
 
   // Contact information
   contactInfo = {
-    address: 'الكويت, الشويخ الصناعية',
+    address: 'الكويت، الشويخ الصناعية',
     phone: '+965 67070814',
     whatsapp: '96567070814',
-    email: 'info@aljawhara.com',
+    email: 'info@aljawharaplus.com',
     workingHours: 'Sunday - Thursday: 9:00 AM - 6:00 PM'
   };
 

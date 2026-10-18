@@ -1,186 +1,120 @@
+<section class="cart-page" [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+  <div class="cart-container">
+    <nav class="cart-breadcrumb" [attr.aria-label]="t('breadcrumb')">
+      <a routerLink="/">{{ t('home') }}</a>
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m12 5-5 5 5 5"/></svg>
+      <span aria-current="page">{{ t('cartTitle') }}</span>
+    </nav>
 
-<div class="container mx-auto px-4 py-4 md:py-6">
-  <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 px-4 py-3 md:px-5 md:py-4 mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h1 class="text-xl md:text-2xl font-bold text-base-content">{{t('yourCart')}}</h1>
-      <p class="text-xs md:text-sm text-base-content/70">{{ itemCount }} {{t('itemsInCart')}}</p>
-    </div>
-
-    <button class="btn btn-soft btn-sm w-full sm:w-auto justify-center" (click)="clearCart()" [disabled]="itemCount === 0">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 mr-2">
-        <path fill-rule="evenodd" d="M16.5 4.478V4.125A2.625 2.625 0 0013.875 1.5h-3.75A2.625 2.625 0 007.5 4.125v.353c-.44.051-.875.11-1.304.175a.75.75 0 10.232 1.482l.262-.041 1.017 12.2A3.375 3.375 0 0011.06 21h1.879a3.375 3.375 0 003.353-3.706l1.017-12.2.262.041a.75.75 0 10.232-1.482 43.384 43.384 0 00-1.303-.175zM9 4.125c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V4.5H9v-.375z" clip-rule="evenodd" />
-        <path d="M10.25 8.25a.75.75 0 00-1.5 0l.34 8.159a.75.75 0 001.5 0L10.25 8.25zM15.25 8.25a.75.75 0 10-1.5 0l-.34 8.159a.75.75 0 001.5 0L15.25 8.25z" />
-      </svg>
-      {{t('clearCart')}}
-    </button>
-  </div>
-
-  @if (cartItems().length === 0) {
-    <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-6 md:p-10 text-center">
-      <svg class="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.5 5h13m-10.5 0a1.5 1.5 0 11-3 0m13 0a1.5 1.5 0 11-3 0" />
-      </svg>
-      <h2 class="text-lg md:text-xl font-semibold text-base-content mb-2">{{t('cartEmpty')}}</h2>
-      <p class="text-sm md:text-base text-base-content/70 mb-4">{{t('browseProducts')}}</p>
-      <a routerLink="/" class="btn btn-soft btn-primary btn-sm md:btn-md w-full sm:w-auto">{{t('continueShopping')}}</a>
-    </div>
-  } @else {
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-      <div class="lg:col-span-2">
-        <ul class="space-y-3 md:space-y-4 list-none">
-          @for (item of cartItems(); track item.id) {
-            <li class="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden hover:shadow-xl transition-all duration-300">
-              <div class="p-4 md:p-5">
-              <div class="flex flex-row items-center gap-4 md:gap-6 rtl:flex-row-reverse">
-                <!-- Product Image Card -->
-                <a [routerLink]="['/product', item.productId]" class="shrink-0">
-                  <div class="bg-base-200 rounded-lg  border border-base-300 shadow-sm">
-                    <div class="img-container rounded-md w-[70px] h-[70px] overflow-hidden">
-                      <img [src]="item.image" 
-                           [alt]="item.name" 
-                           loading="lazy"
-                           (load)="$event.target.classList.add('loaded')"
-                           (error)="$event.target.classList.add('loaded')"
-                          class="w-32 h-full object-contain cursor-pointer hover:opacity-80 transition-opacity" />
-                      <div class="img-loading"></div>
-                    </div>
-                  </div>
-                </a>
-
-                <!-- Product Details -->
-                <div class="flex-1 min-w-0 flex flex-col gap-2">
-                  <div class="flex flex-row items-start justify-between gap-2 rtl:flex-row-reverse">
-                    <div class="flex-1 min-w-0">
-                      <h3 class="font-semibold text-base-content text-sm md:text-base mb-1 line-clamp-2">
-                        <a [routerLink]="['/product', item.productId]" class="hover:text-primary transition-colors">{{ item.name }}</a>
-                      </h3>
-                      
-                      <!-- Variant Info -->
-                      @if (hasVariants(item)) {
-                        <div class="text-xs text-base-content/60 mb-1">
-                          <span class="inline-flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
-                              <path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h7.5a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-7.5a3 3 0 01-3-3V5.25a3 3 0 013-3h7.5a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-7.5z" clip-rule="evenodd" />
-                            </svg>
-                            {{ getVariantCount(item) }} {{t('variants')}}
-                          </span>
-                        </div>
-                      }
-                      
-                      <!-- Price -->
-                      <div class="flex items-baseline gap-2 mt-1">
-                        <span class="font-bold text-primary text-base md:text-lg">{{ item.price | currency:'KWD' }}</span>
-                        <span class="text-xs text-base-content/60">{{t('each')}}</span>
-                      </div>
-                    </div>
-                    
-                    <!-- Remove Button -->
-                    <button class="btn btn-soft btn-error btn-xs md:btn-sm shrink-0" (click)="$event.stopPropagation(); removeItem(item.id)">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3 md:size-4">
-                        <path fill-rule="evenodd" d="M16.5 4.478V4.125A2.625 2.625 0 0013.875 1.5h-3.75A2.625 2.625 0 007.5 4.125v.353c-.44.051-.875.11-1.304.175a.75.75 0 10.232 1.482l.262-.041 1.017 12.2A3.375 3.375 0 0011.06 21h1.879a3.375 3.375 0 003.353-3.706l1.017-12.2.262.041a.75.75 0 10.232-1.482 43.384 43.384 0 00-1.303-.175zM9 4.125c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V4.5H9v-.375z" clip-rule="evenodd" />
-                        <path d="M10.25 8.25a.75.75 0 00-1.5 0l.34 8.159a.75.75 0 001.5 0L10.25 8.25zM15.25 8.25a.75.75 0 10-1.5 0l-.34 8.159a.75.75 0 001.5 0L15.25 8.25z" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Quantity and Total -->
-                  <div class="flex items-center justify-between gap-3 pt-2 border-t border-base-300">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs text-base-content/70">{{t('quantity') || 'Quantity'}}:</span>
-                      <div class="join">
-                        <button class="btn btn-soft btn-xs join-item" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity - 1)" [disabled]="item.quantity <= 1">-</button>
-                        <button class="btn btn-ghost btn-xs join-item no-pointer-events min-w-[2rem]">{{ item.quantity }}</button>
-                        <button class="btn btn-soft btn-xs join-item" (click)="$event.stopPropagation(); updateQuantity(item.id, item.quantity + 1)">+</button>
-                      </div>
-                    </div>
-                    <div class="text-right rtl:text-left">
-                      <div class="font-bold text-base-content text-sm md:text-base">{{ getItemTotal(item.price, item.quantity) | currency:'KWD' }}</div>
-                      <div class="text-xs text-base-content/60">{{t('total') || 'Total'}}</div>
-                    </div>
-                  </div>
-                  
-                  <!-- Coupon Badge -->
-                  @if (item.couponCode) {
-                    <div class="text-xs text-success font-medium">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 inline mr-1">
-                        <path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.122-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" />
-                      </svg>
-                      {{t('coupon')}} {{ item.couponCode }}
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </li>
-          }
-        </ul>
+    <header class="cart-header">
+      <div class="cart-heading">
+        <span class="cart-eyebrow">{{ t('cartEyebrow') }}</span>
+        <h1>{{ t('cartTitle') }}<span class="cart-count">{{ itemCount }}</span></h1>
+        <p>{{ t('cartDescription') }}</p>
       </div>
+      <a routerLink="/product" class="continue-link">
+        {{ t('continueShopping') }}
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+      </a>
+    </header>
 
-      <div class="lg:col-span-1 lg:sticky top-6 self-start space-y-4">
-        <!-- Coupon Section -->
-        <div class="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
-          <h3 class="text-lg font-semibold text-base-content mb-3">{{t('applyCoupon')}}</h3>
-          
-          @if (hasAppliedCoupon) {
-            <div class="alert alert-success mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <div class="font-semibold">{{t('couponApplied')}}</div>
-                <div class="text-sm">{{ appliedCoupon()?.code }} - {{ appliedCoupon()?.description }}</div>
-                <div class="text-sm">{{t('discount')}} {{ discountAmount | currency:'KWD' }}</div>
-              </div>
-              <button class="btn btn-sm btn-ghost" (click)="removeCoupon()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
-                </svg>
+    @if (cartItems().length === 0) {
+      <div class="empty-cart">
+        <div class="empty-cart-icon">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M12 16h24l2 25H10l2-25Z"/><path d="M18 18v-7a6 6 0 0 1 12 0v7M18 27c2 5 10 5 12 0"/></svg>
+        </div>
+        <span class="cart-eyebrow">{{ t('emptyEyebrow') }}</span>
+        <h2>{{ t('cartEmpty') }}</h2>
+        <p>{{ t('browseProducts') }}</p>
+        <a routerLink="/product" class="shop-button">{{ t('discoverProducts') }}<span aria-hidden="true">←</span></a>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <div class="cart-main">
+          <section class="cart-products" aria-labelledby="cart-products-title">
+            <div class="products-heading">
+              <h2 id="cart-products-title">{{ t('selectedProducts') }} <span>({{ cartItems().length }})</span></h2>
+              <button type="button" class="clear-cart" (click)="clearCart()">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg>
+                {{ t('clearCart') }}
               </button>
             </div>
-          } @else {
-            <div class="flex gap-2">
-              <input 
-                type="text" 
-                [(ngModel)]="couponCode"
-                [placeholder]="t('enterCouponCode')"
-                class="input input-bordered flex-1"
-                [class.input-error]="couponError"
-                (keyup.enter)="applyCoupon()"
-              />
-              <button 
-                class="btn btn-primary"
-                (click)="applyCoupon()"
-                [disabled]="isApplyingCoupon() || !couponCode.trim()"
-              >
-                @if (isApplyingCoupon()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
-                  {{t('apply')}}
-                }
-              </button>
-            </div>
-            
-            @if (couponError) {
-              <div class="alert alert-error mt-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{{ couponError }}</span>
-              </div>
-            }
-          }
+            <ul class="cart-list">
+              @for (item of cartItems(); track item.id) {
+                <li class="cart-item">
+                  <a [routerLink]="['/product', item.productId]" class="product-image">
+                    <img [src]="item.image" [alt]="item.name" loading="lazy" />
+                  </a>
+                  <div class="product-details">
+                    <div class="product-title-row">
+                      <h3><a [routerLink]="['/product', item.productId]">{{ item.name }}</a></h3>
+                      <button type="button" class="remove-item" (click)="removeItem(item.id)" [attr.aria-label]="t('removeItem') + ': ' + item.name" [title]="t('removeItem')">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg>
+                      </button>
+                    </div>
+                    @if (hasVariants(item)) {
+                      <p class="variant-info">{{ getVariantCount(item) }} {{ t('variants') }}</p>
+                    }
+                    <div class="unit-price">
+                      <bdi class="price">{{ item.price | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
+                      <span>{{ t('perItem') }}</span>
+                    </div>
+                    <div class="product-bottom-row">
+                      <div class="quantity-field">
+                        <span class="quantity-label">{{ t('quantity') }}</span>
+                        <div class="quantity-control" role="group" [attr.aria-label]="t('quantity') + ': ' + item.name">
+                          <button type="button" (click)="updateQuantity(item.id, item.quantity - 1)" [disabled]="item.quantity <= 1" [attr.aria-label]="t('decreaseQuantity')">−</button>
+                          <span aria-live="polite" aria-atomic="true">{{ item.quantity }}</span>
+                          <button type="button" (click)="updateQuantity(item.id, item.quantity + 1)" [attr.aria-label]="t('increaseQuantity')">+</button>
+                        </div>
+                      </div>
+                      <div class="item-total">
+                        <span>{{ t('total') }}</span>
+                        <bdi class="price">{{ getItemTotal(item.price, item.quantity) | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
+                      </div>
+                    </div>
+                    @if (item.couponCode) {
+                      <span class="item-coupon">{{ t('coupon') }} {{ item.couponCode }}</span>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+          <div class="cart-next-step">
+            <span class="next-step-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M8 10V7a4 4 0 0 1 8 0v3M6 10h12v10H6zM12 14v2"/></svg>
+            </span>
+            <div><strong>{{ t('nextStepTitle') }}</strong><p>{{ t('nextStepDescription') }}</p></div>
+          </div>
         </div>
 
-        <app-order-summary 
-          [cartItems]="cartItems()"
-          [showTax]="true"
-          [showCheckoutButton]="true"
-          [showEmptyMessage]="false"
-        />
+        <aside class="cart-sidebar" [attr.aria-label]="t('orderSummary')">
+          <app-order-summary [cartItems]="cartItems()" [showTax]="true" [showCheckoutButton]="true" [showEmptyMessage]="false" />
+          <section class="coupon-card" aria-labelledby="coupon-heading">
+            <div class="coupon-heading">
+              <span class="coupon-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m3 3 8 .1L21 13l-8 8L3 11V3Z"/><circle cx="7.5" cy="7.5" r="1"/><path d="m10 16 6-6"/></svg></span>
+              <div><h2 id="coupon-heading">{{ t('couponTitle') }}</h2><p>{{ t('couponDescription') }}</p></div>
+            </div>
+            @if (hasAppliedCoupon) {
+              <div class="applied-coupon" role="status">
+                <div><strong>{{ t('couponApplied') }}</strong><p><bdi>{{ appliedCoupon()?.code }}</bdi> · {{ discountAmount | number:'1.3-3' }} {{ t('currency') }}</p></div>
+                <button type="button" class="remove-item" (click)="removeCoupon()" [attr.aria-label]="t('removeCoupon')">×</button>
+              </div>
+            } @else {
+              <form class="coupon-form" (ngSubmit)="applyCoupon()">
+                <label class="sr-only" for="cart-coupon">{{ t('enterCouponCode') }}</label>
+                <input id="cart-coupon" name="coupon" type="text" [(ngModel)]="couponCode" [placeholder]="t('enterCouponCode')" [class.has-error]="couponError" [attr.aria-invalid]="couponError ? 'true' : null" [attr.aria-describedby]="couponError ? 'cart-coupon-error' : null" autocomplete="off" />
+                <button type="submit" [disabled]="isApplyingCoupon() || !couponCode.trim()">
+                  @if (isApplyingCoupon()) { <span class="loading loading-spinner loading-xs" [attr.aria-label]="t('applying')"></span> }
+                  @else { {{ t('apply') }} }
+                </button>
+              </form>
+              @if (couponError) { <p id="cart-coupon-error" class="coupon-error" role="alert">{{ couponError }}</p> }
+            }
+          </section>
+        </aside>
       </div>
-    </div>
-  }
-</div>
-
-
-
+    }
+  </div>
+</section>

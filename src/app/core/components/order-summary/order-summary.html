@@ -1,81 +1,66 @@
 @if (cartItems().length === 0 && showEmptyMessage()) {
-  <div class="alert">
-    <span>{{t('cartEmpty')}}</span>
-  </div>
+  <div class="summary-empty">{{ t('cartEmpty') }}</div>
 } @else {
-  <div class="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden">
-    <div class="p-5">
-      <h2 class="text-xl font-semibold text-base-content">{{t('orderSummary')}}</h2>
-      <div class="divider my-3"></div>
-
-      <div class="flex items-center justify-between py-1">
-        <span class="text-base-content/70">{{t('items')}} ({{ itemCount() }})</span>
-        <span class="font-medium text-base-content">{{ subtotal() | currency:'KWD' }}</span>
+  <section class="order-summary" [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" aria-labelledby="order-summary-title">
+    <header class="summary-heading">
+      <div><span class="summary-eyebrow">{{ t('almostThere') }}</span><h2 id="order-summary-title">{{ t('orderSummary') }}</h2></div>
+      <span class="summary-bag" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 7h12l1 14H5L6 7Z"/><path d="M9 9V5a3 3 0 0 1 6 0v4"/></svg></span>
+    </header>
+    <div class="summary-lines">
+      <div class="summary-line">
+        <span>{{ t('items') }} <span class="summary-count">{{ itemCount() }}</span></span>
+        <bdi>{{ subtotal() | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
       </div>
-
       @if (hasAppliedCoupon()) {
-        <div class="flex items-center justify-between py-1">
-          <span class="text-base-content/70">{{t('discount')}}</span>
-          <span class="font-medium text-success">-{{ discountAmount() | currency:'KWD' }}</span>
+        <div class="summary-line summary-discount">
+          <span>{{ t('discount') }}</span>
+          <bdi>−{{ discountAmount() | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
         </div>
       }
-
-      <div class="flex items-center justify-between py-1">
-        <span class="text-base-content/70">{{t('deliveryFee')}}</span>
-        <span class="font-medium text-base-content">{{ deliveryFee() | currency:'KWD' }}</span>
+      <div class="summary-line">
+        <span>{{ t('deliveryFee') }}</span>
+        <bdi>{{ deliveryFee() | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
       </div>
-
-      <div class="divider my-3"></div>
-
-      <div class="flex items-center justify-between py-1">
-        <span class="font-semibold text-base-content">{{t('total')}}</span>
-        <span class="text-lg font-bold text-base-content">{{ total() | currency:'KWD' }}</span>
-      </div>
-
-      @if (showCheckoutButton()) {
-        <div class="mt-4">
-          <button class="btn btn-soft btn-primary btn-block" [disabled]="cartItems().length === 0" (click)="goToCheckout()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-2">
-              <path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.713 0-2.334.055-.65.057-1.18.17-1.678.45a4.5 4.5 0 00-1.177 1.177C.083 9.49 0 10.02 0 10.67v7.91c0 .917 0 1.588.048 2.112.05.545.155 1.08.417 1.564a4.5 4.5 0 001.903 1.903c.485.262 1.02.367 1.564.417C4.463 23 5.134 23 6.05 23h11.9c.917 0 1.587 0 2.112-.048.545-.05 1.08-.155 1.564-.417a4.5 4.5 0 001.903-1.903c.262-.485.367-1.02.417-1.564.048-.524.048-1.195.048-2.112v-7.91c0-.65-.083-1.177-.346-1.617a4.5 4.5 0 00-1.177-1.177c-.498-.28-1.027-.393-1.678-.45C19.7 6 18.96 6 18 6h-3.75V5.25c0-.918 0-1.588-.048-2.112-.05-.545-.155-1.08-.417-1.564a4.5 4.5 0 00-1.903-1.903C11.3.405 10.765.3 10.22.25 9.696.2 9.025.2 8.108.2H5.25c-.918 0-1.587 0-2.112.048-.545.05-1.08.155-1.564.417A4.5 4.5 0 00.656 2.573c-.262.485-.367 1.02-.417 1.564C.19 3.662.19 4.333.19 5.25V6z" clip-rule="evenodd" />
-            </svg>
-            {{t('checkout')}}
-          </button>
-        </div>
-      }
     </div>
-  </div>
+    <div class="summary-total">
+      <span>{{ t('total') }}</span>
+      <bdi>{{ total() | number:'1.3-3' }} <small>{{ t('currency') }}</small></bdi>
+    </div>
+    @if (showCheckoutButton()) {
+      <button type="button" class="checkout-button" [disabled]="cartItems().length === 0" (click)="goToCheckout()">
+        <span>{{ t('checkout') }}</span>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+      </button>
+      <p class="summary-note">{{ t('reviewBeforeConfirming') }}</p>
+    }
+  </section>
 }
 
 @if (showGuestLoginModal()) {
-  <div class="modal modal-open">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg mb-2">{{ t('guestCheckoutTitle') }}</h3>
-      <p class="text-base-content/70 mb-6">{{ t('guestCheckoutPrompt') }}</p>
-      <div class="modal-action">
-        <button class="btn btn-outline" (click)="onLoginChoice(false)">
-          {{ t('continueAsGuest') }}
-        </button>
-        <button class="btn btn-primary" (click)="onLoginChoice(true)">
-          {{ t('login') }}
-        </button>
+  <div class="summary-modal" [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+    <section class="summary-dialog" role="dialog" aria-modal="true" aria-labelledby="guest-checkout-title">
+      <button type="button" class="dialog-close" (click)="showGuestLoginModal.set(false)" [attr.aria-label]="t('close')">×</button>
+      <span class="dialog-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span>
+      <h3 id="guest-checkout-title">{{ t('guestCheckoutTitle') }}</h3>
+      <p>{{ t('guestCheckoutPrompt') }}</p>
+      <div class="dialog-actions">
+        <button type="button" class="dialog-primary" (click)="onLoginChoice(true)">{{ t('login') }}</button>
+        <button type="button" class="dialog-secondary" (click)="onLoginChoice(false)">{{ t('continueAsGuest') }}</button>
       </div>
-    </div>
+    </section>
   </div>
 }
-
 @if (showGuestWarningModal()) {
-  <div class="modal modal-open">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg mb-2">{{ t('warningTitle') }}</h3>
-      <p class="text-base-content/70 mb-6">{{ t('warningMessage') }}</p>
-      <div class="modal-action">
-        <button class="btn btn-ghost" (click)="showGuestWarningModal.set(false)">
-          {{ t('back') }}
-        </button>
-        <button class="btn btn-primary" (click)="onGuestWarningContinue()">
-          {{ t('continueAsGuest') }}
-        </button>
+  <div class="summary-modal" [attr.dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+    <section class="summary-dialog" role="dialog" aria-modal="true" aria-labelledby="guest-warning-title">
+      <button type="button" class="dialog-close" (click)="showGuestWarningModal.set(false)" [attr.aria-label]="t('close')">×</button>
+      <span class="dialog-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 3v1"/></svg></span>
+      <h3 id="guest-warning-title">{{ t('warningTitle') }}</h3>
+      <p>{{ t('warningMessage') }}</p>
+      <div class="dialog-actions">
+        <button type="button" class="dialog-primary" (click)="onGuestWarningContinue()">{{ t('continueAsGuest') }}</button>
+        <button type="button" class="dialog-secondary" (click)="showGuestWarningModal.set(false)">{{ t('back') }}</button>
       </div>
-    </div>
+    </section>
   </div>
 }

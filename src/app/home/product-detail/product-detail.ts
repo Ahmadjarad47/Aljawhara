@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, OnDestroy, PLATFORM_ID, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product/product-service';
@@ -20,6 +21,9 @@ import { RatingDto } from '../../admin/product/product.models';
   styleUrl: './product-detail.css'
 })
 export class ProductDetail implements OnInit, OnDestroy {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private productService = inject(ProductService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -28,6 +32,24 @@ export class ProductDetail implements OnInit, OnDestroy {
   public authService = inject(ServiceAuth);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private readonly handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'language') this.applyLanguage(event.newValue);
+  };
+
+  private applyLanguage(language: string | null): void {
+    if ((language === 'ar' || language === 'en') && language !== this.currentLanguage()) {
+      this.currentLanguage.set(language);
+      this.updateRelatedProductsLanguage();
+    }
+  }
+
+  private readonly updateLanguage = () => {
+    try {
+      this.applyLanguage(window.localStorage.getItem('language'));
+    } catch {
+      // Keep the default language when browser storage is blocked.
+    }
+  };
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -35,6 +57,21 @@ export class ProductDetail implements OnInit, OnDestroy {
   // Translations object
   translations = {
     ar: {
+      breadcrumb: 'مسار التنقل',
+      loadingProduct: 'جارٍ تحميل المنتج...',
+      noImage: 'صورة المنتج غير متوفرة',
+      previousImage: 'الصورة السابقة',
+      nextImage: 'الصورة التالية',
+      productImage: 'صورة المنتج',
+      productImages: 'صور المنتج',
+      galleryCaption: 'من اختيارات الجوهرة',
+      discountLabel: 'خصم',
+      productPrice: 'سعر المنتج',
+      currency: 'د.ك',
+      chooseQuantity: 'حدد الكمية المناسبة لطلبك',
+      decreaseQuantity: 'تقليل الكمية',
+      increaseQuantity: 'زيادة الكمية',
+      productInformation: 'معلومات المنتج',
       home: 'الرئيسية',
       category: 'الفئة',
       product: 'منتج',
@@ -116,6 +153,21 @@ export class ProductDetail implements OnInit, OnDestroy {
       removedFromWishlist: 'تمت إزالة المنتج من قائمة الأمنيات'
     },
     en: {
+      breadcrumb: 'Breadcrumb',
+      loadingProduct: 'Loading product...',
+      noImage: 'Product image unavailable',
+      previousImage: 'Previous image',
+      nextImage: 'Next image',
+      productImage: 'Product image',
+      productImages: 'Product images',
+      galleryCaption: 'An Aljawhara selection',
+      discountLabel: 'Save',
+      productPrice: 'Product price',
+      currency: 'KWD',
+      chooseQuantity: 'Choose the quantity for your order',
+      decreaseQuantity: 'Decrease quantity',
+      increaseQuantity: 'Increase quantity',
+      productInformation: 'Product information',
       home: 'Home',
       category: 'Category',
       product: 'Product',
@@ -275,7 +327,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   selectedSize = 'One Size';
   quantity = 1;
   showFullDescription = false;
-  showSpecifications = false;
+  showSpecifications = true;
   showReviews = false;
   showShippingInfo = false;
   showReturnPolicy = false;
@@ -348,36 +400,14 @@ export class ProductDetail implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
-    // Load saved language from localStorage
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
-      this.currentLanguage.set(savedLang);
-    } else {
-      this.currentLanguage.set('ar');
+    if (this.isBrowser) {
+      this.updateLanguage();
+      window.addEventListener('storage', this.handleStorageChange);
+      this.languageCheckInterval = setInterval(this.updateLanguage, 500);
     }
 
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language' && e.newValue) {
-        const newLang = e.newValue as 'ar' | 'en';
-        if (newLang === 'ar' || newLang === 'en') {
-          this.currentLanguage.set(newLang);
-          // Update related products language when language changes
-          this.updateRelatedProductsLanguage();
-        }
-      }
-    });
-
-    this.languageCheckInterval = setInterval(() => {
-      const currentLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (currentLang && (currentLang === 'ar' || currentLang === 'en') && currentLang !== this.currentLanguage()) {
-        this.currentLanguage.set(currentLang);
-        // Update related products language when language changes
-        this.updateRelatedProductsLanguage();
-      }
-    }, 500);
-
     // Get product ID from route parameters
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const productId = +params['id'];
       if (productId) {
         this.loadProduct(productId);
@@ -389,6 +419,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.isBrowser) window.removeEventListener('storage', this.handleStorageChange);
     if (this.languageCheckInterval) {
       clearInterval(this.languageCheckInterval);
     }
@@ -399,6 +430,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     this.errorMessage.set('');
 
     this.productService.getProductById(id).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError(error => {
         console.error('Error loading product:', error);
         this.errorMessage.set(this.t('failedToAdd')); // reuse generic error text
@@ -450,6 +482,7 @@ export class ProductDetail implements OnInit, OnDestroy {
 
     this.isCheckingRating.set(true);
     this.productService.getUserRating(productId).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError(error => {
         // If 404, user hasn't rated yet - this is expected
         if (error.status === 404) {
@@ -697,19 +730,26 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   toggleSpecifications() {
-    this.showSpecifications = !this.showSpecifications;
+    this.activateTab('specifications');
   }
 
   toggleReviews() {
-    this.showReviews = !this.showReviews;
+    this.activateTab('reviews');
   }
 
   toggleShippingInfo() {
-    this.showShippingInfo = !this.showShippingInfo;
+    this.activateTab('shipping');
   }
 
   toggleReturnPolicy() {
-    this.showReturnPolicy = !this.showReturnPolicy;
+    this.activateTab('returns');
+  }
+
+  private activateTab(tab: 'specifications' | 'reviews' | 'shipping' | 'returns'): void {
+    this.showSpecifications = tab === 'specifications';
+    this.showReviews = tab === 'reviews';
+    this.showShippingInfo = tab === 'shipping';
+    this.showReturnPolicy = tab === 'returns';
   }
 
   // Review methods
@@ -878,6 +918,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   // Load related products
   loadRelatedProducts(subCategoryId: number, currentProductId: number) {
     this.productService.getRandomProductsBySubCategory(subCategoryId, 3).pipe(
+      takeUntilDestroyed(this.destroyRef),
       catchError(error => {
         console.error('Error loading related products:', error);
         return of([]);
@@ -888,6 +929,7 @@ export class ProductDetail implements OnInit, OnDestroy {
       
       // Transform to match template expectations
       this.transformRelatedProducts();
+      this.changeDetector.markForCheck();
     });
   }
 

@@ -21,6 +21,8 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   currentLanguage = signal<'ar' | 'en'>('ar');
   translations = {
     ar: {
+      almostThere: 'بقيت خطوة واحدة', currency: 'د.ك', close: 'إغلاق',
+      reviewBeforeConfirming: 'يمكنك مراجعة طلبك قبل التأكيد النهائي',
       orderSummary: 'ملخص الطلب', items: 'العناصر', discount: 'الخصم', deliveryFee: 'رسوم التوصيل',
       total: 'الإجمالي', checkout: 'إتمام الطلب', cartEmpty: 'سلة التسوق فارغة.',
       guestCheckoutPrompt: 'هل تريد تسجيل الدخول قبل إتمام الطلب؟', guestCheckoutTitle: 'إتمام الشراء كزائر',
@@ -28,6 +30,8 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
       warningMessage: 'قد تفقد بياناتك إذا تابعت كزائر.', back: 'رجوع',
     },
     en: {
+      almostThere: 'Almost there', currency: 'KWD', close: 'Close',
+      reviewBeforeConfirming: 'Review your order before the final confirmation',
       orderSummary: 'Order summary', items: 'Items', discount: 'Discount', deliveryFee: 'Delivery fee',
       total: 'Total', checkout: 'Checkout', cartEmpty: 'Your cart is empty.',
       guestCheckoutPrompt: 'Would you like to sign in before checkout?', guestCheckoutTitle: 'Guest checkout',
