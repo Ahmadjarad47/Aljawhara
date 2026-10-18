@@ -1,0 +1,163 @@
+<!-- Shared, local icons keep the assistant independent of external assets. -->
+<svg class="assistant-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <symbol id="jawhara-sparkles" viewBox="0 0 32 32"><path d="m19 2 3.5 9.5L32 15l-9.5 3.5L19 28l-3.5-9.5L6 15l9.5-3.5ZM5 1l1.4 3.6L10 6 6.4 7.4 5 11 3.6 7.4 0 6l3.6-1.4Z" fill="currentColor"/></symbol>
+    <symbol id="jawhara-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="jawhara-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="jawhara-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="jawhara-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="jawhara-cart" viewBox="0 0 24 24"><path d="M2 3h3l3 13h11l3-10H6M9 20h.01M18 20h.01"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></symbol>
+    <symbol id="jawhara-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14ZM4 14l5 5"/></symbol>
+    <symbol id="jawhara-attachment" viewBox="0 0 24 24"><path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2a4 4 0 0 1 6 6L9 18a2 2 0 0 1-3-3l9-9"/></symbol>
+    <symbol id="jawhara-send" viewBox="0 0 24 24"><path d="m21 3-7 18-4-8-8-3 19-7ZM10 13 21 3"/></symbol>
+  </defs>
+</svg>
+
+@if (isOpen()) {
+  <section #panel id="jawhara-assistant" class="assistant-panel" role="dialog"
+    aria-labelledby="jawhara-assistant-title" aria-describedby="jawhara-assistant-subtitle"
+    tabindex="-1" (keydown.escape)="close()">
+    <header class="assistant-header">
+      <div class="assistant-heading">
+        <svg class="sparkles" aria-hidden="true"><use href="#jawhara-sparkles"/></svg>
+        <div>
+          <h2 id="jawhara-assistant-title">مساعد الجوهرة الذكي</h2>
+          <p id="jawhara-assistant-subtitle">جهّز احتياجاتك بسهولة</p>
+        </div>
+      </div>
+      <div class="window-actions">
+        <button type="button" class="icon-button" aria-label="تصغير المساعد" (click)="close()">
+          <svg aria-hidden="true"><use href="#jawhara-minus"/></svg>
+        </button>
+        <button type="button" class="icon-button" aria-label="إغلاق المساعد" (click)="close()">
+          <svg aria-hidden="true"><use href="#jawhara-close"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div #conversation class="assistant-conversation" tabindex="0" aria-label="المحادثة والقائمة المقترحة">
+      <div class="message message-user">
+        <p>بدي تجهزلي عدة نزهة لـ 5 أشخاص <span aria-hidden="true">🧺</span></p>
+        <span class="message-caption">طلبك</span>
+      </div>
+      <div class="assistant-reply">
+        <img class="assistant-avatar" src="/logo.png" alt="الجوهرة" width="36" height="36"/>
+        <div class="message message-assistant">
+          <p>أكيد! جهزت لك قائمة مقترحة للنزهة لـ 5 أشخاص. يمكنك تعديل الكميات قبل الإضافة للسلة.</p>
+          <span class="message-caption">مساعد الجوهرة</span>
+        </div>
+      </div>
+
+      <section class="kit-card" aria-labelledby="jawhara-kit-title">
+        <h3 id="jawhara-kit-title"><span aria-hidden="true">🧺</span> قائمة مقترحة لعدة النزهة</h3>
+        <div class="kit-items">
+          @for (item of items(); track item.id) {
+            <div class="kit-item">
+              <div class="product-illustration" aria-hidden="true">
+                <svg viewBox="0 0 64 52">
+                  @switch (item.id) {
+                    @case ('plates') {
+                      <ellipse cx="32" cy="29" rx="28" ry="19" fill="#e4e6e5"/>
+                      <ellipse cx="32" cy="26" rx="28" ry="19" fill="#f4f5f4" stroke="#d5d8d6"/>
+                      <ellipse cx="32" cy="26" rx="20" ry="13" fill="#fff" stroke="#e2e4e2" stroke-width="2"/>
+                    }
+                    @case ('cups') {
+                      <path d="m6 9 4 32q10 8 19 0l4-32" fill="#c7a27b"/><ellipse cx="19.5" cy="9" rx="13.5" ry="5" fill="#f1e8dc"/>
+                      <path d="m32 23 4 24q10 6 19-1l4-23" fill="#ae835c"/><ellipse cx="45.5" cy="23" rx="13.5" ry="5" fill="#f7efe5"/>
+                    }
+                    @case ('cutlery') {
+                      <g fill="#f0f0ef" stroke="#d0d4d2" stroke-width="1.5" transform="rotate(25 32 26)">
+                        <ellipse cx="15" cy="11" rx="6" ry="9"/><path d="M13 20h4v29h-4Z"/>
+                        <path d="M32 2v12m5-12v12m5-12v12m-10-3v5q0 5 3 5v28h4V21q3 0 3-5v-5" fill="none" stroke-width="3"/>
+                        <path d="M51 3q-7 10-5 20h5v26h4V3Z"/>
+                      </g>
+                    }
+                    @case ('tissues') {
+                      <path d="m6 26 25-8 27 10-24 10Z" fill="#e3e6ed"/><path d="M6 26v17l28 8V38Z" fill="#ced5df"/><path d="m34 38 24-10v17l-24 6Z" fill="#f2f3f7"/>
+                      <path d="m25 29-7-20 13 4L40 5l3 24Z" fill="#fafbfc" stroke="#dce0e7"/><path d="m31 13 2 15" stroke="#dce0e7"/>
+                      <path d="m11 34 14 4m15 5 12-4" stroke="#b9a779" stroke-width="2"/>
+                    }
+                    @case ('bags') {
+                      <g transform="rotate(-25 32 26)"><path d="M7 14h48v27H7Z" fill="#303536"/><ellipse cx="7" cy="27.5" rx="6" ry="13.5" fill="#4c5152"/><ellipse cx="55" cy="27.5" rx="6" ry="13.5" fill="#151a1b"/><ellipse cx="55" cy="27.5" rx="2" ry="6" fill="#717675"/><path d="M14 18h33m-33 4h33" stroke="#616666"/></g>
+                    }
+                    @case ('tablecloth') {
+                      <g transform="rotate(20 32 26)"><rect x="6" y="11" width="49" height="30" rx="6" fill="#ec696d"/><path d="M9 18h44M7 26h48M9 34h44M16 12v28m9-28v28m9-28v28m9-28v28" stroke="#fff" stroke-width="3" stroke-dasharray="4 2"/><ellipse cx="55" cy="26" rx="6" ry="15" fill="#f9a4a2" stroke="#df676a"/><ellipse cx="55" cy="26" rx="2" ry="7" fill="#fff0e3"/></g>
+                    }
+                  }
+                </svg>
+              </div>
+              <div class="item-description">
+                <h4>{{ item.name }}</h4>
+                <span>{{ item.quantity }} {{ item.unit }}</span>
+              </div>
+              <div class="quantity-control" role="group" [attr.aria-label]="'كمية ' + item.name">
+                <button type="button" [attr.aria-label]="'زيادة ' + item.name" [disabled]="item.quantity >= 99" (click)="changeQuantity(item.id, 1)">
+                  <svg aria-hidden="true"><use href="#jawhara-plus"/></svg>
+                </button>
+                <output [attr.aria-label]="'الكمية: ' + item.quantity">{{ item.quantity }}</output>
+                <button type="button" [attr.aria-label]="'تقليل ' + item.name" [disabled]="item.quantity <= 1" (click)="changeQuantity(item.id, -1)">
+                  <svg aria-hidden="true"><use href="#jawhara-minus"/></svg>
+                </button>
+              </div>
+              <button type="button" class="remove-item icon-button" [attr.aria-label]="'حذف ' + item.name" (click)="removeItem(item.id)">
+                <svg aria-hidden="true"><use href="#jawhara-trash"/></svg>
+              </button>
+            </div>
+          } @empty {
+            <p class="empty-kit">القائمة فارغة. اكتب احتياجاتك للمساعد أدناه.</p>
+          }
+        </div>
+        <button type="button" class="kit-primary" [disabled]="!items().length" (click)="previewCart()">
+          <svg aria-hidden="true"><use href="#jawhara-cart"/></svg>
+          إضافة التجهيزات للسلة
+        </button>
+        <button type="button" class="kit-secondary" (click)="editList()">
+          <svg aria-hidden="true"><use href="#jawhara-edit"/></svg>
+          تعديل القائمة
+        </button>
+        @if (feedback()) {
+          <p class="kit-feedback" role="status">{{ feedback() }}</p>
+        }
+      </section>
+
+      <div class="new-messages" aria-live="polite" aria-relevant="additions">
+        @for (message of messages(); track message.id) {
+          <div class="message" [class.message-user]="message.from === 'user'" [class.message-assistant]="message.from === 'assistant'">
+            <p>{{ message.text }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <footer class="assistant-composer">
+      @if (attachment()) {
+        <div class="attachment-preview">
+          <span>{{ attachment() }}</span>
+          <button type="button" class="icon-button" aria-label="إزالة المرفق" (click)="attachment.set('')">
+            <svg aria-hidden="true"><use href="#jawhara-close"/></svg>
+          </button>
+        </div>
+      }
+      <form class="composer-form" (submit)="send($event)">
+        <div class="composer-field">
+          <button type="button" class="icon-button attachment-button" aria-label="إرفاق ملف للمعاينة" (click)="fileInput.click()">
+            <svg aria-hidden="true"><use href="#jawhara-attachment"/></svg>
+          </button>
+          <input #fileInput type="file" hidden (change)="selectAttachment($event)"/>
+          <input #messageInput type="text" aria-label="اكتب طلبك للمساعد" placeholder="اكتب طلبك هنا..."
+            maxlength="1000" autocomplete="off" [value]="draft()" (input)="draft.set(messageInput.value)"/>
+        </div>
+        <button type="submit" class="send-button" aria-label="إرسال الطلب" [disabled]="!draft().trim() && !attachment()">
+          <svg aria-hidden="true"><use href="#jawhara-send"/></svg>
+        </button>
+      </form>
+      <p class="preview-label">نسخة تجريبية للواجهة <span aria-hidden="true">·</span> المساعد الذكي قريباً</p>
+    </footer>
+  </section>
+} @else {
+  <button #launcher type="button" class="assistant-launcher" aria-label="فتح مساعد الجوهرة الذكي"
+    aria-haspopup="dialog" aria-controls="jawhara-assistant" [attr.aria-expanded]="false" (click)="open()">
+    <span class="launcher-icon"><svg aria-hidden="true"><use href="#jawhara-sparkles"/></svg></span>
+    <span>مساعد الجوهرة الذكي<small>جهّز احتياجاتك بسهولة</small></span>
+  </button>
+}
