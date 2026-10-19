@@ -47,20 +47,40 @@
     }
 
     <!-- Search and Filters -->
-    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <section class="product-filters" aria-labelledby="product-filters-title">
+        <div class="product-filters-heading">
+            <h2 id="product-filters-title">
+                <span class="product-filters-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+                        <path d="M4 7h16M4 17h16" />
+                        <rect x="7" y="4" width="4" height="6" rx="1.5" />
+                        <rect x="14" y="14" width="4" height="6" rx="1.5" />
+                    </svg>
+                </span>
+                {{ t('searchAndFilter') }}
+            </h2>
+            <button type="button" (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-ghost btn-sm product-filters-reset">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6" />
+                </svg>
+                {{ t('clearFilters') }}
+            </button>
+        </div>
+        <div class="product-filters-body">
+            <div class="product-filters-grid">
                 <!-- Search Input -->
-                <div class="form-control">
-                    <div class="input-group">
+                <div class="product-filter-field">
+                    <label for="product-filter-search">{{ t('search') }}</label>
+                    <div class="product-filter-search">
                         <input
-                            type="text"
+                            id="product-filter-search"
+                            type="search"
                             [placeholder]="t('searchProducts')"
                             class="input input-bordered flex-1"
                             [ngModel]="searchTerm()"
                             (ngModelChange)="searchTerm.set($event)"
                             (keyup.enter)="onSearch()" />
-                        <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
+                        <button type="button" (click)="onSearch()" [disabled]="isLoading()" class="btn btn-primary btn-square" [attr.aria-label]="t('search')">
                             @if (isLoading()) {
                                 <span class="loading loading-spinner loading-sm"></span>
                             } @else {
@@ -73,94 +93,97 @@
                 </div>
 
                 <!-- Category Filter -->
-                <div class="form-control">
+                <div class="product-filter-field">
+                    <label for="product-filter-category">{{ t('category') }}</label>
                     <select
+                        id="product-filter-category"
                         class="select select-bordered"
                         [ngModel]="categoryFilter()"
                         (ngModelChange)="onCategoryFilterChange($event)">
-                        <option [value]="null">{{ t('allCategories') }}</option>
+                        <option [ngValue]="null">{{ t('allCategories') }}</option>
                         @for (category of categories$ | async; track category.id) {
-                            <option [value]="category.id">{{category.name}}</option>
+                            <option [ngValue]="category.id">{{category.name}}</option>
                         }
                     </select>
                 </div>
 
                 <!-- Subcategory Filter -->
-                <div class="form-control">
+                <div class="product-filter-field">
+                    <label for="product-filter-subcategory">{{ t('subcategory') }}</label>
                     <select
+                        id="product-filter-subcategory"
                         class="select select-bordered"
                         [ngModel]="subCategoryFilter()"
                         (ngModelChange)="onSubCategoryFilterChange($event)">
-                        <option [value]="null">{{ t('allSubcategories') }}</option>
+                        <option [ngValue]="null">{{ t('allSubcategories') }}</option>
                         @for (subCategory of subCategories$ | async; track subCategory.id) {
-                            <option [value]="subCategory.id">{{subCategory.name}}</option>
+                            <option [ngValue]="subCategory.id">{{subCategory.name}}</option>
                         }
                     </select>
                 </div>
 
                 <!-- Status Filter -->
-                <div class="form-control">
+                <div class="product-filter-field">
+                    <label for="product-filter-status">{{ t('status') }}</label>
                     <select
+                        id="product-filter-status"
                         class="select select-bordered"
                         [ngModel]="statusFilter()"
                         (ngModelChange)="onStatusFilterChange($event)">
-                        <option [value]="null">{{ t('allStatus') }}</option>
-                        <option [value]="true">{{ t('active') }}</option>
-                        <option [value]="false">{{ t('inactive') }}</option>
+                        <option [ngValue]="null">{{ t('allStatus') }}</option>
+                        <option [ngValue]="true">{{ t('active') }}</option>
+                        <option [ngValue]="false">{{ t('inactive') }}</option>
                     </select>
                 </div>
             </div>
 
             <!-- Price Range Filters -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">{{ t('minPrice') }}</span>
-                    </label>
+            <div class="product-filters-secondary">
+                <div class="product-filter-field">
+                    <label for="product-filter-min-price">{{ t('minPrice') }}</label>
                     <input
+                        id="product-filter-min-price"
                         type="number"
+                        min="0"
+                        step="0.001"
+                        inputmode="decimal"
                         [placeholder]="t('minPrice')"
                         class="input input-bordered"
                         [ngModel]="minPriceFilter()"
                         (ngModelChange)="minPriceFilter.set($event); onPriceFilterChange()" />
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">{{ t('maxPrice') }}</span>
-                    </label>
+                <div class="product-filter-field">
+                    <label for="product-filter-max-price">{{ t('maxPrice') }}</label>
                     <input
+                        id="product-filter-max-price"
                         type="number"
+                        min="0"
+                        step="0.001"
+                        inputmode="decimal"
                         [placeholder]="t('maxPrice')"
                         class="input input-bordered"
                         [ngModel]="maxPriceFilter()"
                         (ngModelChange)="maxPriceFilter.set($event); onPriceFilterChange()" />
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">{{ t('pageSize') }}</span>
-                    </label>
+                <div class="product-filter-field product-filter-page-size">
+                    <label for="product-filter-page-size">{{ t('pageSize') }}</label>
                     <select
+                        id="product-filter-page-size"
                         class="select select-bordered"
                         [ngModel]="pageSize()"
                         (ngModelChange)="onPageSizeChange($event)">
-                        <option [value]="10">10 {{ t('perPage') }}</option>
-                        <option [value]="20">20 {{ t('perPage') }}</option>
-                        <option [value]="50">50 {{ t('perPage') }}</option>
-                        <option [value]="100">100 {{ t('perPage') }}</option>
+                        <option [ngValue]="10">10 {{ t('perPage') }}</option>
+                        <option [ngValue]="20">20 {{ t('perPage') }}</option>
+                        <option [ngValue]="50">50 {{ t('perPage') }}</option>
+                        <option [ngValue]="100">100 {{ t('perPage') }}</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Clear Filters -->
-            <div class="flex justify-end mt-4">
-                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
-                    {{ t('clearFilters') }}
-                </button>
-            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Products Table -->
     <div class="card bg-base-100 shadow-sm border border-base-300">
