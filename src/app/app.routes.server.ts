@@ -17,6 +17,7 @@ export const serverRoutes: ServerRoute[] = environment.maintenance.enabled ? [
   { path: 'product', renderMode: RenderMode.Server, headers: { 'Cache-Control': 'no-store' } },
   { path: 'checkout/success', renderMode: RenderMode.Client },
   { path: 'checkout/failed', renderMode: RenderMode.Client },
+  { path: 'admin/monitoring', renderMode: RenderMode.Client, headers: { 'Cache-Control': 'no-store' } },
   {
     path: 'checkout',
     // Checkout restores the customer's cart and saved delivery details in the browser.

@@ -17,6 +17,7 @@ export const adminRoutes: Routes = [
             { path: 'order', loadComponent: () => import('./order/order').then(m => m.Order) },
             { path: 'user-management', loadComponent: () => import('./user-mangment/user-mangment').then(m => m.UserMangment) },
             { path: 'health', loadComponent: () => import('./health/health').then(m => m.Health) },
+            { path: 'monitoring', loadComponent: () => import('./monitoring/monitoring').then(m => m.Monitoring) },
             // { path: 'companies', loadComponent: () => import('./companies/companies').then(m => m.Companies) },
             // { path: 'freelancers', loadComponent: () => import('./freelancers/freelancers').then(m => m.Freelancers) },
             // { path: 'jobs', loadComponent: () => import('./jobs/jobs').then(m => m.Jobs) },

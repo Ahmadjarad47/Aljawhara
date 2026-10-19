@@ -1,0 +1,224 @@
+<section class="monitoring-page" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">ALJAWHARA / {{ text().window }}</p>
+      <h1>{{ text().title }}</h1>
+      <p class="muted">{{ text().subtitle }}</p>
+    </div>
+    <div class="refresh-controls">
+      <label class="refresh-toggle">
+        <input type="checkbox" class="toggle toggle-primary toggle-sm"
+          [checked]="autoRefresh()" (change)="toggleAutoRefresh()" [disabled]="accessDenied()" />
+        {{ autoRefresh() ? text().autoRefresh : text().paused }}
+      </label>
+      <button type="button" class="btn btn-primary btn-sm" (click)="refresh()"
+        [disabled]="accessDenied() || summaryLoading() || logsLoading()">
+        @if (summaryLoading() || logsLoading()) { <span class="loading loading-spinner loading-xs" aria-hidden="true"></span> }
+        {{ text().refresh }}
+      </button>
+    </div>
+  </header>
+
+  @if (accessDenied()) {
+    <div class="alert alert-error" role="alert">{{ text().accessError }}</div>
+  } @else {
+    @if (summaryError()) {
+      <div class="alert alert-warning" role="alert">
+        {{ text().loadError }} @if (summary()) { {{ text().staleData }} }
+      </div>
+    }
+    @if (!summary() && summaryLoading()) {
+      <div class="loading-state" role="status"><span class="loading loading-spinner"></span>{{ text().loading }}</div>
+    }
+
+    @if (summary(); as data) {
+      <div class="summary-meta muted">
+        <span>{{ text().updated }}: {{ summaryUpdated() | date:'medium' }}</span>
+        <span>{{ text().scope }}</span>
+      </div>
+      <div class="metric-grid" [attr.aria-busy]="summaryLoading()">
+        <article class="panel metric">
+          <p class="muted">{{ text().health }}</p>
+          <strong><span class="badge badge-lg" [ngClass]="statusClass(healthStatus())">{{ statusLabel(healthStatus()) }}</span></strong>
+          <small class="muted">{{ text().checked }}: {{ data.health.checkedAt ? (data.health.checkedAt | date:'short') : text().waiting }}</small>
+        </article>
+        <article class="panel metric">
+          <p class="muted">{{ text().requests }}</p>
+          <strong>{{ data.requests | number }}</strong>
+          <small class="muted">{{ text().window }}</small>
+        </article>
+        <article class="panel metric">
+          <p class="muted">{{ text().serverErrors }}</p>
+          <strong [class.text-error]="data.serverErrors > 0">{{ data.serverErrors | number }}</strong>
+          <small class="muted">{{ text().errorRate }}: {{ data.errorRatePercent | number:'1.0-2' }}%</small>
+        </article>
+        <article class="panel metric">
+          <p class="muted">{{ text().latency }}</p>
+          <strong>{{ data.averageMs | number:'1.0-1' }} <span class="unit">ms</span></strong>
+          <small class="muted">{{ text().p95 }}:
+            @if (data.requests === 0) { {{ text().noTraffic }} }
+            @else if (data.p95UpperBoundMs === null) { {{ text().above30 }} }
+            @else { <bdi>≤ {{ data.p95UpperBoundMs | number }} ms</bdi> }
+          </small>
+        </article>
+      </div>
+
+      <div class="chart-grid">
+        <article class="panel">
+          <h2>{{ text().traffic }}</h2><p class="muted panel-subtitle">{{ text().trafficHint }}</p>
+          <div class="chart-container" dir="ltr">
+            <canvas baseChart type="line" [data]="trafficData()" [options]="trafficOptions"
+              role="img" [attr.aria-label]="text().traffic + ': ' + data.requests + ' / ' + text().serverErrors + ': ' + data.serverErrors"></canvas>
+          </div>
+        </article>
+        <article class="panel">
+          <h2>{{ text().latency }}</h2><p class="muted panel-subtitle">{{ text().latencyHint }}</p>
+          <div class="chart-container" dir="ltr">
+            <canvas baseChart type="line" [data]="latencyData()" [options]="latencyOptions"
+              role="img" [attr.aria-label]="text().averageMs + ': ' + data.averageMs"></canvas>
+          </div>
+        </article>
+      </div>
+      <details class="panel chart-details">
+        <summary>{{ text().chartData }}</summary>
+        <div class="table-scroll" tabindex="0" [attr.aria-label]="text().chartData">
+          <table class="table table-sm">
+            <thead><tr><th>{{ text().timestamp }}</th><th>{{ text().requests }}</th><th>{{ text().serverErrors }}</th><th>{{ text().clientErrors }}</th><th>{{ text().averageMs }}</th></tr></thead>
+            <tbody>
+              @for (point of data.series; track point.timestamp) {
+                <tr><td>{{ point.timestamp | date:'shortTime' }}</td><td>{{ point.requests }}</td><td>{{ point.errors }}</td><td>{{ point.clientErrors }}</td><td>{{ point.averageMs }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <div class="service-grid">
+        <article class="panel">
+          <h2>{{ text().health }}</h2>
+          <div class="checks">
+            @for (check of data.health.checks; track check.name) {
+              <div class="check-row">
+                <div><strong>{{ check.name.toLowerCase() === 'database' ? text().database : check.name }}</strong>
+                  <small class="muted">{{ text().duration }}: {{ check.durationMs | number:'1.0-1' }} ms</small></div>
+                <span class="badge" [ngClass]="statusClass(healthStatus() === 'Unknown' ? 'Unknown' : check.status)">{{ statusLabel(healthStatus() === 'Unknown' ? 'Unknown' : check.status) }}</span>
+              </div>
+            } @empty { <p class="muted">{{ text().noChecks }}</p> }
+          </div>
+          <dl class="facts">
+            <div><dt>{{ text().uptime }}</dt><dd>{{ uptime().hours | number }} {{ text().hours }} {{ uptime().minutes }} {{ text().minutes }}</dd></div>
+            <div><dt>{{ text().memory }}</dt><dd><bdi>{{ data.workingSetMb | number:'1.0-1' }} MB</bdi></dd></div>
+            <div><dt>{{ text().startedAt }}</dt><dd>{{ data.startedAt | date:'short' }}</dd></div>
+            <div><dt>{{ text().clientErrors }}</dt><dd>{{ data.clientErrors | number }}</dd></div>
+          </dl>
+        </article>
+        <article class="panel">
+          <h2>{{ text().jobs }}</h2>
+          @for (job of data.jobs; track job.name) {
+            <div class="job-row">
+              <div class="job-header"><strong dir="auto">{{ job.name }}</strong><span class="badge" [ngClass]="statusClass(job.status)">{{ statusLabel(job.status) }}</span></div>
+              <p class="muted">{{ text().lastRun }}: {{ job.lastRun | date:'short' }}</p>
+              <p class="muted">{{ text().lastSuccess }}: {{ job.lastSuccess ? (job.lastSuccess | date:'short') : text().never }}</p>
+            </div>
+          } @empty { <p class="muted empty-jobs">{{ text().noJobs }}</p> }
+        </article>
+        <article class="panel">
+          <h2>{{ text().storage }}</h2>
+          <p class="storage-status" [class.text-error]="data.logging.persistenceError" [class.text-success]="!data.logging.persistenceError" role="status">
+            {{ data.logging.persistenceError ? text().storageFailed : text().storageOk }}
+          </p>
+          <dl class="facts">
+            <div><dt>{{ text().dropped }}</dt><dd [class.text-error]="data.logging.droppedEvents > 0">{{ data.logging.droppedEvents | number }}</dd></div>
+            <div><dt>{{ text().recentLimit }}</dt><dd>{{ data.logging.recentEventLimit | number }}</dd></div>
+            <div><dt>{{ text().retentionDays }}</dt><dd>{{ data.logging.retentionDays }}</dd></div>
+          </dl>
+          <p class="muted privacy-note">{{ text().privacy }}</p>
+        </article>
+      </div>
+
+    }
+
+    <section class="panel logs-panel" [attr.aria-label]="text().logs">
+      <h2>{{ text().logs }}</h2><p class="muted panel-subtitle">{{ text().logsHint }}</p>
+      <form class="filters" #filterForm="ngForm" (ngSubmit)="filterForm.valid && applyFilters()">
+        <label class="search-field">{{ text().search }}
+          <input class="input input-bordered" name="search" [(ngModel)]="filters.search" maxlength="200" [placeholder]="text().searchPlaceholder" />
+        </label>
+        <label>{{ text().level }}
+          <select class="select select-bordered" name="level" [(ngModel)]="filters.level">
+            <option value="">{{ text().allLevels }}</option>
+            <option value="Information">{{ text().information }}</option><option value="Warning">{{ text().warning }}</option>
+            <option value="Error">{{ text().error }}</option><option value="Critical">{{ text().critical }}</option>
+          </select>
+        </label>
+        <label>{{ text().category }}
+          <input class="input input-bordered" name="category" [(ngModel)]="filters.category" maxlength="200" [placeholder]="text().categoryPlaceholder" />
+        </label>
+        <label>{{ text().trace }}
+          <input class="input input-bordered" name="traceId" [(ngModel)]="filters.traceId" maxlength="128" [placeholder]="text().tracePlaceholder" />
+        </label>
+        <label>{{ text().from }}<input type="datetime-local" class="input input-bordered" name="from" [(ngModel)]="filters.from" /></label>
+        <label>{{ text().to }}<input type="datetime-local" class="input input-bordered" name="to" [(ngModel)]="filters.to" /></label>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="filterForm.invalid">{{ text().apply }}</button>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="clearFilters()">{{ text().clear }}</button>
+        </div>
+      </form>
+      @if (validationError()) { <p class="text-error filter-error" role="alert">{{ text().dateError }}</p> }
+      @if (logsError()) {
+        <div class="alert alert-warning" role="alert">{{ logsError() === 'filters' ? text().filterError : text().loadError }} @if (logs()) { {{ text().staleData }} }</div>
+      }
+      <div class="log-meta muted">
+        @if (logs(); as result) {
+          <span>{{ result.totalCount | number }} {{ text().matches }} · {{ result.retainedCount | number }} / {{ result.recentEventLimit | number }} {{ text().retained }}</span>
+          @if (result.oldestAvailableAt) { <span>{{ text().oldest }}: {{ result.oldestAvailableAt | date:'short' }}</span> }
+          <span>{{ text().updated }}: {{ logsUpdated() | date:'medium' }}</span>
+        }
+      </div>
+      <div class="table-scroll logs-table" tabindex="0" [attr.aria-label]="text().logs" [attr.aria-busy]="logsLoading()">
+        <table class="table">
+          <thead><tr><th>{{ text().timestamp }}</th><th>{{ text().level }}</th><th>{{ text().message }}</th><th>{{ text().trace }}</th></tr></thead>
+          <tbody>
+            @for (entry of logs()?.items ?? []; track entry.id) {
+              <tr>
+                <td class="time-cell">{{ entry.timestamp | date:'medium' }}</td>
+                <td><span class="badge" [ngClass]="statusClass(entry.level)">{{ statusLabel(entry.level) }}</span></td>
+                <td class="event-cell">
+                  <p dir="auto">{{ entry.message }}</p>
+                  <small class="muted category" dir="ltr">{{ entry.category }}</small>
+                  @if (entry.exceptionType) { <small class="text-error category" dir="ltr">{{ entry.exceptionType }}</small> }
+                  <details><summary>{{ text().details }}</summary>
+                    <p>{{ text().userId }}: <bdi>{{ entry.userId ?? '—' }}</bdi></p>
+                    <pre dir="ltr">{{ entry.properties | json }}</pre>
+                  </details>
+                </td>
+                <td class="trace-cell">
+                  @if (entry.traceId) {
+                    <button type="button" class="trace-button" dir="ltr" [title]="text().traceHint" (click)="filterTrace(entry.traceId)">{{ entry.traceId }}</button>
+                  } @else { <span class="muted">—</span> }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-state" role="status">{{ logsLoading() ? text().loading : logsError() ? text().loadError : text().empty }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <footer class="logs-footer">
+        <div class="muted"><p>{{ text().recentOnly }}</p><p>{{ text().livePages }}</p></div>
+        <div class="pagination">
+          <label>{{ text().pageSize }}
+            <select class="select select-bordered select-sm" [ngModel]="pageSize()" (ngModelChange)="changePageSize(+$event)" [disabled]="logsLoading()">
+              <option [ngValue]="25">25</option><option [ngValue]="50">50</option><option [ngValue]="100">100</option><option [ngValue]="200">200</option>
+            </select>
+          </label>
+          <div class="page-buttons">
+            <button type="button" class="btn btn-sm" (click)="changePage(page() - 1)" [disabled]="logsLoading() || page() <= 1">{{ text().previous }}</button>
+            <span>{{ text().page }} {{ page() }} {{ text().of }} {{ totalPages() }}</span>
+            <button type="button" class="btn btn-sm" (click)="changePage(page() + 1)" [disabled]="logsLoading() || !logs() || page() >= totalPages()">{{ text().next }}</button>
+          </div>
+        </div>
+      </footer>
+    </section>
+  }
+</section>

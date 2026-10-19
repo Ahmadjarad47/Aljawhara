@@ -201,6 +201,19 @@
                     </a>
                 </li>
 
+                <li>
+                    <a routerLink="monitoring" routerLinkActive="active"
+                       [routerLinkActiveOptions]="{exact: true}"
+                       class="is-drawer-close:tooltip is-drawer-close:tooltip-right transition-colors duration-200 hover:bg-primary/10 active:bg-primary/20"
+                       [attr.data-tip]="t('monitoring')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-4 my-1.5" aria-hidden="true">
+                            <path d="M3 12h4l3-8 4 16 3-8h4"></path>
+                        </svg>
+                        <span class="is-drawer-close:hidden">{{ t('monitoring') }}</span>
+                    </a>
+                </li>
+
                 <!-- Health -->
                 <li>
                     <a routerLink="health" 
