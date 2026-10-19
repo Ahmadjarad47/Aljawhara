@@ -1,3 +1,5 @@
+import { PaymentInitializationStatus } from '../../../core/Models/checkout-payment';
+
 export interface BaseDto {
     id: number;
     createdAt: string;
@@ -13,7 +15,21 @@ export enum OrderStatus {
     Processing = 1,
     Shipped = 2,
     Delivered = 3,
-    Cancelled = 4
+    Cancelled = 4,
+    Refunded = 5,
+    Expired = 6,
+    RequiresReconciliation = 7
+}
+
+export function normalizeOrderStatus(status: OrderStatus | string | null | undefined): OrderStatus | null {
+    if (status === null || status === undefined || status === '') return null;
+    const value = typeof status === 'string' ? status.trim() : status;
+    if (value === '') return null;
+    const numeric = Number(value);
+    if (Number.isInteger(numeric) && typeof OrderStatus[numeric] === 'string') return numeric;
+    return (Object.values(OrderStatus).find(
+        entry => typeof entry === 'number' && OrderStatus[entry].toLowerCase() === String(value).toLowerCase()
+    ) as OrderStatus | undefined) ?? null;
 }
 
 export interface OrderSummaryDto {
@@ -21,6 +37,7 @@ export interface OrderSummaryDto {
     orderNumber: string;
     status: OrderStatus;
     isPaid?: boolean;
+    paymentInitializationStatus?: PaymentInitializationStatus;
     paymentStatus?: string | number | null;
     total: number;
     createdAt: string;
@@ -33,6 +50,7 @@ export interface OrderDto extends BaseDto {
     orderNumber: string;
     status: OrderStatus;
     isPaid?: boolean;
+    paymentInitializationStatus?: PaymentInitializationStatus;
     paymentStatus?: string | number | null;
     subtotal: number;
     shipping: number;

@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, shareReplay, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, forkJoin } from 'rxjs';
+import { tap, shareReplay, catchError, switchMap, map } from 'rxjs/operators';
+import { OrderPaymentStatus, PaymentInitializationStatus } from '../../../core/Models/checkout-payment';
 import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto, InvoicePaymentDto, OrderPaymentLinkResponse } from './models.order';
 
 @Injectable({
@@ -11,6 +12,23 @@ import { OrderSummaryDto, OrderDto, OrderFilters, RatingDto, RatingCreateDto, In
 export class UserOrderService {
   private api = environment.apiUrl + 'Orders';
   private http = inject(HttpClient);
+
+  private withPaymentStatus<T extends OrderSummaryDto | OrderDto>(order: T): Observable<T> {
+    return this.http.get<OrderPaymentStatus>(`${this.api}/${order.id}/payment-status`, {
+      headers: { 'Cache-Control': 'no-store' }, transferCache: false,
+    }).pipe(
+      map(payment => {
+        if (payment.orderId !== order.id) throw new Error('Order mismatch');
+        return {
+          ...order,
+          isPaid: payment.initializationStatus === PaymentInitializationStatus.Paid,
+          paymentInitializationStatus: payment.initializationStatus,
+        };
+      }),
+      // Keep orders available if the payment status cannot be retrieved.
+      catchError(() => of(order))
+    );
+  }
   
   private sourceOrders = new BehaviorSubject<OrderSummaryDto[]>([]);
   private sourcePagination = new BehaviorSubject<{
@@ -31,6 +49,7 @@ export class UserOrderService {
   // Get user's orders
   getMyOrders(): Observable<OrderSummaryDto[]> {
     return this.http.get<OrderSummaryDto[]>(`${this.api}/my-orders`).pipe(
+      switchMap(orders => orders.length ? forkJoin(orders.map(order => this.withPaymentStatus(order))) : of([])),
       shareReplay(1),
       tap((orders) => {
         console.log('My orders:', orders);
@@ -52,6 +71,7 @@ export class UserOrderService {
   // Get order by ID
   getOrderById(id: number): Observable<OrderDto> {
     return this.http.get<OrderDto>(`${this.api}/${id}`).pipe(
+      switchMap(order => this.withPaymentStatus(order)),
       shareReplay(1)
     );
   }

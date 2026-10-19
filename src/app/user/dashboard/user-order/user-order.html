@@ -57,6 +57,9 @@
                         <option [ngValue]="OrderStatus.Shipped">{{t('shipped')}}</option>
                         <option [ngValue]="OrderStatus.Delivered">{{t('delivered')}}</option>
                         <option [ngValue]="OrderStatus.Cancelled">{{t('cancelled')}}</option>
+                        <option [ngValue]="OrderStatus.Refunded">{{t('refunded')}}</option>
+                        <option [ngValue]="OrderStatus.Expired">{{t('expired')}}</option>
+                        <option [ngValue]="OrderStatus.RequiresReconciliation">{{t('requiresReconciliation')}}</option>
                     </select>
                 </div>
 
@@ -110,6 +113,9 @@
                                             <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
                                                 {{getOrderStatusText(order.status)}}
                                             </div>
+                                            @if (order.isPaid) {
+                                                <div class="badge badge-success">{{t('paid')}}</div>
+                                            }
                                         </td>
                                         <td>
                                             <div class="text-sm">{{order.createdAt | date:'short'}}</div>
@@ -178,6 +184,9 @@
                                         <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
                                             {{getOrderStatusText(order.status)}}
                                         </div>
+                                        @if (order.isPaid) {
+                                            <div class="badge badge-success">{{t('paid')}}</div>
+                                        }
                                     </div>
                                 </div>
 
@@ -250,6 +259,9 @@
                             <div class="badge badge-sm sm:badge-lg ml-2" [ngClass]="getOrderStatusClass(selectedOrderDetails()!.status)">
                                 {{getOrderStatusText(selectedOrderDetails()!.status)}}
                             </div>
+                            @if (selectedOrderDetails()!.isPaid) {
+                                <div class="badge badge-success badge-sm sm:badge-lg">{{t('paid')}}</div>
+                            }
                         </div>
                         <div class="flex items-center flex-wrap gap-2">
                             <span class="text-xs sm:text-sm text-base-content/70">{{t('orderDateLabel')}}:</span>
