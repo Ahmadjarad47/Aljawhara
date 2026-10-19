@@ -1,7 +1,7 @@
 <div class="p-6">
     <!-- Toast Notifications -->
-    <app-toast 
-        [toasts]="toasts$()" 
+    <app-toast
+        [toasts]="toasts$()"
         (close)="onToastClose($event)">
     </app-toast>
     <!-- Header -->
@@ -12,8 +12,8 @@
         </div>
         <div class="flex gap-2">
             @if (selectedProducts().length > 0) {
-                <button 
-                    (click)="deleteSelected()" 
+                <button
+                    (click)="deleteSelected()"
                     [disabled]="isLoading()"
                     class="btn btn-error btn-sm">
                     @if (isLoading()) {
@@ -26,7 +26,7 @@
                     {{ t('deleteSelected') }} ({{selectedProducts().length}})
                 </button>
             }
-            <button (click)="showAddModal.set(true)" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+            <button (click)="openProductCreator()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -53,10 +53,10 @@
                 <!-- Search Input -->
                 <div class="form-control">
                     <div class="input-group">
-                        <input 
-                            type="text" 
-                            [placeholder]="t('searchProducts')" 
-                            class="input input-bordered flex-1" 
+                        <input
+                            type="text"
+                            [placeholder]="t('searchProducts')"
+                            class="input input-bordered flex-1"
                             [ngModel]="searchTerm()"
                             (ngModelChange)="searchTerm.set($event)"
                             (keyup.enter)="onSearch()" />
@@ -74,8 +74,8 @@
 
                 <!-- Category Filter -->
                 <div class="form-control">
-                    <select 
-                        class="select select-bordered" 
+                    <select
+                        class="select select-bordered"
                         [ngModel]="categoryFilter()"
                         (ngModelChange)="onCategoryFilterChange($event)">
                         <option [value]="null">{{ t('allCategories') }}</option>
@@ -87,8 +87,8 @@
 
                 <!-- Subcategory Filter -->
                 <div class="form-control">
-                    <select 
-                        class="select select-bordered" 
+                    <select
+                        class="select select-bordered"
                         [ngModel]="subCategoryFilter()"
                         (ngModelChange)="onSubCategoryFilterChange($event)">
                         <option [value]="null">{{ t('allSubcategories') }}</option>
@@ -100,8 +100,8 @@
 
                 <!-- Status Filter -->
                 <div class="form-control">
-                    <select 
-                        class="select select-bordered" 
+                    <select
+                        class="select select-bordered"
                         [ngModel]="statusFilter()"
                         (ngModelChange)="onStatusFilterChange($event)">
                         <option [value]="null">{{ t('allStatus') }}</option>
@@ -117,10 +117,10 @@
                     <label class="label">
                         <span class="label-text">{{ t('minPrice') }}</span>
                     </label>
-                    <input 
-                        type="number" 
-                        [placeholder]="t('minPrice')" 
-                        class="input input-bordered" 
+                    <input
+                        type="number"
+                        [placeholder]="t('minPrice')"
+                        class="input input-bordered"
                         [ngModel]="minPriceFilter()"
                         (ngModelChange)="minPriceFilter.set($event); onPriceFilterChange()" />
                 </div>
@@ -129,10 +129,10 @@
                     <label class="label">
                         <span class="label-text">{{ t('maxPrice') }}</span>
                     </label>
-                    <input 
-                        type="number" 
-                        [placeholder]="t('maxPrice')" 
-                        class="input input-bordered" 
+                    <input
+                        type="number"
+                        [placeholder]="t('maxPrice')"
+                        class="input input-bordered"
                         [ngModel]="maxPriceFilter()"
                         (ngModelChange)="maxPriceFilter.set($event); onPriceFilterChange()" />
                 </div>
@@ -141,8 +141,8 @@
                     <label class="label">
                         <span class="label-text">{{ t('pageSize') }}</span>
                     </label>
-                    <select 
-                        class="select select-bordered" 
+                    <select
+                        class="select select-bordered"
                         [ngModel]="pageSize()"
                         (ngModelChange)="onPageSizeChange($event)">
                         <option [value]="10">10 {{ t('perPage') }}</option>
@@ -176,9 +176,9 @@
                             <tr>
                                 <th>
                                     <label>
-                                        <input 
-                                            type="checkbox" 
-                                            class="checkbox checkbox-sm" 
+                                        <input
+                                            type="checkbox"
+                                            class="checkbox checkbox-sm"
                                             [checked]="selectedProducts().length === getProductsLength() && getProductsLength() > 0"
                                             [disabled]="isLoading()"
                                             (change)="toggleSelectAll()" />
@@ -198,9 +198,9 @@
                                 <tr>
                                     <th>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
-                                                class="checkbox checkbox-sm" 
+                                            <input
+                                                type="checkbox"
+                                                class="checkbox checkbox-sm"
                                                 [checked]="selectedProducts().includes(product.id)"
                                                 [disabled]="isLoading()"
                                                 (change)="toggleProductSelection(product.id)" />
@@ -260,13 +260,13 @@
                                     </td>
                                     <th>
                                         <div class="flex gap-1">
-                                            <button 
+                                            <button
                                                 (click)="viewProductDetails(product.id)"
                                                 [disabled]="isLoading()"
                                                 class="btn btn-ghost btn-xs">
                                                 {{ t('details') }}
                                             </button>
-                                            <button 
+                                            <button
                                                 (click)="toggleProductStatus(product.id)"
                                                 [disabled]="isLoading()"
                                                 class="btn btn-ghost btn-xs"
@@ -278,7 +278,7 @@
                                                     {{product.isActive ? t('deactivate') : t('activate')}}
                                                 }
                                             </button>
-                                            <button 
+                                            <button
                                                 (click)="editProductStart(product)"
                                                 [disabled]="isLoading()"
                                                 class="btn btn-ghost btn-xs">
@@ -307,8 +307,8 @@
         <div class="flex justify-center items-center mt-6">
             <div class="join">
                 <!-- Previous Button -->
-                <button 
-                    (click)="onPageChange(getCurrentPage() - 1)" 
+                <button
+                    (click)="onPageChange(getCurrentPage() - 1)"
                     [disabled]="getCurrentPage() === 1 || isLoading()"
                     class="join-item btn">
                     «
@@ -319,8 +319,8 @@
                     @if (page === '...') {
                         <button class="join-item btn btn-disabled">...</button>
                     } @else {
-                        <button 
-                            (click)="onPageChange(+page)" 
+                        <button
+                            (click)="onPageChange(+page)"
                             [disabled]="isLoading()"
                             [class.btn-active]="getCurrentPage() === page"
                             class="join-item btn">
@@ -330,8 +330,8 @@
                 }
 
                 <!-- Next Button -->
-                <button 
-                    (click)="onPageChange(getCurrentPage() + 1)" 
+                <button
+                    (click)="onPageChange(getCurrentPage() + 1)"
                     [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
                     class="join-item btn">
                     »
@@ -349,162 +349,107 @@
 
     <!-- Add Product Modal -->
     @if (showAddModal()) {
-        <div class="modal modal-open">
-            <div class="modal-box max-w-4xl product-editor-modal" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
-                <div class="product-editor-heading"><div><h3>{{ t('addProduct') }}</h3><p>{{ currentLanguage() === 'ar' ? 'ابدأ بمعلومات المنتج، ثم حدد سعره وطريقة بيعه.' : 'Start with the product details, then set its price and selling options.' }}</p></div><button type="button" class="product-modal-close" (click)="closeModals()" [attr.aria-label]="t('close')" [disabled]="isLoading()">×</button></div>
-                <h4 class="product-section-label">{{ t('basicInformation') }}</h4>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- English Title -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('productTitleEN') }} *</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="Enter product title in English" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="newProduct.title" />
-                    </div>
-
-                    <!-- Arabic Title -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('productTitleAR') }} *</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="أدخل عنوان المنتج بالعربية" 
-                            class="input input-bordered w-full" 
-                            dir="rtl"
-                            [(ngModel)]="newProduct.titleAr" />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <!-- English Description -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('descriptionEN') }} *</span>
-                        </label>
-                        <textarea 
-                            class="textarea textarea-bordered h-24" 
-                            placeholder="Enter product description in English"
-                            [(ngModel)]="newProduct.description"></textarea>
-                    </div>
-
-                    <!-- Arabic Description -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('descriptionAR') }} *</span>
-                        </label>
-                        <textarea 
-                            class="textarea textarea-bordered h-24" 
-                            placeholder="أدخل وصف المنتج بالعربية"
-                            dir="rtl"
-                            [(ngModel)]="newProduct.descriptionAr"></textarea>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <!-- Subcategory Selection -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('subcategory') }} *</span>
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                [placeholder]="t('searchSubcategory')" 
-                                class="input input-bordered w-full" 
-                                [ngModel]="subCategorySearchTerm()"
-                                (ngModelChange)="onSubCategorySearch($event)"
-                                (focus)="showSubCategoryDropdown.set(true)"
-                                (blur)="onSubCategoryBlur()" />
-                            @if (showSubCategoryDropdown()) {
-                                <div class="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                    @for (subCategory of filteredSubCategories$ | async; track subCategory.id) {
-                                        <div 
-                                            class="p-2 hover:bg-base-200 cursor-pointer"
-                                            (click)="selectSubCategory(subCategory)">
-                                            <div class="font-semibold">{{subCategory.name}}</div>
-                                            <div class="text-sm opacity-70" dir="rtl">{{subCategory.nameAr}}</div>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Stock Quantity -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('stockQuantity') }} *</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            [placeholder]="t('enterStockQuantity')" 
-                            class="input input-bordered w-full" 
-                            min="0" step="1" [(ngModel)]="newProduct.totalInStock" />
-                    </div>
-                </div>
-
-                <h4 class="product-section-label">{{ t('pricingStock') }}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <!-- Old Price -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('oldPrice') }}</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            step="0.001"
-                            placeholder="Enter old price" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="newProduct.oldPrice" />
-                    </div>
-
-                    <!-- New Price -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('newPrice') }} *</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            step="0.001"
-                            placeholder="Enter new price" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="newProduct.newPrice" />
-                    </div>
-
-                    <!-- In Stock -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('stockStatus') }}</span>
-                        </label>
-                        <select class="select select-bordered" [(ngModel)]="newProduct.isInStock">
-                            <option [ngValue]="true">{{ t('inStock') }}</option>
-                            <option [ngValue]="false">{{ t('outOfStock') }}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Product options and pricing -->
+      <div class="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="create-editor-title">
+        <div class="modal-box product-editor-modal product-wizard" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+          <header class="product-editor-heading">
+            <div><span class="editor-eyebrow">{{ currentLanguage() === 'ar' ? 'إدارة المنتجات' : 'Product management' }}</span>
+              <h3 id="create-editor-title">{{ t('addProduct') }}</h3>
+            </div>
+            <button type="button" class="product-modal-close" (click)="closeModals()" [disabled]="isLoading()" [attr.aria-label]="t('close')">×</button>
+          </header>
+          <ol class="product-wizard-steps" aria-label="{{ currentLanguage() === 'ar' ? 'خطوات إضافة المنتج' : 'Product setup steps' }}">
+            @for (step of [0, 1, 2]; track step) {
+              <li [class.active]="productEditorStep() === step" [class.complete]="productEditorStep() > step">
+                <button type="button" (click)="goToProductStep(step)" [disabled]="step > productEditorStep() || isLoading()" [attr.aria-current]="step === productEditorStep() ? 'step' : null">
+                  <span class="step-number">{{ productEditorStep() > step ? '✓' : step + 1 }}</span>
+                  <span>{{ currentLanguage() === 'ar' ? ['معلومات المنتج', 'السعر والكمية', 'الصور والمراجعة'][step] : ['Product info', 'Price & stock', 'Photos & review'][step] }}</span>
+                </button>
+              </li>
+            }
+          </ol>
+          <div class="wizard-body">
+            @if (productStepError()) { <p class="wizard-error" role="alert">{{ productStepError() }}</p> }
+            @if (productEditorStep() === 0) {
+              <div class="wizard-intro"><h4>{{ currentLanguage() === 'ar' ? 'خلّينا نعرّف المنتج' : 'Tell us about the product' }}</h4><p>{{ currentLanguage() === 'ar' ? 'الاسم والوصف والقسم. هذا كل المطلوب في هذه الخطوة.' : 'Just a name, a short description, and a category.' }}</p></div>
+              <div class="simple-product-fields">
+                <label><span>{{ currentLanguage() === 'ar' ? 'ما اسم المنتج؟' : 'Product name' }} *</span>
+                  <input id="create-product-name" class="input input-bordered" maxlength="200" [ngModel]="currentLanguage() === 'ar' ? (newProduct.titleAr || newProduct.title) : (newProduct.title || newProduct.titleAr)" (ngModelChange)="currentLanguage() === 'ar' ? newProduct.titleAr = $event : newProduct.title = $event" [placeholder]="currentLanguage() === 'ar' ? 'مثال: أكواب ورقية' : 'For example: Paper cups'" />
+                </label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'وصف قصير للمنتج' : 'Short description' }} *</span>
+                  <textarea id="create-product-description" class="textarea textarea-bordered" rows="3" [ngModel]="currentLanguage() === 'ar' ? (newProduct.descriptionAr || newProduct.description) : (newProduct.description || newProduct.descriptionAr)" (ngModelChange)="currentLanguage() === 'ar' ? newProduct.descriptionAr = $event : newProduct.description = $event" [placeholder]="currentLanguage() === 'ar' ? 'مثال: أكواب ورقية للمشروبات الساخنة والباردة.' : 'For example: Paper cups for hot and cold drinks.'"></textarea>
+                </label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'بأي قسم يظهر المنتج؟' : 'Product category' }} *</span>
+                  <select id="create-product-category" class="select select-bordered" [(ngModel)]="newProduct.subCategoryId">
+                    <option [ngValue]="0">{{ currentLanguage() === 'ar' ? 'اختر القسم' : 'Choose a category' }}</option>
+                    @for (category of subCategories$ | async; track category.id) {
+                      <option [ngValue]="category.id">{{ currentLanguage() === 'ar' ? category.nameAr || category.name : category.name || category.nameAr }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+              <details class="wizard-optional"><summary>{{ currentLanguage() === 'ar' ? 'إضافة الاسم والوصف بالإنجليزية (اختياري)' : 'Add Arabic name and description (optional)' }}</summary>
+                <p>{{ currentLanguage() === 'ar' ? 'إذا تركتها فارغة، سيُستخدم النص الذي كتبته أعلاه.' : 'If left blank, the text above is used.' }}</p>
+                <div class="simple-product-fields"><label><span>{{ currentLanguage() === 'ar' ? 'الاسم بالإنجليزية' : 'Name in Arabic' }}</span><input class="input input-bordered" [ngModel]="currentLanguage() === 'ar' ? newProduct.title : newProduct.titleAr" (ngModelChange)="currentLanguage() === 'ar' ? newProduct.title = $event : newProduct.titleAr = $event" [dir]="currentLanguage() === 'ar' ? 'ltr' : 'rtl'" /></label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'الوصف بالإنجليزية' : 'Description in Arabic' }}</span><textarea class="textarea textarea-bordered" rows="3" [ngModel]="currentLanguage() === 'ar' ? newProduct.description : newProduct.descriptionAr" (ngModelChange)="currentLanguage() === 'ar' ? newProduct.description = $event : newProduct.descriptionAr = $event" [dir]="currentLanguage() === 'ar' ? 'ltr' : 'rtl'"></textarea></label></div>
+              </details>
+            }
+            @if (productEditorStep() === 1) {
+              <label class="stock-entry"><span>{{ currentLanguage() === 'ar' ? 'كم وحدة متوفرة للبيع؟' : 'How many units are available?' }}</span>
+                <input id="create-product-stock" type="number" min="0" step="1" class="input input-bordered" [(ngModel)]="newProduct.totalInStock" />
+                <small>{{ currentLanguage() === 'ar' ? 'مثال: عندك 50 عبوة جاهزة للبيع ← اكتب 50.' : 'For example: 50 packs ready to sell → enter 50.' }}</small>
+              </label>
+              <app-product-options-editor [variants]="productVariants()" (variantsChange)="productVariants.set($event)"
+                [language]="currentLanguage()" [basePrice]="newProduct.newPrice" (basePriceChange)="newProduct.newPrice = $event"
+                [stockQuantity]="newProduct.totalInStock" [showErrors]="productOptionsSubmitted()" [disabled]="isLoading()" idPrefix="create-product-options">
+              </app-product-options-editor>
+              <details class="wizard-optional"><summary>{{ currentLanguage() === 'ar' ? 'سعر قبل التخفيض وحالة التوفر (اختياري)' : 'Previous price and availability (optional)' }}</summary>
+                <div class="simple-product-fields"><label><span>{{ t('oldPrice') }}</span><input type="number" min="0" step="0.001" class="input input-bordered" [(ngModel)]="newProduct.oldPrice" /></label>
+                <label><span>{{ t('stockStatus') }}</span><select class="select select-bordered" [(ngModel)]="newProduct.isInStock"><option [ngValue]="true">{{ t('inStock') }}</option><option [ngValue]="false">{{ t('outOfStock') }}</option></select></label></div>
+              </details>
+            }
+            @if (productEditorStep() === 2) {
+              <div class="wizard-intro"><h4>{{ currentLanguage() === 'ar' ? 'آخر خطوة: الصور والمراجعة' : 'Last step: photos and review' }}</h4><p>{{ currentLanguage() === 'ar' ? 'أضف صور المنتج وتأكد من المعلومات قبل الحفظ.' : 'Add product photos and check the details before saving.' }}</p></div>
+              <div class="finish-layout">
+                <div class="wizard-photos"><!-- Image Upload Section -->
                 <div class="mt-6">
-                    <app-product-options-editor
-                        [variants]="productVariants()"
-                        (variantsChange)="productVariants.set($event)"
-                        [language]="currentLanguage()"
-                        [basePrice]="newProduct.newPrice"
-                        [stockQuantity]="newProduct.totalInStock"
-                        [showErrors]="productOptionsSubmitted()"
-                        [disabled]="isLoading()"
-                        idPrefix="create-product-options">
-                    </app-product-options-editor>
-                </div>
+                    <h4 class="font-bold text-md mb-3">{{ t('productImages') }}</h4>
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        class="file-input file-input-bordered w-full"
+                        (change)="onImageSelected($event)" />
 
-                <!-- Additional descriptive information -->
-                <details class="product-extra-details">
+                    <!-- Selected Images Preview -->
+                    @if (selectedImages().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">{{ t('selectedImages') }}</h5>
+                            <div class="flex flex-wrap gap-2">
+                                @for (image of selectedImages(); track $index; let i = $index) {
+                                    <div class="relative">
+                                        <img [src]="getImagePreview(image)" class="w-20 h-20 object-cover rounded" />
+                                        <button (click)="removeSelectedImage(i)" class="absolute -top-2 -right-2 btn btn-xs btn-circle btn-error">×</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div></div>
+                <aside class="product-review">
+                  <span class="review-label">{{ currentLanguage() === 'ar' ? 'مراجعة سريعة' : 'Quick review' }}</span>
+                  <h4>{{ currentLanguage() === 'ar' ? newProduct.titleAr || newProduct.title : newProduct.title || newProduct.titleAr }}</h4>
+                  <p>{{ currentLanguage() === 'ar' ? 'المتوفر للبيع' : 'Available stock' }}: <strong>{{ newProduct.totalInStock }}</strong></p>
+                  @if (!productVariants().length) { <div class="review-price">{{ newProduct.newPrice | number:'1.3-3' }} <small>{{ currentLanguage() === 'ar' ? 'د.ك' : 'KWD' }}</small></div> }
+                  @for (group of productVariants(); track $index) {
+                    @if (productVariants().length > 1) { <h5>{{ currentLanguage() === 'ar' ? group.nameAr || group.name : group.name || group.nameAr }}</h5> }
+                    @for (choice of group.values; track $index) {
+                      <div class="review-option"><span>{{ currentLanguage() === 'ar' ? choice.valueAr || choice.value : choice.value || choice.valueAr }}</span><bdi>{{ choice.price | number:'1.3-3' }} {{ currentLanguage() === 'ar' ? 'د.ك' : 'KWD' }}</bdi></div>
+                    }
+                  }
+                  <button type="button" class="review-edit" (click)="goToProductStep(1)">{{ currentLanguage() === 'ar' ? 'تعديل السعر أو الخيارات' : 'Edit price or choices' }}</button>
+                </aside>
+              </div>
+              <details class="product-extra-details">
                     <summary>{{ currentLanguage() === 'ar' ? 'معلومات إضافية عن المنتج (اختياري)' : 'Additional product information (optional)' }}</summary>
                     <p class="product-field-help">{{ currentLanguage() === 'ar' ? 'مثل المادة أو بلد المنشأ. هذه معلومات للعرض؛ الخيارات التي يختارها العميل وأسعارها تُدخل في القسم أعلاه.' : 'For example: material or country of origin. Customer choices and their prices belong in the section above.' }}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,20 +457,20 @@
                             <label class="label">
                                 <span class="label-text">{{ t('detailLabelEN') }}</span>
                             </label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter detail label" 
-                                class="input input-bordered" 
+                            <input
+                                type="text"
+                                placeholder="Enter detail label"
+                                class="input input-bordered"
                                 [(ngModel)]="newProductDetail.label" />
                         </div>
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">{{ t('detailLabelAR') }}</span>
                             </label>
-                            <input 
-                                type="text" 
-                                placeholder="أدخل تسمية التفصيل" 
-                                class="input input-bordered" 
+                            <input
+                                type="text"
+                                placeholder="أدخل تسمية التفصيل"
+                                class="input input-bordered"
                                 dir="rtl"
                                 [(ngModel)]="newProductDetail.labelAr" />
                         </div>
@@ -533,20 +478,20 @@
                             <label class="label">
                                 <span class="label-text">{{ t('detailValueEN') }}</span>
                             </label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter detail value" 
-                                class="input input-bordered" 
+                            <input
+                                type="text"
+                                placeholder="Enter detail value"
+                                class="input input-bordered"
                                 [(ngModel)]="newProductDetail.value" />
                         </div>
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">{{ t('detailValueAR') }}</span>
                             </label>
-                            <input 
-                                type="text" 
-                                placeholder="أدخل قيمة التفصيل" 
-                                class="input input-bordered" 
+                            <input
+                                type="text"
+                                placeholder="أدخل قيمة التفصيل"
+                                class="input input-bordered"
                                 dir="rtl"
                                 [(ngModel)]="newProductDetail.valueAr" />
                         </div>
@@ -554,7 +499,7 @@
                     <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
                         {{ t('addDetail') }}
                     </button>
-                    
+
                     <!-- Product Details List -->
                     @if (productDetails().length > 0) {
                         <div class="mt-4">
@@ -571,275 +516,88 @@
                         </div>
                     }
                 </details>
-
-                <!-- Image Upload Section -->
-                <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">{{ t('productImages') }}</h4>
-                    <input 
-                        type="file" 
-                        multiple 
-                        accept="image/*"
-                        class="file-input file-input-bordered w-full" 
-                        (change)="onImageSelected($event)" />
-                    
-                    <!-- Selected Images Preview -->
-                    @if (selectedImages().length > 0) {
-                        <div class="mt-4">
-                            <h5 class="font-semibold mb-2">{{ t('selectedImages') }}</h5>
-                            <div class="flex flex-wrap gap-2">
-                                @for (image of selectedImages(); track $index; let i = $index) {
-                                    <div class="relative">
-                                        <img [src]="getImagePreview(image)" class="w-20 h-20 object-cover rounded" />
-                                        <button (click)="removeSelectedImage(i)" class="absolute -top-2 -right-2 btn btn-xs btn-circle btn-error">×</button>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-
-                <div class="modal-action">
-                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
-                    <button (click)="addProduct()" [disabled]="isLoading()" class="btn btn-primary">
-                        @if (isLoading()) {
-                            <span class="loading loading-spinner loading-sm"></span>
-                        }
-                        {{ t('addProduct') }}
-                    </button>
-                </div>
+            }
+          </div>
+          <footer class="wizard-footer">
+            <span>{{ currentLanguage() === 'ar' ? 'الخطوة' : 'Step' }} {{ productEditorStep() + 1 }} {{ currentLanguage() === 'ar' ? 'من' : 'of' }} 3</span>
+            <div class="wizard-actions">
+              @if (productEditorStep() > 0) { <button type="button" class="btn btn-ghost wizard-back" (click)="goToProductStep(productEditorStep() - 1)" [disabled]="isLoading()">{{ currentLanguage() === 'ar' ? 'السابق' : 'Back' }}</button> }
+              @else { <button type="button" class="btn btn-ghost" (click)="closeModals()" [disabled]="isLoading()">{{ t('cancel') }}</button> }
+              @if (productEditorStep() < 2) { <button type="button" class="btn btn-primary wizard-next" (click)="nextProductStep()" [disabled]="isLoading()">{{ currentLanguage() === 'ar' ? 'التالي' : 'Continue' }} <span aria-hidden="true">{{ currentLanguage() === 'ar' ? '←' : '→' }}</span></button> }
+              @else { <button type="button" class="btn btn-primary save-product" (click)="addProduct()" [disabled]="isLoading()">@if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> } {{ currentLanguage() === 'ar' ? 'حفظ المنتج' : 'Save product' }}</button> }
             </div>
+          </footer>
         </div>
+      </div>
     }
 
     <!-- Edit Product Modal -->
     @if (showEditModal()) {
-        <div class="modal modal-open">
-            <div class="modal-box max-w-4xl product-editor-modal" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
-                <div class="product-editor-heading"><div><h3>{{ t('editProduct') }}</h3><p>{{ currentLanguage() === 'ar' ? 'ابدأ بمعلومات المنتج، ثم حدد سعره وطريقة بيعه.' : 'Start with the product details, then set its price and selling options.' }}</p></div><button type="button" class="product-modal-close" (click)="closeModals()" [attr.aria-label]="t('close')" [disabled]="isLoading()">×</button></div>
-                <h4 class="product-section-label">{{ t('basicInformation') }}</h4>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- English Title -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('productTitleEN') }} *</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="Enter product title in English" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="editProduct.title" />
-                    </div>
-
-                    <!-- Arabic Title -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('productTitleAR') }} *</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="أدخل عنوان المنتج بالعربية" 
-                            class="input input-bordered w-full" 
-                            dir="rtl"
-                            [(ngModel)]="editProduct.titleAr" />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <!-- English Description -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('descriptionEN') }} *</span>
-                        </label>
-                        <textarea 
-                            class="textarea textarea-bordered h-24" 
-                            placeholder="Enter product description in English"
-                            [(ngModel)]="editProduct.description"></textarea>
-                    </div>
-
-                    <!-- Arabic Description -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('descriptionAR') }} *</span>
-                        </label>
-                        <textarea 
-                            class="textarea textarea-bordered h-24" 
-                            placeholder="أدخل وصف المنتج بالعربية"
-                            dir="rtl"
-                            [(ngModel)]="editProduct.descriptionAr"></textarea>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <!-- Subcategory Selection -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('subcategory') }} *</span>
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                [placeholder]="t('searchSubcategory')" 
-                                class="input input-bordered w-full" 
-                                [ngModel]="editSubCategorySearchTerm()"
-                                (ngModelChange)="onEditSubCategorySearch($event)"
-                                (focus)="showEditSubCategoryDropdown.set(true)"
-                                (blur)="onEditSubCategoryBlur()" />
-                            @if (showEditSubCategoryDropdown()) {
-                                <div class="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                    @for (subCategory of filteredEditSubCategories$ | async; track subCategory.id) {
-                                        <div 
-                                            class="p-2 hover:bg-base-200 cursor-pointer"
-                                            (click)="selectEditSubCategory(subCategory)">
-                                            <div class="font-semibold">{{subCategory.name}}</div>
-                                            <div class="text-sm opacity-70" dir="rtl">{{subCategory.nameAr}}</div>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Stock Quantity -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('stockQuantity') }} *</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            [placeholder]="t('enterStockQuantity')" 
-                            class="input input-bordered w-full" 
-                            min="0" step="1" [(ngModel)]="editProduct.totalInStock" />
-                    </div>
-                </div>
-
-                <h4 class="product-section-label">{{ t('pricingStock') }}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <!-- Old Price -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('oldPrice') }}</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            step="0.001"
-                            placeholder="Enter old price" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="editProduct.oldPrice" />
-                    </div>
-
-                    <!-- New Price -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('newPrice') }} *</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            step="0.001"
-                            placeholder="Enter new price" 
-                            class="input input-bordered w-full" 
-                            [(ngModel)]="editProduct.newPrice" />
-                    </div>
-
-                    <!-- In Stock -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">{{ t('stockStatus') }}</span>
-                        </label>
-                        <select class="select select-bordered" [(ngModel)]="editProduct.isInStock">
-                            <option [ngValue]="true">{{ t('inStock') }}</option>
-                            <option [ngValue]="false">{{ t('outOfStock') }}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Product options and pricing -->
-                <div class="mt-6">
-                    <app-product-options-editor
-                        [variants]="editProductVariants()"
-                        (variantsChange)="editProductVariants.set($event)"
-                        [language]="currentLanguage()"
-                        [basePrice]="editProduct.newPrice"
-                        [stockQuantity]="editProduct.totalInStock"
-                        [showErrors]="productOptionsSubmitted()"
-                        [disabled]="isLoading()"
-                        idPrefix="edit-product-options">
-                    </app-product-options-editor>
-                </div>
-
-                <!-- Additional descriptive information -->
-                <details class="product-extra-details">
-                    <summary>{{ currentLanguage() === 'ar' ? 'معلومات إضافية عن المنتج (اختياري)' : 'Additional product information (optional)' }}</summary>
-                    <p class="product-field-help">{{ currentLanguage() === 'ar' ? 'مثل المادة أو بلد المنشأ. هذه معلومات للعرض؛ الخيارات التي يختارها العميل وأسعارها تُدخل في القسم أعلاه.' : 'For example: material or country of origin. Customer choices and their prices belong in the section above.' }}</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">{{ t('detailLabelEN') }}</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter detail label" 
-                                class="input input-bordered" 
-                                [(ngModel)]="newProductDetail.label" />
-                        </div>
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">{{ t('detailLabelAR') }}</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                placeholder="أدخل تسمية التفصيل" 
-                                class="input input-bordered" 
-                                dir="rtl"
-                                [(ngModel)]="newProductDetail.labelAr" />
-                        </div>
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">{{ t('detailValueEN') }}</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter detail value" 
-                                class="input input-bordered" 
-                                [(ngModel)]="newProductDetail.value" />
-                        </div>
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">{{ t('detailValueAR') }}</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                placeholder="أدخل قيمة التفصيل" 
-                                class="input input-bordered" 
-                                dir="rtl"
-                                [(ngModel)]="newProductDetail.valueAr" />
-                        </div>
-                    </div>
-                    <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
-                        {{ t('addDetail') }}
-                    </button>
-                    
-                    <!-- Product Details List -->
-                    @if (productDetails().length > 0) {
-                        <div class="mt-4">
-                            <h5 class="font-semibold mb-2">Product Details:</h5>
-                            @for (detail of productDetails(); track $index; let i = $index) {
-                                <div class="flex items-center justify-between p-2 bg-base-200 rounded mb-2">
-                                    <div>
-                                        <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
-                                        <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
-                                    </div>
-                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">{{ t('remove') }}</button>
-                                </div>
-                            }
-                        </div>
+      <div class="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="edit-editor-title">
+        <div class="modal-box product-editor-modal product-wizard" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+          <header class="product-editor-heading">
+            <div><span class="editor-eyebrow">{{ currentLanguage() === 'ar' ? 'إدارة المنتجات' : 'Product management' }}</span>
+              <h3 id="edit-editor-title">{{ t('editProduct') }}</h3>
+            </div>
+            <button type="button" class="product-modal-close" (click)="closeModals()" [disabled]="isLoading()" [attr.aria-label]="t('close')">×</button>
+          </header>
+          <ol class="product-wizard-steps" aria-label="{{ currentLanguage() === 'ar' ? 'خطوات إضافة المنتج' : 'Product setup steps' }}">
+            @for (step of [0, 1, 2]; track step) {
+              <li [class.active]="productEditorStep() === step" [class.complete]="productEditorStep() > step">
+                <button type="button" (click)="goToProductStep(step)" [disabled]="step > productEditorStep() || isLoading()" [attr.aria-current]="step === productEditorStep() ? 'step' : null">
+                  <span class="step-number">{{ productEditorStep() > step ? '✓' : step + 1 }}</span>
+                  <span>{{ currentLanguage() === 'ar' ? ['معلومات المنتج', 'السعر والكمية', 'الصور والمراجعة'][step] : ['Product info', 'Price & stock', 'Photos & review'][step] }}</span>
+                </button>
+              </li>
+            }
+          </ol>
+          <div class="wizard-body">
+            @if (productStepError()) { <p class="wizard-error" role="alert">{{ productStepError() }}</p> }
+            @if (productEditorStep() === 0) {
+              <div class="wizard-intro"><h4>{{ currentLanguage() === 'ar' ? 'خلّينا نعرّف المنتج' : 'Tell us about the product' }}</h4><p>{{ currentLanguage() === 'ar' ? 'الاسم والوصف والقسم. هذا كل المطلوب في هذه الخطوة.' : 'Just a name, a short description, and a category.' }}</p></div>
+              <div class="simple-product-fields">
+                <label><span>{{ currentLanguage() === 'ar' ? 'ما اسم المنتج؟' : 'Product name' }} *</span>
+                  <input id="edit-product-name" class="input input-bordered" maxlength="200" [ngModel]="currentLanguage() === 'ar' ? (editProduct.titleAr || editProduct.title) : (editProduct.title || editProduct.titleAr)" (ngModelChange)="currentLanguage() === 'ar' ? editProduct.titleAr = $event : editProduct.title = $event" [placeholder]="currentLanguage() === 'ar' ? 'مثال: أكواب ورقية' : 'For example: Paper cups'" />
+                </label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'وصف قصير للمنتج' : 'Short description' }} *</span>
+                  <textarea id="edit-product-description" class="textarea textarea-bordered" rows="3" [ngModel]="currentLanguage() === 'ar' ? (editProduct.descriptionAr || editProduct.description) : (editProduct.description || editProduct.descriptionAr)" (ngModelChange)="currentLanguage() === 'ar' ? editProduct.descriptionAr = $event : editProduct.description = $event" [placeholder]="currentLanguage() === 'ar' ? 'مثال: أكواب ورقية للمشروبات الساخنة والباردة.' : 'For example: Paper cups for hot and cold drinks.'"></textarea>
+                </label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'بأي قسم يظهر المنتج؟' : 'Product category' }} *</span>
+                  <select id="edit-product-category" class="select select-bordered" [(ngModel)]="editProduct.subCategoryId">
+                    <option [ngValue]="0">{{ currentLanguage() === 'ar' ? 'اختر القسم' : 'Choose a category' }}</option>
+                    @for (category of subCategories$ | async; track category.id) {
+                      <option [ngValue]="category.id">{{ currentLanguage() === 'ar' ? category.nameAr || category.name : category.name || category.nameAr }}</option>
                     }
-                </details>
-
-                <!-- Image Upload Section -->
+                  </select>
+                </label>
+              </div>
+              <details class="wizard-optional"><summary>{{ currentLanguage() === 'ar' ? 'إضافة الاسم والوصف بالإنجليزية (اختياري)' : 'Add Arabic name and description (optional)' }}</summary>
+                <p>{{ currentLanguage() === 'ar' ? 'إذا تركتها فارغة، سيُستخدم النص الذي كتبته أعلاه.' : 'If left blank, the text above is used.' }}</p>
+                <div class="simple-product-fields"><label><span>{{ currentLanguage() === 'ar' ? 'الاسم بالإنجليزية' : 'Name in Arabic' }}</span><input class="input input-bordered" [ngModel]="currentLanguage() === 'ar' ? editProduct.title : editProduct.titleAr" (ngModelChange)="currentLanguage() === 'ar' ? editProduct.title = $event : editProduct.titleAr = $event" [dir]="currentLanguage() === 'ar' ? 'ltr' : 'rtl'" /></label>
+                <label><span>{{ currentLanguage() === 'ar' ? 'الوصف بالإنجليزية' : 'Description in Arabic' }}</span><textarea class="textarea textarea-bordered" rows="3" [ngModel]="currentLanguage() === 'ar' ? editProduct.description : editProduct.descriptionAr" (ngModelChange)="currentLanguage() === 'ar' ? editProduct.description = $event : editProduct.descriptionAr = $event" [dir]="currentLanguage() === 'ar' ? 'ltr' : 'rtl'"></textarea></label></div>
+              </details>
+            }
+            @if (productEditorStep() === 1) {
+              <label class="stock-entry"><span>{{ currentLanguage() === 'ar' ? 'كم وحدة متوفرة للبيع؟' : 'How many units are available?' }}</span>
+                <input id="edit-product-stock" type="number" min="0" step="1" class="input input-bordered" [(ngModel)]="editProduct.totalInStock" />
+                <small>{{ currentLanguage() === 'ar' ? 'مثال: عندك 50 عبوة جاهزة للبيع ← اكتب 50.' : 'For example: 50 packs ready to sell → enter 50.' }}</small>
+              </label>
+              <app-product-options-editor [variants]="editProductVariants()" (variantsChange)="editProductVariants.set($event)"
+                [language]="currentLanguage()" [basePrice]="editProduct.newPrice" (basePriceChange)="editProduct.newPrice = $event"
+                [stockQuantity]="editProduct.totalInStock" [showErrors]="productOptionsSubmitted()" [disabled]="isLoading()" idPrefix="edit-product-options">
+              </app-product-options-editor>
+              <details class="wizard-optional"><summary>{{ currentLanguage() === 'ar' ? 'سعر قبل التخفيض وحالة التوفر (اختياري)' : 'Previous price and availability (optional)' }}</summary>
+                <div class="simple-product-fields"><label><span>{{ t('oldPrice') }}</span><input type="number" min="0" step="0.001" class="input input-bordered" [(ngModel)]="editProduct.oldPrice" /></label>
+                <label><span>{{ t('stockStatus') }}</span><select class="select select-bordered" [(ngModel)]="editProduct.isInStock"><option [ngValue]="true">{{ t('inStock') }}</option><option [ngValue]="false">{{ t('outOfStock') }}</option></select></label></div>
+              </details>
+            }
+            @if (productEditorStep() === 2) {
+              <div class="wizard-intro"><h4>{{ currentLanguage() === 'ar' ? 'آخر خطوة: الصور والمراجعة' : 'Last step: photos and review' }}</h4><p>{{ currentLanguage() === 'ar' ? 'أضف صور المنتج وتأكد من المعلومات قبل الحفظ.' : 'Add product photos and check the details before saving.' }}</p></div>
+              <div class="finish-layout">
+                <div class="wizard-photos"><!-- Image Upload Section -->
                 <div class="mt-6">
                     <h4 class="font-bold text-md mb-3">{{ t('productImages') }}</h4>
-                    
+
                     <!-- Existing Images -->
                     @if (existingImages().length > 0) {
                         <div class="mb-4">
@@ -847,7 +605,7 @@
                             <div class="flex flex-wrap gap-2">
                                 @for (imageUrl of existingImages(); track imageUrl; let i = $index) {
                                     <div class="relative">
-                                        <div 
+                                        <div
                                             class="relative cursor-pointer border-2 rounded transition-all"
                                             [class.border-error]="isImageMarkedForDeletion(imageUrl)"
                                             [class.border-base-300]="!isImageMarkedForDeletion(imageUrl)"
@@ -887,17 +645,17 @@
                             }
                         </div>
                     }
-                    
+
                     <!-- Upload New Images -->
                     <div>
                         <h5 class="font-semibold mb-2">Add New Images:</h5>
-                        <input 
-                            type="file" 
-                            multiple 
+                        <input
+                            type="file"
+                            multiple
                             accept="image/*"
-                            class="file-input file-input-bordered w-full" 
+                            class="file-input file-input-bordered w-full"
                             (change)="onImageSelected($event)" />
-                        
+
                         <!-- Selected Images Preview -->
                         @if (selectedImages().length > 0) {
                             <div class="mt-4">
@@ -913,19 +671,101 @@
                             </div>
                         }
                     </div>
-                </div>
-
-                <div class="modal-action">
-                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
-                    <button (click)="updateProduct()" [disabled]="isLoading()" class="btn btn-primary">
-                        @if (isLoading()) {
-                            <span class="loading loading-spinner loading-sm"></span>
-                        }
-                        {{ t('updateProduct') }}
+                </div></div>
+                <aside class="product-review">
+                  <span class="review-label">{{ currentLanguage() === 'ar' ? 'مراجعة سريعة' : 'Quick review' }}</span>
+                  <h4>{{ currentLanguage() === 'ar' ? editProduct.titleAr || editProduct.title : editProduct.title || editProduct.titleAr }}</h4>
+                  <p>{{ currentLanguage() === 'ar' ? 'المتوفر للبيع' : 'Available stock' }}: <strong>{{ editProduct.totalInStock }}</strong></p>
+                  @if (!editProductVariants().length) { <div class="review-price">{{ editProduct.newPrice | number:'1.3-3' }} <small>{{ currentLanguage() === 'ar' ? 'د.ك' : 'KWD' }}</small></div> }
+                  @for (group of editProductVariants(); track $index) {
+                    @if (editProductVariants().length > 1) { <h5>{{ currentLanguage() === 'ar' ? group.nameAr || group.name : group.name || group.nameAr }}</h5> }
+                    @for (choice of group.values; track $index) {
+                      <div class="review-option"><span>{{ currentLanguage() === 'ar' ? choice.valueAr || choice.value : choice.value || choice.valueAr }}</span><bdi>{{ choice.price | number:'1.3-3' }} {{ currentLanguage() === 'ar' ? 'د.ك' : 'KWD' }}</bdi></div>
+                    }
+                  }
+                  <button type="button" class="review-edit" (click)="goToProductStep(1)">{{ currentLanguage() === 'ar' ? 'تعديل السعر أو الخيارات' : 'Edit price or choices' }}</button>
+                </aside>
+              </div>
+              <details class="product-extra-details">
+                    <summary>{{ currentLanguage() === 'ar' ? 'معلومات إضافية عن المنتج (اختياري)' : 'Additional product information (optional)' }}</summary>
+                    <p class="product-field-help">{{ currentLanguage() === 'ar' ? 'مثل المادة أو بلد المنشأ. هذه معلومات للعرض؛ الخيارات التي يختارها العميل وأسعارها تُدخل في القسم أعلاه.' : 'For example: material or country of origin. Customer choices and their prices belong in the section above.' }}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">{{ t('detailLabelEN') }}</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Enter detail label"
+                                class="input input-bordered"
+                                [(ngModel)]="newProductDetail.label" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">{{ t('detailLabelAR') }}</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="أدخل تسمية التفصيل"
+                                class="input input-bordered"
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.labelAr" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">{{ t('detailValueEN') }}</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Enter detail value"
+                                class="input input-bordered"
+                                [(ngModel)]="newProductDetail.value" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">{{ t('detailValueAR') }}</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="أدخل قيمة التفصيل"
+                                class="input input-bordered"
+                                dir="rtl"
+                                [(ngModel)]="newProductDetail.valueAr" />
+                        </div>
+                    </div>
+                    <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
+                        {{ t('addDetail') }}
                     </button>
-                </div>
+
+                    <!-- Product Details List -->
+                    @if (productDetails().length > 0) {
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">Product Details:</h5>
+                            @for (detail of productDetails(); track $index; let i = $index) {
+                                <div class="flex items-center justify-between p-2 bg-base-200 rounded mb-2">
+                                    <div>
+                                        <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
+                                        <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
+                                    </div>
+                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">{{ t('remove') }}</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </details>
+            }
+          </div>
+          <footer class="wizard-footer">
+            <span>{{ currentLanguage() === 'ar' ? 'الخطوة' : 'Step' }} {{ productEditorStep() + 1 }} {{ currentLanguage() === 'ar' ? 'من' : 'of' }} 3</span>
+            <div class="wizard-actions">
+              @if (productEditorStep() > 0) { <button type="button" class="btn btn-ghost wizard-back" (click)="goToProductStep(productEditorStep() - 1)" [disabled]="isLoading()">{{ currentLanguage() === 'ar' ? 'السابق' : 'Back' }}</button> }
+              @else { <button type="button" class="btn btn-ghost" (click)="closeModals()" [disabled]="isLoading()">{{ t('cancel') }}</button> }
+              @if (productEditorStep() < 2) { <button type="button" class="btn btn-primary wizard-next" (click)="nextProductStep()" [disabled]="isLoading()">{{ currentLanguage() === 'ar' ? 'التالي' : 'Continue' }} <span aria-hidden="true">{{ currentLanguage() === 'ar' ? '←' : '→' }}</span></button> }
+              @else { <button type="button" class="btn btn-primary save-product" (click)="updateProduct()" [disabled]="isLoading()">@if (isLoading()) { <span class="loading loading-spinner loading-sm"></span> } {{ currentLanguage() === 'ar' ? 'حفظ التعديلات' : 'Save changes' }}</button> }
             </div>
+          </footer>
         </div>
+      </div>
     }
 
     <!-- Product Details Modal -->
@@ -933,7 +773,7 @@
         <div class="modal modal-open">
             <div class="modal-box max-w-6xl">
                 <h3 class="font-bold text-lg mb-4">Product Details</h3>
-                
+
                 @if (isLoading()) {
                     <div class="flex justify-center items-center py-12">
                         <span class="loading loading-spinner loading-lg"></span>
@@ -950,8 +790,8 @@
                                         @for (image of selectedProductDetails()!.images; track $index) {
                                             <div class="aspect-square">
                                                 <div class="img-container w-full h-full rounded-lg">
-                                                    <img [src]="image" 
-                                                         [alt]="selectedProductDetails()!.title" 
+                                                    <img [src]="image"
+                                                         [alt]="selectedProductDetails()!.title"
                                                          loading="lazy"
                                                          (load)="$event.target.classList.add('loaded')"
                                                          (error)="$event.target.classList.add('loaded')"
@@ -967,7 +807,7 @@
                                     </div>
                                 }
                             </div>
-                            
+
                             <!-- Basic Information -->
                             <div class="space-y-4">
                                 <div>
@@ -991,7 +831,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <h4 class="font-semibold mb-2">Pricing & Stock</h4>
                                     <div class="space-y-2">
@@ -1109,4 +949,4 @@
         </div>
     }
 </div>
-        
+

@@ -29,13 +29,11 @@ describe('Guided product options', () => {
     await fixture.whenStable();
   }
 
-  it('edits choices directly, previews their full prices, and fills optional translations for saving', async () => {
+  it('only needs choice names and prices, with optional translation settings', async () => {
     fixture.nativeElement.querySelector('[value="options"]').click();
     await fixture.whenStable();
-    const preset = Array.from(fixture.nativeElement.querySelectorAll('.preset'))
-      .find(button => (button as HTMLElement).textContent?.includes('عدد القطع')) as HTMLButtonElement;
-    preset.click();
-    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.advanced-options').open).toBeFalse();
+    expect(fixture.componentInstance.groups()[0].name).toBe('Options');
     await enter('#product-options-choice-0-0', 'عبوة 10 قطع');
     await enter('#product-options-price-0-0', '1.5');
     fixture.nativeElement.querySelector('.add-choice').click();
@@ -47,7 +45,6 @@ describe('Guided product options', () => {
       { value: 'عبوة 10 قطع', valueAr: 'عبوة 10 قطع', price: 1.5 },
       { value: 'عبوة 20 قطعة', valueAr: 'عبوة 20 قطعة', price: 2.5 },
     ]);
-    expect(fixture.nativeElement.querySelector('.choices-preview').textContent).toContain('2.500');
     expect(fixture.nativeElement.querySelector('.shared-stock').textContent).toContain('25');
     expect(fixture.nativeElement.querySelectorAll('input[type="number"]').length).toBe(2);
   });
@@ -93,6 +90,6 @@ describe('Guided product options', () => {
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.options-editor').dir).toBe('ltr');
     expect(fixture.nativeElement.textContent).toContain('One price');
-    expect(fixture.nativeElement.textContent).toContain('All choices share the same stock');
+    expect(fixture.nativeElement.textContent).toContain('What is the selling price?');
   });
 });

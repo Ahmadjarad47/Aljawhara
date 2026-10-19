@@ -16,6 +16,7 @@ export class ProductOptionsEditor {
   variantsChange = output<ProductOptions>();
   language = input<'ar' | 'en'>('ar');
   basePrice = input(0);
+  basePriceChange = output<number>();
   stockQuantity = input(0);
   showErrors = input(false);
   disabled = input(false);
@@ -26,12 +27,12 @@ export class ProductOptionsEditor {
 
   readonly text = {
     ar: {
-      title: 'كيف تبيع هذا المنتج؟', fixed: 'بسعر واحد', fixedHint: 'بدون خيارات؛ يستخدم سعر البيع الأساسي أعلاه.',
+      title: 'هل للمنتج سعر واحد أم عدة خيارات؟', fixed: 'سعر واحد للمنتج', fixedHint: 'العميل يشتري المنتج مباشرة.',
       options: 'بخيارات وأسعار مختلفة', optionsHint: 'مثل المقاس أو اللون أو عدد القطع في العبوة.',
-      guide: 'سمّ المواصفة، ثم أضف خياراتها وحدد سعر بيع كل خيار. يُحفظ كل ما تكتبه عند حفظ المنتج.',
+      guide: 'كل سطر = خيار يختاره العميل + سعره الكامل.',
       example: 'مثال توضيحي: عدد القطع ← عبوة 10 قطع بسعر 1.500 د.ك، وعبوة 20 قطعة بسعر 2.500 د.ك.',
       stock: 'المخزون مشترك لكل الخيارات', stockHint: 'الكمية أعلاه هي إجمالي مخزون المنتج، وليست كمية مستقلة لكل خيار.',
-      group: 'اسم المواصفة', groupPlaceholder: 'مثال: المقاس، اللون، عدد القطع', size: 'المقاس', color: 'اللون', pack: 'عدد القطع',
+      group: 'اسم مجموعة الخيارات', groupPlaceholder: 'مثال: المقاس، اللون، عدد القطع', size: 'المقاس', color: 'اللون', pack: 'عدد القطع',
       choice: 'الخيار المتاح للعميل', choicePlaceholder: 'مثال: صغير، أحمر، عبوة 10 قطع', price: 'سعر بيع الخيار (د.ك)',
       priceHint: 'اكتب السعر الكامل للخيار. سعره يستبدل السعر الأساسي عند اختياره في صفحة المنتج.',
       addChoice: 'إضافة خيار آخر', removeChoice: 'حذف الخيار', addGroup: 'إضافة مواصفة أخرى', removeGroup: 'حذف المواصفة',
@@ -42,9 +43,9 @@ export class ProductOptionsEditor {
       emptyChoices: 'أضف الخيارات التي يمكن للعميل الاختيار بينها.',
     },
     en: {
-      title: 'How is this product sold?', fixed: 'One price', fixedHint: 'No choices; uses the base selling price above.',
+      title: 'One price or several choices?', fixed: 'One price', fixedHint: 'Customers buy the product directly.',
       options: 'Choices with their own prices', optionsHint: 'For example: size, color, or pieces per pack.',
-      guide: 'Name the option, then add its choices and selling prices. Everything is saved when you save the product.',
+      guide: 'Each row is one customer choice and its full selling price.',
       example: 'Example: Pack size → 10-piece pack for 1.500 KWD; 20-piece pack for 2.500 KWD.',
       stock: 'All choices share the same stock', stockHint: 'The quantity above is total product stock, not a separate quantity for each choice.',
       group: 'Option name', groupPlaceholder: 'For example: Size, Color, Pack size', size: 'Size', color: 'Color', pack: 'Pack size',
@@ -71,7 +72,12 @@ export class ProductOptionsEditor {
   }
 
   addGroup(): void {
-    this.variantsChange.emit([...this.variants(), { name: '', nameAr: '', values: [this.blankChoice()] }]);
+    const number = this.variants().length + 1;
+    this.variantsChange.emit([...this.variants(), {
+      name: number === 1 ? 'Options' : `Options ${number}`,
+      nameAr: number === 1 ? 'خيارات المنتج' : `خيارات ${number}`,
+      values: [this.blankChoice()]
+    }]);
   }
 
   removeGroup(index: number): void {

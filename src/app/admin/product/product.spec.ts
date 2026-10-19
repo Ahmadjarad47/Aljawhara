@@ -27,7 +27,7 @@ describe('Product modal option submission', () => {
     TestBed.configureTestingModule({ imports: [Product], providers: [provideZonelessChangeDetection(),
       provideHttpClient(), provideHttpClientTesting(),
       { provide: ServiceCategory, useValue: { getAllCategories: () => of([]) } },
-      { provide: Subcategory, useValue: { getAllSubCategories: () => of([]) } },
+      { provide: Subcategory, useValue: { getAllSubCategories: () => of([{ id: 1, name: 'Cups', nameAr: 'أكواب' }]) } },
       { provide: ImageCompressionService, useValue: {} },
       { provide: ToastService, useValue: { toasts$: signal([]), loading: () => 'test', error: () => {},
         updateToSuccess: () => {}, updateToError: () => {}, removeToast: () => {} } },
@@ -57,22 +57,57 @@ describe('Product modal option submission', () => {
     await fixture.whenStable();
   }
 
+  async function nextStep() {
+    fixture.nativeElement.querySelector('.wizard-next').click();
+    await fixture.whenStable();
+  }
+
+  it('shows one short step at a time and preserves entries when going back', async () => {
+    expect(fixture.nativeElement.querySelector('#create-product-name')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-product-options-editor')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.save-product')).toBeNull();
+    await enter('create-product-name', 'أكواب ورقية');
+    await nextStep();
+    expect(fixture.nativeElement.querySelector('#create-product-name')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#create-product-stock')).not.toBeNull();
+    fixture.nativeElement.querySelector('.wizard-back').click();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('#create-product-name').value).toBe('أكواب ورقية');
+    http.expectNone(request => request.method === 'POST');
+  });
+
+  it('explains missing information before advancing to pricing', async () => {
+    fixture.componentInstance.newProduct.title = '';
+    fixture.componentInstance.newProduct.titleAr = '';
+    await nextStep();
+    expect(fixture.componentInstance.productEditorStep()).toBe(0);
+    expect(fixture.nativeElement.querySelector('.wizard-error').textContent).toContain('اسم المنتج');
+  });
+
   it('creates a product with all directly entered choices without a separate add-variant step', async () => {
+    fixture.componentInstance.newProduct.title = '';
+    fixture.componentInstance.newProduct.description = '';
+    await nextStep();
     fixture.nativeElement.querySelector('[value="options"]').click();
     await fixture.whenStable();
-    await enter('create-product-options-group-0', 'عدد القطع');
+    expect(fixture.nativeElement.querySelector('#create-product-options-base-price')).toBeNull();
     await enter('create-product-options-choice-0-0', 'عبوة 10 قطع');
     await enter('create-product-options-price-0-0', '1.5');
     fixture.nativeElement.querySelector('.add-choice').click();
     await fixture.whenStable();
     await enter('create-product-options-choice-0-1', 'عبوة 20 قطعة');
     await enter('create-product-options-price-0-1', '2.5');
-    fixture.nativeElement.querySelector('.modal-action .btn-primary').click();
+    await nextStep();
+    expect(fixture.nativeElement.querySelector('.product-review').textContent).toContain('عبوة 20 قطعة');
+    expect(fixture.nativeElement.querySelector('.product-review').textContent).toContain('2.500');
+    fixture.nativeElement.querySelector('.save-product').click();
     await fixture.whenStable();
     const request = http.expectOne(request => request.url === url && request.method === 'POST');
     const body = request.request.body as FormData;
     expect(body.get('totalInStock')).toBe('25');
-    expect(body.get('variants[0].name')).toBe('عدد القطع');
+    expect(body.get('title')).toBe('عبوة');
+    expect(body.get('description')).toBe('اختبار');
+    expect(body.get('variants[0].name')).toBe('Options');
     expect(body.get('variants[0].values[1].value')).toBe('عبوة 20 قطعة');
     expect(body.get('variants[0].values[1].price')).toBe('2.5');
     request.flush({ id: 1 });
@@ -82,13 +117,14 @@ describe('Product modal option submission', () => {
   });
 
   it('keeps the modal open and explains incomplete options before making a request', async () => {
+    await nextStep();
     fixture.nativeElement.querySelector('[value="options"]').click();
     await fixture.whenStable();
-    fixture.nativeElement.querySelector('.modal-action .btn-primary').click();
-    await fixture.whenStable();
+    await nextStep();
     http.expectNone(request => request.method === 'POST');
     expect(fixture.componentInstance.showAddModal()).toBeTrue();
-    expect(fixture.nativeElement.querySelector('.options-error').textContent).toContain('اسم المواصفة');
+    expect(fixture.componentInstance.productEditorStep()).toBe(1);
+    expect(fixture.nativeElement.querySelector('.options-error').textContent).toContain('اسم كل خيار');
   });
 
   it('retains existing option IDs and stock when editing a price', async () => {
@@ -98,8 +134,10 @@ describe('Product modal option submission', () => {
         values: [{ id: 21, value: 'Small', valueAr: 'صغير', price: 1.5 }] }],
     } as unknown as ProductDto);
     await fixture.whenStable();
+    await nextStep();
     await enter('edit-product-options-price-0-0', '4.125');
-    fixture.nativeElement.querySelector('.modal-action .btn-primary').click();
+    await nextStep();
+    fixture.nativeElement.querySelector('.save-product').click();
     await fixture.whenStable();
     const request = http.expectOne(request => request.method === 'PUT' && request.url === `${url}/7`);
     const body = request.request.body as FormData;
@@ -107,6 +145,7 @@ describe('Product modal option submission', () => {
     expect(body.get('variants[0].id')).toBe('11');
     expect(body.get('variants[0].values[0].id')).toBe('21');
     expect(body.get('variants[0].values[0].price')).toBe('4.125');
+    expect(body.get('newPrice')).toBe('4.125');
     request.flush({ id: 7 });
     http.match(request => request.method === 'GET').forEach(request => request.flush(page));
     await fixture.whenStable();

@@ -355,6 +355,65 @@ export class Product implements OnInit, OnDestroy {
   productVariants = signal<ProductVariantCreateDto[]>([]);
   editProductVariants = signal<ProductVariantUpdateDto[]>([]);
   productOptionsSubmitted = signal(false);
+  productEditorStep = signal(0);
+  productStepError = signal('');
+
+  openProductCreator(): void {
+    this.resetNewProduct();
+    this.showAddModal.set(true);
+  }
+
+  goToProductStep(step: number): void {
+    if (this.isLoading() || step < 0 || step > this.productEditorStep()) return;
+    this.productStepError.set('');
+    this.productEditorStep.set(step);
+  }
+
+  nextProductStep(): void {
+    if (this.isLoading() || !this.validateEditorStep(this.productEditorStep())) return;
+    this.productEditorStep.update(step => Math.min(2, step + 1));
+  }
+
+  private validateEditorStep(step: number): boolean {
+    const product = this.showEditModal() ? this.editProduct : this.newProduct;
+    const ar = this.currentLanguage() === 'ar';
+    let message = '';
+    if (step === 0) {
+      if (!(product.titleAr.trim() || product.title.trim())) message = ar ? 'اكتب اسم المنتج أولاً.' : 'Enter the product name first.';
+      else if (!(product.descriptionAr.trim() || product.description.trim())) message = ar ? 'أضف وصفاً قصيراً للمنتج.' : 'Add a short product description.';
+      else if (!(product.subCategoryId > 0)) message = ar ? 'اختر القسم الذي ينتمي إليه المنتج.' : 'Choose the product category.';
+    } else if (step === 1) {
+      this.productOptionsSubmitted.set(true);
+      const variants = this.showEditModal() ? this.editProductVariants() : this.productVariants();
+      if (!Number.isInteger(product.totalInStock) || product.totalInStock < 0)
+        message = ar ? 'أدخل كمية متوفرة صحيحة، صفر أو أكثر.' : 'Enter a whole stock quantity of zero or more.';
+      else if (product.oldPrice < 0)
+        message = ar ? 'السعر قبل التخفيض يجب أن يكون صفراً أو أكثر.' : 'The previous price must be zero or more.';
+      else if (variants.length) message = optionsError(variants, this.currentLanguage()) ?? '';
+      else if (typeof product.newPrice !== 'number' || !Number.isFinite(product.newPrice) || product.newPrice < 0.01)
+        message = ar ? 'أدخل سعر بيع المنتج (0.010 د.ك على الأقل).' : 'Enter a selling price of at least 0.010 KWD.';
+    }
+    this.productStepError.set(message);
+    return !message;
+  }
+
+  private prepareProductSubmission(): boolean {
+    for (const step of [0, 1]) {
+      if (!this.validateEditorStep(step)) {
+        this.productEditorStep.set(step);
+        return false;
+      }
+    }
+    const product = this.showEditModal() ? this.editProduct : this.newProduct;
+    product.title = product.title.trim() || product.titleAr.trim();
+    product.titleAr = product.titleAr.trim() || product.title.trim();
+    product.description = product.description.trim() || product.descriptionAr.trim();
+    product.descriptionAr = product.descriptionAr.trim() || product.description.trim();
+    if (!Number.isFinite(product.oldPrice)) product.oldPrice = 0;
+    const variants = this.showEditModal() ? this.editProductVariants() : this.productVariants();
+    if (variants.length) product.newPrice = Math.min(...variants.flatMap(group => group.values.map(value => value.price)));
+    return true;
+  }
   
   // Image management
   selectedImages = signal<File[]>([]);
@@ -651,6 +710,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   async addProduct() {
+    if (!this.prepareProductSubmission()) return;
     this.productOptionsSubmitted.set(true);
     console.log('=== PRODUCT CREATION STARTED ===');
     console.log('Form validation started...');
@@ -747,6 +807,8 @@ export class Product implements OnInit, OnDestroy {
   }
 
   editProductStart(product: ProductDto) {
+    this.productEditorStep.set(0);
+    this.productStepError.set('');
     this.productOptionsSubmitted.set(false);
     this.editProduct = {
       id: product.id,
@@ -798,6 +860,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   async updateProduct() {
+    if (!this.prepareProductSubmission()) return;
     this.productOptionsSubmitted.set(true);
     if (!this.validateProductForm()) {
       this.toastService.error(this.t('validationFailed'), this.t('fillRequiredFields'));
@@ -1165,6 +1228,8 @@ export class Product implements OnInit, OnDestroy {
   }
 
   resetNewProduct() {
+    this.productEditorStep.set(0);
+    this.productStepError.set('');
     console.log('🔄 Resetting product form...');
     
     try {
