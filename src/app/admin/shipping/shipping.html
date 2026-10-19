@@ -33,19 +33,60 @@
           }
           <p class="text-sm text-base-content/60">كوبونات الشحن المجاني الصالحة تستمر بالعمل حتى عند تعطيل هذا العرض.</p>
         </div>
-        <div class="card bg-base-100 shadow-sm border border-base-300 p-6">
+        <div class="space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h2 class="text-lg font-semibold">أسعار المناطق</h2>
-            <button type="button" class="btn btn-sm btn-outline" (click)="addArea()" [disabled]="config.areas.length >= 100">إضافة منطقة</button>
-          </div>
-          <p class="text-sm text-base-content/60 mb-4">استخدم اسم المنطقة كما يظهر في عنوان التوصيل. حذفها يعيد تطبيق السعر الافتراضي عليها.</p>
-          @for (area of config.areas; track $index; let i = $index) {
-            <div class="grid grid-cols-1 sm:grid-cols-[1fr_10rem_auto] gap-3 items-end mb-4">
-              <label class="form-control gap-1"><span>المنطقة</span><input class="input input-bordered w-full" [id]="'shipping-city-' + i" [name]="'city-' + i" maxlength="100" required [(ngModel)]="area.city" /></label>
-              <label class="form-control gap-1"><span>السعر (د.ك)</span><input class="input input-bordered w-full" [id]="'shipping-fee-' + i" [name]="'fee-' + i" type="number" min="0" max="1000000" step="0.001" required [(ngModel)]="area.fee" /></label>
-              <button type="button" class="btn btn-outline btn-error" (click)="removeArea(i)" [attr.aria-label]="'حذف منطقة ' + area.city">حذف</button>
+            <div>
+              <h2 class="text-lg font-semibold">المحافظات والمناطق</h2>
+              <p class="text-sm text-base-content/60 mt-2">لكل منطقة سعر مستقل داخل محافظتها. المناطق بدون سعر خاص تستخدم السعر الافتراضي.</p>
             </div>
-          } @empty { <p class="py-6 text-base-content/60">لا توجد أسعار خاصة. يُستخدم السعر الافتراضي لكل المناطق.</p> }
+            @if (availableGovernorates().length) {
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="sr-only" for="new-shipping-governorate">المحافظة</label>
+                <select id="new-shipping-governorate" class="select select-bordered" name="newGovernorate" [(ngModel)]="newGovernorate">
+                  <option value="">اختر محافظة</option>
+                  @for (state of availableGovernorates(); track state) { <option [value]="state">{{ state }}</option> }
+                </select>
+                <button type="button" class="btn btn-sm btn-outline" (click)="addGovernorate()" [disabled]="!newGovernorate">إضافة محافظة</button>
+              </div>
+            }
+          </div>
+          @for (governorate of config.governorates; track governorate; let g = $index) {
+            <section class="card bg-base-100 shadow-sm border border-base-300 p-4 md:p-6" [attr.data-governorate]="governorate.state">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                  <h3 class="text-lg font-semibold">{{ governorate.state }}</h3>
+                  <span class="badge badge-outline">{{ governorate.areas.length }} مناطق</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-sm btn-outline" (click)="addArea(g)" [disabled]="governorate.areas.length >= 100">إضافة منطقة</button>
+                  <button type="button" class="btn btn-sm btn-ghost text-error" (click)="removeGovernorate(g)" [attr.aria-label]="'حذف ' + governorate.state + ' وأسعارها'">حذف المحافظة وأسعارها</button>
+                </div>
+              </div>
+              @if (governorate.state === 'مناطق غير مصنفة') {
+                <p class="alert alert-warning mb-4">هذه أسعار سابقة لم تُحدّد محافظاتها. انقل كل منطقة إلى محافظتها؛ يبقى سعرها السابق مستخدماً حتى تصنيفها.</p>
+              }
+              <datalist [id]="'shipping-cities-' + g">
+                @for (city of areasForState(governorate.state); track city) { <option [value]="city"></option> }
+              </datalist>
+              @for (area of governorate.areas; track area; let i = $index) {
+                <div class="grid grid-cols-1 sm:grid-cols-[1fr_10rem_auto] gap-3 items-end mb-4">
+                  <label class="form-control gap-1"><span>المنطقة ضمن {{ governorate.state }}</span><input class="input input-bordered w-full" [attr.list]="'shipping-cities-' + g" [id]="'shipping-city-' + g + '-' + i" [name]="'city-' + g + '-' + i" maxlength="100" required [(ngModel)]="area.city" /></label>
+                  <label class="form-control gap-1"><span>السعر (د.ك)</span><input class="input input-bordered w-full" [id]="'shipping-fee-' + g + '-' + i" [name]="'fee-' + g + '-' + i" type="number" min="0" max="1000000" step="0.001" required [(ngModel)]="area.fee" /></label>
+                  <button type="button" class="btn btn-outline btn-error" (click)="removeArea(g, i)" [attr.aria-label]="'حذف منطقة ' + area.city">حذف</button>
+                </div>
+                @if (governorate.state === 'مناطق غير مصنفة') {
+                  <label class="form-control gap-1 mb-5"><span>نقل المنطقة إلى محافظة</span>
+                    <select class="select select-bordered" [ngModel]="''" [ngModelOptions]="{standalone: true}" (ngModelChange)="moveArea(g, i, $event)">
+                      <option value="">اختر المحافظة</option>
+                      @for (target of config.governorates; track target) {
+                        @if (target !== governorate) { <option [value]="target.state">{{ target.state }}</option> }
+                      }
+                    </select>
+                  </label>
+                }
+              } @empty { <p class="py-5 text-base-content/60">لا توجد أسعار خاصة في هذه المحافظة. يُستخدم السعر الافتراضي لمناطقها.</p> }
+            </section>
+          } @empty { <p class="py-6 text-base-content/60">أضف محافظة ثم مناطقها لتحديد أسعار خاصة. يُستخدم السعر الافتراضي حالياً لكل المناطق.</p> }
         </div>
         <button type="submit" class="btn btn-primary" [disabled]="shippingForm.invalid || saving()">
           @if (saving()) { <span class="loading loading-spinner loading-sm"></span> }

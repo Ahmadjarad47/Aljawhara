@@ -350,14 +350,15 @@
     <!-- Add Product Modal -->
     @if (showAddModal()) {
         <div class="modal modal-open">
-            <div class="modal-box max-w-4xl">
-                <h3 class="font-bold text-lg mb-4">Add New Product</h3>
+            <div class="modal-box max-w-4xl product-editor-modal" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+                <div class="product-editor-heading"><div><h3>{{ t('addProduct') }}</h3><p>{{ currentLanguage() === 'ar' ? 'ابدأ بمعلومات المنتج، ثم حدد سعره وطريقة بيعه.' : 'Start with the product details, then set its price and selling options.' }}</p></div><button type="button" class="product-modal-close" (click)="closeModals()" [attr.aria-label]="t('close')" [disabled]="isLoading()">×</button></div>
+                <h4 class="product-section-label">{{ t('basicInformation') }}</h4>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- English Title -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Product Title (English) *</span>
+                            <span class="label-text">{{ t('productTitleEN') }} *</span>
                         </label>
                         <input 
                             type="text" 
@@ -369,7 +370,7 @@
                     <!-- Arabic Title -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Product Title (Arabic) *</span>
+                            <span class="label-text">{{ t('productTitleAR') }} *</span>
                         </label>
                         <input 
                             type="text" 
@@ -384,7 +385,7 @@
                     <!-- English Description -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Description (English) *</span>
+                            <span class="label-text">{{ t('descriptionEN') }} *</span>
                         </label>
                         <textarea 
                             class="textarea textarea-bordered h-24" 
@@ -395,7 +396,7 @@
                     <!-- Arabic Description -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Description (Arabic) *</span>
+                            <span class="label-text">{{ t('descriptionAR') }} *</span>
                         </label>
                         <textarea 
                             class="textarea textarea-bordered h-24" 
@@ -409,12 +410,12 @@
                     <!-- Subcategory Selection -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Subcategory *</span>
+                            <span class="label-text">{{ t('subcategory') }} *</span>
                         </label>
                         <div class="relative">
                             <input 
                                 type="text" 
-                                placeholder="Search subcategory..." 
+                                [placeholder]="t('searchSubcategory')" 
                                 class="input input-bordered w-full" 
                                 [ngModel]="subCategorySearchTerm()"
                                 (ngModelChange)="onSubCategorySearch($event)"
@@ -438,25 +439,26 @@
                     <!-- Stock Quantity -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Stock Quantity *</span>
+                            <span class="label-text">{{ t('stockQuantity') }} *</span>
                         </label>
                         <input 
                             type="number" 
-                            placeholder="Enter stock quantity" 
+                            [placeholder]="t('enterStockQuantity')" 
                             class="input input-bordered w-full" 
-                            [(ngModel)]="newProduct.totalInStock" />
+                            min="0" step="1" [(ngModel)]="newProduct.totalInStock" />
                     </div>
                 </div>
 
+                <h4 class="product-section-label">{{ t('pricingStock') }}</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <!-- Old Price -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Old Price</span>
+                            <span class="label-text">{{ t('oldPrice') }}</span>
                         </label>
                         <input 
                             type="number" 
-                            step="0.01"
+                            step="0.001"
                             placeholder="Enter old price" 
                             class="input input-bordered w-full" 
                             [(ngModel)]="newProduct.oldPrice" />
@@ -465,11 +467,11 @@
                     <!-- New Price -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">New Price *</span>
+                            <span class="label-text">{{ t('newPrice') }} *</span>
                         </label>
                         <input 
                             type="number" 
-                            step="0.01"
+                            step="0.001"
                             placeholder="Enter new price" 
                             class="input input-bordered w-full" 
                             [(ngModel)]="newProduct.newPrice" />
@@ -478,22 +480,37 @@
                     <!-- In Stock -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Stock Status</span>
+                            <span class="label-text">{{ t('stockStatus') }}</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="newProduct.isInStock">
-                            <option [value]="true">In Stock</option>
-                            <option [value]="false">Out of Stock</option>
+                            <option [ngValue]="true">{{ t('inStock') }}</option>
+                            <option [ngValue]="false">{{ t('outOfStock') }}</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Product Details Section -->
+                <!-- Product options and pricing -->
                 <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Details</h4>
+                    <app-product-options-editor
+                        [variants]="productVariants()"
+                        (variantsChange)="productVariants.set($event)"
+                        [language]="currentLanguage()"
+                        [basePrice]="newProduct.newPrice"
+                        [stockQuantity]="newProduct.totalInStock"
+                        [showErrors]="productOptionsSubmitted()"
+                        [disabled]="isLoading()"
+                        idPrefix="create-product-options">
+                    </app-product-options-editor>
+                </div>
+
+                <!-- Additional descriptive information -->
+                <details class="product-extra-details">
+                    <summary>{{ currentLanguage() === 'ar' ? 'معلومات إضافية عن المنتج (اختياري)' : 'Additional product information (optional)' }}</summary>
+                    <p class="product-field-help">{{ currentLanguage() === 'ar' ? 'مثل المادة أو بلد المنشأ. هذه معلومات للعرض؛ الخيارات التي يختارها العميل وأسعارها تُدخل في القسم أعلاه.' : 'For example: material or country of origin. Customer choices and their prices belong in the section above.' }}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Label (English)</span>
+                                <span class="label-text">{{ t('detailLabelEN') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -503,7 +520,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Label (Arabic)</span>
+                                <span class="label-text">{{ t('detailLabelAR') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -514,7 +531,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Value (English)</span>
+                                <span class="label-text">{{ t('detailValueEN') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -524,7 +541,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Value (Arabic)</span>
+                                <span class="label-text">{{ t('detailValueAR') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -535,7 +552,7 @@
                         </div>
                     </div>
                     <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
-                        Add Detail
+                        {{ t('addDetail') }}
                     </button>
                     
                     <!-- Product Details List -->
@@ -548,120 +565,16 @@
                                         <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
                                         <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
                                     </div>
-                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">Remove</button>
+                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">{{ t('remove') }}</button>
                                 </div>
                             }
                         </div>
                     }
-                </div>
-
-                <!-- Variants Section -->
-                <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Variants</h4>
-                    <div class="bg-base-200 p-4 rounded-lg space-y-4">
-                        <!-- New Variant Form -->
-                        <div class="space-y-3">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="form-control">
-                                    <label class="label">
-                                        <span class="label-text">Variant Name (English) *</span>
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g., Size, Color" 
-                                        class="input input-bordered" 
-                                        [(ngModel)]="newVariant.name" />
-                                </div>
-                                <div class="form-control">
-                                    <label class="label">
-                                        <span class="label-text">Variant Name (Arabic) *</span>
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="مثال: حجم، لون" 
-                                        class="input input-bordered" 
-                                        dir="rtl"
-                                        [(ngModel)]="newVariant.nameAr" />
-                                </div>
-                            </div>
-                            
-                            <!-- Variant Values -->
-                            <div class="space-y-2">
-                                <h5 class="font-semibold">Variant Values:</h5>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    <div class="form-control">
-                                        <input 
-                                            type="text" 
-                                            placeholder="Value (EN)" 
-                                            class="input input-bordered input-sm" 
-                                            [(ngModel)]="newVariantValue.value" />
-                                    </div>
-                                    <div class="form-control">
-                                        <input 
-                                            type="text" 
-                                            placeholder="القيمة (AR)" 
-                                            class="input input-bordered input-sm" 
-                                            dir="rtl"
-                                            [(ngModel)]="newVariantValue.valueAr" />
-                                    </div>
-                                    <div class="form-control">
-                                        <input 
-                                            type="number" 
-                                            step="0.01"
-                                            placeholder="Price" 
-                                            class="input input-bordered input-sm" 
-                                            [(ngModel)]="newVariantValue.price" />
-                                    </div>
-                                </div>
-                                <button (click)="addVariantValue()" class="btn btn-outline btn-sm">
-                                    Add Value
-                                </button>
-                                
-                                <!-- Values List -->
-                                @if (newVariant.values.length > 0) {
-                                <div class="mt-2 space-y-1">
-                                    @for (value of newVariant.values; track $index; let i = $index) {
-                                    <div class="flex items-center justify-between p-2 bg-base-100 rounded text-sm">
-                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}</span>
-                                        <button (click)="newVariant.values.splice(i, 1)" class="btn btn-ghost btn-xs">Remove</button>
-                                    </div>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            
-                            <button (click)="addVariant()" class="btn btn-primary btn-sm">
-                                Add Variant
-                            </button>
-                        </div>
-                        
-                        <!-- Added Variants List -->
-                        @if (productVariants().length > 0) {
-                        <div class="mt-4 space-y-3">
-                            <h5 class="font-semibold">Added Variants:</h5>
-                            @for (variant of productVariants(); track $index; let i = $index) {
-                            <div class="bg-base-100 p-3 rounded">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-semibold">{{variant.name}} / {{variant.nameAr}}</span>
-                                    <button (click)="removeVariant(i)" class="btn btn-ghost btn-xs">Remove</button>
-                                </div>
-                                <div class="space-y-1">
-                                    @for (value of variant.values; track $index; let j = $index) {
-                                    <div class="text-sm opacity-70">
-                                        {{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                            }
-                        </div>
-                        }
-                    </div>
-                </div>
+                </details>
 
                 <!-- Image Upload Section -->
                 <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Images</h4>
+                    <h4 class="font-bold text-md mb-3">{{ t('productImages') }}</h4>
                     <input 
                         type="file" 
                         multiple 
@@ -672,7 +585,7 @@
                     <!-- Selected Images Preview -->
                     @if (selectedImages().length > 0) {
                         <div class="mt-4">
-                            <h5 class="font-semibold mb-2">Selected Images:</h5>
+                            <h5 class="font-semibold mb-2">{{ t('selectedImages') }}</h5>
                             <div class="flex flex-wrap gap-2">
                                 @for (image of selectedImages(); track $index; let i = $index) {
                                     <div class="relative">
@@ -686,12 +599,12 @@
                 </div>
 
                 <div class="modal-action">
-                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
                     <button (click)="addProduct()" [disabled]="isLoading()" class="btn btn-primary">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
                         }
-                        Add Product
+                        {{ t('addProduct') }}
                     </button>
                 </div>
             </div>
@@ -701,14 +614,15 @@
     <!-- Edit Product Modal -->
     @if (showEditModal()) {
         <div class="modal modal-open">
-            <div class="modal-box max-w-4xl">
-                <h3 class="font-bold text-lg mb-4">Edit Product</h3>
+            <div class="modal-box max-w-4xl product-editor-modal" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+                <div class="product-editor-heading"><div><h3>{{ t('editProduct') }}</h3><p>{{ currentLanguage() === 'ar' ? 'ابدأ بمعلومات المنتج، ثم حدد سعره وطريقة بيعه.' : 'Start with the product details, then set its price and selling options.' }}</p></div><button type="button" class="product-modal-close" (click)="closeModals()" [attr.aria-label]="t('close')" [disabled]="isLoading()">×</button></div>
+                <h4 class="product-section-label">{{ t('basicInformation') }}</h4>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- English Title -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Product Title (English) *</span>
+                            <span class="label-text">{{ t('productTitleEN') }} *</span>
                         </label>
                         <input 
                             type="text" 
@@ -720,7 +634,7 @@
                     <!-- Arabic Title -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Product Title (Arabic) *</span>
+                            <span class="label-text">{{ t('productTitleAR') }} *</span>
                         </label>
                         <input 
                             type="text" 
@@ -735,7 +649,7 @@
                     <!-- English Description -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Description (English) *</span>
+                            <span class="label-text">{{ t('descriptionEN') }} *</span>
                         </label>
                         <textarea 
                             class="textarea textarea-bordered h-24" 
@@ -746,7 +660,7 @@
                     <!-- Arabic Description -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Description (Arabic) *</span>
+                            <span class="label-text">{{ t('descriptionAR') }} *</span>
                         </label>
                         <textarea 
                             class="textarea textarea-bordered h-24" 
@@ -760,12 +674,12 @@
                     <!-- Subcategory Selection -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Subcategory *</span>
+                            <span class="label-text">{{ t('subcategory') }} *</span>
                         </label>
                         <div class="relative">
                             <input 
                                 type="text" 
-                                placeholder="Search subcategory..." 
+                                [placeholder]="t('searchSubcategory')" 
                                 class="input input-bordered w-full" 
                                 [ngModel]="editSubCategorySearchTerm()"
                                 (ngModelChange)="onEditSubCategorySearch($event)"
@@ -789,25 +703,26 @@
                     <!-- Stock Quantity -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Stock Quantity *</span>
+                            <span class="label-text">{{ t('stockQuantity') }} *</span>
                         </label>
                         <input 
                             type="number" 
-                            placeholder="Enter stock quantity" 
+                            [placeholder]="t('enterStockQuantity')" 
                             class="input input-bordered w-full" 
-                            [(ngModel)]="editProduct.totalInStock" />
+                            min="0" step="1" [(ngModel)]="editProduct.totalInStock" />
                     </div>
                 </div>
 
+                <h4 class="product-section-label">{{ t('pricingStock') }}</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <!-- Old Price -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Old Price</span>
+                            <span class="label-text">{{ t('oldPrice') }}</span>
                         </label>
                         <input 
                             type="number" 
-                            step="0.01"
+                            step="0.001"
                             placeholder="Enter old price" 
                             class="input input-bordered w-full" 
                             [(ngModel)]="editProduct.oldPrice" />
@@ -816,11 +731,11 @@
                     <!-- New Price -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">New Price *</span>
+                            <span class="label-text">{{ t('newPrice') }} *</span>
                         </label>
                         <input 
                             type="number" 
-                            step="0.01"
+                            step="0.001"
                             placeholder="Enter new price" 
                             class="input input-bordered w-full" 
                             [(ngModel)]="editProduct.newPrice" />
@@ -829,22 +744,37 @@
                     <!-- In Stock -->
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">Stock Status</span>
+                            <span class="label-text">{{ t('stockStatus') }}</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="editProduct.isInStock">
-                            <option [value]="true">In Stock</option>
-                            <option [value]="false">Out of Stock</option>
+                            <option [ngValue]="true">{{ t('inStock') }}</option>
+                            <option [ngValue]="false">{{ t('outOfStock') }}</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Product Details Section -->
+                <!-- Product options and pricing -->
                 <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Details</h4>
+                    <app-product-options-editor
+                        [variants]="editProductVariants()"
+                        (variantsChange)="editProductVariants.set($event)"
+                        [language]="currentLanguage()"
+                        [basePrice]="editProduct.newPrice"
+                        [stockQuantity]="editProduct.totalInStock"
+                        [showErrors]="productOptionsSubmitted()"
+                        [disabled]="isLoading()"
+                        idPrefix="edit-product-options">
+                    </app-product-options-editor>
+                </div>
+
+                <!-- Additional descriptive information -->
+                <details class="product-extra-details">
+                    <summary>{{ currentLanguage() === 'ar' ? 'معلومات إضافية عن المنتج (اختياري)' : 'Additional product information (optional)' }}</summary>
+                    <p class="product-field-help">{{ currentLanguage() === 'ar' ? 'مثل المادة أو بلد المنشأ. هذه معلومات للعرض؛ الخيارات التي يختارها العميل وأسعارها تُدخل في القسم أعلاه.' : 'For example: material or country of origin. Customer choices and their prices belong in the section above.' }}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Label (English)</span>
+                                <span class="label-text">{{ t('detailLabelEN') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -854,7 +784,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Label (Arabic)</span>
+                                <span class="label-text">{{ t('detailLabelAR') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -865,7 +795,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Value (English)</span>
+                                <span class="label-text">{{ t('detailValueEN') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -875,7 +805,7 @@
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Detail Value (Arabic)</span>
+                                <span class="label-text">{{ t('detailValueAR') }}</span>
                             </label>
                             <input 
                                 type="text" 
@@ -886,7 +816,7 @@
                         </div>
                     </div>
                     <button (click)="addProductDetail()" class="btn btn-outline btn-sm mt-2">
-                        Add Detail
+                        {{ t('addDetail') }}
                     </button>
                     
                     <!-- Product Details List -->
@@ -899,131 +829,16 @@
                                         <span class="font-semibold">{{detail.label}}</span> - {{detail.value}}
                                         <div class="text-sm opacity-70" dir="rtl">{{detail.labelAr}} - {{detail.valueAr}}</div>
                                     </div>
-                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">Remove</button>
+                                    <button (click)="removeProductDetail(i)" class="btn btn-ghost btn-xs">{{ t('remove') }}</button>
                                 </div>
                             }
                         </div>
                     }
-                </div>
-
-                <!-- Variants Section -->
-                <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Variants</h4>
-                    <div class="bg-base-200 p-4 rounded-lg space-y-4">
-                        <!-- New Variant Form -->
-                        <div class="space-y-3">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="form-control">
-                                    <label class="label">
-                                        <span class="label-text">Variant Name (English) *</span>
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g., Size, Color" 
-                                        class="input input-bordered" 
-                                        [(ngModel)]="newVariant.name" />
-                                </div>
-                                <div class="form-control">
-                                    <label class="label">
-                                        <span class="label-text">Variant Name (Arabic) *</span>
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="مثال: حجم، لون" 
-                                        class="input input-bordered" 
-                                        dir="rtl"
-                                        [(ngModel)]="newVariant.nameAr" />
-                                </div>
-                            </div>
-                            
-                            <!-- Variant Values -->
-                            <div class="space-y-2">
-                                <h5 class="font-semibold">Variant Values:</h5>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    <div class="form-control">
-                                        <input 
-                                            type="text" 
-                                            placeholder="Value (EN)" 
-                                            class="input input-bordered input-sm" 
-                                            [(ngModel)]="newVariantValue.value" />
-                                    </div>
-                                    <div class="form-control">
-                                        <input 
-                                            type="text" 
-                                            placeholder="القيمة (AR)" 
-                                            class="input input-bordered input-sm" 
-                                            dir="rtl"
-                                            [(ngModel)]="newVariantValue.valueAr" />
-                                    </div>
-                                    <div class="form-control">
-                                        <input 
-                                            type="number" 
-                                            step="0.01"
-                                            placeholder="Price" 
-                                            class="input input-bordered input-sm" 
-                                            [(ngModel)]="newVariantValue.price" />
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button (click)="addEditVariantValue(editProductVariants().length - 1)" 
-                                            [disabled]="editProductVariants().length === 0"
-                                            class="btn btn-outline btn-sm">
-                                        Add Value to Last Variant
-                                    </button>
-                                    <button (click)="addVariantValue()" class="btn btn-outline btn-sm">
-                                        Add Value to New Variant
-                                    </button>
-                                </div>
-                                
-                                <!-- Values List for New Variant -->
-                                @if (newVariant.values.length > 0) {
-                                <div class="mt-2 space-y-1">
-                                    @for (value of newVariant.values; track $index; let i = $index) {
-                                    <div class="flex items-center justify-between p-2 bg-base-100 rounded text-sm">
-                                        <span>{{value.value}} / {{value.valueAr}} - {{(value.price |currency:'KWD')}}</span>
-                                        <button (click)="newVariant.values.splice(i, 1)" class="btn btn-ghost btn-xs">Remove</button>
-                                    </div>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            
-                            <button (click)="addEditVariant()" class="btn btn-primary btn-sm">
-                                Add Variant
-                            </button>
-                        </div>
-                        
-                        <!-- Added Variants List -->
-                        @if (editProductVariants().length > 0) {
-                        <div class="mt-4 space-y-3">
-                            <h5 class="font-semibold">Added Variants:</h5>
-                            @for (variant of editProductVariants(); track $index; let i = $index) {
-                            <div class="bg-base-100 p-3 rounded">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-semibold">{{variant.name}} / {{variant.nameAr}}</span>
-                                    <button (click)="removeEditVariant(i)" class="btn btn-ghost btn-xs">Remove</button>
-                                </div>
-                                <div class="space-y-1">
-                                    @for (value of variant.values; track $index; let j = $index) {
-                                    <div class="flex items-center justify-between text-sm">
-                                        <span class="opacity-70">{{value.value}} / {{value.valueAr}} - {{(value.price |currency)}}</span>
-                                        <button (click)="removeEditVariantValue(i, j)" class="btn btn-ghost btn-xs">Remove</button>
-                                    </div>
-                                    }
-                                </div>
-                                <button (click)="addEditVariantValue(i)" class="btn btn-outline btn-xs mt-2">
-                                    Add Value
-                                </button>
-                            </div>
-                            }
-                        </div>
-                        }
-                    </div>
-                </div>
+                </details>
 
                 <!-- Image Upload Section -->
                 <div class="mt-6">
-                    <h4 class="font-bold text-md mb-3">Product Images</h4>
+                    <h4 class="font-bold text-md mb-3">{{ t('productImages') }}</h4>
                     
                     <!-- Existing Images -->
                     @if (existingImages().length > 0) {
@@ -1101,12 +916,12 @@
                 </div>
 
                 <div class="modal-action">
-                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{ t('cancel') }}</button>
                     <button (click)="updateProduct()" [disabled]="isLoading()" class="btn btn-primary">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
                         }
-                        Update Product
+                        {{ t('updateProduct') }}
                     </button>
                 </div>
             </div>
@@ -1129,7 +944,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Product Images -->
                             <div>
-                                <h4 class="font-semibold mb-3">Product Images</h4>
+                                <h4 class="font-semibold mb-3">{{ t('productImages') }}</h4>
                                 @if (selectedProductDetails()!.images && selectedProductDetails()!.images.length > 0) {
                                     <div class="grid grid-cols-2 gap-2">
                                         @for (image of selectedProductDetails()!.images; track $index) {

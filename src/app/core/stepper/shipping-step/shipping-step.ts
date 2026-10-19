@@ -114,7 +114,7 @@ export class ShippingStepComponent implements OnInit {
 
   calculateDeliveryFee(city?: string | null): number | null {
     const subtotal = this.cartService.getCartItems().reduce((sum, item) => sum + item.price * item.quantity, 0);
-    return this.shippingService.calculateFee(subtotal, city,
+    return this.shippingService.calculateFee(subtotal, city, this.formData.state,
       this.cartService.hasAppliedCoupon() && this.cartService.getAppliedCoupon()?.type === 3);
   }
 

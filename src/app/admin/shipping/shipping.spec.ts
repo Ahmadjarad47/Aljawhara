@@ -17,7 +17,7 @@ describe('Admin shipping settings', () => {
     fixture = TestBed.createComponent(Shipping);
     fixture.detectChanges();
     http.expectOne(url).flush({ currency: 'KWD', defaultFee: 2, freeShippingThreshold: 20, version: 1,
-      areas: [{ city: 'الخيران', fee: 6 }] });
+      governorates: [{ state: 'محافظة الأحمدي', areas: [{ city: 'الخيران', fee: 6 }] }] });
     await fixture.whenStable();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -40,8 +40,8 @@ describe('Admin shipping settings', () => {
       .find(button => (button as HTMLButtonElement).textContent?.includes('إضافة منطقة')) as HTMLButtonElement;
     add.click();
     await fixture.whenStable();
-    await input('city-0', 'المطلاع');
-    await input('fee-0', '7.375');
+    await input('city-0-0', 'الفحيحيل');
+    await input('fee-0-0', '7.375');
     const toggle = fixture.nativeElement.querySelector('[name="freeShippingEnabled"]') as HTMLInputElement;
     toggle.click();
     await fixture.whenStable();
@@ -50,7 +50,7 @@ describe('Admin shipping settings', () => {
     const request = http.expectOne(url);
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual({ currency: 'KWD', defaultFee: 4.125, freeShippingThreshold: null,
-      version: 1, areas: [{ city: 'المطلاع', fee: 7.375 }] });
+      version: 1, governorates: [{ state: 'محافظة الأحمدي', areas: [{ city: 'الفحيحيل', fee: 7.375 }] }] });
     request.flush({ ...request.request.body, version: 2 });
     await fixture.whenStable();
     expect(fixture.componentInstance.success()).toBeTrue();
@@ -66,5 +66,36 @@ describe('Admin shipping settings', () => {
     expect(fixture.componentInstance.settings!.defaultFee).toBe(9);
     expect(fixture.componentInstance.error()).toContain('عدّل مسؤول آخر');
     expect(fixture.componentInstance.saving()).toBeFalse();
+  });
+
+  it('groups areas under their governorates and saves independent fees inside the same governorate', async () => {
+    const ahmadi = fixture.nativeElement.querySelector('[data-governorate="محافظة الأحمدي"]') as HTMLElement;
+    expect(ahmadi.querySelector('h3')!.textContent).toContain('محافظة الأحمدي');
+    expect(ahmadi.querySelector('datalist option[value="الفحيحيل"]')).not.toBeNull();
+    (Array.from(ahmadi.querySelectorAll('button')).find(button => button.textContent?.includes('إضافة منطقة'))!).click();
+    await fixture.whenStable();
+    await input('city-0-1', 'الفحيحيل');
+    await input('fee-0-1', '3.125');
+    const select = fixture.nativeElement.querySelector('#new-shipping-governorate') as HTMLSelectElement;
+    select.value = 'محافظة الجهراء';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    (Array.from(fixture.nativeElement.querySelectorAll('button'))
+      .find(button => (button as HTMLButtonElement).textContent?.includes('إضافة محافظة')) as HTMLButtonElement).click();
+    await fixture.whenStable();
+    const jahra = fixture.nativeElement.querySelector('[data-governorate="محافظة الجهراء"]') as HTMLElement;
+    (Array.from(jahra.querySelectorAll('button')).find(button => button.textContent?.includes('إضافة منطقة'))!).click();
+    await fixture.whenStable();
+    await input('city-1-0', 'المطلاع');
+    await input('fee-1-0', '4.625');
+    fixture.nativeElement.querySelector('button[type="submit"]').click();
+    await fixture.whenStable();
+    const request = http.expectOne(url);
+    expect(request.request.body.governorates).toEqual([
+      { state: 'محافظة الأحمدي', areas: [{ city: 'الخيران', fee: 6 }, { city: 'الفحيحيل', fee: 3.125 }] },
+      { state: 'محافظة الجهراء', areas: [{ city: 'المطلاع', fee: 4.625 }] },
+    ]);
+    request.flush({ ...request.request.body, version: 2 });
+    await fixture.whenStable();
   });
 });

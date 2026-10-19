@@ -1,4 +1,67 @@
 /* Product Management Styles */
+.product-editor-modal {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+}
+
+.product-editor-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-base-300, #dce6e2);
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+}
+
+.product-editor-heading h3 { font-size: 1.3rem; font-weight: 700; margin: 0; }
+.product-editor-heading p, .product-field-help {
+  color: var(--color-base-content, #3c5048);
+  opacity: .7;
+  font-size: .84rem;
+  line-height: 1.8;
+  margin: 8px 0 0;
+}
+
+.product-modal-close {
+  border: 1px solid var(--color-base-300, #dce6e2);
+  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.product-section-label { font-weight: 700; font-size: .95rem; margin: 24px 0 14px; }
+.product-editor-modal .input, .product-editor-modal .select { min-height: 44px; }
+.product-editor-modal .label { padding-block: 8px; font-size: .84rem; }
+.product-extra-details {
+  margin-top: 24px;
+  border: 1px solid var(--color-base-300, #dce6e2);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.product-extra-details summary { font-size: .95rem; font-weight: 600; cursor: pointer; }
+.product-extra-details .product-field-help { margin-bottom: 16px; }
+.product-editor-modal .modal-action {
+  position: sticky;
+  bottom: -24px;
+  margin-inline: -24px;
+  padding: 16px 24px;
+  background: var(--color-base-100, white);
+  border-top: 1px solid var(--color-base-300, #dce6e2);
+  z-index: 5;
+}
+
+@media (max-width: 600px) {
+  .product-editor-modal { width: calc(100vw - 16px); padding: 16px; }
+  .product-editor-modal .modal-action { bottom: -16px; margin-inline: -16px; padding: 14px 16px; }
+}
+
 .product-image-preview {
   transition: all 0.3s ease;
 }

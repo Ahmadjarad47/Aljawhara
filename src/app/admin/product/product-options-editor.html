@@ -1,0 +1,80 @@
+<section class="options-editor" [dir]="language() === 'ar' ? 'rtl' : 'ltr'" [attr.aria-labelledby]="idPrefix() + '-title'">
+  <h4 [id]="idPrefix() + '-title'">{{ t('title') }}</h4>
+  <fieldset class="selling-modes" [disabled]="disabled()">
+    <legend class="sr-only">{{ t('title') }}</legend>
+    <label class="selling-mode" [class.selected]="!variants().length">
+      <input type="radio" [name]="idPrefix() + '-mode'" [checked]="!variants().length" (change)="setMode(false)" value="fixed" />
+      <span><strong>{{ t('fixed') }}</strong><small>{{ t('fixedHint') }}</small></span>
+    </label>
+    <label class="selling-mode" [class.selected]="variants().length > 0">
+      <input type="radio" [name]="idPrefix() + '-mode'" [checked]="variants().length > 0" (change)="setMode(true)" value="options" />
+      <span><strong>{{ t('options') }}</strong><small>{{ t('optionsHint') }}</small></span>
+    </label>
+  </fieldset>
+
+  @if (variants().length) {
+    <div class="options-guide"><p>{{ t('guide') }}</p><p class="example">{{ t('example') }}</p></div>
+    <fieldset class="option-groups" [disabled]="disabled()">
+      <legend class="sr-only">{{ t('options') }}</legend>
+      @for (group of variants(); track $index; let g = $index) {
+        <div class="option-group">
+          <div class="group-heading"><span class="group-number">{{ g + 1 }}</span><strong>{{ groupLabel(group) || t('group') }}</strong>
+            <button type="button" class="text-action remove-action" (click)="removeGroup(g)" [attr.aria-label]="t('removeGroup') + ' ' + (g + 1)">{{ t('removeGroup') }}</button>
+          </div>
+          <label class="option-field"><span>{{ t('group') }} <b aria-hidden="true">*</b></span>
+            <input type="text" [id]="idPrefix() + '-group-' + g" [attr.placeholder]="t('groupPlaceholder')" maxlength="100" required
+              [ngModel]="groupLabel(group)" [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="updateGroup(g, language() === 'ar' ? {nameAr: $event} : {name: $event})"
+              [attr.aria-invalid]="showErrors() && !groupLabel(group).trim()" />
+          </label>
+          <div class="presets">@for (kind of presets; track kind) {
+            <button type="button" class="preset" (click)="setPreset(g, kind)">{{ t(kind) }}</button>
+          }</div>
+          <p class="field-hint">{{ t('priceHint') }}</p>
+          <div class="option-rows">
+            @for (value of group.values; track $index; let i = $index) {
+              <div class="option-row">
+                <label class="option-field"><span>{{ t('choice') }} <b aria-hidden="true">*</b></span>
+                  <input type="text" [id]="idPrefix() + '-choice-' + g + '-' + i" [attr.placeholder]="t('choicePlaceholder')" maxlength="100" required
+                    [ngModel]="choiceLabel(value)" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="updateChoice(g, i, language() === 'ar' ? {valueAr: $event} : {value: $event})"
+                    [attr.aria-invalid]="showErrors() && !choiceLabel(value).trim()" />
+                </label>
+                <label class="option-field"><span>{{ t('price') }} <b aria-hidden="true">*</b></span>
+                  <input type="number" [id]="idPrefix() + '-price-' + g + '-' + i" min="0.01" step="0.001" required dir="ltr"
+                    [ngModel]="value.price" [ngModelOptions]="{standalone: true}" (ngModelChange)="updateChoice(g, i, {price: $event})"
+                    [attr.aria-invalid]="showErrors() && !(value.price >= 0.01)" />
+                </label>
+                <button type="button" class="remove-choice" (click)="removeChoice(g, i)" [attr.aria-label]="t('removeChoice') + ' ' + (i + 1)">×</button>
+              </div>
+            } @empty { <p class="field-hint">{{ t('emptyChoices') }}</p> }
+          </div>
+          <button type="button" class="add-choice" (click)="addChoice(g)">+ {{ t('addChoice') }}</button>
+          <details class="translations"><summary>{{ t('translation') }}</summary><p class="field-hint">{{ t('translationHint') }}</p>
+            <label class="option-field"><span>{{ t('translatedGroup') }}</span>
+              <input type="text" maxlength="100" [ngModel]="language() === 'ar' ? group.name : group.nameAr" [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="updateGroup(g, language() === 'ar' ? {name: $event} : {nameAr: $event})" [dir]="language() === 'ar' ? 'ltr' : 'rtl'" />
+            </label>
+            @for (value of group.values; track $index; let i = $index) {
+              <label class="option-field"><span>{{ t('translatedChoice') }}: {{ choiceLabel(value) || (i + 1) }}</span>
+                <input type="text" maxlength="100" [ngModel]="language() === 'ar' ? value.value : value.valueAr" [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="updateChoice(g, i, language() === 'ar' ? {value: $event} : {valueAr: $event})" [dir]="language() === 'ar' ? 'ltr' : 'rtl'" />
+              </label>
+            }
+          </details>
+          <div class="choices-preview"><h5>{{ t('preview') }}</h5><div class="preview-items">
+            @for (value of group.values; track $index) {
+              @if (choiceLabel(value).trim() && value.price >= 0.01) {
+                <span class="preview-choice">{{ choiceLabel(value) }} <bdi>{{ value.price | number:'1.3-3' }} {{ language() === 'ar' ? 'د.ك' : 'KWD' }}</bdi></span>
+              }
+            }
+          </div><p class="field-hint">{{ t('emptyPreview') }}</p></div>
+        </div>
+      }
+      <button type="button" class="add-group" (click)="addGroup()">+ {{ t('addGroup') }}</button>
+    </fieldset>
+    @if (variants().length > 1) { <p class="multiple-options-note">{{ t('multiple') }}</p> }
+    @if (showErrors() && error()) { <p class="options-error" role="alert">{{ error() }}</p> }
+  }
+  <div class="shared-stock"><strong>{{ t('stock') }} · {{ stockQuantity() }}</strong><p>{{ t('stockHint') }}</p></div>
+</section>

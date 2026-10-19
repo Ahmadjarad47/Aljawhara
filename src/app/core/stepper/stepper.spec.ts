@@ -75,7 +75,8 @@ describe('Single-page checkout', () => {
     checkout = fixture.componentInstance;
     fixture.detectChanges();
     http.expectOne(`${environment.apiUrl}shipping`).flush({ currency: 'KWD', defaultFee: 2, freeShippingThreshold: 20, version: 1,
-      areas: [{ city: 'الخيران', fee: 6 }, { city: 'المطلاع', fee: 4 }] });
+      governorates: [{ state: 'محافظة الأحمدي', areas: [{ city: 'الخيران', fee: 6 }] },
+        { state: 'محافظة الجهراء', areas: [{ city: 'المطلاع', fee: 4 }] }] });
     if (authenticated) http.expectOne(addressUrl).flush({ success: true, data: addresses });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -275,7 +276,7 @@ describe('Single-page checkout', () => {
     const settings = TestBed.inject(ShippingService);
     settings.load().subscribe();
     http.expectOne(`${environment.apiUrl}shipping`).flush({ currency: 'KWD', defaultFee: 4.125,
-      freeShippingThreshold: 10, version: 2, areas: [] });
+      freeShippingThreshold: 10, version: 2, governorates: [] });
     expect(checkout.deliveryFee()).toBe(4.125);
     cart.updateQuantity('item-1', 4);
     expect(checkout.deliveryFee()).toBe(0);
@@ -296,6 +297,26 @@ describe('Single-page checkout', () => {
     expect(confirmButton().disabled).toBeTrue();
     await checkout.confirmOrder();
     http.expectNone(ordersUrl);
+  });
+
+  it('uses the governorate and area together when matching shipping prices', async () => {
+    await render();
+    await fillRequired();
+    TestBed.inject(ShippingService).load().subscribe();
+    http.expectOne(`${environment.apiUrl}shipping`).flush({ currency: 'KWD', defaultFee: 2,
+      freeShippingThreshold: null, version: 2, governorates: [
+        { state: 'محافظة الأحمدي', areas: [{ city: 'الساحل', fee: 3.125 }, { city: 'البعيد', fee: 9.375 }] },
+        { state: 'محافظة الجهراء', areas: [{ city: 'الساحل', fee: 5 }] },
+      ] });
+    const shipping = checkout.shipping()!;
+    shipping.onAddressLocationChange({ addressLine1: 'محافظة الأحمدي — الساحل', city: 'الساحل', state: 'محافظة الأحمدي' });
+    expect(checkout.deliveryFee()).toBe(3.125);
+    shipping.onAddressLocationChange({ addressLine1: 'محافظة الأحمدي — البعيد', city: 'البعيد', state: 'الأحمدي' });
+    expect(checkout.deliveryFee()).toBe(9.375);
+    shipping.onAddressLocationChange({ addressLine1: 'محافظة الجهراء — الساحل', city: 'الساحل', state: 'محافظة الجهراء' });
+    expect(checkout.deliveryFee()).toBe(5);
+    shipping.onAddressLocationChange({ addressLine1: 'الساحل', city: 'الساحل', state: null });
+    expect(checkout.deliveryFee()).toBe(2);
   });
 
   it('selects a combined governorate/area, recalculates delivery, and sends matching geography', async () => {

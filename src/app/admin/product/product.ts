@@ -7,6 +7,8 @@ import { Subcategory } from '../sub-category/subcategory';
 import { ToastService } from '../../services/toast.service';
 import { ImageCompressionService } from '../../services/image-compression.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
+import { ProductOptionsEditor } from './product-options-editor';
+import { optionsError, prepareOptions } from './product-options';
 import { 
   ProductDto, 
   ProductCreateWithFilesDto, 
@@ -14,9 +16,7 @@ import {
   ProductDetailCreateDto,
   ProductFilters,
   ProductVariantCreateDto,
-  ProductVariantValueCreateDto,
-  ProductVariantUpdateDto,
-  ProductVariantValueUpdateDto
+  ProductVariantUpdateDto
 } from './product.models';
 import { CategoryDto } from '../category/category.model';
 import { SubCategoryDto } from '../sub-category/subCategory.models';
@@ -25,7 +25,7 @@ import { Observable, map, switchMap, startWith, catchError, of, combineLatest, B
 @Component({
   selector: 'app-product',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, ProductOptionsEditor],
   templateUrl: './product.html',
   styleUrl: './product.css'
 })
@@ -119,11 +119,11 @@ export class Product implements OnInit, OnDestroy {
       descriptionAR: 'الوصف (عربي)',
       subcategory: 'الفئة الفرعية',
       searchSubcategory: 'البحث في الفئة الفرعية...',
-      stockQuantity: 'كمية المخزون',
+      stockQuantity: 'إجمالي الكمية المتوفرة',
       enterStockQuantity: 'أدخل كمية المخزون',
-      oldPrice: 'السعر القديم',
+      oldPrice: 'السعر قبل التخفيض (اختياري)',
       enterOldPrice: 'أدخل السعر القديم',
-      newPrice: 'السعر الجديد',
+      newPrice: 'سعر البيع الأساسي (د.ك)',
       enterNewPrice: 'أدخل السعر الجديد',
       stockStatus: 'حالة المخزون',
       productDetails: 'تفاصيل المنتج',
@@ -247,11 +247,11 @@ export class Product implements OnInit, OnDestroy {
       descriptionAR: 'Description (Arabic)',
       subcategory: 'Subcategory',
       searchSubcategory: 'Search subcategory...',
-      stockQuantity: 'Stock Quantity',
+      stockQuantity: 'Total available stock',
       enterStockQuantity: 'Enter stock quantity',
-      oldPrice: 'Old Price',
+      oldPrice: 'Price before discount (optional)',
       enterOldPrice: 'Enter old price',
-      newPrice: 'New Price',
+      newPrice: 'Base selling price (KWD)',
       enterNewPrice: 'Enter new price',
       stockStatus: 'Stock Status',
       productDetails: 'Product Details',
@@ -354,16 +354,7 @@ export class Product implements OnInit, OnDestroy {
   // Variants management
   productVariants = signal<ProductVariantCreateDto[]>([]);
   editProductVariants = signal<ProductVariantUpdateDto[]>([]);
-  newVariant: ProductVariantCreateDto = {
-    name: '',
-    nameAr: '',
-    values: []
-  };
-  newVariantValue: ProductVariantValueCreateDto = {
-    value: '',
-    valueAr: '',
-    price: 0
-  };
+  productOptionsSubmitted = signal(false);
   
   // Image management
   selectedImages = signal<File[]>([]);
@@ -660,6 +651,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   async addProduct() {
+    this.productOptionsSubmitted.set(true);
     console.log('=== PRODUCT CREATION STARTED ===');
     console.log('Form validation started...');
     
@@ -692,7 +684,7 @@ export class Product implements OnInit, OnDestroy {
     });
 
     this.newProduct.productDetails = this.productDetails();
-    this.newProduct.variants = currentVariants.length > 0 ? [...currentVariants] : undefined;
+    this.newProduct.variants = currentVariants.length > 0 ? prepareOptions(currentVariants) : undefined;
     
     // Compress images one more time before sending (in case they weren't compressed during selection)
     let imagesToSend = this.selectedImages();
@@ -755,6 +747,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   editProductStart(product: ProductDto) {
+    this.productOptionsSubmitted.set(false);
     this.editProduct = {
       id: product.id,
       title: product.title,
@@ -805,6 +798,7 @@ export class Product implements OnInit, OnDestroy {
   }
 
   async updateProduct() {
+    this.productOptionsSubmitted.set(true);
     if (!this.validateProductForm()) {
       this.toastService.error(this.t('validationFailed'), this.t('fillRequiredFields'));
       return;
@@ -816,7 +810,7 @@ export class Product implements OnInit, OnDestroy {
     console.log('🔍 Edit variants count:', currentEditVariants.length);
 
     this.editProduct.productDetails = this.productDetails();
-    this.editProduct.variants = currentEditVariants.length > 0 ? [...currentEditVariants] : [];
+    this.editProduct.variants = prepareOptions(currentEditVariants);
     
     // Compress images one more time before sending (in case they weren't compressed during selection)
     let imagesToSend = this.selectedImages();
@@ -1201,19 +1195,10 @@ export class Product implements OnInit, OnDestroy {
       // Reset signals
       this.productDetails.set([]);
       this.productVariants.set([]);
+      this.productOptionsSubmitted.set(false);
       this.selectedImages.set([]);
       this.categorySearchTerm.set('');
       this.subCategorySearchTerm.set('');
-      this.newVariant = {
-        name: '',
-        nameAr: '',
-        values: []
-      };
-      this.newVariantValue = {
-        value: '',
-        valueAr: '',
-        price: 0
-      };
       
       console.log('✅ Product form reset completed');
     } catch (error) {
@@ -1312,11 +1297,14 @@ export class Product implements OnInit, OnDestroy {
     }
     
     // Check stock quantity
-    if (product.totalInStock < 0) {
+    if (!Number.isInteger(product.totalInStock) || product.totalInStock < 0) {
       errors.push('Stock quantity cannot be negative');
       console.error('❌ Validation Error: Negative stock quantity:', product.totalInStock);
     }
     
+    const variantError = optionsError(this.showEditModal() ? this.editProductVariants() : this.productVariants(), this.currentLanguage());
+    if (variantError) errors.push(variantError);
+
     // Log validation results
     if (errors.length > 0) {
       console.error('❌ Form validation failed with errors:', errors);
@@ -1373,216 +1361,6 @@ export class Product implements OnInit, OnDestroy {
 
   // Make Math available in template
   Math = Math;
-
-  // Variants management methods
-  addVariant() {
-    if (!this.newVariant.name || !this.newVariant.name.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantNameRequired'));
-      return;
-    }
-    if (!this.newVariant.nameAr || !this.newVariant.nameAr.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantArabicNameRequired'));
-      return;
-    }
-    if (this.newVariant.values.length === 0) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantMustHaveValue'));
-      return;
-    }
-
-    const variants = this.productVariants();
-    // Deep copy the variant and its values
-    const newVariantCopy: ProductVariantCreateDto = {
-      name: this.newVariant.name,
-      nameAr: this.newVariant.nameAr,
-      values: this.newVariant.values.map(v => ({ ...v }))
-    };
-    
-    console.log('🔍 Adding variant:', newVariantCopy);
-    this.productVariants.set([...variants, newVariantCopy]);
-    console.log('✅ Variant added. Total variants:', this.productVariants().length);
-    
-    this.newVariant = {
-      name: '',
-      nameAr: '',
-      values: []
-    };
-    this.toastService.success(this.t('success'), this.t('variantAdded'));
-  }
-
-  removeVariant(index: number) {
-    const variants = this.productVariants();
-    this.productVariants.set(variants.filter((_, i) => i !== index));
-    this.toastService.info('Variant Removed', 'Variant has been removed.');
-  }
-
-  addVariantValue() {
-    if (!this.newVariantValue.value || !this.newVariantValue.value.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('valueRequired'));
-      return;
-    }
-    if (!this.newVariantValue.valueAr || !this.newVariantValue.valueAr.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('arabicValueRequired'));
-      return;
-    }
-    if (!this.newVariantValue.price || this.newVariantValue.price <= 0) {
-      this.toastService.error(this.t('validationFailed'), this.t('priceMustBeGreater'));
-      return;
-    }
-
-    this.newVariant.values.push({ ...this.newVariantValue });
-    this.newVariantValue = {
-      value: '',
-      valueAr: '',
-      price: 0
-    };
-    this.toastService.success(this.t('success'), this.t('valueAdded'));
-  }
-
-  removeVariantValue(variantIndex: number, valueIndex: number) {
-    const variants = this.productVariants();
-    if (variantIndex < 0 || variantIndex >= variants.length) {
-      console.error('❌ Invalid variantIndex:', variantIndex);
-      return;
-    }
-    
-    const variant = variants[variantIndex];
-    // Create a new array with updated variant
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex] = {
-      ...variant,
-      values: variant.values.filter((_, i) => i !== valueIndex)
-    };
-    this.productVariants.set(updatedVariants);
-    this.toastService.info('Value Removed', 'Variant value has been removed.');
-  }
-
-  // Edit variants management methods
-  addEditVariant() {
-    if (!this.newVariant.name || !this.newVariant.name.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantNameRequired'));
-      return;
-    }
-    if (!this.newVariant.nameAr || !this.newVariant.nameAr.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantArabicNameRequired'));
-      return;
-    }
-    if (this.newVariant.values.length === 0) {
-      this.toastService.error(this.t('validationFailed'), this.t('variantMustHaveValue'));
-      return;
-    }
-
-    const variants = this.editProductVariants();
-    // Deep copy the variant and its values
-    const newVariantCopy: ProductVariantUpdateDto = {
-      id: undefined,
-      name: this.newVariant.name,
-      nameAr: this.newVariant.nameAr,
-      values: this.newVariant.values.map(v => ({
-        id: undefined,
-        value: v.value,
-        valueAr: v.valueAr,
-        price: v.price
-      }))
-    };
-    
-    console.log('🔍 Adding edit variant:', newVariantCopy);
-    this.editProductVariants.set([...variants, newVariantCopy]);
-    console.log('✅ Edit variant added. Total variants:', this.editProductVariants().length);
-    
-    this.newVariant = {
-      name: '',
-      nameAr: '',
-      values: []
-    };
-    this.toastService.success(this.t('success'), this.t('variantAdded'));
-  }
-
-  removeEditVariant(index: number) {
-    const variants = this.editProductVariants();
-    this.editProductVariants.set(variants.filter((_, i) => i !== index));
-    this.toastService.info('Variant Removed', 'Variant has been removed.');
-  }
-
-  addEditVariantValue(variantIndex: number) {
-    if (!this.newVariantValue.value || !this.newVariantValue.value.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('valueRequired'));
-      return;
-    }
-    if (!this.newVariantValue.valueAr || !this.newVariantValue.valueAr.trim()) {
-      this.toastService.error(this.t('validationFailed'), this.t('arabicValueRequired'));
-      return;
-    }
-    if (!this.newVariantValue.price || this.newVariantValue.price <= 0) {
-      this.toastService.error(this.t('validationFailed'), this.t('priceMustBeGreater'));
-      return;
-    }
-
-    const variants = this.editProductVariants();
-    console.log('🔍 addEditVariantValue called:', {
-      variantIndex,
-      variantsLength: variants.length,
-      variants: variants
-    });
-    
-    // If variantIndex is invalid, add to newVariant instead
-    if (variantIndex < 0 || variantIndex >= variants.length) {
-      console.log('⚠️ Invalid variantIndex, adding to newVariant.values instead');
-      this.newVariant.values.push({ ...this.newVariantValue });
-      this.newVariantValue = {
-        value: '',
-        valueAr: '',
-        price: 0
-      };
-      this.toastService.success(this.t('success'), this.t('valueAdded'));
-      return;
-    }
-
-    const variant = variants[variantIndex];
-    if (!variant) {
-      console.error('❌ Variant not found at index:', variantIndex);
-      this.toastService.error(this.t('error'), this.t('variantNotFound'));
-      return;
-    }
-    
-    // Create a new array with updated variant
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex] = {
-      ...variant,
-      values: [...variant.values, {
-        id: undefined,
-        value: this.newVariantValue.value,
-        valueAr: this.newVariantValue.valueAr,
-        price: this.newVariantValue.price
-      }]
-    };
-    
-    this.editProductVariants.set(updatedVariants);
-    this.newVariantValue = {
-      value: '',
-      valueAr: '',
-      price: 0
-    };
-    console.log('✅ Value added to variant:', updatedVariants[variantIndex]);
-    this.toastService.success(this.t('success'), this.t('valueAdded'));
-  }
-
-  removeEditVariantValue(variantIndex: number, valueIndex: number) {
-    const variants = this.editProductVariants();
-    if (variantIndex < 0 || variantIndex >= variants.length) {
-      console.error('❌ Invalid variantIndex:', variantIndex);
-      return;
-    }
-    
-    const variant = variants[variantIndex];
-    // Create a new array with updated variant
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex] = {
-      ...variant,
-      values: variant.values.filter((_, i) => i !== valueIndex)
-    };
-    this.editProductVariants.set(updatedVariants);
-    this.toastService.info('Value Removed', 'Variant value has been removed.');
-  }
 
   // Toast management
   onToastClose(toastId: string) {
