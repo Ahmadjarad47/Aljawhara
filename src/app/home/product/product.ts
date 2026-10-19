@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService, ProductFilters, ProductResponse } from './product-service';
 import { CategoryDto, ProductSummaryDto, SubCategoryDto } from './product.models';
-import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, map, catchError, of, Subscription } from 'rxjs';
 import { CartService } from '../../core/service/cart-service';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { ToastService } from '../../services/toast.service';
@@ -36,6 +36,7 @@ export interface Filters {
 export class Product implements OnInit, OnDestroy {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly destroyRef = inject(DestroyRef);
+  private productsRequest?: Subscription;
   public productService = inject(ProductService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
@@ -224,6 +225,7 @@ export class Product implements OnInit, OnDestroy {
   // Signals for reactive state management
   isLoading = signal(false);
   errorMessage = signal('');
+  categoriesError = signal(false);
   
   // Pagination signals
   currentPage = signal(1);
@@ -349,10 +351,13 @@ export class Product implements OnInit, OnDestroy {
   }
 
   loadProducts(filters: ProductFilters) {
+    this.productsRequest?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.products$ = of([]);
+    this.totalCount.set(0);
     
-    this.productService.getProducts(filters).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.productsRequest = this.productService.getProducts(filters).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         const wishlistIds = new Set(
           this.wishlistService.getWishlistItems().map(item => item.id)
@@ -368,8 +373,8 @@ export class Product implements OnInit, OnDestroy {
           this.totalCount.set(products.length);
         } else {
           // Paginated response - backend returns { Products, TotalCount, PageNumber, PageSize }
-          const productsRaw = (response as any).Products || (response as any).products || response.products || [];
-          const totalCount = (response as any).TotalCount || (response as any).totalCount || response.totalCount || 0;
+          const productsRaw = response.products ?? response.Products ?? [];
+          const totalCount = response.totalCount ?? response.TotalCount ?? 0;
           const products = productsRaw.map((p: ProductSummaryDto) => ({
             ...p,
             isInWishlist: wishlistIds.has(p.id)
@@ -388,8 +393,10 @@ export class Product implements OnInit, OnDestroy {
   }
 
   loadCategories() {
+    this.categoriesError.set(false);
     this.categories$ = this.productService.getCategories().pipe(
       catchError(error => {
+        this.categoriesError.set(true);
         console.error('Error loading categories:', error);
         return of([]);
       })

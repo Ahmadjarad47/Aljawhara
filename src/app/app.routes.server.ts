@@ -12,6 +12,9 @@ export const serverRoutes: ServerRoute[] = environment.maintenance.enabled ? [
     },
   },
 ] : [
+  // Catalog HTML must be rendered from the current API, never frozen at build time.
+  { path: '', renderMode: RenderMode.Server, headers: { 'Cache-Control': 'no-store' } },
+  { path: 'product', renderMode: RenderMode.Server, headers: { 'Cache-Control': 'no-store' } },
   { path: 'checkout/success', renderMode: RenderMode.Client },
   { path: 'checkout/failed', renderMode: RenderMode.Client },
   {
@@ -21,7 +24,8 @@ export const serverRoutes: ServerRoute[] = environment.maintenance.enabled ? [
   },
   {
     path: 'product/:id',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Server,
+    headers: { 'Cache-Control': 'no-store' }
   },
   {
     path: '**',

@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment.development';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, shareReplay, tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { map, share, tap } from 'rxjs/operators';
 import { SubCategoryDto, SubCategoryCreateDto, SubCategoryUpdateDto, PagedResult, SubCategoryFilters, ToggleResponse } from './subCategory.models';
 
 @Injectable({
@@ -45,7 +45,12 @@ export class Subcategory {
     }
 
     return this.http.get<PagedResult<SubCategoryDto>>(`${this.api}/subcategories`, { params }).pipe(
-      shareReplay(1),
+      tap({ subscribe: () => {
+        this.sourceSubCategories.next([]);
+        this.sourcePagination.next({ totalCount: 0, totalPages: 0,
+          currentPage: filters.pageNumber ?? 1, pageSize: filters.pageSize ?? 10 });
+      } }),
+      share({ connector: () => new ReplaySubject<PagedResult<SubCategoryDto>>(1), resetOnComplete: true }),
       tap((result) => {
         console.log(result);
         this.sourceSubCategories.next(result.items);
@@ -81,7 +86,7 @@ export class Subcategory {
 
   getAllSubCategories(): Observable<SubCategoryDto[]> {
     return this.http.get<{[key: string]: string}>(`${this.api}/subcategories/all`).pipe(
-      shareReplay(1),
+      share({ connector: () => new ReplaySubject<{[key: string]: string}>(1), resetOnComplete: true }),
       tap(response => console.log('Raw SubCategory API response:', response)),
       map(response => {
         return Object.entries(response).map(([id, name]) => ({

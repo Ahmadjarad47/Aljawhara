@@ -289,7 +289,7 @@
             }
           </div>
           <div class="text-sm hidden sm:block" style="color: rgba(22, 22, 22, 0.7); font-weight: 500;">
-            {{t('showing')}} {{ (getCurrentPage() - 1) * pageSize() + 1 }} - {{ Math.min(getCurrentPage() * pageSize(), getProductsLength()) }} {{t('of')}} {{ getProductsLength() }}
+            {{t('showing')}} {{ getProductsLength() === 0 ? 0 : (getCurrentPage() - 1) * pageSize() + 1 }} - {{ Math.min(getCurrentPage() * pageSize(), getProductsLength()) }} {{t('of')}} {{ getProductsLength() }}
           </div>
         </div>
 
@@ -301,6 +301,9 @@
         }
 
         <!-- Error State -->
+        @if (categoriesError()) {
+          <p role="alert">{{ currentLanguage() === 'ar' ? 'تعذر تحميل الفئات. تحقق من اتصالك.' : 'Unable to load categories. Check your connection.' }}</p>
+        }
         @if (errorMessage()) {
           <div class="alert alert-error">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -768,7 +771,7 @@
         }
 
         <!-- No Results -->
-        @if (getProductsLength() === 0 && !isLoading()) {
+        @if (getProductsLength() === 0 && !isLoading() && !errorMessage()) {
           <div class="text-center py-12">
             <svg class="w-16 h-16 mx-auto text-base-content/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.334A7.96 7.96 0 0012 5c-2.34 0-4.29 1.009-5.824 2.57"></path>

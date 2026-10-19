@@ -1,9 +1,9 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CategoryDto, ProductDto, ProductSummaryDto } from './product.models';
-import { Observable, shareReplay } from 'rxjs';
+import { defer, finalize, Observable, shareReplay } from 'rxjs';
 import { RatingDto } from '../../admin/product/product.models';
 
 export interface ProductFilters {
@@ -39,30 +39,25 @@ export class ProductService {
   private readonly destroyRef = inject(DestroyRef);
   api = environment.apiUrl;
   http = inject(HttpClient);
-  private readonly categoriesCacheDuration = 5 * 60 * 1000;
-  private readonly categoriesCache = new Map<boolean, {
-    expiresAt: number;
-    request$: Observable<CategoryDto[]>;
-  }>();
+  private readonly categoriesRequests = new Map<string, Observable<CategoryDto[]>>();
 
   getCategories(includeSubCategories: boolean = true): Observable<CategoryDto[]> {
-    const cached = this.categoriesCache.get(includeSubCategories);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.request$;
-    }
+    return defer(() => {
+      const key = `${this.api}|${includeSubCategories}`;
+      const pending = this.categoriesRequests.get(key);
+      if (pending) return pending;
 
-    const params = new HttpParams().set('includeSubCategories', includeSubCategories.toString());
-    // Navbar and all desktop/mobile filter subscriptions share the same HTTP request.
-    const request$ = this.http.get<CategoryDto[]>(`${this.api}Categories`, { params }).pipe(
-      // Stop shared requests and retry delays when the SSR application is destroyed.
-      takeUntilDestroyed(this.destroyRef),
-      shareReplay({ bufferSize: 1, refCount: false })
-    );
-    this.categoriesCache.set(includeSubCategories, {
-      expiresAt: Date.now() + this.categoriesCacheDuration,
-      request$
+      const params = new HttpParams().set('includeSubCategories', includeSubCategories.toString());
+      // Coalesce concurrent navbar/filter requests, but never replay a completed
+      // catalog snapshot on a later visit (including a database change at the same URL).
+      const request$ = this.http.get<CategoryDto[]>(`${this.api}Categories`, { params }).pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.categoriesRequests.delete(key)),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+      this.categoriesRequests.set(key, request$);
+      return request$;
     });
-    return request$;
   }
 
   getProducts(filters?: ProductFilters): Observable<ProductSummaryDto[] | ProductResponse> {
@@ -71,8 +66,8 @@ export class ProductService {
     if (filters) {
       if (filters.categoryId) params = params.set('categoryId', filters.categoryId.toString());
       if (filters.subCategoryId) params = params.set('subCategoryId', filters.subCategoryId.toString());
-      if (filters.minPrice) params = params.set('minPrice', filters.minPrice.toString());
-      if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice.toString());
+      if (filters.minPrice !== undefined) params = params.set('minPrice', filters.minPrice.toString());
+      if (filters.maxPrice !== undefined) params = params.set('maxPrice', filters.maxPrice.toString());
       if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
       if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
       if (filters.inStock !== undefined) params = params.set('inStock', filters.inStock.toString());

@@ -2,8 +2,9 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter, withComponentInputBinding, withViewTransitions, withPreloading, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { catalogFreshnessInterceptor, isCatalogUrl } from './core/interceptors/catalog-freshness.interceptor';
 import { SelectivePreloadingStrategy } from './core/strategies/selective-preloading.strategy';
 
 export const appConfig: ApplicationConfig = {
@@ -28,13 +29,14 @@ export const appConfig: ApplicationConfig = {
     
     // SSR optimizations
     provideClientHydration(
-      withEventReplay() // Replay user events after hydration for better UX
+      withEventReplay(), // Replay user events after hydration for better UX
+      withHttpTransferCacheOptions({ filter: request => !isCatalogUrl(request.url) })
     ),
     
     // HTTP Client with security and performance optimizations
     provideHttpClient(
       withFetch(), // Use Fetch API instead of XHR for better performance and modern browser support
-      withInterceptors([authInterceptor]) // Auth interceptor with retry logic and token refresh
+      withInterceptors([authInterceptor, catalogFreshnessInterceptor])
     ),
   ]
 };

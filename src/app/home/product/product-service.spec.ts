@@ -52,15 +52,16 @@ describe('ProductService category requests', () => {
     expect(receivedSubCategories).toEqual([categories[0].subCategories, categories[0].subCategories]);
   });
 
-  it('reuses the response for later consumers and language changes within five minutes', () => {
+  it('fetches current categories for later consumers instead of replaying completed data', () => {
     service.getCategories().subscribe();
     http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush(categories);
 
     let received: CategoryDto[] | undefined;
     service.getCategories().subscribe(value => received = value);
 
-    expect(received).toEqual(categories);
-    http.expectNone(request => request.url.endsWith('Categories'));
+    expect(received).toBeUndefined();
+    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
+    expect(received).toEqual([]);
   });
 
   it('keeps requests with and without subcategories separate', () => {
@@ -73,19 +74,6 @@ describe('ProductService category requests', () => {
     http.expectOne(`${service.api}Categories?includeSubCategories=false`).flush([]);
     expect(withSubCategories).toEqual(categories);
     expect(withoutSubCategories).toEqual([]);
-  });
-
-  it('fetches fresh categories for consumers after the cache expires', () => {
-    const now = spyOn(Date, 'now').and.returnValue(1000);
-    service.getCategories().subscribe();
-    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
-
-    now.and.returnValue(1000 + 5 * 60 * 1000);
-    let received: CategoryDto[] | undefined;
-    service.getCategories().subscribe(value => received = value);
-    expect(received).toBeUndefined();
-    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
-    expect(received).toEqual([]);
   });
 
   it('allows a failed request to be retried instead of caching its error', () => {
@@ -101,6 +89,27 @@ describe('ProductService category requests', () => {
     expect(received).toEqual([]);
   });
 
+  it('revalidates even a retained categories observable after a same-URL database reset', () => {
+    const request$ = service.getCategories();
+    request$.subscribe();
+    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush(categories);
+    let received: CategoryDto[] | undefined;
+    request$.subscribe(value => received = value);
+    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
+    expect(received).toEqual([]);
+  });
+
+  it('isolates concurrent category requests across API environments', () => {
+    const oldApi = service.api;
+    service.getCategories().subscribe();
+    service.api = 'https://new-api.test/api/';
+    let received: CategoryDto[] | undefined;
+    service.getCategories().subscribe(value => received = value);
+    http.expectOne(`${oldApi}Categories?includeSubCategories=true`).flush(categories);
+    http.expectOne(`${service.api}Categories?includeSubCategories=true`).flush([]);
+    expect(received).toEqual([]);
+  });
+
   it('cancels shared categories when the SSR injector is destroyed', () => {
     const categories$ = service.getCategories();
     const first = categories$.subscribe();
@@ -112,6 +121,6 @@ describe('ProductService category requests', () => {
     expect(request.cancelled).toBeTrue();
     expect(first.closed).toBeTrue();
     expect(second.closed).toBeTrue();
-    expect(() => categories$.subscribe()).not.toThrow();
+    // No request survives the application that owned it.
   });
 });

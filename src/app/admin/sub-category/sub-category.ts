@@ -6,7 +6,7 @@ import { SubCategoryDto, SubCategoryCreateDto, SubCategoryUpdateDto, PagedResult
 import { ServiceCategory } from '../category/service-category';
 import { CategoryDto } from '../category/category.model';
 import { ToastService } from '../../services/toast.service';
-import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sub-category',
@@ -316,14 +316,18 @@ export class SubCategory implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.catalogRequest?.unsubscribe();
     if (this.languageCheckInterval) {
       clearInterval(this.languageCheckInterval);
     }
   }
   
+  private catalogRequest?: Subscription;
+
   loadSubCategories(filters: SubCategoryFilters) {
     this.isLoading.set(true);
-    this.subCategoryService.getSubCategories(filters).subscribe({
+    this.catalogRequest?.unsubscribe();
+    this.catalogRequest = this.subCategoryService.getSubCategories(filters).subscribe({
       next: () => {
         this.isLoading.set(false);
       },

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { tap, map, share } from 'rxjs/operators';
 import { 
   ProductDto, 
   ProductCreateWithFilesDto, 
@@ -65,7 +65,12 @@ export class ServiceProduct {
     }
 
     return this.http.get<PagedResult<ProductDto>>(`${this.api}/products`, { params }).pipe(
-      shareReplay(1),
+      tap({ subscribe: () => {
+        this.sourceProducts.next([]);
+        this.sourcePagination.next({ totalCount: 0, totalPages: 0,
+          currentPage: filters.pageNumber ?? 1, pageSize: filters.pageSize ?? 10 });
+      } }),
+      share({ connector: () => new ReplaySubject<PagedResult<ProductDto>>(1), resetOnComplete: true }),
       tap((result) => {
         console.log(result);
         this.sourceProducts.next(result.items);

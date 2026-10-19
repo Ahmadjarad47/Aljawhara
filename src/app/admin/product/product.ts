@@ -20,7 +20,7 @@ import {
 } from './product.models';
 import { CategoryDto } from '../category/category.model';
 import { SubCategoryDto } from '../sub-category/subCategory.models';
-import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-product',
@@ -609,9 +609,12 @@ export class Product implements OnInit, OnDestroy {
     }
   }
   
+  private catalogRequest?: Subscription;
+
   loadProducts(filters: ProductFilters) {
     this.isLoading.set(true);
-    this.productService.getProducts(filters).subscribe({
+    this.catalogRequest?.unsubscribe();
+    this.catalogRequest = this.productService.getProducts(filters).subscribe({
       next: () => {
         this.isLoading.set(false);
       },
@@ -1288,6 +1291,7 @@ export class Product implements OnInit, OnDestroy {
 
   // Clean up blob URLs when component is destroyed
   ngOnDestroy() {
+    this.catalogRequest?.unsubscribe();
     this.imagePreviewCache.forEach((blobUrl) => {
       URL.revokeObjectURL(blobUrl);
     });

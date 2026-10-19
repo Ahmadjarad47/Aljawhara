@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product/product-service';
 import { ProductDto, ProductSummaryDto } from '../product/product.models';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, Subscription } from 'rxjs';
 import { CartService } from '../../core/service/cart-service';
 import { ShippingService } from '../../core/service/shipping.service';
 import { WishlistService } from '../../core/service/wishlist-service';
@@ -428,14 +428,22 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   loadProduct(id: number) {
+    this.productRequest?.unsubscribe();
+    this.relatedRequest?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.product.set(null);
+    this.currentPrice.set(0);
+    this.originalRelatedProducts = [];
+    this.relatedProducts = [];
 
-    this.productService.getProductById(id).pipe(
+    this.productRequest = this.productService.getProductById(id).pipe(
       takeUntilDestroyed(this.destroyRef),
       catchError(error => {
         console.error('Error loading product:', error);
-        this.errorMessage.set(this.t('failedToAdd')); // reuse generic error text
+        this.errorMessage.set(this.currentLanguage() === 'ar'
+          ? 'تعذر تحميل المنتج. تحقق من اتصالك وحاول مجدداً.'
+          : 'Unable to load product. Check your connection and try again.');
         this.isLoading.set(false);
         return of(null);
       })
@@ -918,8 +926,12 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   // Load related products
+  private productRequest?: Subscription;
+  private relatedRequest?: Subscription;
+
   loadRelatedProducts(subCategoryId: number, currentProductId: number) {
-    this.productService.getRandomProductsBySubCategory(subCategoryId, 3).pipe(
+    this.relatedRequest?.unsubscribe();
+    this.relatedRequest = this.productService.getRandomProductsBySubCategory(subCategoryId, 3).pipe(
       takeUntilDestroyed(this.destroyRef),
       catchError(error => {
         console.error('Error loading related products:', error);

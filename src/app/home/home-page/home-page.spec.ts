@@ -2,11 +2,12 @@ import { ChangeDetectorRef, PLATFORM_ID, provideZonelessChangeDetection, signal 
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { CartService } from '../../core/service/cart-service';
 import { WishlistService } from '../../core/service/wishlist-service';
 import { ProductService } from '../product/product-service';
 import { HomePage } from './home-page';
+import { environment } from '../../../environments/environment';
 
 describe('HomePage browser state and server rendering', () => {
   let page: HomePage;
@@ -65,12 +66,12 @@ describe('HomePage browser state and server rendering', () => {
     expect(page.isLoadingProducts).toBeFalse();
   });
 
-  it('restores language, wishlist visibility, and cached products in the browser', () => {
+  it('preserves language and wishlist visibility but replaces 581 cached products with the empty API result', () => {
     storage.set('language', 'en');
     storage.set('showWishlist', 'true');
     storage.set('home_featured_products', JSON.stringify({
       timestamp: Date.now(),
-      data: [{ id: 1, title: 'Cup', titleAr: 'كوب', oldPrice: 2, newPrice: 1 }]
+      data: Array.from({ length: 581 }, (_, id) => ({ id, title: 'Cup', titleAr: 'كوب', oldPrice: 2, newPrice: 1 }))
     }));
     page = createPage('browser');
     page.ngOnInit();
@@ -78,8 +79,84 @@ describe('HomePage browser state and server rendering', () => {
     expect(page.currentLanguage()).toBe('en');
     expect(page.showWishlist()).toBeTrue();
     expect(storage.has('showWishlist')).toBeFalse();
-    expect(page.featuredProducts[0].name).toBe('Cup');
-    expect(products).not.toHaveBeenCalled();
+    expect(page.featuredProducts).toEqual([]);
+    expect(products).toHaveBeenCalledTimes(1);
+    expect(storage.has('home_featured_products')).toBeFalse();
+  });
+
+  it('clears rendered cards after a successful empty paginated response', () => {
+    page = createPage('browser');
+    products.and.returnValue(of([{ id: 1, title: 'Cup', oldPrice: 2, newPrice: 1 }]));
+    page.loadFeaturedProducts();
+    expect(page.featuredProducts.length).toBe(1);
+
+    products.and.returnValue(of({ products: [], totalCount: 0 }));
+    page.loadFeaturedProducts();
+    expect(page.featuredProducts).toEqual([]);
+  });
+
+  it('ignores stale snapshots again on reload and preserves all customer storage', () => {
+    const protectedKeys = ['auth_token', 'refresh_token', 'user_data', 'cart_items', 'wishlist_items', 'language', 'theme', 'checkout_data'];
+    protectedKeys.forEach(key => storage.set(key, key === 'language' ? 'en' : 'keep-me'));
+    for (const key of ['home_featured_products', 'home_categories_with_images', 'home_customer_satisfaction', 'home_latest_reviews']) {
+      storage.set(key, JSON.stringify({ timestamp: Date.now() + 86400000, data: [{ id: 1 }] }));
+    }
+    page = createPage('browser');
+    page.ngOnInit();
+    expect(page.featuredProducts).toEqual([]);
+    expect(page.categoriesWithImages).toEqual([]);
+    page.ngOnDestroy();
+    page = TestBed.runInInjectionContext(() => new HomePage({} as Router, { getProducts: products } as unknown as ProductService));
+    page.ngOnInit();
+    expect(products).toHaveBeenCalledTimes(2);
+    expect(page.featuredProducts).toEqual([]);
+    protectedKeys.forEach(key => expect(storage.get(key)).toBe(key === 'language' ? 'en' : 'keep-me'));
+  });
+
+  it('loads an empty catalog in a fresh private-session equivalent without writing catalog storage', () => {
+    page = createPage('browser');
+    page.ngOnInit();
+    expect(products).toHaveBeenCalledTimes(1);
+    expect(page.featuredProducts).toEqual([]);
+    expect(page.productsLoadFailed).toBeFalse();
+    expect(storage.has('home_featured_products')).toBeFalse();
+    expect(storage.has('home_categories_with_images')).toBeFalse();
+  });
+
+  it('reports offline failures separately and never restores old cards', () => {
+    page = createPage('browser');
+    products.and.returnValue(of([{ id: 1, title: 'Cup', newPrice: 1 }]));
+    page.loadFeaturedProducts();
+    expect(page.featuredProducts.length).toBe(1);
+    products.and.returnValue(throwError(() => new Error('offline')));
+    page.loadFeaturedProducts();
+    expect(page.featuredProducts).toEqual([]);
+    expect(page.productsLoadFailed).toBeTrue();
+    expect(page.isLoadingProducts).toBeFalse();
+    products.and.returnValue(of([]));
+    page.loadFeaturedProducts();
+    expect(page.productsLoadFailed).toBeFalse();
+  });
+
+  it('cancels earlier featured requests so an older response cannot overwrite an empty catalog', () => {
+    page = createPage('browser');
+    const old = new Subject<any>();
+    products.and.returnValue(old);
+    page.loadFeaturedProducts();
+    products.and.returnValue(of([]));
+    page.loadFeaturedProducts();
+    expect(old.observed).toBeFalse();
+    old.next([{ id: 1, title: 'Stale', newPrice: 1 }]);
+    expect(page.featuredProducts).toEqual([]);
+  });
+
+  it('invalidates the remaining hero cache when the API environment or cache schema changes', () => {
+    storage.set('home_hero_slides', JSON.stringify({ timestamp: Date.now(), version: 2,
+      apiUrl: 'https://old-api.test/api/', data: { heroSlidesAr: [{ title: 'Old database' }], heroSlidesEn: [] } }));
+    page = createPage('browser');
+    page.ngOnInit();
+    expect(httpGet.calls.allArgs().some(args => args[0] === `${environment.apiUrl}Carousels`)).toBeTrue();
+    expect(page.heroSlidesAr).toEqual([]);
   });
 
   it('updates language across tabs and in the same tab, then stops watching on destroy', () => {

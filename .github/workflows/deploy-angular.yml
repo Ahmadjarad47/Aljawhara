@@ -21,7 +21,12 @@ jobs:
       - name: Install dependencies and build Angular
         run: |
           npm ci
-          npm run build  --configuration=production
+          npm run build -- --configuration=production
+
+      - name: Prepare current catalog shell for static hosting
+        # Home/catalog routes are no longer prerendered with build-time API data.
+        # This deployment serves browser files through Nginx rather than Node SSR.
+        run: cp dist/Aljawhara.new.Angular/browser/index.csr.html dist/Aljawhara.new.Angular/browser/index.html
 
       - name: Clean old files on server
         uses: appleboy/ssh-action@v1.1.0

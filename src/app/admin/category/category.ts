@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServiceCategory } from './service-category';
 import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters, CategoryCreateWithFileDto, CategoryUpdateWithFileDto } from './category.model';
-import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, map, switchMap, startWith, catchError, of, combineLatest, BehaviorSubject, Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 
@@ -299,14 +299,18 @@ export class Category implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.catalogRequest?.unsubscribe();
     if (this.languageCheckInterval) {
       clearInterval(this.languageCheckInterval);
     }
   }
   
+  private catalogRequest?: Subscription;
+
   loadCategories(filters: CategoryFilters) {
     this.isLoading.set(true);
-    this.categoryService.getCategories(filters).subscribe({
+    this.catalogRequest?.unsubscribe();
+    this.catalogRequest = this.categoryService.getCategories(filters).subscribe({
       next: () => {
         this.isLoading.set(false);
       },

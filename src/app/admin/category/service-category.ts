@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { tap, map, share } from 'rxjs/operators';
 import { CategoryDto, CategoryCreateDto, CategoryUpdateDto, PagedResult, CategoryFilters, ToggleResponse, CategoryCreateWithFileDto, CategoryUpdateWithFileDto } from './category.model';
 
 @Injectable({
@@ -39,7 +39,12 @@ export class ServiceCategory {
     }
 
     return this.http.get<PagedResult<CategoryDto>>(`${this.api}/categories`, { params }).pipe(
-      shareReplay(1),
+      tap({ subscribe: () => {
+        this.sourceCategory.next([]);
+        this.sourcePagination.next({ totalCount: 0, totalPages: 0,
+          currentPage: filters.pageNumber ?? 1, pageSize: filters.pageSize ?? 10 });
+      } }),
+      share({ connector: () => new ReplaySubject<PagedResult<CategoryDto>>(1), resetOnComplete: true }),
       tap((result) => {
         console.log(result);
         this.sourceCategory.next(result.items);
@@ -56,7 +61,7 @@ export class ServiceCategory {
   // Get all categories (for dropdowns, etc.)
   getAllCategories(): Observable<CategoryDto[]> {
     return this.http.get<{[key: string]: string}>(`${this.api}/categories/all`).pipe(
-      shareReplay(1),
+      share({ connector: () => new ReplaySubject<{[key: string]: string}>(1), resetOnComplete: true }),
       tap(response => console.log('Raw API response:', response)),
       map(response => {
         // Transform the object response to CategoryDto array

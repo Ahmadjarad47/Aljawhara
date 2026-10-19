@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, OnDestroy, PLATFORM_ID, signal, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, DestroyRef, PLATFORM_ID, signal, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 import { ProductService, ProductResponse } from '../product/product-service';
 import { ProductSummaryDto } from '../product/product.models';
 import { WishlistService } from '../../core/service/wishlist-service';
@@ -14,7 +15,7 @@ import {
   CustomerSatisfactionDto,
   ProductRatingSummaryDto
 } from '../../admin/carousel/carousel.models';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 type CategoryWithImageDto = {
   id: number;
@@ -38,6 +39,8 @@ export class HomePage implements OnInit, OnDestroy {
   readonly shipping = inject(ShippingService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly destroyRef = inject(DestroyRef);
+  private featuredRequest?: Subscription;
   private languageInterval?: ReturnType<typeof setInterval>;
   private countdownInterval?: ReturnType<typeof setInterval>;
   private readonly apiOrigin = new URL(environment.apiUrl).origin;
@@ -208,6 +211,8 @@ export class HomePage implements OnInit, OnDestroy {
   // Loading states
   isLoadingCategories: boolean = false;
   isLoadingProducts: boolean = true;
+  productsLoadFailed = false;
+  categoriesLoadFailed = false;
   isLoadingStats: boolean = false;
   isLoadingReviews: boolean = false;
 
@@ -334,11 +339,13 @@ export class HomePage implements OnInit, OnDestroy {
       if (!raw) {
         return null;
       }
-      const parsed = JSON.parse(raw) as { timestamp: number; data: T };
-      if (!parsed || typeof parsed.timestamp !== 'number') {
+      const parsed = JSON.parse(raw) as { timestamp: number; apiUrl: string; version: number; data: T };
+      if (!parsed || !Number.isFinite(parsed.timestamp) || parsed.apiUrl !== environment.apiUrl || parsed.version !== 2) {
+        this.removeStorage(key);
         return null;
       }
-      const isExpired = Date.now() - parsed.timestamp > this.CACHE_TTL;
+      const age = Date.now() - parsed.timestamp;
+      const isExpired = age < 0 || age >= this.CACHE_TTL;
       if (isExpired) {
         this.removeStorage(key);
         return null;
@@ -356,6 +363,8 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       const wrapped = {
         timestamp: Date.now(),
+        apiUrl: environment.apiUrl,
+        version: 2,
         data
       };
       window.localStorage.setItem(key, JSON.stringify(wrapped));
@@ -374,6 +383,9 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this.isBrowser) {
+      // Retire only known legacy catalog snapshots. User-owned storage is untouched.
+      ['home_featured_products', 'home_categories_with_images', 'home_customer_satisfaction', 'home_latest_reviews']
+        .forEach(key => this.removeStorage(key));
       this.initializeBrowserState();
       this.startCountdown();
       this.startCarousel();
@@ -488,24 +500,19 @@ export class HomePage implements OnInit, OnDestroy {
 
   private loadCategoriesWithImages() {
     this.isLoadingCategories = true;
-
-    const cached = this.getCache<CategoryWithImageDto[]>('home_categories_with_images');
-    if (cached && Array.isArray(cached) && cached.length > 0) {
-      this.categoriesWithImages = cached;
-      this.isLoadingCategories = false;
-      return;
-    }
+    this.categoriesLoadFailed = false;
+    this.categoriesWithImages = [];
 
     this.http.get<CategoryWithImageDto[]>(`${environment.apiUrl}Carousels/categories-with-images`)
       .pipe(finalize(() => this.changeDetector.markForCheck())).subscribe({
       next: (categories) => {
         this.categoriesWithImages = Array.isArray(categories) ? categories : [];
-        this.setCache('home_categories_with_images', this.categoriesWithImages);
         this.isLoadingCategories = false;
       },
       error: (error) => {
         console.error('[HomePage] Error loading categories with images:', error);
         this.categoriesWithImages = [];
+        this.categoriesLoadFailed = true;
         this.isLoadingCategories = false;
       }
     });
@@ -532,13 +539,7 @@ export class HomePage implements OnInit, OnDestroy {
   private loadCustomerSatisfaction() {
     this.isLoadingStats = true;
 
-    // Try cache first
-    const cachedStats = this.getCache<CustomerSatisfactionDto>('home_customer_satisfaction');
-    if (cachedStats) {
-      this.customerSatisfaction = cachedStats;
-      this.isLoadingStats = false;
-      return;
-    }
+    this.customerSatisfaction = null;
 
     this.http
       .get<CustomerSatisfactionDto>(`${environment.apiUrl}Carousels/customer-satisfaction`)
@@ -546,7 +547,6 @@ export class HomePage implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.customerSatisfaction = data;
-          this.setCache('home_customer_satisfaction', data);
           this.isLoadingStats = false;
         },
         error: (error) => {
@@ -560,13 +560,7 @@ export class HomePage implements OnInit, OnDestroy {
   private loadLatestReviews() {
     this.isLoadingReviews = true;
 
-    // Try cache first
-    const cachedReviews = this.getCache<ProductRatingSummaryDto[]>('home_latest_reviews');
-    if (cachedReviews) {
-      this.latestReviews = cachedReviews;
-      this.isLoadingReviews = false;
-      return;
-    }
+    this.latestReviews = [];
 
     this.http
       .get<ProductRatingSummaryDto[]>(`${environment.apiUrl}Carousels/latest-third-reviews`)
@@ -574,7 +568,6 @@ export class HomePage implements OnInit, OnDestroy {
       .subscribe({
         next: (reviews) => {
           this.latestReviews = Array.isArray(reviews) ? reviews : [];
-          this.setCache('home_latest_reviews', this.latestReviews);
           this.isLoadingReviews = false;
         },
         error: (error) => {
@@ -586,36 +579,30 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Load featured products from API
   loadFeaturedProducts() {
+    this.featuredRequest?.unsubscribe();
     this.isLoadingProducts = true;
-    // Try cache first
-    const cachedProducts = this.getCache<ProductSummaryDto[]>('home_featured_products');
-    if (cachedProducts && cachedProducts.length > 0) {
-      // Restore originalProducts and derived featuredProducts
-      this.originalProducts = cachedProducts;
-      this.updateProductsLanguage();
-      this.isLoadingProducts = false;
-      return;
-    }
+    this.productsLoadFailed = false;
+    this.originalProducts = [];
+    this.updateProductsLanguage();
 
-    this.productService
+    this.featuredRequest = this.productService
       .getProducts({
         pageNumber: 1,
         pageSize: 8,
         sortBy: 'highRating' // Get highest rated products
       })
-      .pipe(finalize(() => this.changeDetector.markForCheck()))
+      .pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.changeDetector.markForCheck()))
       .subscribe({
         next: (response) => {
           const products = this.extractProducts(response);
           // Store original products for language switching
           this.originalProducts = products;
-          // Cache original API products (not transformed) for 5 minutes
-          this.setCache('home_featured_products', products);
           this.updateProductsLanguage();
           this.isLoadingProducts = false;
         },
         error: (error) => {
           console.error('Error loading products:', error);
+          this.productsLoadFailed = true;
           this.isLoadingProducts = false;
         }
       });
@@ -623,9 +610,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Update products language when language changes (without re-fetching from API)
   private updateProductsLanguage() {
-    if (this.originalProducts.length > 0) {
-      this.featuredProducts = this.originalProducts.map(product => this.transformProduct(product));
-    }
+    this.featuredProducts = this.originalProducts.map(product => this.transformProduct(product));
   }
 
   // Extract products from response (handles both array and object responses)
@@ -633,7 +618,7 @@ export class HomePage implements OnInit, OnDestroy {
     if (Array.isArray(response)) {
       return response;
     }
-    return response.Products || response.products || [];
+    return response.products ?? response.Products ?? [];
   }
 
   // Trim product descriptions so cards stay compact
