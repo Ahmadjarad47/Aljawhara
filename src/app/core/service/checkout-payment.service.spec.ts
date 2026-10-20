@@ -86,4 +86,16 @@ describe('Checkout payment contract', () => {
     third.flush({ orderId: 8, initializationStatus: 1 });
     http.expectNone(request => request.url.includes('webhook'));
   });
+
+  it('reads preparation state by default and requests verification only when explicitly asked', () => {
+    service.getStatus(8).subscribe();
+    const preparation = http.expectOne(`${api}/8/payment-status`);
+    expect(preparation.request.params.has('verify')).toBeFalse();
+    preparation.flush({ orderId: 8, initializationStatus: 2, paymentUrl: 'https://sadad.test/pay/9001' });
+
+    service.getStatus(8, true).subscribe();
+    const returned = http.expectOne(`${api}/8/payment-status?verify=true`);
+    expect(returned.request.params.get('verify')).toBe('true');
+    returned.flush({ orderId: 8, initializationStatus: 5 });
+  });
 });

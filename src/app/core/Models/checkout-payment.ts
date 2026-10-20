@@ -23,4 +23,6 @@ export interface OrderPaymentStatus {
   initializationStatus: PaymentInitializationStatus;
   paymentUrl?: string | null;
   reservationExpiresAtUtc?: string | null;
+  lastVerificationAtUtc?: string | null;
+  verificationReasonCode?: string | null;
 }

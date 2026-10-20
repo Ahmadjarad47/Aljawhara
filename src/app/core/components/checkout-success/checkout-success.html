@@ -11,7 +11,17 @@
     </div>
     <h1 class="text-2xl sm:text-3xl font-bold">{{ title() }}</h1>
     @if (!isSuccess()) {
-      <p class="mt-4 text-base-content/70">{{ text('سيتم تأكيد الدفع بعد التحقق من السيرفر. لا تُنشئ طلباً جديداً أثناء التحقق.', 'Payment is confirmed only after server verification. Do not create another order while verification is in progress.') }}</p>
+      @if (isPreparingPayment()) {
+        @if (state() === 'review' || state() === 'delayed' || state() === 'unavailable') {
+          <p class="mt-4 text-base-content/70">{{ text('تعذر فتح رابط الدفع حالياً. حدّث الحالة أو تواصل معنا مع رقم الطلب.', 'We could not open your payment link yet. Refresh the status or contact us with your order number.') }}</p>
+        } @else {
+          <p class="mt-4 text-base-content/70">{{ text('نجهّز رابط الدفع. سيتم تحويلك إلى سداد لإتمام الدفع، ثم العودة إلى المتجر.', 'We are preparing your payment link. You will be redirected to Sadad to pay, then returned to the store.') }}</p>
+        }
+      } @else if (state() === 'review' || state() === 'delayed') {
+        <p class="mt-4 text-base-content/70">{{ text('لم نتمكن من تأكيد الدفع تلقائياً بعد. حدّث الحالة أو تواصل معنا مع رقم الطلب إذا تم خصم المبلغ. لا تدفع مرة أخرى.', 'We have not confirmed your payment automatically yet. Refresh the status or contact us with your order number if you were charged. Do not pay again.') }}</p>
+      } @else {
+        <p class="mt-4 text-base-content/70">{{ text('سيتم تأكيد الدفع بعد التحقق من السيرفر. لا تُنشئ طلباً جديداً أثناء التحقق.', 'Payment is confirmed only after server verification. Do not create another order while verification is in progress.') }}</p>
+      }
     }
     @if (verifiedOrderId(); as id) {
       <p class="mt-3">{{ text('رقم الطلب', 'Order ID') }}: {{ id }}</p>
@@ -26,8 +36,8 @@
       @if (canRetry()) {
         <button class="btn bg-[#054239] text-white" [disabled]="busy()" (click)="retryPayment()">{{ text('إعادة محاولة الدفع', 'Retry payment') }}</button>
       }
-      @if (['pending', 'reconciliation', 'unavailable', 'checking'].includes(state())) {
-        <button class="btn btn-outline" [disabled]="busy()" (click)="checkStatus()">{{ text('تحديث حالة الدفع', 'Refresh payment status') }}</button>
+      @if (['pending', 'reconciliation', 'unavailable', 'checking', 'review', 'delayed'].includes(state())) {
+        <button class="btn btn-outline" [disabled]="busy()" (click)="checkStatus()">{{ isPreparingPayment() ? text('تحديث رابط الدفع', 'Refresh payment link') : text('تحديث حالة الدفع', 'Refresh payment status') }}</button>
       }
       <a class="btn btn-ghost" routerLink="/">{{ text('متابعة التسوق', 'Continue shopping') }}</a>
       <a class="btn btn-outline" routerLink="/user/orders">{{ text('طلباتي', 'My orders') }}</a>

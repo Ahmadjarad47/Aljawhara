@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { tap, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OrderCreateDto } from '../../admin/order/order.models';
 import { CheckoutOrderResponse, OrderPaymentStatus } from '../Models/checkout-payment';
@@ -65,10 +65,11 @@ export class CheckoutPaymentService {
     return headers;
   }
 
-  getStatus(orderId: number) {
+  getStatus(orderId: number, verify = false) {
     return this.http.get<OrderPaymentStatus>(`${this.api}/${orderId}/payment-status`, {
       headers: this.headers(orderId), transferCache: false,
-    }).pipe(tap(status => {
+      params: verify ? new HttpParams().set('verify', 'true') : undefined,
+    }).pipe(timeout(20000), tap(status => {
       if (status.orderId !== orderId) throw new Error('Order mismatch');
       const context = this.context(orderId);
       this.remember({ ...context, orderId, paymentInitializationStatus: status.initializationStatus,
@@ -81,7 +82,7 @@ export class CheckoutPaymentService {
     if (payment) params = params.set('payment', payment);
     return this.http.get<unknown>(`${this.api}/payment-callback`, {
       params, observe: 'response', transferCache: false, headers: { 'Cache-Control': 'no-store' },
-    });
+    }).pipe(timeout(20000));
   }
 
   retryPayment(orderId: number, attemptId: number) {
