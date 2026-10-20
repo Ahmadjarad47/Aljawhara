@@ -28,7 +28,7 @@ describe('My orders status display', () => {
   });
   afterEach(() => fixture.destroy());
 
-  it('shows paid in desktop, mobile and order details without offering payment again', () => {
+  it('separates preparation from payment in desktop, mobile and order details without offering payment again', () => {
     component.currentLanguage.set('ar');
     component.selectedOrderDetails.set({
       ...order, createdBy: 'Customer', isDeleted: false, items: [],
@@ -43,16 +43,27 @@ describe('My orders status display', () => {
     const paidBadges = Array.from(fixture.nativeElement.querySelectorAll('.badge'))
       .filter((badge: any) => badge.textContent.trim() === 'تم الدفع');
     expect(paidBadges.length).toBe(3);
+    paidBadges.forEach((badge: any) => {
+      expect(badge.parentElement.textContent).not.toContain('قيد التجهيز');
+    });
+    const headers = Array.from(fixture.nativeElement.querySelectorAll('th'))
+      .map((header: any) => header.textContent.trim());
+    expect(headers).toContain('حالة الطلب');
+    expect(headers).toContain('حالة الدفع');
+    expect(fixture.nativeElement.textContent).toContain('قيد التجهيز');
+    expect(fixture.nativeElement.textContent).not.toContain('قيد المعالجة');
     expect(component.canPayOrder(order)).toBeFalse();
     expect(fixture.nativeElement.textContent).not.toContain('ادفع الآن');
     component.currentLanguage.set('en');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Paid');
+    expect(fixture.nativeElement.textContent).toContain('Preparing');
+    expect(fixture.nativeElement.textContent).toContain('Payment status');
   });
 
   it('recognizes API status names and numbers and never renders an empty label', () => {
     component.currentLanguage.set('ar');
-    expect(component.getOrderStatusText('Processing')).toBe('قيد المعالجة');
+    expect(component.getOrderStatusText('Processing')).toBe('قيد التجهيز');
     expect(component.getOrderStatusText('6')).toBe('منتهي الصلاحية');
     expect(component.getOrderStatusText(OrderStatus.RequiresReconciliation)).toBe('بانتظار مراجعة الدفع');
     expect(component.getOrderStatusText('unrecognized')).toBe('حالة غير معروفة');
