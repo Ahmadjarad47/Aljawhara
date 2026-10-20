@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, inject, signal, computed } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import arabicLocale from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
 import { ToastService, ToastMessage } from '../../../services/toast.service';
@@ -19,6 +20,8 @@ import { PaymentInitializationStatus } from '../../../core/Models/checkout-payme
 
 declare const window: any;
 
+registerLocaleData(arabicLocale);
+
 @Component({
   selector: 'app-user-order',
   standalone: true,
@@ -31,6 +34,16 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   private orderService = inject(UserOrderService);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private detailsDialog = viewChild<ElementRef<HTMLDialogElement>>('detailsDialog');
+  private ratingDialog = viewChild<ElementRef<HTMLDialogElement>>('ratingDialog');
+
+  constructor() {
+    afterRenderEffect(() => {
+      for (const dialog of [this.detailsDialog(), this.ratingDialog()]) {
+        if (dialog && !dialog.nativeElement.open) dialog.nativeElement.showModal();
+      }
+    });
+  }
 
   // Expose OrderStatus enum to template
   OrderStatus = OrderStatus;
@@ -107,9 +120,25 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       view: 'عرض',
       cancel: 'إلغاء',
       noOrdersFound: 'لم يتم العثور على طلبات',
+      tryOtherFilters: 'جرّب البحث برقم آخر أو تغيير حالة الطلب.',
+      ordersAppearHere: 'ستظهر طلباتك هنا بعد إتمام أول طلب.',
+      loadingOrders: 'جارٍ تحميل الطلبات...',
+      currency: 'د.ك',
       orderDetails: 'تفاصيل الطلب',
       orderDateLabel: 'تاريخ الطلب',
       shippingAddress: 'عنوان الشحن',
+      fullName: 'الاسم',
+      phone: 'الهاتف',
+      street: 'الشارع',
+      block: 'القطعة',
+      avenue: 'الجادة',
+      house: 'المنزل',
+      floor: 'الدور',
+      apartment: 'الشقة',
+      city: 'المدينة',
+      state: 'المحافظة',
+      postalCode: 'الرمز البريدي',
+      country: 'الدولة',
       orderItems: 'عناصر الطلب',
       product: 'المنتج',
       price: 'السعر',
@@ -163,9 +192,25 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       view: 'View',
       cancel: 'Cancel',
       noOrdersFound: 'No orders found',
+      tryOtherFilters: 'Try another order number or change the status filter.',
+      ordersAppearHere: 'Your orders will appear here after your first purchase.',
+      loadingOrders: 'Loading your orders...',
+      currency: 'KWD',
       orderDetails: 'Order Details',
       orderDateLabel: 'Order Date',
       shippingAddress: 'Shipping Address',
+      fullName: 'Name',
+      phone: 'Phone',
+      street: 'Street',
+      block: 'Block',
+      avenue: 'Avenue',
+      house: 'House',
+      floor: 'Floor',
+      apartment: 'Apartment',
+      city: 'City',
+      state: 'State',
+      postalCode: 'Postal code',
+      country: 'Country',
       orderItems: 'Order Items',
       product: 'Product',
       price: 'Price',
@@ -273,8 +318,20 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   }
 
   closeDetailsModal(): void {
+    this.closeRatingModal();
+    this.detailsDialog()?.nativeElement.close();
     this.showDetailsModal.set(false);
     this.selectedOrderDetails.set(null);
+  }
+
+  onDetailsCancel(event: Event): void {
+    event.preventDefault();
+    if (!this.isLoading()) this.closeDetailsModal();
+  }
+
+  onRatingCancel(event: Event): void {
+    event.preventDefault();
+    if (!this.isLoading()) this.closeRatingModal();
   }
 
   canCancelOrder(order: OrderSummaryDto | OrderDto): boolean {
@@ -408,6 +465,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   }
 
   closeRatingModal(): void {
+    this.ratingDialog()?.nativeElement.close();
     this.showRatingModal.set(false);
     this.selectedProductForRating.set(null);
   }

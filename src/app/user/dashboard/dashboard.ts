@@ -18,6 +18,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // Translations object
   translations = {
     ar: {
+      dashboard: 'حسابي',
       homepage: 'الرئيسية',
       myOrders: 'طلباتي',
       myTransactions: 'معاملاتي',
@@ -25,6 +26,7 @@ export class Dashboard implements OnInit, OnDestroy {
       open: 'فتح'
     },
     en: {
+      dashboard: 'My account',
       homepage: 'Homepage',
       myOrders: 'My Orders',
       myTransactions: 'My Transactions',

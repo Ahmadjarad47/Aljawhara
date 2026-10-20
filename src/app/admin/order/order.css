@@ -1,3 +1,56 @@
-/* Order Management Styles */
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.form-control .label {
+  white-space: normal;
+}
+
+.form-control .input,
+.form-control .select {
+  width: 100%;
+  min-width: 0;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input-group .input {
+  flex: 1;
+}
+
+.input-group .btn {
+  flex-shrink: 0;
+}
+
+.table :is(th, td) {
+  text-align: start;
+}
+
+.badge {
+  white-space: nowrap;
+}
+
+.modal-box {
+  width: calc(100% - 2rem);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+.modal-action {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 
 

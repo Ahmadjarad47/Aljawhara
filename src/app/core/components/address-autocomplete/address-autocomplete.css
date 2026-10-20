@@ -1,9 +1,9 @@
 :host { display: block; min-width: 0; }
 .address-combobox { position: relative; }
-input { display: block; width: 100%; min-width: 0; height: 41px; border: 1px solid #d8d8da; border-radius: 4px; background: #f8f8f8; padding: 8px 12px; padding-inline-end: 42px; font: inherit; font-size: 14px; color: #383b40; text-align: start; }
+input { display: block; width: 100%; min-width: 0; height: var(--address-control-height, 41px); border: 1px solid #d8d8da; border-radius: var(--address-control-radius, 4px); background: #f8f8f8; padding: 8px 12px; padding-inline-end: 42px; font: inherit; font-size: var(--address-control-font-size, 14px); color: #383b40; text-align: start; }
 input:focus { outline: 2px solid #054239; outline-offset: 2px; }
 input::placeholder { color: #92979b; }
-.dropdown-toggle { display: flex; align-items: center; justify-content: center; position: absolute; inset-inline-end: 1px; top: 1px; height: 39px; width: 38px; border: 0; background: transparent; color: #68766f; cursor: pointer; }
+.dropdown-toggle { display: flex; align-items: center; justify-content: center; position: absolute; inset-inline-end: 1px; top: 1px; height: calc(var(--address-control-height, 41px) - 2px); width: 38px; border: 0; background: transparent; color: #68766f; cursor: pointer; }
 .dropdown-toggle svg { width: 18px; height: 18px; }
 .address-options { position: absolute; inset-inline: 0; top: calc(100% + 6px); z-index: 40; max-height: 252px; overflow-y: auto; overscroll-behavior: contain; border: 1px solid #d8e2df; border-radius: 6px; background: #fff; box-shadow: 0 8px 24px #142e2420; padding: 4px; }
 .address-options button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 39px; padding: 9px 10px; border: 0; border-radius: 3px; background: #fff; color: #263b33; font: inherit; font-size: 13px; text-align: start; cursor: pointer; white-space: nowrap; }

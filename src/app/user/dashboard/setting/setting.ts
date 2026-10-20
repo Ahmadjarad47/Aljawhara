@@ -1,5 +1,7 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, inject, signal } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import arabicLocale from '@angular/common/locales/ar';
+import { finalize } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
 import { ToastService } from '../../../services/toast.service';
@@ -10,17 +12,50 @@ import { AddressAutocompleteComponent } from '../../../core/components/address-a
 import { AddressLocation } from '../../../core/data/kuwait-areas';
 import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAddressPayload } from '../../../core/stepper/shipping-address';
 
+registerLocaleData(arabicLocale);
+
 @Component({
   selector: 'app-setting',
   standalone: true,
   imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent],
   templateUrl: './setting.html',
-  styleUrl: './setting.css'
+  styleUrls: ['../account-page.css', './setting.css']
 })
 export class Setting implements OnInit, OnDestroy {
   private settingService = inject(SettingService);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private addressDialog = viewChild<ElementRef<HTMLDialogElement>>('addressDialog');
+  isSavingUsername = signal(false);
+  isSavingPhone = signal(false);
+
+  constructor() {
+    afterRenderEffect(() => {
+      const dialog = this.addressDialog()?.nativeElement;
+      if (dialog && !dialog.open) dialog.showModal();
+    });
+  }
+
+  closeAddressEditor(event?: Event): void {
+    event?.preventDefault();
+    if (this.isSavingAddress()) return;
+    this.addressDialog()?.nativeElement.close();
+    this.showAddAddress.set(false);
+    this.showEditAddress.set(false);
+  }
+
+  isProfilePhoneValid(): boolean {
+    return /^[0-9]{9}$/.test(this.updatePhoneModel.phoneNumber);
+  }
+
+  onTabKeydown(event: KeyboardEvent): void {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const tab = event.key === 'Home' ? 'profile' : event.key === 'End' ? 'addresses'
+      : this.activeTab() === 'profile' ? 'addresses' : 'profile';
+    this.activeTab.set(tab);
+    (event.currentTarget as HTMLElement).querySelector<HTMLButtonElement>(`#settings-${tab}-tab`)?.focus();
+  }
 
   // Language management
   currentLanguage = signal<'ar' | 'en'>('ar');
@@ -29,6 +64,19 @@ export class Setting implements OnInit, OnDestroy {
   translations = {
     ar: {
       accountSettings: 'إعدادات الحساب',
+      saveChanges: 'حفظ التغييرات',
+      saving: 'جارٍ الحفظ...',
+      close: 'إغلاق',
+      retry: 'إعادة المحاولة',
+      loadingProfile: 'جارٍ تحميل بيانات الحساب...',
+      loadingAddresses: 'جارٍ تحميل العناوين...',
+      usernameHint: 'اختر الاسم الذي ترغب باستخدامه في حسابك.',
+      phoneHint: 'حدّث رقم الهاتف المرتبط بحسابك.',
+      addressHint: 'إدارة عنوان التوصيل المحفوظ في حسابك.',
+      addAddressHint: 'أضف عنوانك لتسهيل التوصيل في طلباتك القادمة.',
+      addressFormHint: 'الحقول المعلّمة بنجمة مطلوبة.',
+      addressDetails: 'تفاصيل العنوان',
+      optional: 'اختياري',
       manageProfile: 'إدارة ملفك الشخصي والعناوين',
       profile: 'الملف الشخصي',
       addresses: 'العناوين',
@@ -103,6 +151,19 @@ export class Setting implements OnInit, OnDestroy {
     },
     en: {
       accountSettings: 'Account Settings',
+      saveChanges: 'Save changes',
+      saving: 'Saving...',
+      close: 'Close',
+      retry: 'Try again',
+      loadingProfile: 'Loading your account...',
+      loadingAddresses: 'Loading your addresses...',
+      usernameHint: 'Choose the name you want to use for your account.',
+      phoneHint: 'Update the phone number linked to your account.',
+      addressHint: 'Manage the delivery address saved to your account.',
+      addAddressHint: 'Add your address for easier delivery on your next order.',
+      addressFormHint: 'Fields marked with an asterisk are required.',
+      addressDetails: 'Address details',
+      optional: 'Optional',
       manageProfile: 'Manage your profile and addresses',
       profile: 'Profile',
       addresses: 'Addresses',
@@ -266,12 +327,16 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   onUpdateUsername() {
+    if (this.isSavingUsername()) return;
     if (!this.updateUsernameModel.username || this.updateUsernameModel.username.length < 3) {
       this.toastService.warning(this.t('validation'), this.t('usernameMinLength'));
       return;
     }
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingUsername'));
-    this.settingService.updateUsername({ username: this.updateUsernameModel.username }).subscribe({
+    this.isSavingUsername.set(true);
+    this.settingService.updateUsername({ username: this.updateUsernameModel.username }).pipe(
+      finalize(() => this.isSavingUsername.set(false))
+    ).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('usernameUpdated'));
@@ -287,12 +352,16 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   onUpdatePhone() {
+    if (this.isSavingPhone()) return;
     if (!this.updatePhoneModel.phoneNumber || !/^[0-9]{9}$/.test(this.updatePhoneModel.phoneNumber)) {
       this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
       return;
     }
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingPhone'));
-    this.settingService.updatePhoneNumber({ phoneNumber: this.updatePhoneModel.phoneNumber }).subscribe({
+    this.isSavingPhone.set(true);
+    this.settingService.updatePhoneNumber({ phoneNumber: this.updatePhoneModel.phoneNumber }).pipe(
+      finalize(() => this.isSavingPhone.set(false))
+    ).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('phoneUpdated'));
@@ -351,7 +420,7 @@ export class Setting implements OnInit, OnDestroy {
         this.isSavingAddress.set(false);
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressCreated'));
-          this.showAddAddress.set(false);
+          this.closeAddressEditor();
           this.loadAddresses();
         } else {
           this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToCreateAddress'));
@@ -377,7 +446,7 @@ export class Setting implements OnInit, OnDestroy {
         this.isSavingAddress.set(false);
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressUpdated'));
-          this.showEditAddress.set(false);
+          this.closeAddressEditor();
           this.loadAddresses();
         } else {
           this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdateAddress'));

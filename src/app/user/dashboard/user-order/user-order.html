@@ -1,11 +1,14 @@
-<div class="p-4 md:p-6">
+<div class="orders-page" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
     <!-- Header -->
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-base-content">{{t('myOrders')}}</h1>
-            <p class="text-base-content/70 mt-2">{{t('viewAndManage')}}</p>
+    <div class="orders-header">
+        <div class="orders-heading">
+            <div class="orders-title-row">
+                <h1>{{t('myOrders')}}</h1>
+                <span class="orders-count">{{orders().length}}</span>
+            </div>
+            <p>{{t('viewAndManage')}}</p>
         </div>
-        <button (click)="loadOrders()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
+        <button (click)="loadOrders()" [disabled]="isLoading()" class="btn btn-ghost orders-refresh">
             @if (isLoading()) {
                 <span class="loading loading-spinner loading-xs"></span>
             } @else {
@@ -18,37 +21,16 @@
     </div>
 
     <!-- Search and Filters -->
-    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-col md:flex-row gap-4">
-                <!-- Search Input -->
-                <div class="flex-1">
-                    <div class="form-control">
-                        <div class="input-group">
-                            <input 
-                                type="text" 
-                                [placeholder]="t('searchPlaceholder')" 
-                                class="input input-bordered flex-1" 
-                                [ngModel]="searchTerm()"
-                                (ngModelChange)="searchTerm.set($event)"
-                                (keyup.enter)="onSearch()" />
-                            <button (click)="onSearch()" [disabled]="isLoading()" class="btn btn-square">
-                                @if (isLoading()) {
-                                    <span class="loading loading-spinner loading-sm"></span>
-                                } @else {
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                }
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status Filter -->
-                <div class="form-control">
-                    <select 
-                        class="select select-bordered" 
+    <div class="orders-filters" role="search" [attr.aria-label]="t('searchPlaceholder')">
+                <label class="orders-search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="search" [placeholder]="t('searchPlaceholder')" [attr.aria-label]="t('searchPlaceholder')"
+                        [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+                </label>
+                <div class="orders-filter-row">
+                    <select class="select select-bordered orders-status-filter" [attr.aria-label]="t('status')"
                         [ngModel]="statusFilter()"
                         (ngModelChange)="onStatusFilterChange($event)">
                         <option [ngValue]="null">{{t('allStatus')}}</option>
@@ -61,26 +43,25 @@
                         <option [ngValue]="OrderStatus.Expired">{{t('expired')}}</option>
                         <option [ngValue]="OrderStatus.RequiresReconciliation">{{t('requiresReconciliation')}}</option>
                     </select>
+                    @if (searchTerm() || statusFilter() !== null) {
+                        <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-ghost orders-clear">
+                            {{t('clearFilters')}}
+                        </button>
+                    }
                 </div>
-
-                <!-- Clear Filters -->
-                <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
-                    {{t('clearFilters')}}
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Orders List -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-        <div class="card-body p-0">
+    <div class="orders-results" [attr.aria-busy]="isLoading()">
+        <div>
             @if (isLoading()) {
-                <div class="flex justify-center items-center py-12">
-                    <span class="loading loading-spinner loading-lg"></span>
+                <div class="orders-loading" role="status">
+                    <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
+                    <span>{{t('loadingOrders')}}</span>
                 </div>
             } @else {
                 <!-- Desktop / tablet table view -->
-                <div class="hidden md:block">
+                <div class="orders-desktop">
                     <div class="overflow-x-auto">
                         <table class="table table-zebra">
                             <thead>
@@ -108,10 +89,10 @@
                                             <div class="badge badge-outline">{{order.itemCount}} {{t('items')}}</div>
                                         </td>
                                         <td>
-                                            <div class="font-semibold">{{order.total | currency:'KWD'}}</div>
+                                            <div class="font-semibold">{{order.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</div>
                                         </td>
                                         <td>
-                                            <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
+                                            <div class="badge" [class]="getOrderStatusClass(order.status)">
                                                 {{getOrderStatusText(order.status)}}
                                             </div>
                                         </td>
@@ -123,11 +104,11 @@
                                             }
                                         </td>
                                         <td>
-                                            <div class="text-sm">{{order.createdAt | date:'short'}}</div>
+                                            <div class="text-sm">{{order.createdAt | date:'dd MMM yyyy':undefined:currentLanguage()}}</div>
                                         </td>
                                         <td>
                                             <div class="flex gap-1">
-                                                <button 
+                                                <button
                                                     (click)="viewOrderDetails(order.id)"
                                                     [disabled]="isLoading()"
                                                     class="btn btn-ghost btn-xs">
@@ -146,7 +127,7 @@
                                                     </button>
                                                 }
                                                 @if (canCancelOrder(order)) {
-                                                    <button 
+                                                    <button
                                                         (click)="cancelOrder(order.id)"
                                                         [disabled]="isLoading()"
                                                         class="btn btn-ghost btn-xs btn-error">
@@ -169,86 +150,76 @@
                 </div>
 
                 <!-- Mobile card view -->
-                <div class="md:hidden">
+                <div class="orders-mobile">
                     @for (order of filteredOrders$(); track order.id) {
-                        <div class="border-b border-base-300 last:border-b-0">
-                            <div class="p-4 space-y-2">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <div class="text-xs text-base-content/70 uppercase tracking-wide">
-                                            {{t('orderNumber')}}
-                                        </div>
-                                        <div class="font-semibold text-primary">
-                                            {{order.orderNumber}}
-                                        </div>
-                                        <div class="mt-1 text-xs text-base-content/70">
-                                            {{order.createdAt | date:'short'}}
+                        <article class="order-card">
+                                <div class="order-card-header">
+                                    <div class="order-identity">
+                                        <span class="order-label">{{t('orderNumber')}}</span>
+                                        <h2><bdi>{{order.orderNumber}}</bdi></h2>
+                                        <time [attr.datetime]="order.createdAt">{{order.createdAt | date:'dd MMM yyyy' : undefined : (currentLanguage() === 'ar' ? 'ar' : 'en')}}</time>
+                                    </div>
+                                    <div class="order-status">
+                                        <span class="sr-only">{{t('status')}}</span>
+                                        <div class="badge" [class]="getOrderStatusClass(order.status)">
+                                            {{getOrderStatusText(order.status)}}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <div class="text-base-content/70">{{t('status')}}</div>
-                                        <div class="badge" [ngClass]="getOrderStatusClass(order.status)">
-                                            {{getOrderStatusText(order.status)}}
-                                        </div>
+                                <div class="order-card-meta">
+                                    <span class="order-customer">{{order.customerName}}</span>
+                                    <span class="order-item-count">{{order.itemCount}} {{t('items')}}</span>
+                                </div>
+                                <div class="order-card-summary">
+                                    <div class="order-amount">
+                                        <span class="order-label">{{t('total')}}</span>
+                                        <strong><bdi>{{order.total | number:'1.3-3'}} <small>{{t('currency')}}</small></bdi></strong>
                                     </div>
-                                    <div>
-                                        <div class="text-base-content/70">{{t('paymentStatus')}}</div>
+                                    <div class="order-payment">
+                                        <span class="order-label">{{t('paymentStatus')}}</span>
                                         @if (order.isPaid) {
                                             <div class="badge badge-success">{{t('paid')}}</div>
                                         } @else {
                                             <span class="text-base-content/50">—</span>
                                         }
                                     </div>
-                                    <div>
-                                        <div class="text-base-content/70">{{t('customer')}}</div>
-                                        <div class="font-medium truncate">{{order.customerName}}</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-base-content/70">{{t('items')}}</div>
-                                        <div class="font-medium">
-                                            {{order.itemCount}} {{t('items')}}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="text-base-content/70">{{t('total')}}</div>
-                                        <div class="font-semibold">
-                                            {{order.total | currency:'KWD'}}
-                                        </div>
-                                    </div>
                                 </div>
 
-                                <div class="flex justify-end gap-2 pt-1">
-                                    <button 
+                                <div class="order-card-actions">
+                                    <button
                                         (click)="viewOrderDetails(order.id)"
                                         [disabled]="isLoading()"
-                                        class="btn btn-ghost btn-xs">
-                                        {{t('view')}}
+                                        class="btn order-view" [attr.aria-label]="t('orderDetails') + ' ' + order.orderNumber">
+                                        {{t('orderDetails')}}
+                                        <svg class="order-view-arrow" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" /></svg>
                                     </button>
                                     @if (canPayOrder(order)) {
                                         <button
                                             (click)="payOrder(order.id)"
                                             [disabled]="isLoading()"
-                                            class="btn btn-success btn-xs btn-outline">
+                                            class="btn btn-primary order-pay">
                                             {{t('payNow')}}
                                         </button>
                                     }
                                     @if (canCancelOrder(order)) {
-                                        <button 
+                                        <button
                                             (click)="cancelOrder(order.id)"
                                             [disabled]="isLoading()"
-                                            class="btn btn-error btn-xs btn-outline">
+                                            class="btn btn-ghost order-cancel">
                                             {{t('cancel')}}
                                         </button>
                                     }
                                 </div>
-                            </div>
-                        </div>
+                        </article>
                     } @empty {
-                        <div class="text-center py-8 text-base-content/50">
-                            {{t('noOrdersFound')}}
+                        <div class="orders-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 7 3-4h12l3 4v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Zm0 0h18M8 10a4 4 0 0 0 8 0" /></svg>
+                            <h2>{{t('noOrdersFound')}}</h2>
+                            <p>{{searchTerm() || statusFilter() !== null ? t('tryOtherFilters') : t('ordersAppearHere')}}</p>
+                            @if (searchTerm() || statusFilter() !== null) {
+                                <button class="btn btn-outline" (click)="clearFilters()">{{t('clearFilters')}}</button>
+                            }
                         </div>
                     }
                 </div>
@@ -258,16 +229,20 @@
 
     <!-- Order Details Modal -->
     @if (showDetailsModal() && selectedOrderDetails()) {
-        <div class="modal modal-open">
-            <div class="modal-box max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-6">
-                <h3 class="font-bold text-lg md:text-xl mb-4 break-words">{{t('orderDetails')}} - {{selectedOrderDetails()!.orderNumber}}</h3>
-                
+        <dialog #detailsDialog class="modal orders-modal" aria-labelledby="order-details-title" (cancel)="onDetailsCancel($event)" (close)="closeDetailsModal()">
+            <div class="modal-box orders-details-box">
+                <div class="orders-modal-header">
+                    <div><h2 id="order-details-title">{{t('orderDetails')}}</h2><p><bdi>{{selectedOrderDetails()!.orderNumber}}</bdi></p></div>
+                    <button class="btn btn-ghost orders-modal-close" (click)="closeDetailsModal()" [disabled]="isLoading()" [attr.aria-label]="t('close')"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6" /></svg></button>
+                </div>
+                <div class="orders-modal-content">
+
                 <!-- Order Status -->
                 <div class="mb-4">
                     <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
                         <div class="flex items-center flex-wrap gap-2">
                             <span class="text-xs sm:text-sm text-base-content/70">{{t('status')}}:</span>
-                            <div class="badge badge-sm sm:badge-lg ml-2" [ngClass]="getOrderStatusClass(selectedOrderDetails()!.status)">
+                            <div class="badge badge-sm sm:badge-lg ml-2" [class]="getOrderStatusClass(selectedOrderDetails()!.status)">
                                 {{getOrderStatusText(selectedOrderDetails()!.status)}}
                             </div>
                         </div>
@@ -281,7 +256,7 @@
                         </div>
                         <div class="flex items-center flex-wrap gap-2">
                             <span class="text-xs sm:text-sm text-base-content/70">{{t('orderDateLabel')}}:</span>
-                            <span class="font-medium text-xs sm:text-sm ml-2">{{selectedOrderDetails()!.createdAt | date:'medium'}}</span>
+                            <span class="font-medium text-xs sm:text-sm ml-2">{{selectedOrderDetails()!.createdAt | date:'dd MMM yyyy, HH:mm':undefined:currentLanguage()}}</span>
                         </div>
                     </div>
                 </div>
@@ -293,59 +268,59 @@
                     <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('shippingAddress')}}</h4>
                     <div class="bg-base-200 p-3 sm:p-4 rounded-lg space-y-1">
                         <p class="font-medium text-sm sm:text-base break-words">
-                            <span class="text-base-content/70">الاسم:</span> {{selectedOrderDetails()!.shippingAddress.fullName}}
+                            <span class="text-base-content/70">{{t('fullName')}}:</span> {{selectedOrderDetails()!.shippingAddress.fullName}}
                         </p>
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">الهاتف:</span> {{selectedOrderDetails()!.shippingAddress.phone}}
+                            <span class="font-medium">{{t('phone')}}:</span> {{selectedOrderDetails()!.shippingAddress.phone}}
                         </p>
                         @if (selectedOrderDetails()!.shippingAddress.street) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الشارع:</span> {{selectedOrderDetails()!.shippingAddress.street}}
+                                <span class="font-medium">{{t('street')}}:</span> {{selectedOrderDetails()!.shippingAddress.street}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alQataa) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">القطعة:</span> {{selectedOrderDetails()!.shippingAddress.alQataa}}
+                                <span class="font-medium">{{t('block')}}:</span> {{selectedOrderDetails()!.shippingAddress.alQataa}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alSharee) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الشارع:</span> {{selectedOrderDetails()!.shippingAddress.alSharee}}
+                                <span class="font-medium">{{t('street')}}:</span> {{selectedOrderDetails()!.shippingAddress.alSharee}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alJada) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الجادة:</span> {{selectedOrderDetails()!.shippingAddress.alJada}}
+                                <span class="font-medium">{{t('avenue')}}:</span> {{selectedOrderDetails()!.shippingAddress.alJada}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alManzil) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">المنزل:</span> {{selectedOrderDetails()!.shippingAddress.alManzil}}
+                                <span class="font-medium">{{t('house')}}:</span> {{selectedOrderDetails()!.shippingAddress.alManzil}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alDor) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الدور:</span> {{selectedOrderDetails()!.shippingAddress.alDor}}
+                                <span class="font-medium">{{t('floor')}}:</span> {{selectedOrderDetails()!.shippingAddress.alDor}}
                             </p>
                         }
                         @if (selectedOrderDetails()!.shippingAddress.alShakka) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">الشقة:</span> {{selectedOrderDetails()!.shippingAddress.alShakka}}
+                                <span class="font-medium">{{t('apartment')}}:</span> {{selectedOrderDetails()!.shippingAddress.alShakka}}
                             </p>
                         }
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">المدينة:</span> {{selectedOrderDetails()!.shippingAddress.city}}
+                            <span class="font-medium">{{t('city')}}:</span> {{selectedOrderDetails()!.shippingAddress.city}}
                         </p>
                         @if (selectedOrderDetails()!.shippingAddress.state) {
                             <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">المحافظة:</span> {{selectedOrderDetails()!.shippingAddress.state}}
+                                <span class="font-medium">{{t('state')}}:</span> {{selectedOrderDetails()!.shippingAddress.state}}
                             </p>
                         }
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">الرمز البريدي:</span> 0000
+                            <span class="font-medium">{{t('postalCode')}}:</span> {{selectedOrderDetails()!.shippingAddress.postalCode || '—'}}
                         </p>
                         <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">الدولة:</span> Kuwait
+                            <span class="font-medium">{{t('country')}}:</span> {{selectedOrderDetails()!.shippingAddress.country}}
                         </p>
                     </div>
                 </div>
@@ -353,130 +328,83 @@
                 <div class="divider"></div>
 
                 <!-- Order Items -->
-                <div class="mb-4">
-                    <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('orderItems')}}</h4>
-                    <div class="overflow-x-auto -mx-4 sm:mx-0">
-                        <table class="table table-sm text-xs sm:text-sm">
-                            <thead>
-                                <tr>
-                                    <th class="text-xs sm:text-sm">{{t('product')}}</th>
-                                    <th class="text-xs sm:text-sm hidden sm:table-cell">{{t('price')}}</th>
-                                    <th class="text-xs sm:text-sm">{{t('quantity')}}</th>
-                                    <th class="text-xs sm:text-sm">{{t('total')}}</th>
-                                    <th class="text-xs sm:text-sm hidden md:table-cell">{{t('rating')}}</th>
-                                    <th class="text-xs sm:text-sm md:hidden">{{t('rating')}}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (item of selectedOrderDetails()!.items; track item.id) {
-                                    <tr>
-                                        <td>
-                                            <div class="flex items-center gap-2 sm:gap-3">
-                                                @if (item.image) {
-                                                    <div class="avatar shrink-0">
-                                                        <div class="mask mask-squircle w-8 h-8 sm:w-12 sm:h-12">
-                                                            <img [src]="item.image" [alt]="item.name" />
-                                                        </div>
-                                                    </div>
-                                                }
-                                                <div class="font-medium text-xs sm:text-sm break-words min-w-0">
-                                                    <div>{{item.name}}</div>
-                                                    <div class="text-xs text-base-content/70 sm:hidden">{{item.price | currency:'KWD'}} × {{item.quantity}}</div>
+                <section class="order-items-section">
+                    <h3>{{t('orderItems')}} <span>({{selectedOrderDetails()!.items.length}})</span></h3>
+                    <div class="order-items-list">
+                        @for (item of selectedOrderDetails()!.items; track item.id) {
+                            <article class="order-product">
+                                <div class="order-product-main">
+                                    <div class="order-product-image">
+                                        @if (item.image) {
+                                            <img [src]="item.image" [alt]="item.name" loading="lazy" />
+                                        } @else {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10" /></svg>
+                                        }
+                                    </div>
+                                    <div class="order-product-info">
+                                        <h4>{{item.name}}</h4>
+                                        <p>{{t('quantity')}}: {{item.quantity}} <span aria-hidden="true">·</span> <bdi>{{item.price | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</bdi></p>
+                                        <strong><bdi>{{item.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</bdi></strong>
+                                    </div>
+                                </div>
+                                <div class="order-product-rating">
+                                    @if (checkingRatings()) {
+                                        <span class="loading loading-spinner loading-xs" role="status" [attr.aria-label]="t('rating')"></span>
+                                    } @else {
+                                        @if (hasRatedProduct(item.productId)) {
+                                            @let rating = getProductRating(item.productId);
+                                            @if (rating) {
+                                                <div class="order-rated">
+                                                    <span class="order-stars" [attr.aria-label]="t('rating') + ': ' + rating.ratingNumber + ' ' + t('outOfStars')">
+                                                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                                                            <span [class.order-star-filled]="star <= rating.ratingNumber" aria-hidden="true">★</span>
+                                                        }
+                                                    </span>
+                                                    <span class="text-xs text-base-content/60">{{t('rated')}}</span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="hidden sm:table-cell">{{item.price | currency:'KWD'}}</td>
-                                        <td class="text-xs sm:text-sm">{{item.quantity}}</td>
-                                        <td class="font-semibold text-xs sm:text-sm">{{item.total | currency:'KWD'}}</td>
-                                        <td class="hidden md:table-cell">
-                                            @if (checkingRatings()) {
-                                                <span class="loading loading-spinner loading-xs"></span>
-                                            } @else {
-                                                @if (hasRatedProduct(item.productId)) {
-                                                    @let rating = getProductRating(item.productId);
-                                                    @if (rating) {
-                                                        <div class="flex flex-col gap-1">
-                                                            <div class="rating rating-xs">
-                                                                @for (star of [1, 2, 3, 4, 5]; track star) {
-                                                                    <input 
-                                                                        type="radio" 
-                                                                        name="rating-display-{{item.productId}}" 
-                                                                        class="mask mask-star-2 bg-orange-400" 
-                                                                        [checked]="rating.ratingNumber === star"
-                                                                        disabled />
-                                                                }
-                                                            </div>
-                                                            @if (rating.content) {
-                                                                <div class="text-xs text-base-content/70 max-w-xs truncate" [title]="rating.content">
-                                                                    {{rating.content}}
-                                                                </div>
-                                                            }
-                                                            <div class="badge badge-success badge-xs">{{t('rated')}}</div>
-                                                        </div>
-                                                    }
-                                                } @else {
-                                                    <button 
-                                                        (click)="openRatingModal(item.productId, item.name)"
-                                                        [disabled]="isLoading()"
-                                                        class="btn btn-primary btn-xs">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                                        </svg>
-                                                        <span class="hidden sm:inline">{{t('rate')}}</span>
-                                                    </button>
-                                                }
+                                                @if (rating.content) { <p class="order-review">{{rating.content}}</p> }
                                             }
-                                        </td>
-                                        <!-- Mobile Rating Button -->
-                                        <td class="md:hidden">
-                                            @if (!checkingRatings() && !hasRatedProduct(item.productId)) {
-                                                <button 
-                                                    (click)="openRatingModal(item.productId, item.name)"
-                                                    [disabled]="isLoading()"
-                                                    class="btn btn-primary btn-xs">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                                    </svg>
-                                                </button>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                        } @else {
+                                            <button class="btn btn-ghost order-rate" (click)="openRatingModal(item.productId, item.name)" [disabled]="isLoading()">
+                                                <span aria-hidden="true">☆</span> {{t('rateProduct')}}
+                                            </button>
+                                        }
+                                    }
+                                </div>
+                            </article>
+                        }
                     </div>
-                </div>
-
-                <div class="divider"></div>
+                </section>
 
                 <!-- Order Summary -->
-                <div class="bg-base-200 p-3 sm:p-4 rounded-lg">
+                <div class="order-totals">
                     <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('subtotal')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.subtotal | currency:'KWD'}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.subtotal | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
                     </div>
                     @if (selectedOrderDetails()!.couponDiscountAmount && selectedOrderDetails()!.couponDiscountAmount! > 0) {
                         <div class="flex justify-between mb-2 text-success text-xs sm:text-sm">
                             <span>{{t('discount')}} ({{selectedOrderDetails()!.couponCode}}):</span>
-                            <span class="font-medium">-{{selectedOrderDetails()!.couponDiscountAmount! | currency:'KWD'}}</span>
+                            <span class="font-medium">-{{selectedOrderDetails()!.couponDiscountAmount! | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
                         </div>
                     }
                     <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('shipping')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.shipping | currency:'KWD'}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.shipping | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
                     </div>
                     <div class="flex justify-between mb-2 text-xs sm:text-sm">
                         <span class="text-base-content/70">{{t('tax')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.tax | currency:'KWD'}}</span>
+                        <span class="font-medium">{{selectedOrderDetails()!.tax | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
                     </div>
                     <div class="divider my-2"></div>
                     <div class="flex justify-between text-base sm:text-lg font-bold">
                         <span>{{t('total')}}:</span>
-                        <span>{{selectedOrderDetails()!.total | currency:'KWD'}}</span>
+                        <span>{{selectedOrderDetails()!.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
                     </div>
                 </div>
 
-                <div class="modal-action flex-col sm:flex-row gap-2 mt-4">
+                </div>
+                <div class="modal-action orders-details-actions">
                     @if (canPayOrder(selectedOrderDetails()!)) {
                         <button
                             (click)="payOrder(selectedOrderDetails()!.id)"
@@ -485,9 +413,9 @@
                             <span class="text-xs sm:text-sm">{{t('payNow')}}</span>
                         </button>
                     }
-                    <button 
-                        (click)="downloadInvoice(selectedOrderDetails()!.id)" 
-                        [disabled]="isLoading()" 
+                    <button
+                        (click)="downloadInvoice(selectedOrderDetails()!.id)"
+                        [disabled]="isLoading()"
                         class="btn btn-primary w-full sm:w-auto">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
@@ -499,9 +427,9 @@
                         <span class="text-xs sm:text-sm">{{t('downloadInvoice')}}</span>
                     </button>
                     @if (canCancelOrder(selectedOrderDetails()!)) {
-                        <button 
-                            (click)="cancelOrder(selectedOrderDetails()!.id)" 
-                            [disabled]="isLoading()" 
+                        <button
+                            (click)="cancelOrder(selectedOrderDetails()!.id)"
+                            [disabled]="isLoading()"
                             class="btn btn-error w-full sm:w-auto">
                             @if (isLoading()) {
                                 <span class="loading loading-spinner loading-sm"></span>
@@ -512,15 +440,15 @@
                     <button (click)="closeDetailsModal()" [disabled]="isLoading()" class="btn w-full sm:w-auto text-xs sm:text-sm">{{t('close')}}</button>
                 </div>
             </div>
-        </div>
+        </dialog>
     }
 
     <!-- Rating Modal -->
     @if (showRatingModal() && selectedProductForRating()) {
-        <div class="modal modal-open">
-            <div class="modal-box max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-6">
-                <h3 class="font-bold text-base sm:text-lg mb-4 break-words">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>
-                
+        <dialog #ratingDialog class="modal orders-modal" aria-labelledby="order-rating-title" (cancel)="onRatingCancel($event)" (close)="closeRatingModal()">
+            <div class="modal-box orders-rating-box">
+                <h3 id="order-rating-title" class="font-bold text-base sm:text-lg mb-4 break-words">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>
+
                 <!-- Rating Stars -->
                 <div class="mb-4">
                     <label class="label py-2">
@@ -528,12 +456,13 @@
                     </label>
                     <div class="rating rating-md sm:rating-lg justify-center sm:justify-start">
                         @for (star of [1, 2, 3, 4, 5]; track star) {
-                            <input 
-                                type="radio" 
-                                name="rating" 
-                                class="mask mask-star-2 bg-orange-400" 
+                            <input
+                                type="radio"
+                                name="rating"
+                                [attr.aria-label]="star + ' ' + t('outOfStars')"
+                                class="mask mask-star-2 bg-orange-400"
                                 [checked]="ratingForm().ratingNumber === star"
-                                (click)="updateRatingNumber(star)" />
+                                (change)="updateRatingNumber(star)" />
                         }
                     </div>
                     <div class="label py-1">
@@ -545,12 +474,12 @@
 
                 <!-- Review Comment -->
                 <div class="form-control mb-4">
-                    <label class="label py-2">
+                    <label class="label py-2" for="order-review">
                         <span class="label-text font-semibold text-sm sm:text-base">{{t('yourReview')}}</span>
                         <span class="label-text-alt text-xs sm:text-sm text-base-content/70">{{t('required')}}</span>
                     </label>
-                    <textarea 
-                        class="textarea textarea-bordered h-24 sm:h-32 text-sm" 
+                    <textarea id="order-review"
+                        class="textarea textarea-bordered h-24 sm:h-32 text-sm"
                         [placeholder]="t('shareExperience')"
                         [ngModel]="ratingForm().content"
                         (ngModelChange)="updateRatingContent($event)"
@@ -564,15 +493,15 @@
                 </div>
 
                 <div class="modal-action flex-col sm:flex-row gap-2">
-                    <button 
-                        (click)="closeRatingModal()" 
-                        [disabled]="isLoading()" 
+                    <button
+                        (click)="closeRatingModal()"
+                        [disabled]="isLoading()"
                         class="btn btn-ghost w-full sm:w-auto text-xs sm:text-sm">
                         {{t('cancel')}}
                     </button>
-                    <button 
-                        (click)="submitRating()" 
-                        [disabled]="isLoading() || !ratingForm().content.trim()" 
+                    <button
+                        (click)="submitRating()"
+                        [disabled]="isLoading() || !ratingForm().content.trim()"
                         class="btn btn-primary w-full sm:w-auto">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
@@ -581,13 +510,13 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </dialog>
     }
 
     <!-- Toast Component -->
-    <app-toast 
-        [toasts]="toasts" 
+    <app-toast
+        [toasts]="toasts"
         (close)="onToastClose($event)">
     </app-toast>
-    
+
 </div>

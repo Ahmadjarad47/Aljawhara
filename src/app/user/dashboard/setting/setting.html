@@ -1,213 +1,94 @@
-<div class="p-6">
-  <div class="mb-6">
-    <h2 class="text-2xl font-semibold">{{t('accountSettings')}}</h2>
-    <p class="text-base-content/70">{{t('manageProfile')}}</p>
-  </div>
+<div class="account-page settings-page" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
+  <header class="account-header"><div><h1>{{t('accountSettings')}}</h1><p>{{t('manageProfile')}}</p></div></header>
 
-  <div role="tablist" class="tabs tabs-boxed mb-4">
-    <a role="tab" class="tab" [class.tab-active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">{{t('profile')}}</a>
-    <a role="tab" class="tab" [class.tab-active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">{{t('addresses')}}</a>
+  <div class="account-tabs" role="tablist" [attr.aria-label]="t('accountSettings')" (keydown)="onTabKeydown($event)">
+    <button id="settings-profile-tab" type="button" role="tab" [attr.aria-selected]="activeTab() === 'profile'" [attr.tabindex]="activeTab() === 'profile' ? 0 : -1" aria-controls="settings-profile-panel" [class.is-active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>{{t('profile')}}
+    </button>
+    <button id="settings-addresses-tab" type="button" role="tab" [attr.aria-selected]="activeTab() === 'addresses'" [attr.tabindex]="activeTab() === 'addresses' ? 0 : -1" aria-controls="settings-addresses-panel" [class.is-active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>{{t('addresses')}}
+    </button>
   </div>
 
   @if (activeTab() === 'profile') {
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="card bg-base-100 shadow-sm border border-base-300">
-        <div class="card-body">
-          <h3 class="card-title">{{t('userInfo')}}</h3>
-          @if (isLoadingUser()) {
-            <span class="loading loading-spinner"></span>
-          } @else {
-            @if (currentUser(); as user) {
-              <div class="space-y-2">
-                <div><span class="font-medium">{{t('username')}}:</span> {{user.username}}</div>
-                <div><span class="font-medium">{{t('email')}}:</span> {{user.email}}</div>
-                <div><span class="font-medium">{{t('phone')}}:</span> {{user.phoneNumber}}</div>
-                <div><span class="font-medium">{{t('created')}}:</span> {{user.createdAt | date:'medium'}}</div>
-              </div>
-            }
-          }
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow-sm border border-base-300">
-        <div class="card-body">
-          <h3 class="card-title">{{t('updateUsername')}}</h3>
-          <div class="form-control">
-            <label class="label"><span class="label-text">{{t('username')}}</span></label>
-            <input class="input input-bordered" type="text" [(ngModel)]="updateUsernameModel.username" />
-          </div>
-          <div class="card-actions justify-end mt-3">
-            <button class="btn btn-primary" (click)="onUpdateUsername()">{{t('save')}}</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow-sm border border-base-300 lg:col-span-2">
-        <div class="card-body">
-          <h3 class="card-title">{{t('updatePhoneNumber')}}</h3>
-            <div class="form-control">
-              <label class="label"><span class="label-text">{{t('phoneNumber')}}</span></label>
-              <input 
-                class="input input-bordered" 
-                type="tel" 
-                [(ngModel)]="updatePhoneModel.phoneNumber"
-                maxlength="9"
-                pattern="[0-9]{9}"
-                (keypress)="onPhoneKeyPress($event)"
-              />
-            </div>
-          <div class="card-actions justify-end mt-3">
-            <button class="btn btn-primary" (click)="onUpdatePhone()">{{t('save')}}</button>
+    <section id="settings-profile-panel" role="tabpanel" aria-labelledby="settings-profile-tab" tabindex="0">
+      @if (isLoadingUser()) {
+        <div class="account-loading" role="status"><span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span><span>{{t('loadingProfile')}}</span></div>
+      } @else if (currentUser(); as user) {
+        <div class="settings-profile-layout">
+          <section class="account-card profile-overview">
+            <div class="profile-identity"><span class="profile-avatar" aria-hidden="true">{{user.username.slice(0, 1)}}</span><div><h2>{{user.username}}</h2><p><bdi>{{user.email}}</bdi></p></div></div>
+            <dl class="profile-info">
+              <div><dt>{{t('phone')}}</dt><dd><bdi>{{user.phoneNumber || '—'}}</bdi></dd></div>
+              <div><dt>{{t('created')}}</dt><dd>{{user.createdAt | date:'dd MMM yyyy':undefined:currentLanguage()}}</dd></div>
+            </dl>
+          </section>
+          <div class="profile-edit-sections">
+            <form class="account-card profile-edit-card" (ngSubmit)="onUpdateUsername()">
+              <div class="account-section-heading"><div><h2>{{t('updateUsername')}}</h2><p class="account-hint">{{t('usernameHint')}}</p></div></div>
+              <fieldset [disabled]="isSavingUsername()">
+                <div class="account-field"><label for="settings-username">{{t('username')}}</label><input id="settings-username" name="username" class="input" type="text" autocomplete="username" [(ngModel)]="updateUsernameModel.username" minlength="3" required aria-describedby="settings-username-hint" /><span id="settings-username-hint" class="account-hint">{{t('usernameMinLength')}}</span></div>
+                <button class="btn btn-primary profile-save" type="submit" [disabled]="isSavingUsername() || updateUsernameModel.username.trim().length < 3 || updateUsernameModel.username === user.username">@if (isSavingUsername()) { <span class="loading loading-spinner loading-sm" aria-hidden="true"></span> }{{t(isSavingUsername() ? 'saving' : 'saveChanges')}}</button>
+              </fieldset>
+            </form>
+            <form class="account-card profile-edit-card" (ngSubmit)="onUpdatePhone()">
+              <div class="account-section-heading"><div><h2>{{t('updatePhoneNumber')}}</h2><p class="account-hint">{{t('phoneHint')}}</p></div></div>
+              <fieldset [disabled]="isSavingPhone()">
+                <div class="account-field"><label for="settings-phone">{{t('phoneNumber')}}</label><input id="settings-phone" name="phoneNumber" class="input" type="tel" inputmode="numeric" autocomplete="tel-national" dir="ltr" [(ngModel)]="updatePhoneModel.phoneNumber" maxlength="9" pattern="[0-9]{9}" required aria-describedby="settings-phone-hint" /><span id="settings-phone-hint" class="account-hint">{{t('phoneMinLength')}}</span></div>
+                <button class="btn btn-primary profile-save" type="submit" [disabled]="isSavingPhone() || !isProfilePhoneValid() || updatePhoneModel.phoneNumber === user.phoneNumber">@if (isSavingPhone()) { <span class="loading loading-spinner loading-sm" aria-hidden="true"></span> }{{t(isSavingPhone() ? 'saving' : 'saveChanges')}}</button>
+              </fieldset>
+            </form>
           </div>
         </div>
-      </div>
-    </div>
+      } @else {
+        <div class="account-empty"><h2>{{t('failedToLoadUser')}}</h2><button class="btn btn-outline" (click)="loadUser()">{{t('retry')}}</button></div>
+      }
+    </section>
   }
 
   @if (activeTab() === 'addresses') {
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-      <div class="card-body p-4">
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-          <h3 class="card-title">{{t('yourAddresses')}}</h3>
-          @if ((addresses() || []).length === 0) {
-            <button class="btn btn-primary btn-sm" (click)="openAddAddress()">{{t('addAddress')}}</button>
+    <section id="settings-addresses-panel" role="tabpanel" aria-labelledby="settings-addresses-tab" tabindex="0">
+      <div class="account-section-heading addresses-heading"><div><h2>{{t('yourAddresses')}}</h2><p class="account-hint">{{t('addressHint')}}</p></div>@if (!isLoadingAddresses() && addresses().length === 0) { <button class="btn btn-primary" (click)="openAddAddress()"><span aria-hidden="true">+</span> {{t('addAddress')}}</button> }</div>
+      @if (isLoadingAddresses()) {
+        <div class="account-loading" role="status"><span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span><span>{{t('loadingAddresses')}}</span></div>
+      } @else {
+        <div class="settings-address-list">
+          @for (addr of addresses(); track addr.id) {
+            <article class="account-card saved-address">
+              <div class="saved-address-header"><span class="account-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div class="saved-address-identity"><h2>{{addr.fullName}}</h2><p><bdi>{{addr.phoneNumber}}</bdi></p></div><span class="badge" [class.badge-success]="addr.isDefault">{{t(addr.isDefault ? 'default' : 'secondary')}}</span></div>
+              <div class="saved-address-location"><span class="account-label">{{t('address')}}</span><p>{{addr.addressLine1}}</p></div>
+              <dl class="saved-address-details">@for (field of optionalFields; track field.key) { @if (addr[field.key]) { <div><dt>{{t(field.key)}}</dt><dd>{{addr[field.key]}}</dd></div> } }</dl>
+              <div class="saved-address-actions"><button class="btn btn-outline" (click)="openEditAddress(addr)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16 3 5 5L8 21H3v-5L16 3Zm-2 2 5 5"/></svg>{{t('editAddress')}}</button><button class="btn btn-ghost address-delete" (click)="deleteAddress(addr.id)" [attr.aria-label]="t('delete') + ' ' + addr.addressLine1">{{t('delete')}}</button></div>
+            </article>
+          } @empty {
+            <div class="account-empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><h2>{{t('noAddressesFound')}}</h2><p>{{t('addAddressHint')}}</p></div>
           }
         </div>
-
-        @if (isLoadingAddresses()) {
-          <div class="flex justify-center py-8">
-            <span class="loading loading-spinner loading-lg"></span>
-          </div>
-        } @else {
-          @if ((addresses() || []).length === 0) {
-            <div class="text-center text-base-content/60 py-6">{{t('noAddressesFound')}}</div>
-          } @else {
-            <!-- Desktop / tablet table view -->
-            <div class="hidden md:block">
-              <div class="overflow-x-auto">
-                <table class="table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>{{t('name')}}</th>
-                      <th>{{t('phone')}}</th>
-                      <th>{{t('address')}}</th>
-                      <th>{{t('default')}}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (addr of addresses(); track addr.id) {
-                      <tr>
-                        <td>{{addr.fullName}}</td>
-                        <td>{{addr.phoneNumber}}</td>
-                        <td>
-                          <div>{{addr.addressLine1}}</div>
-                          @if (addressDetails(addr)) { <div class="text-xs text-base-content/60 mt-1">{{addressDetails(addr)}}</div> }
-                        </td>
-                        <td>
-                          <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">{{addr.isDefault ? t('yes') : t('no')}}</div>
-                        </td>
-                        <td class="text-right">
-                          <div class="flex gap-2 justify-end">
-                            <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
-                            <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
-                          </div>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Mobile card view -->
-            <div class="md:hidden space-y-3">
-              @for (addr of addresses(); track addr.id) {
-                <div class="border border-base-300 rounded-lg p-4 space-y-2">
-                  <div class="flex items-start justify-between gap-3">
-                    <div>
-                      <div class="font-semibold">
-                        {{addr.fullName}}
-                      </div>
-                      <div class="text-sm text-base-content/70">
-                        {{addr.phoneNumber}}
-                      </div>
-                    </div>
-                    <div class="shrink-0">
-                      <div class="badge" [class.badge-success]="addr.isDefault" [class.badge-ghost]="!addr.isDefault">
-                        {{addr.isDefault ? t('default') : t('secondary')}}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-sm text-base-content">
-                    <div>{{addr.addressLine1}}</div>
-                    @if (addressDetails(addr)) { <div class="text-xs text-base-content/60 mt-1">{{addressDetails(addr)}}</div> }
-                  </div>
-                  <div class="flex justify-end gap-2 pt-1">
-                    <button class="btn btn-ghost btn-xs" (click)="openEditAddress(addr)">{{t('edit')}}</button>
-                    <button class="btn btn-error btn-xs" (click)="deleteAddress(addr.id)">{{t('delete')}}</button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-      </div>
-    </div>
-
-    @if (showAddAddress() || showEditAddress()) {
-      @let editing = showEditAddress();
-      @let address = editing ? editAddress : newAddress;
-      <div class="modal modal-open" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'">
-        <form class="modal-box max-w-3xl address-editor" #addressForm="ngForm"
-          role="dialog" aria-modal="true" aria-labelledby="address-editor-heading"
-          (ngSubmit)="editing ? updateAddress() : addAddress()">
-          <h3 id="address-editor-heading" class="font-bold text-lg mb-5">{{t(editing ? 'editAddress' : 'addAddress')}}</h3>
-          <fieldset [disabled]="isSavingAddress()" class="address-editor-fields">
-            <div class="address-contact-grid">
-              <div class="form-control">
-                <label for="account-fullName">{{t('fullName')}} <span class="text-error">*</span></label>
-                <input id="account-fullName" name="fullName" class="input input-bordered" autocomplete="name"
-                  [(ngModel)]="address.fullName" required maxlength="100" />
-              </div>
-              <div class="form-control">
-                <label for="account-phoneNumber">{{t('phoneNumber')}} <span class="text-error">*</span></label>
-                <input id="account-phoneNumber" name="phoneNumber" class="input input-bordered" type="tel" autocomplete="tel"
-                  [(ngModel)]="address.phoneNumber" required maxlength="16" pattern="[+]?[0-9]{8,15}" />
-              </div>
-            </div>
-            <div class="form-control my-4">
-              <label for="account-addressLine1">{{t('addressLine1')}} <span class="text-error">*</span></label>
-              <app-address-autocomplete fieldId="account-addressLine1" [value]="address.addressLine1" [language]="currentLanguage()"
-                [label]="t('addressLine1')" (locationChange)="onAddressLocationChange(address, $event)"></app-address-autocomplete>
-            </div>
-            <div class="address-detail-grid">
-              @for (field of optionalFields; track field.key) {
-                <div class="form-control">
-                  <label [for]="'account-' + field.key">{{t(field.key)}}</label>
-                  <input [id]="'account-' + field.key" [name]="field.key" class="input input-bordered"
-                    [(ngModel)]="address[field.key]" [maxlength]="field.maxLength" />
-                </div>
-              }
-            </div>
-            <label class="flex items-center gap-3 mt-5 cursor-pointer">
-              <input type="checkbox" name="isDefault" class="checkbox checkbox-sm" [(ngModel)]="address.isDefault" />
-              <span class="text-sm">{{t('setAsDefault')}}</span>
-            </label>
-          </fieldset>
-          <div class="modal-action">
-            <button class="btn btn-ghost" type="button" [disabled]="isSavingAddress()"
-              (click)="showAddAddress.set(false); showEditAddress.set(false)">{{t('cancel')}}</button>
-            <button class="btn address-save" type="submit" [disabled]="isSavingAddress() || !isAddressValid(address)">
-              @if (isSavingAddress()) { <span class="loading loading-spinner loading-sm"></span> }
-              {{t('save')}}
-            </button>
-          </div>
-        </form>
-      </div>
-    }
+      }
+    </section>
   }
 
+  @if (showAddAddress() || showEditAddress()) {
+    @let editing = showEditAddress();
+    @let address = editing ? editAddress : newAddress;
+    <dialog #addressDialog class="modal account-modal" aria-labelledby="address-editor-heading" (cancel)="closeAddressEditor($event)" (close)="closeAddressEditor()">
+      <form class="modal-box address-editor" #addressForm="ngForm" (ngSubmit)="editing ? updateAddress() : addAddress()">
+        <header class="account-modal-header"><div><h2 id="address-editor-heading">{{t(editing ? 'editAddress' : 'addAddress')}}</h2><p>{{t('addressFormHint')}}</p></div><button class="btn btn-ghost account-modal-close" type="button" [disabled]="isSavingAddress()" (click)="closeAddressEditor()" [attr.aria-label]="t('close')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6"/></svg></button></header>
+        <div class="account-modal-body">
+          <fieldset [disabled]="isSavingAddress()" class="address-editor-fields">
+            <div class="address-contact-grid">
+              <div class="account-field"><label for="account-fullName">{{t('fullName')}} <span class="text-error">*</span></label><input id="account-fullName" name="fullName" class="input" autocomplete="name" [(ngModel)]="address.fullName" required maxlength="100" /></div>
+              <div class="account-field"><label for="account-phoneNumber">{{t('phoneNumber')}} <span class="text-error">*</span></label><input id="account-phoneNumber" name="phoneNumber" class="input" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" [(ngModel)]="address.phoneNumber" required maxlength="16" pattern="[+]?[0-9]{8,15}" /></div>
+            </div>
+            <div class="account-field address-location-field"><label for="account-addressLine1">{{t('addressLine1')}} <span class="text-error">*</span></label><app-address-autocomplete fieldId="account-addressLine1" [value]="address.addressLine1" [language]="currentLanguage()" [label]="t('addressLine1')" (locationChange)="onAddressLocationChange(address, $event)"></app-address-autocomplete></div>
+            <h3 class="address-optional-heading">{{t('addressDetails')}} <span>{{t('optional')}}</span></h3>
+            <div class="address-detail-grid">@for (field of optionalFields; track field.key) { <div class="account-field"><label [for]="'account-' + field.key">{{t(field.key)}}</label><input [id]="'account-' + field.key" [name]="field.key" class="input" [(ngModel)]="address[field.key]" [maxlength]="field.maxLength" /></div> }</div>
+            <label class="address-default-toggle"><input type="checkbox" name="isDefault" class="checkbox checkbox-sm" [(ngModel)]="address.isDefault" /><span>{{t('setAsDefault')}}</span></label>
+          </fieldset>
+        </div>
+        <footer class="account-modal-footer"><button class="btn btn-outline" type="button" [disabled]="isSavingAddress()" (click)="closeAddressEditor()">{{t('cancel')}}</button><button class="btn btn-primary address-save" type="submit" [disabled]="isSavingAddress() || !isAddressValid(address)">@if (isSavingAddress()) { <span class="loading loading-spinner loading-sm" aria-hidden="true"></span> }{{t(isSavingAddress() ? 'saving' : 'save')}}</button></footer>
+      </form>
+    </dialog>
+  }
   <app-toast [toasts]="toastService.toasts$()" (close)="toastService.removeToast($event)"></app-toast>
 </div>

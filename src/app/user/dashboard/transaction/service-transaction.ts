@@ -42,7 +42,7 @@ export class ServiceTransaction {
     return this.http
       .get<PagedResult<TransactionAdvancedDto>>(`${this.api}/my`, { params })
       .pipe(
-        shareReplay(1),
+        shareReplay({ bufferSize: 1, refCount: true }),
         tap(result => {
           this.sourceItems.next(result.items);
           this.sourcePagination.next({

@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, computed, effect, inject, signal } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import arabicLocale from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
 import { ToastService } from '../../../services/toast.service';
@@ -7,12 +8,14 @@ import { ServiceTransaction } from './service-transaction';
 import { Observable, map } from 'rxjs';
 import { PaymentMethod, TransactionAdvancedDto, TransactionFilterDto, PagedResult } from './transaction.models';
 
+registerLocaleData(arabicLocale);
+
 @Component({
   selector: 'app-transaction',
   standalone: true,
   imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './transaction.html',
-  styleUrl: './transaction.css'
+  styleUrls: ['../account-page.css', './transaction.css']
 })
 export class Transaction implements OnInit, OnDestroy {
   public service = inject(ServiceTransaction);
@@ -26,6 +29,22 @@ export class Transaction implements OnInit, OnDestroy {
   translations = {
     ar: {
       myTransactions: 'معاملاتي',
+      filters: 'تصفية المعاملات',
+      filterHint: 'حدّد الخيارات ثم اضغط تطبيق لعرض النتائج.',
+      searchOrders: 'ابحث برقم الطلب...',
+      search: 'بحث',
+      close: 'إغلاق',
+      clearFilters: 'مسح الفلاتر',
+      moreOptions: 'المزيد من الخيارات',
+      transactionDetails: 'تفاصيل المعاملة',
+      currency: 'د.ك',
+      loadingTransactions: 'جارٍ تحميل المعاملات...',
+      transactionsAppearHere: 'ستظهر معاملات الدفع هنا بعد إتمام طلباتك.',
+      tryOtherFilters: 'جرّب تغيير البحث أو خيارات التصفية.',
+      pages: 'صفحات المعاملات',
+      previous: 'السابق',
+      next: 'التالي',
+      of: 'من',
       viewAndFilter: 'عرض وتصفية معاملات الدفع الخاصة بك',
       orderId: 'رقم الطلب',
       orderNumber: 'رقم الطلب',
@@ -65,6 +84,22 @@ export class Transaction implements OnInit, OnDestroy {
     },
     en: {
       myTransactions: 'My Transactions',
+      filters: 'Filters',
+      filterHint: 'Choose your filters, then apply to see the results.',
+      searchOrders: 'Order number...',
+      search: 'Search',
+      close: 'Close',
+      clearFilters: 'Clear filters',
+      moreOptions: 'More options',
+      transactionDetails: 'Transaction details',
+      currency: 'KWD',
+      loadingTransactions: 'Loading your transactions...',
+      transactionsAppearHere: 'Your payment transactions will appear here after you place an order.',
+      tryOtherFilters: 'Try another search or change your filters.',
+      pages: 'Transaction pages',
+      previous: 'Previous',
+      next: 'Next',
+      of: 'of',
       viewAndFilter: 'View and filter your payment transactions',
       orderId: 'Order ID',
       orderNumber: 'Order Number',
@@ -174,6 +209,11 @@ export class Transaction implements OnInit, OnDestroy {
 
   // UI state
   isLoading = signal(false);
+  showFilters = signal(false);
+  private filtersDialog = viewChild<ElementRef<HTMLDialogElement>>('filtersDialog');
+  private appliedFilters = signal<TransactionFilterDto>({ pageSize: 10, sortBy: 'TransactionDate', sortDirection: 'desc' });
+  activeFilterCount = computed(() => Object.entries(this.appliedFilters())
+    .filter(([key, value]) => !['pageSize', 'sortBy', 'sortDirection'].includes(key) && value != null && value !== '').length);
 
   // Pagination
   currentPage = signal(1);
@@ -196,19 +236,8 @@ export class Transaction implements OnInit, OnDestroy {
 
   // Derived filters
   filters$ = computed((): TransactionFilterDto => ({
-    orderId: this.orderId() ?? undefined,
-    orderNumber: this.orderNumber() || undefined,
-    paymentMethod: this.paymentMethod() ?? undefined,
-    status: this.status() || undefined,
-    startDate: this.startDate() || undefined,
-    endDate: this.endDate() || undefined,
-    minAmount: this.minAmount() ?? undefined,
-    maxAmount: this.maxAmount() ?? undefined,
-    isRefunded: this.isRefunded() ?? undefined,
-    pageNumber: this.currentPage(),
-    pageSize: this.pageSize(),
-    sortBy: this.sortBy(),
-    sortDirection: this.sortDirection()
+    ...this.appliedFilters(),
+    pageNumber: this.currentPage()
   }));
 
   // Data streams
@@ -226,9 +255,13 @@ export class Transaction implements OnInit, OnDestroy {
   Math = Math;
 
   constructor() {
-    effect(() => {
-      const f = this.filters$();
-      this.loadTransactions(f);
+    effect(onCleanup => {
+      const request = this.loadTransactions(this.filters$());
+      onCleanup(() => request.unsubscribe());
+    });
+    afterRenderEffect(() => {
+      const dialog = this.filtersDialog()?.nativeElement;
+      if (dialog && !dialog.open) dialog.showModal();
     });
   }
 
@@ -266,7 +299,7 @@ export class Transaction implements OnInit, OnDestroy {
 
   loadTransactions(filters: TransactionFilterDto) {
     this.isLoading.set(true);
-    this.service.getTransactions(filters).subscribe({
+    return this.service.getTransactions(filters).subscribe({
       next: (_result: PagedResult<TransactionAdvancedDto>) => this.isLoading.set(false),
       error: () => {
         this.isLoading.set(false);
@@ -288,26 +321,57 @@ export class Transaction implements OnInit, OnDestroy {
   }
 
   onSearch() {
+    this.appliedFilters.set({
+      orderId: this.orderId() ?? undefined,
+      orderNumber: this.orderNumber().trim() || undefined,
+      paymentMethod: this.paymentMethod() ?? undefined,
+      status: this.status().trim() || undefined,
+      startDate: this.startDate() || undefined,
+      endDate: this.endDate() || undefined,
+      minAmount: this.minAmount() ?? undefined,
+      maxAmount: this.maxAmount() ?? undefined,
+      isRefunded: this.isRefunded() ?? undefined,
+      pageSize: this.pageSize(), sortBy: this.sortBy(), sortDirection: this.sortDirection()
+    });
     this.currentPage.set(1);
+    this.filtersDialog()?.nativeElement.close();
+    this.showFilters.set(false);
+  }
+
+  closeFilters(event?: Event): void {
+    event?.preventDefault();
+    const filters = this.appliedFilters();
+    this.orderId.set(filters.orderId ?? null);
+    this.orderNumber.set(filters.orderNumber ?? '');
+    this.paymentMethod.set(filters.paymentMethod ?? null);
+    this.status.set(filters.status ?? '');
+    this.startDate.set(filters.startDate ?? null);
+    this.endDate.set(filters.endDate ?? null);
+    this.minAmount.set(filters.minAmount ?? null);
+    this.maxAmount.set(filters.maxAmount ?? null);
+    this.isRefunded.set(filters.isRefunded ?? null);
+    this.pageSize.set(filters.pageSize ?? 10);
+    this.sortBy.set((filters.sortBy ?? 'TransactionDate') as ReturnType<typeof this.sortBy>);
+    this.sortDirection.set(filters.sortDirection ?? 'desc');
+    this.filtersDialog()?.nativeElement.close();
+    this.showFilters.set(false);
   }
 
   onPageChange(page: number) {
+    if (page < 1 || page > this.getTotalPages()) return;
     this.currentPage.set(page);
   }
 
   onPageSizeChange(size: number) {
     this.pageSize.set(size);
-    this.currentPage.set(1);
   }
 
   onSortChange(sortBy: string) {
-    this.sortBy.set(sortBy as any);
-    this.currentPage.set(1);
+    this.sortBy.set(sortBy as ReturnType<typeof this.sortBy>);
   }
 
   onSortDirectionChange(dir: 'asc' | 'desc') {
     this.sortDirection.set(dir);
-    this.currentPage.set(1);
   }
 
   clearFilters() {
@@ -320,7 +384,7 @@ export class Transaction implements OnInit, OnDestroy {
     this.minAmount.set(null);
     this.maxAmount.set(null);
     this.isRefunded.set(null);
-    this.currentPage.set(1);
+    this.onSearch();
   }
 
   getPageNumbers(totalPages: number, currentPage: number): (number | string)[] {

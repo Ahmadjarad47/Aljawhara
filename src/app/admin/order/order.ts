@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -24,11 +24,17 @@ import {
   OrderSummaryDto,
   OrderUpdateStatusDto,
   OrderStatus,
+  normalizeOrderStatus,
   InvoicePaymentDto
 } from './order.models';
 import { Observable, map, combineLatest, catchError, of } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
+import { Dashboard } from '../dashboard/dashboard';
+import { orderText } from './order.text';
+import arabicLocale from '@angular/common/locales/ar-KW';
+
+registerLocaleData(arabicLocale);
 
 declare const window: any;
 
@@ -58,6 +64,19 @@ ChartJS.register(
 export class Order implements OnInit {
   public orderService = inject(OrderService);
   public toastService = inject(ToastService);
+  readonly language = inject(Dashboard).currentLanguage;
+  readonly locale = computed(() => this.language() === 'ar' ? 'ar-KW' : 'en-US');
+  readonly editableStatuses = [OrderStatus.Pending, OrderStatus.Processing, OrderStatus.Shipped,
+    OrderStatus.Delivered, OrderStatus.Cancelled, OrderStatus.Refunded];
+  readonly orderStatuses = [...this.editableStatuses, OrderStatus.Expired, OrderStatus.RequiresReconciliation];
+
+  t(key: keyof typeof orderText.ar): string {
+    return orderText[this.language()][key];
+  }
+
+  formatChartDate(date: string): string {
+    return new Date(date).toLocaleDateString(this.locale(), { month: 'short', day: 'numeric', year: 'numeric' });
+  }
   
   // Signals for reactive state management
   selectedOrders = signal<number[]>([]);
@@ -132,6 +151,10 @@ export class Order implements OnInit {
   );
 
   constructor() {
+    effect(() => {
+      this.language();
+      this.updateChartsData();
+    });
     // Set up reactive data loading
     effect(() => {
       const status = this.statusFilter();
@@ -170,7 +193,7 @@ export class Order implements OnInit {
           this.isLoading.set(false);
         },
         error: (error) => {
-          this.toastService.error('Error', 'Failed to load orders');
+          this.toastService.error(this.t('error'), this.t('loadOrdersError'));
           this.isLoading.set(false);
           console.error('Error loading orders:', error);
         }
@@ -181,7 +204,7 @@ export class Order implements OnInit {
           this.isLoading.set(false);
         },
         error: (error) => {
-          this.toastService.error('Error', 'Failed to load orders');
+          this.toastService.error(this.t('error'), this.t('loadOrdersError'));
           this.isLoading.set(false);
           console.error('Error loading orders:', error);
         }
@@ -244,7 +267,7 @@ export class Order implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load order details');
+        this.toastService.error(this.t('error'), this.t('loadDetailsError'));
         this.isLoading.set(false);
         console.error('Error loading order details:', error);
       }
@@ -252,26 +275,32 @@ export class Order implements OnInit {
   }
 
   updateStatusStart(orderSummary: OrderSummaryDto) {
+    const status = normalizeOrderStatus(orderSummary.status);
+    if (status === null) {
+      this.toastService.warning(this.t('validationError'), this.t('selectStatus'));
+      return;
+    }
     this.statusUpdate = {
       id: orderSummary.id,
-      status: orderSummary.status
+      status
     };
     this.showStatusModal.set(true);
   }
 
   updateStatus() {
-    if (!this.statusUpdate.id || this.statusUpdate.status === undefined) {
-      this.toastService.warning('Validation Error', 'Please select a valid status');
+    const status = normalizeOrderStatus(this.statusUpdate.status);
+    if (!this.statusUpdate.id || status === null || !this.editableStatuses.includes(status)) {
+      this.toastService.warning(this.t('validationError'), this.t('selectStatus'));
       return;
     }
 
     // Ensure status is sent as a number
     const updateDto: OrderUpdateStatusDto = {
       id: this.statusUpdate.id,
-      status: typeof this.statusUpdate.status === 'string' ? parseInt(this.statusUpdate.status, 10) : this.statusUpdate.status
+      status
     };
 
-    const loadingToastId = this.toastService.loading('Updating', 'Updating order status...');
+    const loadingToastId = this.toastService.loading(this.t('updating'), this.t('updatingStatus'));
     this.isLoading.set(true);
     this.orderService.updateOrderStatus(updateDto.id, updateDto).subscribe({
       next: () => {
@@ -279,10 +308,10 @@ export class Order implements OnInit {
         this.statusUpdate = { id: 0, status: OrderStatus.Pending };
         this.loadOrders(this.statusFilter(), this.currentPage(), this.pageSize());
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Order status updated successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('statusUpdated'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update order status');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('updateStatusError'));
         this.isLoading.set(false);
         console.error('Error updating order status:', error);
       }
@@ -290,20 +319,20 @@ export class Order implements OnInit {
   }
 
   cancelOrder(orderSummary: OrderSummaryDto) {
-    if (!confirm(`Are you sure you want to cancel order #${orderSummary.orderNumber}?`)) {
+    if (!confirm(`${this.t('confirmCancel')} #${orderSummary.orderNumber}${this.language() === 'ar' ? '؟' : '?'}`)) {
       return;
     }
 
-    const loadingToastId = this.toastService.loading('Cancelling', 'Cancelling order...');
+    const loadingToastId = this.toastService.loading(this.t('cancelling'), this.t('cancellingOrder'));
     this.isLoading.set(true);
     this.orderService.cancelOrder(orderSummary.id).subscribe({
       next: () => {
         this.loadOrders(this.statusFilter(), this.currentPage(), this.pageSize());
         this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Order cancelled successfully');
+        this.toastService.updateToSuccess(loadingToastId, this.t('success'), this.t('orderCancelled'));
       },
       error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', error.error?.message || 'Failed to cancel order');
+        this.toastService.updateToError(loadingToastId, this.t('error'), this.t('cancelOrderError'));
         this.isLoading.set(false);
         console.error('Error cancelling order:', error);
       }
@@ -319,7 +348,7 @@ export class Order implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load statistics');
+        this.toastService.error(this.t('error'), this.t('loadStatisticsError'));
         this.isLoading.set(false);
         console.error('Error loading statistics:', error);
       }
@@ -338,7 +367,7 @@ export class Order implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', 'Failed to load sales data');
+        this.toastService.error(this.t('error'), this.t('loadSalesError'));
         this.isLoading.set(false);
         console.error('Error loading sales:', error);
       }
@@ -348,7 +377,7 @@ export class Order implements OnInit {
   searchByOrderNumber() {
     const searchTerm = this.searchTerm().trim();
     if (!searchTerm) {
-      this.toastService.warning('Validation Error', 'Please enter an order number');
+      this.toastService.warning(this.t('validationError'), this.t('enterOrderNumber'));
       return;
     }
 
@@ -371,7 +400,7 @@ export class Order implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.toastService.error('Error', error.error?.message || 'Order not found');
+        this.toastService.error(this.t('error'), this.t('orderNotFound'));
         this.isLoading.set(false);
         console.error('Error searching order:', error);
       }
@@ -422,46 +451,31 @@ export class Order implements OnInit {
     return pages;
   }
 
-  getStatusBadgeClass(status: OrderStatus): string {
-    switch (status) {
+  getStatusBadgeClass(status: OrderStatus | string | null | undefined): string {
+    switch (normalizeOrderStatus(status)) {
       case OrderStatus.Delivered:
         return 'badge-success';
       case OrderStatus.Pending:
+      case OrderStatus.RequiresReconciliation:
         return 'badge-warning';
       case OrderStatus.Processing:
         return 'badge-info';
       case OrderStatus.Shipped:
         return 'badge-primary';
       case OrderStatus.Cancelled:
+      case OrderStatus.Expired:
       case OrderStatus.Refunded:
         return 'badge-error';
       default:
-        return 'badge-info';
+        return 'badge-ghost';
     }
   }
 
-  getStatusName(status: OrderStatus | string | number): string {
-    // If it's already a string and it's a valid status name, return it
-    if (typeof status === 'string') {
-      const statusName = status as keyof typeof OrderStatus;
-      if (OrderStatus[statusName] !== undefined) {
-        return statusName;
-      }
-      // Try to parse as number
-      const numStatus = parseInt(status, 10);
-      if (!isNaN(numStatus) && OrderStatus[numStatus] !== undefined) {
-        return OrderStatus[numStatus];
-      }
-      return status; // Return the string as-is if it's a valid status name
-    }
-    
-    // If it's a number, get the status name from enum
-    const numStatus = typeof status === 'number' ? status : parseInt(String(status), 10);
-    if (!isNaN(numStatus)) {
-      return OrderStatus[numStatus] || 'Unknown';
-    }
-    
-    return 'Unknown';
+  getStatusName(status: OrderStatus | string | null | undefined): string {
+    const keys = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded',
+      'expired', 'requiresReconciliation'] as const;
+    const normalized = normalizeOrderStatus(status);
+    return normalized === null ? this.t('unknown') : this.t(keys[normalized]);
   }
 
   // Convert statistics object to array with formatted labels
@@ -514,7 +528,7 @@ export class Order implements OnInit {
     this.orderService.getInvoicePaymentData(orderId).pipe(
       catchError(error => {
         console.error('Error loading invoice data:', error);
-        this.toastService.error('Error', 'Failed to load invoice data');
+        this.toastService.error(this.t('error'), this.t('loadInvoiceError'));
         this.isLoading.set(false);
         return of(null);
       })
@@ -523,7 +537,7 @@ export class Order implements OnInit {
         if (invoiceData && invoiceData.success) {
           await this.generatePDF(invoiceData);
         } else {
-          this.toastService.error('Error', invoiceData?.message || 'Failed to load invoice data');
+          this.toastService.error(this.t('error'), this.t('loadInvoiceError'));
         }
         this.isLoading.set(false);
       },
@@ -538,10 +552,10 @@ export class Order implements OnInit {
     try {
       const { downloadInvoicePDF } = await import('../../core/utils/invoice-pdf');
       await downloadInvoicePDF(invoice);
-      this.toastService.success('Success', 'Invoice downloaded successfully');
+      this.toastService.success(this.t('success'), this.t('invoiceDownloaded'));
     } catch (error) {
       console.error('Error generating PDF:', error);
-      this.toastService.error('Error', 'Failed to generate PDF');
+      this.toastService.error(this.t('error'), this.t('generatePdfError'));
     }
   }
 
@@ -599,7 +613,9 @@ export class Order implements OnInit {
         'rgba(139, 92, 246, 0.8)',    // Shipped - Purple
         'rgba(16, 185, 129, 0.8)',    // Delivered - Green
         'rgba(239, 68, 68, 0.8)',     // Cancelled - Red
-        'rgba(107, 114, 128, 0.8)'    // Refunded - Gray
+        'rgba(107, 114, 128, 0.8)',   // Refunded - Gray
+        'rgba(239, 68, 68, 0.8)',    // Expired - Red
+        'rgba(245, 158, 11, 0.8)'    // Payment under review - Amber
       ],
       borderColor: [
         'rgb(251, 191, 36)',
@@ -745,7 +761,7 @@ export class Order implements OnInit {
         callbacks: {
           label: (context) => {
             const yValue = context.parsed?.y;
-            return `Revenue: ${(yValue || 0).toLocaleString()} KWD`;
+            return `${this.t('revenue')}: ${(yValue || 0).toLocaleString(this.locale())} ${this.t('currency')}`;
           }
         }
       }
@@ -763,7 +779,7 @@ export class Order implements OnInit {
           },
           padding: 8,
           callback: (value) => {
-            return Number(value).toLocaleString() + ' KWD';
+            return Number(value).toLocaleString(this.locale()) + ' ' + this.t('currency');
           }
         }
       },
@@ -862,7 +878,7 @@ export class Order implements OnInit {
     
     // Apply status filter
     if (this.chartStatusFilter() !== null) {
-      orders = orders.filter(order => order.status === this.chartStatusFilter());
+      orders = orders.filter(order => normalizeOrderStatus(order.status) === this.chartStatusFilter());
     }
     
     // Apply date range filter
@@ -890,6 +906,28 @@ export class Order implements OnInit {
   
   // Update chart data based on orders
   updateChartsData() {
+    const rtl = this.language() === 'ar';
+    const textDirection = rtl ? 'rtl' : 'ltr';
+    for (const options of [this.ordersByStatusChartOptions, this.ordersOverTimeChartOptions, this.revenueOverTimeChartOptions]) {
+      if (!options) continue;
+      options.locale = this.locale();
+      if (options.plugins?.legend) {
+        options.plugins.legend.rtl = rtl;
+        options.plugins.legend.textDirection = textDirection;
+      }
+      if (options.plugins?.tooltip) {
+        options.plugins.tooltip.rtl = rtl;
+        options.plugins.tooltip.textDirection = textDirection;
+      }
+    }
+    this.ordersOverTimeChartData = {
+      ...this.ordersOverTimeChartData,
+      datasets: [{ ...this.ordersOverTimeChartData.datasets[0], label: this.t('orders') }]
+    };
+    this.revenueOverTimeChartData = {
+      ...this.revenueOverTimeChartData,
+      datasets: [{ ...this.revenueOverTimeChartData.datasets[0], label: this.t('revenue') }]
+    };
     const orders = this.getFilteredOrdersForChart();
     if (orders.length === 0) {
       // Reset charts to empty state
@@ -931,7 +969,8 @@ export class Order implements OnInit {
       });
 
     orders.forEach(order => {
-      statusCounts[order.status] = (statusCounts[order.status] || 0) + 1;
+      const status = normalizeOrderStatus(order.status);
+      if (status !== null) statusCounts[status] = (statusCounts[status] || 0) + 1;
     });
 
     const statusLabels: string[] = [];
@@ -957,7 +996,7 @@ export class Order implements OnInit {
     const ordersByDate: { [key: string]: number } = {};
     orders.forEach(order => {
       const date = new Date(order.createdAt);
-      const dateKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const dateKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
       ordersByDate[dateKey] = (ordersByDate[dateKey] || 0) + 1;
     });
 
@@ -970,7 +1009,7 @@ export class Order implements OnInit {
 
     this.ordersOverTimeChartData = {
       ...this.ordersOverTimeChartData,
-      labels: sortedDates,
+      labels: sortedDates.map(date => this.formatChartDate(date)),
       datasets: [{
         ...this.ordersOverTimeChartData.datasets[0],
         data: ordersData
@@ -981,7 +1020,7 @@ export class Order implements OnInit {
     const revenueByDate: { [key: string]: number } = {};
     orders.forEach(order => {
       const date = new Date(order.createdAt);
-      const dateKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const dateKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
       revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + order.total;
     });
 
@@ -994,7 +1033,7 @@ export class Order implements OnInit {
 
     this.revenueOverTimeChartData = {
       ...this.revenueOverTimeChartData,
-      labels: sortedRevenueDates,
+      labels: sortedRevenueDates.map(date => this.formatChartDate(date)),
       datasets: [{
         ...this.revenueOverTimeChartData.datasets[0],
         data: revenueData

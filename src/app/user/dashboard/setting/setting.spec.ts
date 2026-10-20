@@ -115,4 +115,23 @@ describe('Account address forms', () => {
     http.expectNone(addressUrl);
     expect((fixture.nativeElement.querySelector('.address-save') as HTMLButtonElement).disabled).toBeTrue();
   });
+
+  it('prevents duplicate profile submissions and restores the form after a rejected update', async () => {
+    settings.currentUser.set({ id: 'demo', username: 'Customer', email: 'demo@example.com',
+      phoneNumber: '123456789', createdAt: '2026-10-20', emailConfirmed: true, isActive: true });
+    settings.activeTab.set('profile');
+    settings.updateUsernameModel.username = 'Updated customer';
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('.profile-save') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(settings.isSavingUsername()).toBeTrue();
+    expect((fixture.nativeElement.querySelector('#settings-username') as HTMLInputElement).closest('fieldset')!.disabled).toBeTrue();
+    settings.onUpdateUsername();
+    const request = http.expectOne(`${environment.apiUrl}Auth/me/username`);
+    expect(request.request.body.username).toBe('Updated customer');
+    request.flush({ success: false, message: 'Rejected' });
+    await fixture.whenStable();
+    expect(settings.isSavingUsername()).toBeFalse();
+    expect((fixture.nativeElement.querySelector('#settings-username') as HTMLInputElement).value).toBe('Updated customer');
+  });
 });

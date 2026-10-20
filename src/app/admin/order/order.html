@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="p-4 md:p-6" [dir]="language() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="language()">
     <!-- Toast Component -->
     <app-toast 
         [toasts]="toasts" 
@@ -6,29 +6,29 @@
     </app-toast>
 
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-base-content">Order Management</h1>
-            <p class="text-base-content/70 mt-2">Manage orders and track status</p>
+            <h1 class="text-3xl font-bold text-base-content">{{t('title')}}</h1>
+            <p class="text-base-content/70 mt-2">{{t('subtitle')}}</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
             <button (click)="toggleCharts()" [disabled]="isLoading()" class="btn btn-primary btn-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                {{showCharts() ? 'Hide' : 'Show'}} Charts
+                {{showCharts() ? t('hideCharts') : t('showCharts')}}
             </button>
             <button (click)="viewStatistics()" [disabled]="isLoading()" class="btn btn-info btn-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                Statistics
+                {{t('statistics')}}
             </button>
             <button (click)="viewSales()" [disabled]="isLoading()" class="btn btn-success btn-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Sales Report
+                {{t('salesReport')}}
             </button>
         </div>
     </div>
@@ -40,12 +40,12 @@
             <div class="card bg-base-100 shadow-sm border border-base-300">
                 <div class="card-body p-4">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Chart Filters</h3>
+                        <h3 class="text-lg font-semibold">{{t('chartFilters')}}</h3>
                         <button 
                             (click)="clearChartFilters()" 
                             [disabled]="isLoading()"
                             class="btn btn-ghost btn-sm">
-                            Clear Filters
+                            {{t('clearFilters')}}
                         </button>
                     </div>
                     
@@ -53,24 +53,24 @@
                         <!-- Time Range Quick Filter -->
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Time Range</span>
+                                <span class="label-text">{{t('timeRange')}}</span>
                             </label>
                             <select 
                                 class="select select-bordered select-sm" 
                                 [ngModel]="chartTimeRange()"
                                 (ngModelChange)="onChartTimeRangeChange($event)">
-                                <option value="all">All Time</option>
-                                <option value="7days">Last 7 Days</option>
-                                <option value="30days">Last 30 Days</option>
-                                <option value="90days">Last 90 Days</option>
-                                <option value="custom">Custom Range</option>
+                                <option value="all">{{t('allTime')}}</option>
+                                <option value="7days">{{t('last7Days')}}</option>
+                                <option value="30days">{{t('last30Days')}}</option>
+                                <option value="90days">{{t('last90Days')}}</option>
+                                <option value="custom">{{t('customRange')}}</option>
                             </select>
                         </div>
 
                         <!-- Start Date Filter -->
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Start Date</span>
+                                <span class="label-text">{{t('startDate')}}</span>
                             </label>
                             <input 
                                 type="date" 
@@ -82,7 +82,7 @@
                         <!-- End Date Filter -->
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">End Date</span>
+                                <span class="label-text">{{t('endDate')}}</span>
                             </label>
                             <input 
                                 type="date" 
@@ -94,19 +94,16 @@
                         <!-- Status Filter -->
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Status</span>
+                                <span class="label-text">{{t('status')}}</span>
                             </label>
                             <select 
                                 class="select select-bordered select-sm" 
                                 [ngModel]="chartStatusFilter()"
-                                (ngModelChange)="chartStatusFilter.set($event === 'null' || $event === '' ? null : +$event); applyChartFilters()">
-                                <option [value]="null">All Status</option>
-                                <option [value]="0">Pending</option>
-                                <option [value]="1">Processing</option>
-                                <option [value]="2">Shipped</option>
-                                <option [value]="3">Delivered</option>
-                                <option [value]="4">Cancelled</option>
-                                <option [value]="5">Refunded</option>
+                                (ngModelChange)="chartStatusFilter.set($event); applyChartFilters()">
+                                <option [ngValue]="null">{{t('allStatus')}}</option>
+                                @for (status of orderStatuses; track status) {
+                                    <option [ngValue]="status">{{getStatusName(status)}}</option>
+                                }
                             </select>
                         </div>
                     </div>
@@ -115,19 +112,19 @@
                     <div class="mt-4 text-sm text-base-content/70">
                         @if (chartStartDate() || chartEndDate() || chartStatusFilter() !== null) {
                             <div class="flex flex-wrap gap-2">
-                                <span class="font-semibold">Active Filters:</span>
+                                <span class="font-semibold">{{t('activeFilters')}}:</span>
                                 @if (chartStartDate()) {
-                                    <span class="badge badge-sm">From: {{chartStartDate()}}</span>
+                                    <span class="badge badge-sm">{{t('from')}}: {{chartStartDate()}}</span>
                                 }
                                 @if (chartEndDate()) {
-                                    <span class="badge badge-sm">To: {{chartEndDate()}}</span>
+                                    <span class="badge badge-sm">{{t('to')}}: {{chartEndDate()}}</span>
                                 }
                                 @if (chartStatusFilter() !== null) {
-                                    <span class="badge badge-sm">Status: {{getStatusName(chartStatusFilter()!)}}</span>
+                                    <span class="badge badge-sm">{{t('status')}}: {{getStatusName(chartStatusFilter()!)}}</span>
                                 }
                             </div>
                         } @else {
-                            <span>Showing all data</span>
+                            <span>{{t('showingAllData')}}</span>
                         }
                     </div>
                 </div>
@@ -139,9 +136,9 @@
                 <div class="card bg-base-100 shadow-sm border border-base-300">
                     <div class="card-body">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="card-title">Orders by Status</h2>
+                            <h2 class="card-title">{{t('ordersByStatus')}}</h2>
                             <span class="badge badge-primary badge-sm">
-                                {{getFilteredOrdersForChart().length}} orders
+                                {{getFilteredOrdersForChart().length}} {{t('orders')}}
                             </span>
                         </div>
                         <div class="h-80">
@@ -158,9 +155,9 @@
                 <div class="card bg-base-100 shadow-sm border border-base-300">
                     <div class="card-body">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="card-title">Orders Over Time</h2>
+                            <h2 class="card-title">{{t('ordersOverTime')}}</h2>
                             <span class="badge badge-primary badge-sm">
-                                {{getFilteredOrdersForChart().length}} orders
+                                {{getFilteredOrdersForChart().length}} {{t('orders')}}
                             </span>
                         </div>
                         <div class="h-80">
@@ -178,9 +175,9 @@
             <div class="card bg-base-100 shadow-sm border border-base-300">
                 <div class="card-body">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="card-title">Revenue Over Time</h2>
+                        <h2 class="card-title">{{t('revenueOverTime')}}</h2>
                         <span class="badge badge-success badge-sm">
-                            {{getFilteredOrdersForChart().length}} orders
+                            {{getFilteredOrdersForChart().length}} {{t('orders')}}
                         </span>
                     </div>
                     <div class="h-80">
@@ -204,12 +201,12 @@
                     <div class="input-group">
                         <input 
                             type="text" 
-                            placeholder="Search by order number..." 
+                            [placeholder]="t('searchPlaceholder')"
                             class="input input-bordered flex-1" 
                             [ngModel]="searchTerm()"
                             (ngModelChange)="searchTerm.set($event)"
                             (keyup.enter)="searchByOrderNumber()" />
-                        <button (click)="searchByOrderNumber()" [disabled]="isLoading()" class="btn btn-square">
+                        <button (click)="searchByOrderNumber()" [disabled]="isLoading()" [attr.aria-label]="t('search')" class="btn btn-square">
                             @if (isLoading()) {
                                 <span class="loading loading-spinner loading-sm"></span>
                             } @else {
@@ -226,14 +223,12 @@
                     <select 
                         class="select select-bordered" 
                         [ngModel]="statusFilter()"
-                        (ngModelChange)="statusFilter.set($event === 'null' || $event === '' ? null : +$event); onSearch()">
-                        <option [value]="null">All Status</option>
-                        <option [value]="0">Pending</option>
-                        <option [value]="1">Processing</option>
-                        <option [value]="2">Shipped</option>
-                        <option [value]="3">Delivered</option>
-                        <option [value]="4">Cancelled</option>
-                        <option [value]="5">Refunded</option>
+                        (ngModelChange)="statusFilter.set($event); onSearch()"
+                        [attr.aria-label]="t('status')">
+                        <option [ngValue]="null">{{t('allStatus')}}</option>
+                        @for (status of orderStatuses; track status) {
+                            <option [ngValue]="status">{{getStatusName(status)}}</option>
+                        }
                     </select>
                 </div>
 
@@ -241,7 +236,7 @@
                 <div class="form-control">
                     <input 
                         type="text" 
-                        placeholder="Filter by User ID" 
+                        [placeholder]="t('userFilter')"
                         class="input input-bordered" 
                         [ngModel]="userIdFilter()"
                         (ngModelChange)="userIdFilter.set($event)" />
@@ -253,17 +248,17 @@
                         class="select select-bordered" 
                         [ngModel]="pageSize()"
                         (ngModelChange)="onPageSizeChange($event)">
-                        <option [value]="10">10 per page</option>
-                        <option [value]="20">20 per page</option>
-                        <option [value]="50">50 per page</option>
-                        <option [value]="100">100 per page</option>
+                        <option [value]="10">10 {{t('perPage')}}</option>
+                        <option [value]="20">20 {{t('perPage')}}</option>
+                        <option [value]="50">50 {{t('perPage')}}</option>
+                        <option [value]="100">100 {{t('perPage')}}</option>
                     </select>
                 </div>
 
                 <!-- Clear Filters -->
                 <div class="form-control">
                     <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-outline">
-                        Clear Filters
+                        {{t('clearFilters')}}
                     </button>
                 </div>
             </div>
@@ -292,13 +287,13 @@
                                             (change)="toggleSelectAll()" />
                                     </label>
                                 </th>
-                                <th>Order Number</th>
-                                <th>Customer</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
+                                <th>{{t('orderNumber')}}</th>
+                                <th>{{t('customer')}}</th>
+                                <th>{{t('status')}}</th>
+                                <th>{{t('items')}}</th>
+                                <th>{{t('total')}}</th>
+                                <th>{{t('createdAt')}}</th>
+                                <th>{{t('actions')}}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -316,24 +311,24 @@
                                     </th>
                                     <td>
                                         <div class="font-semibold">#{{order.orderNumber}}</div>
-                                        <div class="text-xs opacity-50">ID: {{order.id}}</div>
+                                        <div class="text-xs opacity-50">{{t('id')}}: {{order.id}}</div>
                                     </td>
                                     <td>
                                         <div class="font-semibold">{{order.customerName}}</div>
                                     </td>
                                     <td>
-                                        <div class="badge" [class]="getStatusBadgeClass(order.status)">
+                                        <div class="badge" [ngClass]="getStatusBadgeClass(order.status)">
                                             {{getStatusName(order.status)}}
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="font-semibold">{{order.itemCount}} items</div>
+                                        <div class="font-semibold">{{order.itemCount}} {{t('items')}}</div>
                                     </td>
                                     <td>
-                                        <div class="font-bold text-success">{{order.total | currency:'KWD'}}</div>
+                                        <div class="font-bold text-success">{{order.total | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
                                     </td>
                                     <td>
-                                        <div class="text-sm">{{order.createdAt | date:'short'}}</div>
+                                        <div class="text-sm">{{order.createdAt | date:'short':undefined:locale()}}</div>
                                     </td>
                                     <th>
                                         <div class="flex flex-wrap gap-1">
@@ -341,13 +336,13 @@
                                                 (click)="viewDetails(order)"
                                                 [disabled]="isLoading()"
                                                 class="btn btn-ghost btn-xs">
-                                                Details
+                                                {{t('details')}}
                                             </button>
                                             <button 
                                                 (click)="updateStatusStart(order)"
                                                 [disabled]="isLoading()"
                                                 class="btn btn-info btn-xs">
-                                                Update Status
+                                                {{t('updateStatus')}}
                                             </button>
                                           
                                         </div>
@@ -357,7 +352,7 @@
                             @if (getOrdersLength() === 0 && !isLoading()) {
                                 <tr>
                                     <td colspan="8" class="text-center py-8 text-base-content/50">
-                                        No orders found
+                                        {{t('noOrders')}}
                                     </td>
                                 </tr>
                             }
@@ -375,6 +370,7 @@
                 <!-- Previous Button -->
                 <button 
                     (click)="onPageChange(getCurrentPage() - 1)" 
+                    [attr.aria-label]="t('previousPage')"
                     [disabled]="getCurrentPage() === 1 || isLoading()"
                     class="join-item btn">
                     «
@@ -398,6 +394,7 @@
                 <!-- Next Button -->
                 <button 
                     (click)="onPageChange(getCurrentPage() + 1)" 
+                    [attr.aria-label]="t('nextPage')"
                     [disabled]="getCurrentPage() === getTotalPages() || isLoading()"
                     class="join-item btn">
                     »
@@ -408,7 +405,7 @@
         <!-- Pagination Info -->
         <div class="text-center mt-4 text-sm text-base-content/70">
             @if (pagination$ | async; as pagination) {
-                Showing {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} to {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} of {{pagination.totalCount}} orders
+                {{t('showing')}} {{((pagination.currentPage - 1) * pagination.pageSize) + 1}} {{t('to')}} {{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)}} {{t('of')}} {{pagination.totalCount}} {{t('orders')}}
             }
         </div>
     }
@@ -416,30 +413,30 @@
     <!-- Status Update Modal -->
     @if (showStatusModal()) {
         <div class="modal modal-open">
-            <div class="modal-box max-w-md">
-                <h3 class="font-bold text-lg mb-4">Update Order Status</h3>
+            <div class="modal-box max-w-md" role="dialog" aria-modal="true" aria-labelledby="order-status-title">
+                <h3 id="order-status-title" class="font-bold text-lg mb-4">{{t('updateOrderStatus')}}</h3>
                 
                 <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text">Status *</span>
+                    <label class="label" for="order-status">
+                        <span class="label-text">{{t('status')}} *</span>
                     </label>
-                    <select class="select select-bordered" [ngModel]="statusUpdate.status" (ngModelChange)="statusUpdate.status = +$event">
-                        <option [value]="0">Pending</option>
-                        <option [value]="1">Processing</option>
-                        <option [value]="2">Shipped</option>
-                        <option [value]="3">Delivered</option>
-                        <option [value]="4">Cancelled</option>
-                        <option [value]="5">Refunded</option>
+                    <select id="order-status" class="select select-bordered" [ngModel]="statusUpdate.status" (ngModelChange)="statusUpdate.status = $event">
+                        @if (!editableStatuses.includes(statusUpdate.status)) {
+                            <option [ngValue]="statusUpdate.status" disabled>{{getStatusName(statusUpdate.status)}}</option>
+                        }
+                        @for (status of editableStatuses; track status) {
+                            <option [ngValue]="status">{{getStatusName(status)}}</option>
+                        }
                     </select>
                 </div>
 
                 <div class="modal-action">
-                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">Cancel</button>
-                    <button (click)="updateStatus()" [disabled]="isLoading()" class="btn btn-primary">
+                    <button (click)="closeModals()" [disabled]="isLoading()" class="btn btn-ghost">{{t('cancel')}}</button>
+                    <button (click)="updateStatus()" [disabled]="isLoading() || !editableStatuses.includes(statusUpdate.status)" class="btn btn-primary">
                         @if (isLoading()) {
                             <span class="loading loading-spinner loading-sm"></span>
                         }
-                        Update Status
+                        {{t('updateStatus')}}
                     </button>
                 </div>
             </div>
@@ -450,7 +447,7 @@
     @if (showStatisticsModal()) {
         <div class="modal modal-open">
             <div class="modal-box max-w-4xl">
-                <h3 class="font-bold text-lg mb-4">Order Statistics</h3>
+                <h3 class="font-bold text-lg mb-4">{{t('statistics')}}</h3>
                 
                 @if (isLoading()) {
                     <div class="flex justify-center items-center py-12">
@@ -468,7 +465,7 @@
                 }
 
                 <div class="modal-action">
-                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                    <button (click)="closeModals()" class="btn btn-ghost">{{t('close')}}</button>
                 </div>
             </div>
         </div>
@@ -478,12 +475,12 @@
     @if (showSalesModal()) {
         <div class="modal modal-open">
             <div class="modal-box max-w-2xl">
-                <h3 class="font-bold text-lg mb-4">Sales Report</h3>
+                <h3 class="font-bold text-lg mb-4">{{t('salesReport')}}</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text">Start Date</span>
+                            <span class="label-text">{{t('startDate')}}</span>
                         </label>
                         <input 
                             type="date" 
@@ -494,7 +491,7 @@
 
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text">End Date</span>
+                            <span class="label-text">{{t('endDate')}}</span>
                         </label>
                         <input 
                             type="date" 
@@ -508,7 +505,7 @@
                     @if (isLoading()) {
                         <span class="loading loading-spinner loading-sm"></span>
                     } @else {
-                        Load Sales Data
+                        {{t('loadSales')}}
                     }
                 </button>
                 
@@ -518,16 +515,16 @@
                     </div>
                 } @else if (totalSales(); as sales) {
                     <div class="stat bg-base-200 rounded-lg p-4">
-                        <div class="stat-title">Total Sales</div>
-                        <div class="stat-value text-success">{{sales.totalSales | currency:'KWD'}}</div>
+                        <div class="stat-title">{{t('totalSales')}}</div>
+                        <div class="stat-value text-success">{{sales.totalSales | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
                         @if (sales.startDate || sales.endDate) {
                             <div class="stat-desc">
                                 @if (sales.startDate && sales.endDate) {
-                                    From {{sales.startDate | date:'short'}} to {{sales.endDate | date:'short'}}
+                                    {{t('from')}} {{sales.startDate | date:'short':undefined:locale()}} {{t('to')}} {{sales.endDate | date:'short':undefined:locale()}}
                                 } @else if (sales.startDate) {
-                                    From {{sales.startDate | date:'short'}}
+                                    {{t('from')}} {{sales.startDate | date:'short':undefined:locale()}}
                                 } @else if (sales.endDate) {
-                                    Until {{sales.endDate | date:'short'}}
+                                    {{t('until')}} {{sales.endDate | date:'short':undefined:locale()}}
                                 }
                             </div>
                         }
@@ -535,7 +532,7 @@
                 }
 
                 <div class="modal-action">
-                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                    <button (click)="closeModals()" class="btn btn-ghost">{{t('close')}}</button>
                 </div>
             </div>
         </div>
@@ -545,70 +542,70 @@
     @if (showDetailsModal()) {
         <div class="modal modal-open">
             <div class="modal-box max-w-4xl max-h-[90vh] overflow-y-auto">
-                <h3 class="font-bold text-lg mb-4">Order Details</h3>
+                <h3 class="font-bold text-lg mb-4">{{t('orderDetails')}}</h3>
                 
                 @if (selectedOrder(); as order) {
                     <div class="space-y-4">
                         <!-- Order Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="card bg-base-200 p-4">
-                                <h4 class="font-semibold mb-2">Order Information</h4>
+                                <h4 class="font-semibold mb-2">{{t('orderInformation')}}</h4>
                                 <div class="space-y-1 text-sm">
-                                    <div><span class="font-medium">Order Number:</span> #{{order.orderNumber}}</div>
-                                    <div><span class="font-medium">Status:</span> 
-                                        <span class="badge" [class]="getStatusBadgeClass(order.status)">
+                                    <div><span class="font-medium">{{t('orderNumber')}}:</span> #{{order.orderNumber}}</div>
+                                    <div><span class="font-medium">{{t('status')}}:</span>
+                                        <span class="badge" [ngClass]="getStatusBadgeClass(order.status)">
                                             {{getStatusName(order.status)}}
                                         </span>
                                     </div>
-                                    <div><span class="font-medium">Customer:</span> {{order.customerName}}</div>
+                                    <div><span class="font-medium">{{t('customer')}}:</span> {{order.customerName}}</div>
                                     @if (order.appUserId) {
-                                        <div><span class="font-medium">User ID:</span> {{order.appUserId}}</div>
+                                        <div><span class="font-medium">{{t('userId')}}:</span> {{order.appUserId}}</div>
                                     }
-                                    <div><span class="font-medium">Created:</span> {{order.createdAt | date:'medium'}}</div>
+                                    <div><span class="font-medium">{{t('createdAt')}}:</span> {{order.createdAt | date:'medium':undefined:locale()}}</div>
                                 </div>
                             </div>
                             <div class="card bg-base-200 p-4">
-                                <h4 class="font-semibold mb-2">Financial Information</h4>
+                                <h4 class="font-semibold mb-2">{{t('financialInformation')}}</h4>
                                 <div class="space-y-1 text-sm">
-                                    <div><span class="font-medium">Subtotal:</span> {{order.subtotal | currency:'KWD'}}</div>
-                                    <div><span class="font-medium">Shipping:</span> {{order.shipping | currency:'KWD'}}</div>
-                                    <div><span class="font-medium">Tax:</span> {{order.tax | currency:'KWD'}}</div>
+                                    <div><span class="font-medium">{{t('subtotal')}}:</span> {{order.subtotal | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
+                                    <div><span class="font-medium">{{t('shipping')}}:</span> {{order.shipping | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
+                                    <div><span class="font-medium">{{t('tax')}}:</span> {{order.tax | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
                                     @if (order.couponCode && order.couponDiscountAmount) {
-                                        <div><span class="font-medium">Coupon:</span> {{order.couponCode}} (-{{order.couponDiscountAmount | currency:'KWD'}})</div>
+                                        <div><span class="font-medium">{{t('coupon')}}:</span> {{order.couponCode}} (-{{order.couponDiscountAmount | currency:'KWD':'symbol':'1.3-3':locale()}})</div>
                                     }
-                                    <div class="font-bold text-success text-lg"><span class="font-medium">Total:</span> {{order.total | currency:'KWD'}}</div>
+                                    <div class="font-bold text-success text-lg"><span class="font-medium">{{t('total')}}:</span> {{order.total | currency:'KWD':'symbol':'1.3-3':locale()}}</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Shipping Address -->
                         <div class="card bg-base-200 p-4">
-                            <h4 class="font-semibold mb-2">Shipping Address</h4>
+                            <h4 class="font-semibold mb-2">{{t('shippingAddress')}}</h4>
                             <div class="space-y-1 text-sm">
-                                <div><span class="font-medium">Full Name:</span> {{order.shippingAddress.fullName}}</div>
-                                <div><span class="font-medium">Phone:</span> {{order.shippingAddress.phone}}</div>
-                                <div><span class="font-medium">Address:</span> {{order.shippingAddress.street}}</div>
-                                <div><span class="font-medium">City:</span> {{order.shippingAddress.city}}</div>
+                                <div><span class="font-medium">{{t('fullName')}}:</span> {{order.shippingAddress.fullName}}</div>
+                                <div><span class="font-medium">{{t('phone')}}:</span> {{order.shippingAddress.phone}}</div>
+                                <div><span class="font-medium">{{t('address')}}:</span> {{order.shippingAddress.street}}</div>
+                                <div><span class="font-medium">{{t('city')}}:</span> {{order.shippingAddress.city}}</div>
                                 @if (order.shippingAddress.state) {
-                                    <div><span class="font-medium">State:</span> {{order.shippingAddress.state}}</div>
+                                    <div><span class="font-medium">{{t('state')}}:</span> {{order.shippingAddress.state}}</div>
                                 }
-                                <div><span class="font-medium">Postal Code:</span> {{order.shippingAddress.postalCode}}</div>
-                                <div><span class="font-medium">Country:</span> {{order.shippingAddress.country}}</div>
+                                <div><span class="font-medium">{{t('postalCode')}}:</span> {{order.shippingAddress.postalCode}}</div>
+                                <div><span class="font-medium">{{t('country')}}:</span> {{order.shippingAddress.country}}</div>
                             </div>
                         </div>
 
                         <!-- Order Items -->
                         <div class="card bg-base-200 p-4">
-                            <h4 class="font-semibold mb-2">Order Items</h4>
+                            <h4 class="font-semibold mb-2">{{t('orderItems')}}</h4>
                             <div class="overflow-x-auto">
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>
-                                            <th>Product</th>
-                                            <th>Image</th>
-                                            <th>Price</th>
-                                            <th>Quantity</th>
-                                            <th>Total</th>
+                                            <th>{{t('product')}}</th>
+                                            <th>{{t('image')}}</th>
+                                            <th>{{t('price')}}</th>
+                                            <th>{{t('quantity')}}</th>
+                                            <th>{{t('total')}}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -616,18 +613,18 @@
                                             <tr>
                                                 <td>
                                                     <div class="font-semibold">{{item.name}}</div>
-                                                    <div class="text-xs opacity-50">ID: {{item.productId}}</div>
+                                                    <div class="text-xs opacity-50">{{t('id')}}: {{item.productId}}</div>
                                                 </td>
                                                 <td>
                                                     @if (item.image) {
                                                         <img [src]="item.image" alt="{{item.name}}" class="w-16 h-16 object-cover rounded" />
                                                     } @else {
-                                                        <div class="w-16 h-16 bg-base-300 rounded flex items-center justify-center text-xs">No Image</div>
+                                                        <div class="w-16 h-16 bg-base-300 rounded flex items-center justify-center text-xs">{{t('noImage')}}</div>
                                                     }
                                                 </td>
-                                                <td>{{item.price | currency:'KWD'}}</td>
+                                                <td>{{item.price | currency:'KWD':'symbol':'1.3-3':locale()}}</td>
                                                 <td>{{item.quantity}}</td>
-                                                <td class="font-semibold">{{item.total | currency:'KWD'}}</td>
+                                                <td class="font-semibold">{{item.total | currency:'KWD':'symbol':'1.3-3':locale()}}</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -649,9 +646,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         }
-                        Download Invoice
+                        {{t('downloadInvoice')}}
                     </button>
-                    <button (click)="closeModals()" class="btn btn-ghost">Close</button>
+                    <button (click)="closeModals()" class="btn btn-ghost">{{t('close')}}</button>
                 </div>
             </div>
         </div>

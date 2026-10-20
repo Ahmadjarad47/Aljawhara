@@ -1,5 +1,7 @@
 import { OrderItemCreateDto } from "../../Models/order";
 import { BaseDto } from "../base.dto";
+import { OrderStatus } from '../../core/Models/order-status';
+export { OrderStatus, normalizeOrderStatus } from '../../core/Models/order-status';
 
 export interface OrderDto extends BaseDto {
     orderNumber: string;
@@ -34,15 +36,6 @@ export interface ShippingAddressDto extends BaseDto {
     postalCode?: string | null;
     country?: string | null;
     appUserId: string | null;
-}
-export enum OrderStatus
-{
-    Pending,
-    Processing,
-    Shipped,
-    Delivered,
-    Cancelled,
-    Refunded
 }
 export interface OrderCreateDto {
     items: OrderItemCreateDto[];
