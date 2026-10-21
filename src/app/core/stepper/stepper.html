@@ -10,6 +10,7 @@
       </div>
       <div class="checkout-card payment-card">
         <app-payment-timing-step></app-payment-timing-step>
+        <app-whatsapp-checkout [phone]="shipping()?.normalizedPhone() ?? null" (optInChange)="whatsAppOptIn.set($event)" />
       </div>
     </fieldset>
     <aside class="checkout-card order-summary" aria-labelledby="summary-heading">

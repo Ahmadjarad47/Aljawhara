@@ -1,6 +1,8 @@
 import { ShippingAddressCreateDto } from '../../admin/order/order.models';
 import { CreateAddressDto } from '../Models/shipping';
 
+import { normalizePhone } from '../phone/phone-number';
+
 export const MOBILE_PATTERN = /^\+?[0-9]{8,15}$/;
 
 export const ADDRESS_DETAIL_FIELDS = [
@@ -15,7 +17,7 @@ export const ADDRESS_DETAIL_FIELDS = [
 export function isShippingAddressValid(address: CreateAddressDto): boolean {
   return !!address.fullName.trim() && address.fullName.trim().length <= 100
     && !!address.addressLine1.trim() && address.addressLine1.trim().length <= 200
-    && MOBILE_PATTERN.test(address.phoneNumber.trim())
+    && !!normalizePhone(address.phoneNumber)
     && ADDRESS_DETAIL_FIELDS.every(field => (address[field.key]?.length ?? 0) <= field.maxLength);
 }
 
@@ -42,7 +44,7 @@ export function createAddressForm(address?: CreateAddressDto): CreateAddressDto 
 export function toAddressPayload(address: CreateAddressDto): CreateAddressDto {
   const result = createAddressForm(address);
   result.fullName = result.fullName.trim();
-  result.phoneNumber = result.phoneNumber.trim();
+  result.phoneNumber = normalizePhone(result.phoneNumber) ?? result.phoneNumber.trim();
   result.addressLine1 = result.addressLine1.trim();
   for (const field of ['alQataa', 'alSharee', 'alJada', 'alManzil', 'alDor', 'alShakka'] as const) {
     result[field] = result[field]?.trim() || null;

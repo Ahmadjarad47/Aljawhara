@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Setting } from './setting';
 import { environment } from '../../../../environments/environment.development';
+import { environment as apiEnvironment } from '../../../../environments/environment';
 import { UserAddressDto } from './setting.models';
 
 const addressUrl = `${environment.apiUrl}Auth/addresses`;
@@ -33,6 +34,7 @@ describe('Account address forms', () => {
     fixture.detectChanges();
     http.expectOne(`${environment.apiUrl}Auth/me`).flush({ success: true, data: null });
     http.expectOne(addressUrl).flush({ success: true, data: [] });
+    http.expectOne(`${apiEnvironment.apiUrl}account/whatsapp/preferences`).flush({ enabled: false, phoneNumber: null, phoneNumberConfirmed: false });
     settings.activeTab.set('addresses');
     await fixture.whenStable();
   });
@@ -69,7 +71,7 @@ describe('Account address forms', () => {
     const request = http.expectOne(addressUrl);
     expect(request.request.method).toBe('POST');
     const body = JSON.parse(JSON.stringify(request.request.body));
-    expect(body.phoneNumber).toBe('67070814');
+    expect(body.phoneNumber).toBe('+96567070814');
     expect(body.addressLine1).toBe('عنوان التوصيل');
     expect(body.city).toBeNull();
     expect(body.country).toBeUndefined();
@@ -122,6 +124,7 @@ describe('Account address forms', () => {
     settings.activeTab.set('profile');
     settings.updateUsernameModel.username = 'Updated customer';
     await fixture.whenStable();
+    http.expectOne(`${apiEnvironment.apiUrl}account/whatsapp/preferences`).flush({ enabled: false, phoneNumber: null, phoneNumberConfirmed: false });
     (fixture.nativeElement.querySelector('.profile-save') as HTMLButtonElement).click();
     await fixture.whenStable();
     expect(settings.isSavingUsername()).toBeTrue();

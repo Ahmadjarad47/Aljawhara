@@ -85,6 +85,12 @@ export class CheckoutPaymentService {
     }).pipe(timeout(20000));
   }
 
+  retryWhatsAppInvoice(orderId: number, whatsAppPhone: string) {
+    return this.http.post(`${this.api}/${orderId}/whatsapp-invoice/retry`, { consent: true, whatsAppPhone }, {
+      headers: this.headers(orderId),
+    });
+  }
+
   retryPayment(orderId: number, attemptId: number) {
     const storageKey = `checkout_retry_${orderId}_${attemptId}`;
     const key = this.read<string>(storageKey) ?? crypto.randomUUID();

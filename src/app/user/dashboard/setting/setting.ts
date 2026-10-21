@@ -12,12 +12,17 @@ import { AddressAutocompleteComponent } from '../../../core/components/address-a
 import { AddressLocation } from '../../../core/data/kuwait-areas';
 import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAddressPayload } from '../../../core/stepper/shipping-address';
 
+import { PhoneInputComponent } from '../../../core/phone/phone-input';
+import { normalizePhone } from '../../../core/phone/phone-number';
+import { CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js/max';
+import { WhatsAppPreferencesComponent } from '../../../core/components/whatsapp-preferences/whatsapp-preferences';
+
 registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-setting',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent, WhatsAppPreferencesComponent, PhoneInputComponent],
   templateUrl: './setting.html',
   styleUrls: ['../account-page.css', './setting.css']
 })
@@ -25,6 +30,7 @@ export class Setting implements OnInit, OnDestroy {
   private settingService = inject(SettingService);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
+  private whatsappPreferences = viewChild(WhatsAppPreferencesComponent);
   private addressDialog = viewChild<ElementRef<HTMLDialogElement>>('addressDialog');
   isSavingUsername = signal(false);
   isSavingPhone = signal(false);
@@ -44,8 +50,11 @@ export class Setting implements OnInit, OnDestroy {
     this.showEditAddress.set(false);
   }
 
-  isProfilePhoneValid(): boolean {
-    return /^[0-9]{9}$/.test(this.updatePhoneModel.phoneNumber);
+  profilePhoneCountry: CountryCode = 'KW';
+  addressPhoneCountry: CountryCode = 'KW';
+  isProfilePhoneValid(): boolean { return !!normalizePhone(this.updatePhoneModel.phoneNumber, this.profilePhoneCountry); }
+  changeAddressPhone(address: CreateAddressDto, phone: string): void {
+    address.phoneNumber = normalizePhone(phone, this.addressPhoneCountry) ?? phone;
   }
 
   onTabKeydown(event: KeyboardEvent): void {
@@ -214,7 +223,7 @@ export class Setting implements OnInit, OnDestroy {
       success: 'Success',
       usernameUpdated: 'Username updated',
       failedToUpdateUsername: 'Failed to update username',
-      phoneMinLength: 'Phone number must be exactly 9 digits',
+      phoneMinLength: 'Enter a valid number for the selected country or use + and the calling code.',
       updatingPhone: 'Updating phone number...',
       phoneUpdated: 'Phone number updated',
       failedToUpdatePhone: 'Failed to update phone number',
@@ -316,6 +325,7 @@ export class Setting implements OnInit, OnDestroy {
           this.currentUser.set(res.data);
           this.updateUsernameModel.username = res.data.username;
           this.updatePhoneModel.phoneNumber = res.data.phoneNumber;
+          this.profilePhoneCountry = parsePhoneNumberFromString(res.data.phoneNumber)?.country ?? 'KW';
         }
         this.isLoadingUser.set(false);
       },
@@ -353,19 +363,20 @@ export class Setting implements OnInit, OnDestroy {
 
   onUpdatePhone() {
     if (this.isSavingPhone()) return;
-    if (!this.updatePhoneModel.phoneNumber || !/^[0-9]{9}$/.test(this.updatePhoneModel.phoneNumber)) {
+    if (!this.isProfilePhoneValid()) {
       this.toastService.warning(this.t('validation'), this.t('phoneMinLength'));
       return;
     }
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingPhone'));
     this.isSavingPhone.set(true);
-    this.settingService.updatePhoneNumber({ phoneNumber: this.updatePhoneModel.phoneNumber }).pipe(
+    this.settingService.updatePhoneNumber({ phoneNumber: normalizePhone(this.updatePhoneModel.phoneNumber, this.profilePhoneCountry)! }).pipe(
       finalize(() => this.isSavingPhone.set(false))
     ).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('phoneUpdated'));
           this.loadUser();
+          void this.whatsappPreferences()?.load();
         } else {
           this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdatePhone'));
         }
@@ -398,11 +409,13 @@ export class Setting implements OnInit, OnDestroy {
       this.toastService.warning(this.t('limitReached'), this.t('onlyOneAddress'));
       return;
     }
+    this.addressPhoneCountry = 'KW';
     this.resetNewAddress();
     this.showAddAddress.set(true);
   }
 
   openEditAddress(address: UserAddressDto) {
+    this.addressPhoneCountry = parsePhoneNumberFromString(address.phoneNumber)?.country ?? 'KW';
     this.editAddress = { ...createAddressForm(address), id: address.id };
     this.showEditAddress.set(true);
   }

@@ -13,6 +13,10 @@ import { AddressAutocompleteComponent } from '../../components/address-autocompl
 import { AddressLocation } from '../../data/kuwait-areas';
 import { ShippingService } from '../../service/shipping.service';
 
+import { PhoneInputComponent } from '../../phone/phone-input';
+import { normalizePhone } from '../../phone/phone-number';
+import { CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js/max';
+
 interface AddressResponse<T> {
   success: boolean;
   data?: T;
@@ -21,7 +25,7 @@ interface AddressResponse<T> {
 @Component({
   selector: 'app-shipping-step',
   standalone: true,
-  imports: [CommonModule, FormsModule, AddressAutocompleteComponent],
+  imports: [CommonModule, FormsModule, AddressAutocompleteComponent, PhoneInputComponent],
   templateUrl: './shipping-step.html',
   styleUrl: './shipping-step.css'
 })
@@ -40,6 +44,10 @@ export class ShippingStepComponent implements OnInit {
   private formRevision = signal(0);
   currentLanguage = signal<'ar' | 'en'>(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
   formData: CreateAddressDto = createAddressForm();
+
+  phoneCountry: CountryCode = 'KW';
+  normalizedPhone(): string | null { this.formRevision(); return normalizePhone(this.formData.phoneNumber, this.phoneCountry); }
+  changePhoneCountry(country: CountryCode): void { this.phoneCountry = country; this.formChanged(); }
 
   readonly optionalFields = ADDRESS_DETAIL_FIELDS;
   readonly deliveryFee = computed(() => {
@@ -106,6 +114,7 @@ export class ShippingStepComponent implements OnInit {
 
   private populateAddress(address: UserAddressDto): void {
     this.formData = createAddressForm(address);
+    this.phoneCountry = parsePhoneNumberFromString(address.phoneNumber)?.country ?? 'KW';
     this.formChanged();
     this.selectedAddressId.set(address.id || null);
     this.stepperService.updateCheckoutData({ address, selectedAddressId: address.id || undefined });
@@ -124,7 +133,7 @@ export class ShippingStepComponent implements OnInit {
 
   isFormValid(): boolean {
     this.formRevision();
-    return isShippingAddressValid(this.formData);
+    return isShippingAddressValid({ ...this.formData, phoneNumber: this.normalizedPhone() ?? '' });
   }
 
   onAddressLocationChange(location: AddressLocation): void {
@@ -140,7 +149,7 @@ export class ShippingStepComponent implements OnInit {
   async saveAddress(): Promise<boolean> {
     if (!this.isFormValid() || this.isLoading() || this.isSubmitting()) return false;
     this.error.set('');
-    const payload = toAddressPayload(this.formData);
+    const payload = toAddressPayload({ ...this.formData, phoneNumber: this.normalizedPhone()! });
     if (!this.authService.isAuthenticated) {
       this.populateAddress({ ...payload, id: 0, createdAt: '', updatedAt: '' });
       return true;

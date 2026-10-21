@@ -34,7 +34,7 @@
             <form class="account-card profile-edit-card" (ngSubmit)="onUpdatePhone()">
               <div class="account-section-heading"><div><h2>{{t('updatePhoneNumber')}}</h2><p class="account-hint">{{t('phoneHint')}}</p></div></div>
               <fieldset [disabled]="isSavingPhone()">
-                <div class="account-field"><label for="settings-phone">{{t('phoneNumber')}}</label><input id="settings-phone" name="phoneNumber" class="input" type="tel" inputmode="numeric" autocomplete="tel-national" dir="ltr" [(ngModel)]="updatePhoneModel.phoneNumber" maxlength="9" pattern="[0-9]{9}" required aria-describedby="settings-phone-hint" /><span id="settings-phone-hint" class="account-hint">{{t('phoneMinLength')}}</span></div>
+                <app-phone-input fieldId="settings-phone" [value]="updatePhoneModel.phoneNumber" (valueChange)="updatePhoneModel.phoneNumber = $event" [country]="profilePhoneCountry" (countryChange)="profilePhoneCountry = $event" [disabled]="isSavingPhone()" [label]="t('phoneNumber')" />
                 <button class="btn btn-primary profile-save" type="submit" [disabled]="isSavingPhone() || !isProfilePhoneValid() || updatePhoneModel.phoneNumber === user.phoneNumber">@if (isSavingPhone()) { <span class="loading loading-spinner loading-sm" aria-hidden="true"></span> }{{t(isSavingPhone() ? 'saving' : 'saveChanges')}}</button>
               </fieldset>
             </form>
@@ -43,6 +43,7 @@
       } @else {
         <div class="account-empty"><h2>{{t('failedToLoadUser')}}</h2><button class="btn btn-outline" (click)="loadUser()">{{t('retry')}}</button></div>
       }
+      <app-whatsapp-preferences (phoneVerified)="loadUser()" />
     </section>
   }
 
@@ -78,7 +79,7 @@
           <fieldset [disabled]="isSavingAddress()" class="address-editor-fields">
             <div class="address-contact-grid">
               <div class="account-field"><label for="account-fullName">{{t('fullName')}} <span class="text-error">*</span></label><input id="account-fullName" name="fullName" class="input" autocomplete="name" [(ngModel)]="address.fullName" required maxlength="100" /></div>
-              <div class="account-field"><label for="account-phoneNumber">{{t('phoneNumber')}} <span class="text-error">*</span></label><input id="account-phoneNumber" name="phoneNumber" class="input" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" [(ngModel)]="address.phoneNumber" required maxlength="16" pattern="[+]?[0-9]{8,15}" /></div>
+              <app-phone-input fieldId="account-phoneNumber" [required]="true" [value]="address.phoneNumber" (valueChange)="changeAddressPhone(address, $event)" [country]="addressPhoneCountry" (countryChange)="addressPhoneCountry = $event; changeAddressPhone(address, address.phoneNumber)" [disabled]="isSavingAddress()" [label]="t('phoneNumber')" />
             </div>
             <div class="account-field address-location-field"><label for="account-addressLine1">{{t('addressLine1')}} <span class="text-error">*</span></label><app-address-autocomplete fieldId="account-addressLine1" [value]="address.addressLine1" [language]="currentLanguage()" [label]="t('addressLine1')" (locationChange)="onAddressLocationChange(address, $event)"></app-address-autocomplete></div>
             <h3 class="address-optional-heading">{{t('addressDetails')}} <span>{{t('optional')}}</span></h3>

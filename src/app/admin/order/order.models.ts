@@ -38,6 +38,8 @@ export interface ShippingAddressDto extends BaseDto {
     appUserId: string | null;
 }
 export interface OrderCreateDto {
+    whatsAppInvoiceOptIn?: boolean;
+    whatsAppConsentPhone?: string | null;
     items: OrderItemCreateDto[];
     shippingAddress: ShippingAddressCreateDto;
     couponCode: string | null;

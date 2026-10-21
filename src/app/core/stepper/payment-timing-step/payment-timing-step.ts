@@ -50,7 +50,7 @@ export class PaymentTimingStepComponent {
     this.stepperService.updateCheckoutData({ paymentTiming: timing });
   }
 
-  async createOrder(): Promise<void> {
+  async createOrder(whatsAppInvoiceOptIn = false): Promise<void> {
     if (this.isCreatingOrder()) return;
     const address = this.stepperService.checkoutData().address;
     const cartItems = this.cartService.getCartItems();
@@ -64,6 +64,8 @@ export class PaymentTimingStepComponent {
         productId, name, image, price, quantity, selectedVariants,
       })),
       shippingAddress: toOrderShippingAddress(address),
+      whatsAppInvoiceOptIn,
+      whatsAppConsentPhone: whatsAppInvoiceOptIn ? toOrderShippingAddress(address).phone : null,
       couponCode: this.cartService.getAppliedCoupon()?.code ?? null,
       paymentMethod: this.selectedTiming() === 'on_delivery' ? 2 : 4,
     };

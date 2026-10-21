@@ -45,7 +45,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             }
           }
           
-          const retryable = isRetryableError(error);
+          const retryable = !/\/account\/whatsapp\/phone-verification(?:\/|$)/i.test(req.url) && isRetryableError(error);
           if (retryable && index < MAX_RETRY_ATTEMPTS) {
             // Exponential backoff: 1s, 2s, 4s
             const delay = RETRY_DELAY_MS * Math.pow(2, index);
@@ -98,7 +98,7 @@ function addSecurityHeaders(request: HttpRequest<any>): HttpRequest<any> {
   };
 
   // Add cache headers for GET requests (mobile performance optimization)
-  if (/\/admin\/monitoring(?:\/|\?|$)/i.test(request.url) ||
+  if (/\/account\/whatsapp(?:\/|\?|$)/i.test(request.url) || /\/admin\/monitoring(?:\/|\?|$)/i.test(request.url) ||
       /\/orders\/(?:\d+\/payment-status|payment-callback)(?:\?|$)/i.test(request.url)) {
     headers['Cache-Control'] = 'no-store';
   } else if (request.method === 'GET' && !request.url.includes('/auth/')) {

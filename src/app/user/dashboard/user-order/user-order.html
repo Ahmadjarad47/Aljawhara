@@ -404,6 +404,7 @@
                 </div>
 
                 </div>
+                <app-whatsapp-invoice-retry [orderId]="selectedOrderDetails()!.id" [phone]="selectedOrderDetails()!.shippingAddress.phone" />
                 <div class="modal-action orders-details-actions">
                     @if (canPayOrder(selectedOrderDetails()!)) {
                         <button

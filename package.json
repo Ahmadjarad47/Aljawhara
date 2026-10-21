@@ -44,6 +44,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
+    "libphonenumber-js": "^1.13.15",
     "ng2-charts": "^8.0.0",
     "pdfmake": "^0.2.20",
     "postcss": "^8.5.6",

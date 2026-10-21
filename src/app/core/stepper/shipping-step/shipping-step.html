@@ -13,13 +13,8 @@
           <input id="fullName" name="fullName" autocomplete="name" [(ngModel)]="formData.fullName" (ngModelChange)="formChanged()" required maxlength="100" />
         </div>
         <div class="field">
-          <label for="phoneNumber">{{ t('phoneNumber') }} <span>*</span></label>
-          <input id="phoneNumber" name="phoneNumber" type="tel" autocomplete="tel" inputmode="tel"
-            [(ngModel)]="formData.phoneNumber" (ngModelChange)="formChanged()" required maxlength="16" pattern="[+]?[0-9]{8,15}"
-            #phone="ngModel" aria-describedby="phone-error" />
-          @if (phone.invalid && phone.touched) {
-            <small id="phone-error" role="alert">{{ t('phoneHint') }}</small>
-          }
+          <app-phone-input fieldId="phoneNumber" [required]="true" [value]="formData.phoneNumber" (valueChange)="formData.phoneNumber = $event; formChanged()"
+            [country]="phoneCountry" (countryChange)="changePhoneCountry($event)" [label]="t('phoneNumber')" />
         </div>
       </div>
       <div class="field address-line">
