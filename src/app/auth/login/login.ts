@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ServiceAuth } from '../service-auth';
 import { LoginDto, LoginResponseDto, ResendVerificationDto } from '../auth.models';
 import { ToastService } from '../../services/toast.service';
@@ -17,6 +17,7 @@ import { ToastComponent } from '../../core/components/toast/toast.component';
 export class LoginComponent implements OnInit, OnDestroy {
   private authService = inject(ServiceAuth);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
   private formBuilder = inject(FormBuilder);
 
@@ -198,8 +199,12 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.t('loginSuccessMessage')
           );
           
-          // Redirect based on user role or to home
-          this.router.navigate(['/']);
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+          // Only accept absolute paths within the app; keep query parameters and fragments.
+          const destination = returnUrl?.startsWith('/') &&
+            !returnUrl.startsWith('//') && !returnUrl.includes('\\')
+            ? returnUrl : '/';
+          this.router.navigateByUrl(destination);
         } else {
           // Check if the error is about email verification
           const errorMessage = response.message || '';
