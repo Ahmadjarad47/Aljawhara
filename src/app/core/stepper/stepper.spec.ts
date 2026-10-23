@@ -107,10 +107,10 @@ describe('Single-page checkout', () => {
     return fixture.nativeElement.querySelector('.confirm-order');
   }
 
-  it('renders delivery, payment and summary together with exactly nine address inputs', async () => {
+  it('renders delivery, payment and summary together with a searchable country input', async () => {
     await render();
     expect(fixture.nativeElement.querySelector('.checkout-page').dir).toBe('rtl');
-    expect(fixture.nativeElement.querySelectorAll('#shipping-address input').length).toBe(9);
+    expect(fixture.nativeElement.querySelectorAll('#shipping-address input').length).toBe(10);
     expect(fixture.nativeElement.querySelectorAll('#shipping-address input[required]').length).toBe(3);
     expect(fixture.nativeElement.querySelector('#payment-heading')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('#summary-heading')).not.toBeNull();
@@ -137,8 +137,11 @@ describe('Single-page checkout', () => {
   it('saves explicit German consent and resets it when the recipient changes', async () => {
     await render();
     await fillRequired();
-    const country = fixture.nativeElement.querySelector('app-phone-input select') as HTMLSelectElement;
-    country.value = 'DE'; country.dispatchEvent(new Event('change', { bubbles: true }));
+    const country = fixture.nativeElement.querySelector('app-phone-input [role="combobox"]') as HTMLInputElement;
+    country.focus();
+    country.value = 'Germany'; country.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('app-phone-input [role="option"]') as HTMLButtonElement).click();
     await fixture.whenStable();
     await setInput('phoneNumber', '015112345678');
     const checkbox = fixture.nativeElement.querySelector('app-whatsapp-checkout input') as HTMLInputElement;

@@ -1,0 +1,40 @@
+<div class="phone-fields" dir="rtl">
+  <div class="country-field">
+    <label [for]="fieldId() + '-country'">الدولة ورمز الاتصال</label>
+    <div class="country-picker">
+      <input [id]="fieldId() + '-country'" type="text" role="combobox" autocomplete="off"
+        [value]="isOpen() ? query() : selectedCountry().label"
+        (focus)="open()" (click)="!isOpen() && open()" (blur)="close()" (input)="search($event)" (keydown)="onKeydown($event)"
+        [disabled]="disabled()" placeholder="ابحث عن الدولة أو رمز الاتصال"
+        aria-autocomplete="list" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="fieldId() + '-countries'"
+        [attr.aria-activedescendant]="isOpen() && activeIndex() >= 0 ? fieldId() + '-country-option-' + activeIndex() : null" />
+      <button class="country-toggle" type="button" tabindex="-1" [disabled]="disabled()"
+        aria-label="عرض الدول ورموز الاتصال" (pointerdown)="$event.preventDefault()" (click)="toggle()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
+      </button>
+      @if (isOpen() && !disabled()) {
+        <div class="country-options" [id]="fieldId() + '-countries'" role="listbox" aria-label="الدول ورموز الاتصال">
+          @for (item of filteredCountries(); track item.code; let index = $index) {
+            <button type="button" role="option" tabindex="-1" [id]="fieldId() + '-country-option-' + index"
+              [attr.aria-selected]="country() === item.code" [class.active]="activeIndex() === index"
+              (pointerdown)="$event.preventDefault()" (click)="selectCountry(item.code)">
+              <span aria-hidden="true">{{ item.flag }}</span>
+              <span class="country-name">{{ item.name }}</span>
+              <span class="calling-code" dir="ltr">+{{ item.callingCode }}</span>
+            </button>
+          } @empty {
+            <p class="empty-options" role="status">لا توجد دول مطابقة للبحث</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+  <label>{{ label() }}
+    <input [id]="fieldId()" type="tel" dir="ltr" inputmode="tel" autocomplete="tel" maxlength="40"
+      [required]="required()" [ngModel]="value()" (ngModelChange)="change($event)" [disabled]="disabled()"
+      [ngModelOptions]="{standalone: true}" [attr.aria-describedby]="fieldId() + '-hint'" [attr.aria-invalid]="value() && !normalized() ? true : null" />
+  </label>
+</div>
+@if (normalized(); as phone) { <small [id]="fieldId() + '-hint'" dir="ltr" class="normalized">{{ phone }}</small> }
+@else if (value()) { <small [id]="fieldId() + '-hint'" class="phone-error" role="alert">أدخل رقماً صالحاً للدولة المختارة، أو استخدم + أو 00 قبل رمز الدولة للرقم الدولي.</small> }
