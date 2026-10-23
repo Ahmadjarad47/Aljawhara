@@ -45,7 +45,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             }
           }
           
-          const retryable = !/\/account\/whatsapp\/phone-verification(?:\/|$)/i.test(req.url) && isRetryableError(error);
+          const retryable = !/\/ai-shopping(?:\/|$)/i.test(req.url) &&
+            !/\/account\/whatsapp\/phone-verification(?:\/|$)/i.test(req.url) && isRetryableError(error);
           if (retryable && index < MAX_RETRY_ATTEMPTS) {
             // Exponential backoff: 1s, 2s, 4s
             const delay = RETRY_DELAY_MS * Math.pow(2, index);
@@ -59,6 +60,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error instanceof HttpErrorResponse) {
         // Handle 401 Unauthorized - token refresh
         if (error.status === 401) {
+          // Anonymous shopping capabilities expire independently of account login.
+          if (/\/ai-shopping(?:\/|$)/i.test(req.url) && !tokenService.getToken()) return throwError(() => error);
           return handle401Error(req, next, tokenService, authService, router);
         }
         
@@ -98,7 +101,7 @@ function addSecurityHeaders(request: HttpRequest<any>): HttpRequest<any> {
   };
 
   // Add cache headers for GET requests (mobile performance optimization)
-  if (/\/account\/whatsapp(?:\/|\?|$)/i.test(request.url) || /\/admin\/monitoring(?:\/|\?|$)/i.test(request.url) ||
+  if (/\/ai-shopping(?:\/|$)/i.test(request.url) || /\/account\/whatsapp(?:\/|\?|$)/i.test(request.url) || /\/admin\/monitoring(?:\/|\?|$)/i.test(request.url) ||
       /\/orders\/(?:\d+\/payment-status|payment-callback)(?:\?|$)/i.test(request.url)) {
     headers['Cache-Control'] = 'no-store';
   } else if (request.method === 'GET' && !request.url.includes('/auth/')) {

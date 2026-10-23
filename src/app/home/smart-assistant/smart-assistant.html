@@ -22,6 +22,7 @@
         </div>
       </div>
       <div class="window-actions">
+        <button type="button" class="icon-button" aria-label="محادثة جديدة" title="محادثة جديدة" [disabled]="!!working()" (click)="newConversation()">↻</button>
         <button type="button" class="icon-button" aria-label="تصغير المساعد" (click)="close()">
           <svg aria-hidden="true"><use href="#jawhara-minus"/></svg>
         </button>
@@ -32,36 +33,71 @@
     </header>
 
     <div #conversation class="assistant-conversation" tabindex="0" aria-label="المحادثة">
+      @if (!messages().length) {
+        <p class="assistant-welcome">أهلاً فيك! احكيلي شو المناسبة، لِكم شخص، وميزانيتك إذا بتحب. مثلاً: «بدي تجهيزات نزهة لـ 5 أشخاص».</p>
+      }
       <div class="messages" role="log" aria-label="رسائل المحادثة" aria-live="polite" aria-relevant="additions">
         @for (message of messages(); track message.id) {
-          <div class="message message-user"><p>{{ message.text }}</p></div>
+          <div class="message" [class.message-user]="message.role === 'user'" [class.message-assistant]="message.role === 'assistant'"><p>{{ message.text }}</p></div>
         }
       </div>
+      @if (working()) {
+        <p class="assistant-status" role="status">{{ working() === 'chat' ? 'عم بجهّز اقتراحات من منتجات المتجر…' : working() === 'confirm' ? 'عم بنتحقق من السعر والمخزون ونضيف للسلة…' : 'عم نحدّث القائمة…' }}</p>
+      }
+      @if (preview(); as proposal) {
+        <section class="shopping-list" aria-label="التجهيزات المقترحة" [attr.aria-busy]="!!working()">
+          @for (item of visibleItems(); track item.productId) {
+            <article class="shopping-item">
+              <a [routerLink]="['/product', item.productId]" (click)="close()" class="shopping-image" [attr.aria-label]="item.productName">
+                @if (item.imageUrl) { <img [src]="item.imageUrl" [alt]="item.productName" loading="lazy"/> }
+                @else { <span aria-hidden="true">◇</span> }
+              </a>
+              <div class="shopping-item-content">
+                <a [routerLink]="['/product', item.productId]" (click)="close()" class="shopping-product-name">{{ item.productName }}</a>
+                <p>{{ item.unitPrice | number:'1.3-3' }} د.ك للعبوة @if (item.unitsPerPackage) { <span>· {{ item.unitsPerPackage }} قطعة</span> }</p>
+                <small>{{ item.reason }}</small>
+                <div class="shopping-controls">
+                  <label>عدد العبوات <input type="number" min="1" max="100" step="1" [value]="quantity(item)" [disabled]="!!working() || isConfirmed()" [attr.aria-label]="'عدد عبوات ' + item.productName" (change)="editQuantity(item, $event)"/></label>
+                  <button type="button" [disabled]="!!working() || hasEdits() || isConfirmed()" (click)="replace(item)">استبدال</button>
+                  <button type="button" [disabled]="!!working() || isConfirmed()" [attr.aria-label]="'إزالة ' + item.productName" (click)="remove(item)">إزالة</button>
+                </div>
+              </div>
+            </article>
+          }
+          @if (proposal.recommendations.length) {
+            <p class="shopping-total">المجموع التقديري <strong>{{ displayTotal() | number:'1.3-3' }} د.ك</strong></p>
+            <p class="shopping-note">بدون التوصيل ورسوم وخصومات إتمام الطلب. السعر والتوفر يُراجعان قبل الإضافة.</p>
+          }
+          @if (proposal.unavailableNeeds.length) {
+            <ul class="shopping-unavailable">@for (need of proposal.unavailableNeeds; track $index) { <li>{{ need }}</li> }</ul>
+          }
+          @if (hasEdits()) {
+            <div class="shopping-edit-actions"><button type="button" [disabled]="!!working()" (click)="refresh()">تحديث القائمة</button><button type="button" [disabled]="!!working()" (click)="cancelEdits()">إلغاء التعديلات</button></div>
+          } @else if (proposal.requiresConfirmation && !isConfirmed()) {
+            <button type="button" class="shopping-approve" [disabled]="!!working()" (click)="approve()">إضافة التجهيزات للسلة</button>
+          }
+        </section>
+      }
+      @if (notice()) { <p class="assistant-notice" role="status">{{ notice() }}</p> }
+      @if (error()) {
+        <div class="assistant-error" role="alert"><p>{{ error() }}</p>
+          @if (preview() && !isConfirmed()) { <button type="button" [disabled]="!!working()" (click)="refresh()">تحديث القائمة</button> }
+          <button type="button" [disabled]="!!working()" (click)="newConversation()">محادثة جديدة</button>
+        </div>
+      }
     </div>
 
     <footer class="assistant-composer">
-      @if (attachment()) {
-        <div class="attachment-preview">
-          <span>{{ attachment() }}</span>
-          <button type="button" class="icon-button" aria-label="إزالة المرفق" (click)="attachment.set('')">
-            <svg aria-hidden="true"><use href="#jawhara-close"/></svg>
-          </button>
-        </div>
-      }
       <form class="composer-form" (submit)="send($event)">
         <div class="composer-field">
-          <button type="button" class="icon-button attachment-button" aria-label="إرفاق ملف للمعاينة" (click)="fileInput.click()">
-            <svg aria-hidden="true"><use href="#jawhara-attachment"/></svg>
-          </button>
-          <input #fileInput type="file" hidden (change)="selectAttachment($event)"/>
           <input #messageInput type="text" aria-label="اكتب طلبك للمساعد" placeholder="اكتب طلبك هنا..."
-            maxlength="1000" autocomplete="off" enterkeyhint="send" [value]="draft()" (input)="draft.set(messageInput.value)"/>
+            maxlength="2000" autocomplete="off" enterkeyhint="send" [disabled]="!!working() || hasEdits()" [value]="draft()" (input)="draft.set(messageInput.value)"/>
         </div>
-        <button type="submit" class="send-button" aria-label="إرسال الطلب" [disabled]="!draft().trim() && !attachment()">
+        <button type="submit" class="send-button" aria-label="إرسال الطلب" [disabled]="!draft().trim() || !!working() || hasEdits()">
           <svg aria-hidden="true"><use href="#jawhara-send"/></svg>
         </button>
       </form>
-      <p class="preview-label">نسخة تجريبية للواجهة <span aria-hidden="true">·</span> المساعد الذكي قريباً</p>
+      <p class="preview-label">{{ hasEdits() ? 'حدّث القائمة لتطبيق تعديلاتك أولاً' : 'ما بنضيف أي منتج للسلة بدون موافقتك' }}</p>
     </footer>
   </section>
 } @else {

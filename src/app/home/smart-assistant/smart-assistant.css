@@ -70,6 +70,31 @@ button:disabled { cursor: default; opacity: .4; }
 .message p { margin: 0; padding: 10px 13px; border-radius: 14px; font-weight: 600; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .message-user { margin-left: auto; }
 .message-user p { background: #d6fae9; border-bottom-right-radius: 4px; }
+.message-assistant { margin-right: auto; }
+.message-assistant p { background: #f0f5f3; border-bottom-left-radius: 4px; }
+.assistant-welcome, .assistant-status { margin: 4px 0 14px; color: #4c625a; font-size: 13px; line-height: 1.8; }
+.shopping-list { margin-block: 14px; }
+.shopping-item { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #e8eeeb; }
+.shopping-image { width: 60px; height: 66px; flex-shrink: 0; display: grid; place-items: center; background: #f4f7f5; border-radius: 8px; overflow: hidden; color: #005447; }
+.shopping-image img { width: 100%; height: 100%; object-fit: contain; }
+.shopping-item-content { flex: 1; min-width: 0; }
+.shopping-product-name { color: #005447; font-size: 13px; font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+.shopping-item-content p { margin: 3px 0; font-size: 12px; }
+.shopping-item-content small { display: block; color: #67766f; font-size: 11px; overflow-wrap: anywhere; }
+.shopping-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; font-size: 11px; }
+.shopping-controls label { display: flex; align-items: center; gap: 5px; }
+.shopping-controls input { width: 52px; min-height: 36px; border: 1px solid #bbcec5; border-radius: 6px; text-align: center; }
+.shopping-controls button, .shopping-edit-actions button, .assistant-error button { min-height: 36px; border: 1px solid #cbdad3; border-radius: 6px; background: #fff; color: #005447; padding: 5px 8px; cursor: pointer; }
+.shopping-total { display: flex; justify-content: space-between; gap: 10px; margin: 14px 0 5px; }
+.shopping-total strong { white-space: nowrap; color: #005447; }
+.shopping-note { margin: 0 0 12px; font-size: 10px; color: #687a71; }
+.shopping-unavailable { margin: 10px 0; padding-inline-start: 18px; font-size: 12px; color: #755c29; }
+.shopping-approve { width: 100%; min-height: 44px; padding: 10px; border: 0; border-radius: 8px; background: #005447; color: #fff; font-weight: 700; cursor: pointer; }
+.shopping-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.assistant-notice { padding: 10px; background: #e5f6ed; border-radius: 8px; color: #135a3d; font-size: 12px; }
+.assistant-error { padding: 10px; border: 1px solid #ebccbd; background: #fff7f0; border-radius: 8px; font-size: 12px; color: #713f28; }
+.assistant-error p { margin: 0 0 6px; }
+.assistant-error button { margin-inline-end: 6px; }
 .assistant-composer { padding: 9px 12px 7px; flex-shrink: 0; border-top: 1px solid #f0f2f3; background: #fff; }
 .composer-form { display: flex; align-items: center; gap: 10px; }
 .composer-field { display: flex; align-items: center; flex: 1; min-width: 0; border: 1px solid #d5dfe5; border-radius: 9px; padding: 0 3px; box-shadow: inset 0 1px 2px #00000003; }

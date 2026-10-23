@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { CartItem, OrderItemCreateDto } from '../../Models/order';
 import { CouponDto, CouponValidationResultDto } from '../Models/coupon';
+import { PreparedBrowserCart } from '../Models/ai-shopping';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,7 @@ import { CouponDto, CouponValidationResultDto } from '../Models/coupon';
 export class CartService {
   private readonly STORAGE_KEY = 'cart_items';
   private readonly COUPON_STORAGE_KEY = 'applied_coupon';
+  private assistantOperations: Record<string, string> = {};
   
   // Cart items signal
   private cartItems = signal<CartItem[]>([]);
@@ -43,13 +45,19 @@ export class CartService {
       if(typeof localStorage == 'undefined') {return;}
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const items = JSON.parse(stored);
+        const value = JSON.parse(stored);
+        const items = Array.isArray(value) ? value : value.items;
+        if (!Array.isArray(items)) throw new Error('Invalid cart storage');
+        this.assistantOperations = this.activeOperations(Array.isArray(value) ? {} : value.assistantOperations);
         // Convert date strings back to Date objects
         const cartItems = items.map((item: CartItem) => ({
           ...item,
           addedAt: new Date(item.addedAt)
         }));
         this.cartItems.set(cartItems);
+      } else {
+        this.cartItems.set([]);
+        this.assistantOperations = {};
       }
     } catch (error) {
       console.error('Error loading cart from storage:', error);
@@ -58,19 +66,35 @@ export class CartService {
   }
 
   // Save cart to localStorage
-  private saveCartToStorage(items: CartItem[]): void {
+  private saveCartToStorage(items: CartItem[], operations = this.assistantOperations): boolean {
     try {
-      if(typeof localStorage == 'undefined') {return;}
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
+      if(typeof localStorage == 'undefined') {return false;}
+      const current = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+      const receipts = this.activeOperations({ ...current?.assistantOperations, ...operations });
+      // Cart contents and approval receipts commit together in ONE localStorage write.
+      const value = Object.keys(receipts).length ? { schemaVersion: 2, items, assistantOperations: receipts } : items;
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(value));
+      this.assistantOperations = receipts;
       this.cartItems.set(items);
+      return true;
     } catch (error) {
       console.error('Error saving cart to storage:', error);
+      return false;
     }
+  }
+
+  private activeOperations(operations: unknown): Record<string, string> {
+    if (!operations || typeof operations !== 'object' || Array.isArray(operations)) return {};
+    return Object.fromEntries(Object.entries(operations).filter(([key, expiry]) =>
+      /^[0-9a-f-]{36}$/i.test(key) && typeof expiry === 'string' && Date.parse(expiry) > Date.now()));
   }
 
   // Add item to cart
   addItem(product: OrderItemCreateDto): void {
-    const items = this.cartItems();
+    this.saveCartToStorage(this.mergeItem(this.cartItems(), product));
+  }
+
+  private mergeItem(items: CartItem[], product: OrderItemCreateDto): CartItem[] {
     
     // Check if product already exists in cart with same variants
     const existingItem = items.find(item => {
@@ -97,7 +121,7 @@ export class CartService {
           ? { ...item, quantity: item.quantity + product.quantity }
           : item
       );
-      this.saveCartToStorage(updatedItems);
+      return updatedItems;
     } else {
       // Add new item to cart
       const newItem: CartItem = {
@@ -111,8 +135,39 @@ export class CartService {
         selectedVariants: product.selectedVariants
       };
       const updatedItems = [...items, newItem];
-      this.saveCartToStorage(updatedItems);
+      return updatedItems;
     }
+  }
+
+  async addApprovedShoppingList(prepared: PreparedBrowserCart, isCurrent = () => true): Promise<'added' | 'already-applied'> {
+    if (typeof navigator === 'undefined' || !navigator.locks || typeof localStorage === 'undefined')
+      throw new Error('CART_LOCK_UNAVAILABLE');
+    return navigator.locks.request('aljawhara:cart_items', () => {
+      if (!isCurrent()) throw new Error('SESSION_CHANGED');
+      this.loadCartFromStorage();
+      if (this.assistantOperations[prepared.operationId]) return 'already-applied' as const;
+      if (prepared.status !== 'prepared' || !/^[0-9a-f-]{36}$/i.test(prepared.operationId) ||
+          !Number.isFinite(Date.parse(prepared.expiresAtUtc)) || Date.parse(prepared.expiresAtUtc) <= Date.now() ||
+          !Number.isFinite(Date.parse(prepared.replayUntilUtc)) || Date.parse(prepared.replayUntilUtc) < Date.parse(prepared.expiresAtUtc) ||
+          !Array.isArray(prepared.items) || prepared.items.length > 20 ||
+          new Set(prepared.items.map(x => x.productId)).size !== prepared.items.length)
+        throw new Error('PREPARATION_EXPIRED');
+      let items = this.cartItems();
+      for (const line of prepared.items) {
+        const existing = items.filter(x => x.productId === line.productId).reduce((sum, x) => sum + x.quantity, 0);
+        if (!Number.isInteger(line.productId) || line.productId <= 0 || !Number.isInteger(line.quantity) ||
+            line.quantity < 1 || line.quantity > 100 || !Number.isFinite(line.price) || line.price <= 0 ||
+            !Number.isInteger(line.availablePackages) || existing + line.quantity > line.availablePackages)
+          throw new Error('CART_CHANGED');
+        items = this.mergeItem(items, { productId: line.productId, name: line.name, image: line.image ?? '', price: line.price, quantity: line.quantity });
+        items = items.map(x => x.productId === line.productId && !Object.keys(x.selectedVariants ?? {}).length
+          ? { ...x, price: line.price, name: line.name, image: line.image ?? '' } : x);
+      }
+      const operations = { ...this.assistantOperations, [prepared.operationId]: prepared.replayUntilUtc };
+      if (!this.saveCartToStorage(items, operations)) throw new Error('CART_STORAGE_FAILED');
+      if (this.appliedCoupon()) this.saveCouponToStorage(this.appliedCoupon(), null);
+      return 'added' as const;
+    });
   }
 
   // Remove item from cart
@@ -140,8 +195,8 @@ export class CartService {
 
   // Clear entire cart
   clearCart(): void {
-    this.cartItems.set([]);
-    localStorage.removeItem(this.STORAGE_KEY);
+    // Keep recent approval receipts so an old assistant retry cannot refill a cleared cart.
+    this.saveCartToStorage([]);
   }
 
   // Get cart item count
