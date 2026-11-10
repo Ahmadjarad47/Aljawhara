@@ -4,11 +4,10 @@ import { Navbar } from './home/navbar/navbar';
 import { Footer } from './home/footer/footer';
 import { ServiceAuth } from './auth/service-auth';
 import { MaintenanceService } from './core/services/maintenance.service';
-import { SmartAssistant } from './home/smart-assistant/smart-assistant';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar, Footer, SmartAssistant],
+  imports: [RouterOutlet, Navbar, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

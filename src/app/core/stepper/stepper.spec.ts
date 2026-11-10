@@ -79,7 +79,6 @@ describe('Single-page checkout', () => {
         { state: 'محافظة الجهراء', areas: [{ city: 'المطلاع', fee: 4 }] }] });
     if (authenticated) {
       http.expectOne(addressUrl).flush({ success: true, data: addresses });
-      http.expectOne(`${paymentEnvironment.apiUrl}account/whatsapp/preferences`).flush({ enabled: false, phoneNumber: null, phoneNumberConfirmed: false });
     }
     await fixture.whenStable();
     fixture.detectChanges();
@@ -134,26 +133,14 @@ describe('Single-page checkout', () => {
     expect(confirmButton().disabled).toBeTrue();
   });
 
-  it('saves explicit German consent and resets it when the recipient changes', async () => {
+  it('does not render or submit WhatsApp invoice controls', async () => {
     await render();
     await fillRequired();
-    const country = fixture.nativeElement.querySelector('app-phone-input [role="combobox"]') as HTMLInputElement;
-    country.focus();
-    country.value = 'Germany'; country.dispatchEvent(new Event('input', { bubbles: true }));
-    await fixture.whenStable();
-    (fixture.nativeElement.querySelector('app-phone-input [role="option"]') as HTMLButtonElement).click();
-    await fixture.whenStable();
-    await setInput('phoneNumber', '015112345678');
-    const checkbox = fixture.nativeElement.querySelector('app-whatsapp-checkout input') as HTMLInputElement;
-    expect(checkbox.checked).toBeFalse(); checkbox.click(); await fixture.whenStable();
-    expect(checkout.whatsAppOptIn()).toBeTrue();
-    await setInput('phoneNumber', '015112345679');
-    expect(checkout.whatsAppOptIn()).toBeFalse();
-    checkbox.click(); await fixture.whenStable(); confirmButton().click(); await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-whatsapp-checkout')).toBeNull();
+    confirmButton().click(); await fixture.whenStable();
     const request = http.expectOne(ordersUrl);
-    expect(request.request.body.whatsAppInvoiceOptIn).toBeTrue();
-    expect(request.request.body.whatsAppConsentPhone).toBe('+4915112345679');
-    expect(request.request.body.shippingAddress.phone).toBe('+4915112345679');
+    expect(request.request.body.whatsAppInvoiceOptIn).toBeUndefined();
+    expect(request.request.body.whatsAppConsentPhone).toBeUndefined();
     request.flush({ orderId: 92, paymentInitializationStatus: 0 }); await fixture.whenStable();
   });
 
@@ -168,8 +155,8 @@ describe('Single-page checkout', () => {
     const body = JSON.parse(JSON.stringify(request.request.body));
     expect(body.shippingAddress.fullName).toBe('بدر');
     expect(body.shippingAddress.phone).toBe('+96567070814');
-    expect(body.whatsAppInvoiceOptIn).toBeFalse();
-    expect(body.whatsAppConsentPhone).toBeNull();
+    expect(body.whatsAppInvoiceOptIn).toBeUndefined();
+    expect(body.whatsAppConsentPhone).toBeUndefined();
     expect(body.shippingAddress.street).toBe('عبدالله مبارك');
     expect(body.shippingAddress.city).toBeNull();
     expect(body.shippingAddress.state).toBeNull();

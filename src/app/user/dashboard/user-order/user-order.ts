@@ -20,14 +20,12 @@ import { PaymentInitializationStatus } from '../../../core/Models/checkout-payme
 
 declare const window: any;
 
-import { WhatsAppInvoiceRetryComponent } from '../../../core/components/whatsapp-invoice-retry/whatsapp-invoice-retry';
-
 registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-user-order',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, WhatsAppInvoiceRetryComponent],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './user-order.html',
   styleUrl: './user-order.css'
 })

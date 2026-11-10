@@ -6,12 +6,10 @@ import { PaymentTimingStepComponent } from './payment-timing-step/payment-timing
 import { CartService } from '../service/cart-service';
 import { ServiceStepper } from './service-stepper';
 
-import { WhatsAppCheckoutComponent } from '../components/whatsapp-checkout/whatsapp-checkout';
-
 @Component({
   selector: 'app-stepper',
   standalone: true,
-  imports: [CommonModule, RouterLink, ShippingStepComponent, PaymentTimingStepComponent, WhatsAppCheckoutComponent],
+  imports: [CommonModule, RouterLink, ShippingStepComponent, PaymentTimingStepComponent],
   templateUrl: './stepper.html',
   styleUrl: './stepper.css'
 })
@@ -21,7 +19,6 @@ export class StepperComponent {
   shipping = viewChild(ShippingStepComponent);
   payment = viewChild(PaymentTimingStepComponent);
   isSubmitting = signal(false);
-  whatsAppOptIn = signal(false);
   currentLanguage = signal<'ar' | 'en'>(localStorage.getItem('language') === 'en' ? 'en' : 'ar');
   cartItems = this.cartService.getCartItemsSignal();
   subtotal = computed(() => this.cartItems().reduce((sum, item) => sum + item.price * item.quantity, 0));
@@ -60,7 +57,7 @@ export class StepperComponent {
     if (!this.canConfirm() || !shipping || !payment) return;
     this.isSubmitting.set(true);
     try {
-      if (await shipping.saveAddress()) await payment.createOrder(this.whatsAppOptIn());
+      if (await shipping.saveAddress()) await payment.createOrder();
     } finally {
       this.isSubmitting.set(false);
     }

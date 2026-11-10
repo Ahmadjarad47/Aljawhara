@@ -15,14 +15,13 @@ import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAdd
 import { PhoneInputComponent } from '../../../core/phone/phone-input';
 import { normalizePhone } from '../../../core/phone/phone-number';
 import { CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js/max';
-import { WhatsAppPreferencesComponent } from '../../../core/components/whatsapp-preferences/whatsapp-preferences';
 
 registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-setting',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent, WhatsAppPreferencesComponent, PhoneInputComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent, PhoneInputComponent],
   templateUrl: './setting.html',
   styleUrls: ['../account-page.css', './setting.css']
 })
@@ -30,7 +29,6 @@ export class Setting implements OnInit, OnDestroy {
   private settingService = inject(SettingService);
   public toastService = inject(ToastService);
   private languageCheckInterval?: ReturnType<typeof setInterval>;
-  private whatsappPreferences = viewChild(WhatsAppPreferencesComponent);
   private addressDialog = viewChild<ElementRef<HTMLDialogElement>>('addressDialog');
   isSavingUsername = signal(false);
   isSavingPhone = signal(false);
@@ -376,7 +374,6 @@ export class Setting implements OnInit, OnDestroy {
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), res.message || this.t('phoneUpdated'));
           this.loadUser();
-          void this.whatsappPreferences()?.load();
         } else {
           this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdatePhone'));
         }

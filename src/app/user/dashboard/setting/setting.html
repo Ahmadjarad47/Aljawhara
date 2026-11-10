@@ -43,7 +43,6 @@
       } @else {
         <div class="account-empty"><h2>{{t('failedToLoadUser')}}</h2><button class="btn btn-outline" (click)="loadUser()">{{t('retry')}}</button></div>
       }
-      <app-whatsapp-preferences (phoneVerified)="loadUser()" />
     </section>
   }
 
