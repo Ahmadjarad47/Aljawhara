@@ -52,13 +52,10 @@
         <div class="flex items-center space-x-4">
           <a routerLink="/" routerLinkActive="opacity-80" [routerLinkActiveOptions]="{exact: true}"
             class="flex items-center space-x-3 group cursor-pointer">
-            <div class="relative">
-              <div class="h-12 w-44">
-                <img src="/logo.png" style="opacity: 1 !important;" alt="Aljawhara Logo" fetchpriority="high"
-                  class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80" width="176"
-                  height="48">
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <div class="brand-logo h-14 w-48" dir="ltr">
+              <img src="/logo.png" alt="شعار الجوهرة - Al Jawhara" fetchpriority="high"
+                class="h-full w-full object-contain object-left transition-opacity duration-300 group-hover:opacity-80"
+                width="192" height="56">
             </div>
 
           </a>
@@ -485,10 +482,10 @@
       <!-- Menu Header -->
       <div class="flex items-center justify-between p-4 border-b border-base-300">
         <div class="flex items-center space-x-3">
-          <div class="img-container h-10 w-32">
-            <img src="/logo.png" alt="Aljawhara Logo" loading="lazy" (load)="$event.target.classList.add('loaded')"
-              (error)="$event.target.classList.add('loaded')" class="h-full w-full object-contain" width="128"
-              height="40">
+          <div class="img-container brand-logo h-12 w-36" dir="ltr">
+            <img src="/logo.png" alt="شعار الجوهرة - Al Jawhara" loading="lazy"
+              (load)="$event.target.classList.add('loaded')" (error)="$event.target.classList.add('loaded')"
+              class="h-full w-full object-contain object-left" width="144" height="48">
             <div class="img-loading"></div>
           </div>
         </div>

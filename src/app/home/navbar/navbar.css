@@ -56,9 +56,14 @@ header > div:first-child {
   background: var(--navbar-color-primary);
 }
 
-/* Logo hover */
-header a[routerLink="/"] .absolute {
-  background: var(--navbar-color-accent);
+/* Keep the official wide logo aligned consistently in both text directions. */
+.brand-logo {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.brand-logo img {
+  display: block;
 }
 
 /* Search bar */
