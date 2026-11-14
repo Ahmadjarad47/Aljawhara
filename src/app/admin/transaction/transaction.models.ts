@@ -9,7 +9,7 @@ export interface TransactionAdvancedDto {
     amount: number;
     paymentMethod: PaymentMethod;
     paymentMethodName: string;
-    status: string;
+    status: number;
     transactionDate: string;
     processedDate: string | null;
     transactionReference: string | null;
