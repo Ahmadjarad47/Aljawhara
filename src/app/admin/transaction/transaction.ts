@@ -367,7 +367,7 @@ export class Transaction implements OnInit {
     const statusNum = typeof transaction.status === 'string' ? parseInt(transaction.status, 10) : transaction.status;
     this.editTransaction = {
       id: transaction.id,
-      status: statusNum.toString(),
+      status: Number(statusNum) ,
       transactionReference: transaction.transactionReference,
       paymentGatewayResponse: transaction.paymentGatewayResponse,
       notes: transaction.notes

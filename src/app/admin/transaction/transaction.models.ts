@@ -47,7 +47,7 @@ export interface TransactionCreateAdvancedDto {
 
 export interface TransactionUpdateDto {
     id: number;
-    status: string;
+    status: any;
     transactionReference: string | null;
     paymentGatewayResponse: string | null;
     notes: string | null;
