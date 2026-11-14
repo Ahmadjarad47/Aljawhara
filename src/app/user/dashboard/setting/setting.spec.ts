@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Setting } from './setting';
 import { environment } from '../../../../environments/environment.development';
-import { environment as apiEnvironment } from '../../../../environments/environment';
 import { UserAddressDto } from './setting.models';
 
 const addressUrl = `${environment.apiUrl}Auth/addresses`;
@@ -34,7 +33,6 @@ describe('Account address forms', () => {
     fixture.detectChanges();
     http.expectOne(`${environment.apiUrl}Auth/me`).flush({ success: true, data: null });
     http.expectOne(addressUrl).flush({ success: true, data: [] });
-    http.expectOne(`${apiEnvironment.apiUrl}account/whatsapp/preferences`).flush({ enabled: false, phoneNumber: null, phoneNumberConfirmed: false });
     settings.activeTab.set('addresses');
     await fixture.whenStable();
   });
@@ -56,7 +54,9 @@ describe('Account address forms', () => {
   it('creates addresses with the same nine fields as checkout and only three required', async () => {
     settings.openAddAddress();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelectorAll('.address-editor input[type="text"], .address-editor input:not([type]), .address-editor input[type="tel"]').length).toBe(9);
+    const addressInputs = fixture.nativeElement.querySelectorAll(
+      '.address-editor input:not([type="checkbox"]):not(#account-phoneNumber-country)');
+    expect(addressInputs.length).toBe(9);
     expect(fixture.nativeElement.querySelectorAll('.address-editor input[required]').length).toBe(3);
     for (const key of ['city', 'state', 'country', 'postalCode', 'addressLine2']) {
       expect(fixture.nativeElement.querySelector(`.address-editor [name="${key}"]`)).toBeNull();
@@ -122,19 +122,20 @@ describe('Account address forms', () => {
     settings.currentUser.set({ id: 'demo', username: 'Customer', email: 'demo@example.com',
       phoneNumber: '123456789', createdAt: '2026-10-20', emailConfirmed: true, isActive: true });
     settings.activeTab.set('profile');
-    settings.updateUsernameModel.username = 'Updated customer';
+    settings.updateUsernameModel.username = 'أحمد ٢٢٣';
     await fixture.whenStable();
-    http.expectOne(`${apiEnvironment.apiUrl}account/whatsapp/preferences`).flush({ enabled: false, phoneNumber: null, phoneNumberConfirmed: false });
     (fixture.nativeElement.querySelector('.profile-save') as HTMLButtonElement).click();
     await fixture.whenStable();
     expect(settings.isSavingUsername()).toBeTrue();
     expect((fixture.nativeElement.querySelector('#settings-username') as HTMLInputElement).closest('fieldset')!.disabled).toBeTrue();
     settings.onUpdateUsername();
     const request = http.expectOne(`${environment.apiUrl}Auth/me/username`);
-    expect(request.request.body.username).toBe('Updated customer');
-    request.flush({ success: false, message: 'Rejected' });
+    expect(request.request.body.username).toBe('أحمد ٢٢٣');
+    request.flush({ success: false, fieldErrors: { username: ['DuplicateUserName'] } },
+      { status: 400, statusText: 'Bad Request' });
     await fixture.whenStable();
     expect(settings.isSavingUsername()).toBeFalse();
-    expect((fixture.nativeElement.querySelector('#settings-username') as HTMLInputElement).value).toBe('Updated customer');
+    expect((fixture.nativeElement.querySelector('#settings-username') as HTMLInputElement).value).toBe('أحمد ٢٢٣');
+    expect(fixture.nativeElement.textContent).toContain('اسم المستخدم مستخدم بالفعل');
   });
 });

@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, DestroyRef, OnInit, OnDestroy, PLATFORM_ID, inject, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product/product-service';
 import { ProductDto, ProductSummaryDto } from '../product/product.models';
@@ -17,7 +16,7 @@ import { RatingDto } from '../../admin/product/product.models';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ToastComponent],
+  imports: [CommonModule, RouterModule, ToastComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css'
 })
@@ -125,13 +124,9 @@ export class ProductDetail implements OnInit, OnDestroy {
       checkingRating: 'جاري التحقق من تقييمك...',
       yourReview: 'تقييمك',
       submitted: 'تم الإرسال',
-      writeReview: 'اكتب تقييماً',
+      rateFromDeliveredOrder: 'يمكنك تقييم المنتج من صفحة طلباتي بعد تسليم الطلب.',
+      myOrders: 'طلباتي',
       rating: 'التقييم',
-      title: 'العنوان',
-      summarizeReview: 'لخص تقييمك',
-      review: 'التقييم',
-      tellUsExperience: 'أخبرنا عن تجربتك مع هذا المنتج',
-      submitReview: 'إرسال التقييم',
       submittedOn: 'تم الإرسال في',
       basedOn: 'بناءً على',
       reviewsText: 'تقييم',
@@ -221,13 +216,9 @@ export class ProductDetail implements OnInit, OnDestroy {
       checkingRating: 'Checking your rating...',
       yourReview: 'Your Review',
       submitted: 'Submitted',
-      writeReview: 'Write a Review',
+      rateFromDeliveredOrder: 'You can rate this product from My Orders after delivery.',
+      myOrders: 'My Orders',
       rating: 'Rating',
-      title: 'Title',
-      summarizeReview: 'Summarize your review',
-      review: 'Review',
-      tellUsExperience: 'Tell us about your experience with this product',
-      submitReview: 'Submit Review',
       submittedOn: 'Submitted on',
       basedOn: 'Based on',
       reviewsText: 'reviews',
@@ -343,43 +334,6 @@ export class ProductDetail implements OnInit, OnDestroy {
     return this.toastService.toasts$();
   }
 
-  // Reviews data
-  reviews = [
-    {
-      id: 1,
-      user: 'Ahmed Al-Mahmoud',
-      avatar: 'A',
-      rating: 5,
-      date: '2024-01-15',
-      title: 'Excellent sound quality!',
-      comment: 'These headphones are amazing. The noise cancellation works perfectly and the sound quality is crystal clear. Highly recommended!',
-      verified: true,
-      helpful: 12
-    },
-    {
-      id: 2,
-      user: 'Sarah Johnson',
-      avatar: 'S',
-      rating: 4,
-      date: '2024-01-10',
-      title: 'Great value for money',
-      comment: 'Good headphones for the price. Battery life is excellent and they are very comfortable to wear for long periods.',
-      verified: true,
-      helpful: 8
-    },
-    {
-      id: 3,
-      user: 'Mohammed Ali',
-      avatar: 'M',
-      rating: 5,
-      date: '2024-01-08',
-      title: 'Perfect for work',
-      comment: 'I use these for my daily work calls and music. The microphone quality is great and the noise cancellation helps me focus.',
-      verified: false,
-      helpful: 5
-    }
-  ];
-
   // Related products
   relatedProducts: Array<{
     id: number;
@@ -393,13 +347,6 @@ export class ProductDetail implements OnInit, OnDestroy {
   
   // Store original related products data for language switching
   private originalRelatedProducts: ProductSummaryDto[] = [];
-
-  // New review form
-  newReview = {
-    rating: 5,
-    title: '',
-    comment: ''
-  };
 
   ngOnInit() {
     if (this.isBrowser) {
@@ -504,17 +451,7 @@ export class ProductDetail implements OnInit, OnDestroy {
         return of(null);
       })
     ).subscribe(rating => {
-      if (rating) {
-        this.userRating.set(rating);
-        // Pre-fill the review form with existing rating
-        this.newReview = {
-          rating: rating.ratingNumber,
-          title: '', // RatingDto might not have title
-          comment: rating.content || ''
-        };
-      } else {
-        this.userRating.set(null);
-      }
+      this.userRating.set(rating);
       this.isCheckingRating.set(false);
     });
   }
@@ -762,50 +699,11 @@ export class ProductDetail implements OnInit, OnDestroy {
     this.showReturnPolicy = tab === 'returns';
   }
 
-  // Review methods
-  submitReview() {
-    if (!this.authService.isAuthenticated) {
-      this.toastService.warning(this.t('loginRequired'), this.t('pleaseLogin'));
-      this.router.navigate(['/auth/login'], { 
-        queryParams: { returnUrl: this.router.url } 
-      });
-      return;
-    }
-
-    if (this.newReview.title && this.newReview.comment) {
-      const review = {
-        id: this.reviews.length + 1,
-        user: 'You',
-        avatar: 'Y',
-        rating: this.newReview.rating,
-        date: new Date().toISOString().split('T')[0],
-        title: this.newReview.title,
-        comment: this.newReview.comment,
-        verified: false,
-        helpful: 0
-      };
-      this.reviews.unshift(review);
-      this.newReview = { rating: 5, title: '', comment: '' };
-      // After submitting, check for user rating again
-      const product = this.product();
-      if (product) {
-        this.checkUserRating(product.id);
-      }
-    }
-  }
-
   // Navigate to login
   navigateToLogin() {
     this.router.navigate(['/auth/login'], { 
       queryParams: { returnUrl: this.router.url } 
     });
-  }
-
-  markReviewHelpful(reviewId: number) {
-    const review = this.reviews.find(r => r.id === reviewId);
-    if (review) {
-      review.helpful++;
-    }
   }
 
   // Utility methods

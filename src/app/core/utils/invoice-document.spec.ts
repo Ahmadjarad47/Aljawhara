@@ -36,6 +36,8 @@ describe('Arabic invoice page layout', () => {
     expect(doc.querySelector('.summary-total')!.textContent).toContain('638.802');
     expect(doc.querySelector('.badge')!.textContent).toBe('منتهي الصلاحية');
     expect(doc.querySelector('.meta')!.textContent).toContain('2026');
+    expect(doc.querySelector<HTMLImageElement>('.logo')!.alt).toBe('شعار الجوهرة');
+    expect(doc.body.textContent).not.toMatch(/plus|بلس/i);
     expect(doc.querySelector('.page-number')!.textContent).toBe('صفحة 1 من 1');
   });
 

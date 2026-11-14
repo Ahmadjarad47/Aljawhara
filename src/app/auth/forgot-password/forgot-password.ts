@@ -43,6 +43,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
       // Buttons
       sending: 'جاري الإرسال...',
       sendResetCode: 'إرسال رمز إعادة التعيين',
+      enterResetCode: 'إدخال رمز إعادة التعيين',
       backToLogin: 'العودة لتسجيل الدخول',
       // Toasts
       emailSentTitle: 'تم إرسال البريد الإلكتروني',
@@ -67,6 +68,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
       // Buttons
       sending: 'Sending...',
       sendResetCode: 'Send Reset Code',
+      enterResetCode: 'Enter Reset Code',
       backToLogin: 'Back to Login',
       // Toasts
       emailSentTitle: 'Email Sent',
@@ -128,6 +130,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (this.isLoading()) return;
     if (this.forgotPasswordForm.invalid) {
       this.markAllFieldsAsTouched();
       return;
@@ -152,13 +155,12 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
           );
         }
       },
-      error: (error) => {
+      error: () => {
         this.isLoading.set(false);
         this.toastService.error(
           this.t('failedTitle'),
           this.t('failedGeneric')
         );
-        console.error('Forgot password error:', error);
       }
     });
   }

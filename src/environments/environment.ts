@@ -1,5 +1,5 @@
 export const environment = {
-  // apiUrl: 'https://api.aljawharaplus.com/api/',
+  apiUrl: 'https://api.aljawharaplus.com/api/',
   maintenance: {
     // فعّل الصيانة بإسناد true، ثم أعد بناء الموقع ونشره. false يعيد الموقع للعمل.
     enabled: false,

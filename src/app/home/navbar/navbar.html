@@ -16,7 +16,7 @@
             <path
               d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          <span class="font-medium">info@aljawharaplus.com</span>
+          <span class="font-medium">info@aljawhara.com</span>
         </div>
       </div>
       <div class="flex items-center space-x-6">
@@ -53,9 +53,9 @@
           <a routerLink="/" routerLinkActive="opacity-80" [routerLinkActiveOptions]="{exact: true}"
             class="flex items-center space-x-3 group cursor-pointer">
             <div class="relative">
-              <div class="h-12 w-full">
+              <div class="h-12 w-44">
                 <img src="/logo.png" style="opacity: 1 !important;" alt="Aljawhara Logo" fetchpriority="high"
-                  class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80" width="74"
+                  class="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-80" width="176"
                   height="48">
               </div>
               <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -485,15 +485,11 @@
       <!-- Menu Header -->
       <div class="flex items-center justify-between p-4 border-b border-base-300">
         <div class="flex items-center space-x-3">
-          <div class="img-container h-8 w-8">
+          <div class="img-container h-10 w-32">
             <img src="/logo.png" alt="Aljawhara Logo" loading="lazy" (load)="$event.target.classList.add('loaded')"
-              (error)="$event.target.classList.add('loaded')" class="h-full w-full object-contain" width="74"
-              height="48">
+              (error)="$event.target.classList.add('loaded')" class="h-full w-full object-contain" width="128"
+              height="40">
             <div class="img-loading"></div>
-          </div>
-          <div>
-            <h2 class="text-lg font-bold text-primary">Aljawhara</h2>
-            <p class="text-xs text-base-content/60">Marketplace</p>
           </div>
         </div>
         <button (click)="toggleMobileMenu()" class="p-2 text-base-content/60 hover:text-gray-700">

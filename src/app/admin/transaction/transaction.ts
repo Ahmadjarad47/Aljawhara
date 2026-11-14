@@ -75,7 +75,6 @@ export class Transaction implements OnInit {
   public toastService = inject(ToastService);
   
   // Signals for reactive state management
-  selectedTransactions = signal<number[]>([]);
   showAddModal = signal(false);
   showEditModal = signal(false);
   showRefundModal = signal(false);
@@ -340,70 +339,6 @@ export class Transaction implements OnInit {
     this.currentPage.set(1);
   }
 
-  toggleTransactionSelection(transactionId: number) {
-    const current = this.selectedTransactions();
-    const index = current.indexOf(transactionId);
-    if (index > -1) {
-      this.selectedTransactions.set(current.filter(id => id !== transactionId));
-    } else {
-      this.selectedTransactions.set([...current, transactionId]);
-    }
-  }
-
-  toggleSelectAll() {
-    this.transactions$.pipe(
-      map(transactions => {
-        const current = this.selectedTransactions();
-        if (current.length === transactions.length) {
-          this.selectedTransactions.set([]);
-        } else {
-          this.selectedTransactions.set(transactions.map(t => t.id));
-        }
-      })
-    ).subscribe();
-  }
-
-  deleteSelected() {
-    const selected = this.selectedTransactions();
-    if (selected.length === 0) return;
-
-    if (!confirm(`Are you sure you want to delete ${selected.length} transaction(s)?`)) {
-      return;
-    }
-
-    const loadingToastId = this.toastService.loading('Deleting', `Deleting ${selected.length} transactions...`);
-    this.isLoading.set(true);
-    
-    // Delete transactions one by one (or implement bulk delete if available)
-    let completed = 0;
-    let errors = 0;
-    
-    selected.forEach(id => {
-      this.transactionService.deleteTransaction(id).subscribe({
-        next: () => {
-          completed++;
-          if (completed + errors === selected.length) {
-            this.selectedTransactions.set([]);
-            this.loadTransactions(this.filters$());
-            this.isLoading.set(false);
-            if (errors === 0) {
-              this.toastService.updateToSuccess(loadingToastId, 'Success', `${selected.length} transactions deleted successfully`);
-            } else {
-              this.toastService.updateToError(loadingToastId, 'Partial Success', `${completed} transactions deleted, ${errors} failed`);
-            }
-          }
-        },
-        error: (error) => {
-          errors++;
-          if (completed + errors === selected.length) {
-            this.isLoading.set(false);
-            this.toastService.updateToError(loadingToastId, 'Error', `${errors} transactions failed to delete`);
-          }
-        }
-      });
-    });
-  }
-
   addTransaction() {
     if (!this.newTransaction.orderId || !this.newTransaction.amount || this.newTransaction.amount <= 0) {
       this.toastService.warning('Validation Error', 'Order ID and amount are required');
@@ -459,27 +394,6 @@ export class Transaction implements OnInit {
         this.toastService.updateToError(loadingToastId, 'Error', 'Failed to update transaction');
         this.isLoading.set(false);
         console.error('Error updating transaction:', error);
-      }
-    });
-  }
-
-  deleteTransaction(id: number) {
-    if (!confirm('Are you sure you want to delete this transaction?')) {
-      return;
-    }
-
-    const loadingToastId = this.toastService.loading('Deleting', 'Deleting transaction...');
-    this.isLoading.set(true);
-    this.transactionService.deleteTransaction(id).subscribe({
-      next: () => {
-        this.loadTransactions(this.filters$());
-        this.isLoading.set(false);
-        this.toastService.updateToSuccess(loadingToastId, 'Success', 'Transaction deleted successfully');
-      },
-      error: (error) => {
-        this.toastService.updateToError(loadingToastId, 'Error', 'Failed to delete transaction');
-        this.isLoading.set(false);
-        console.error('Error deleting transaction:', error);
       }
     });
   }

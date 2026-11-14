@@ -262,46 +262,8 @@
               </div>
             </div>
           } @else {
-            <!-- Write Review Form -->
-            <h3 class="text-lg font-semibold text-base-content mb-4">{{t('writeReview')}}</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-2">{{t('rating')}}</label>
-                <div class="flex items-center space-x-1">
-                  @for (star of [1,2,3,4,5]; track star) {
-                  <button (click)="newReview.rating = star"
-                          class="w-8 h-8 transition-colors duration-200"
-                          [class.text-warning]="star <= newReview.rating"
-                          [class.text-base-300]="star > newReview.rating">
-                    <svg class="w-full h-full fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                    </svg>
-                  </button>
-                  }
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-2">{{t('title')}}</label>
-                <input type="text"
-                       [(ngModel)]="newReview.title"
-                       [placeholder]="t('summarizeReview')"
-                       class="w-full px-3 py-2 border border-base-300 rounded-lg bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-2">{{t('review')}}</label>
-                <textarea [(ngModel)]="newReview.comment"
-                          [placeholder]="t('tellUsExperience')"
-                          rows="4"
-                          class="w-full px-3 py-2 border border-base-300 rounded-lg bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
-              </div>
-
-              <button (click)="submitReview()"
-                      class="bg-primary text-primary-content px-6 py-2 rounded-lg hover:bg-primary-focus transition-colors duration-200">
-                {{t('submitReview')}}
-              </button>
-            </div>
+            <p class="text-base-content/70 mb-3">{{t('rateFromDeliveredOrder')}}</p>
+            <a class="link link-primary" routerLink="/user/orders">{{t('myOrders')}}</a>
           }
         </div>
 

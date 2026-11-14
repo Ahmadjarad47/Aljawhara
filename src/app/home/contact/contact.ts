@@ -125,7 +125,7 @@ export class Contact implements OnInit, OnDestroy {
     address: 'الكويت، الشويخ الصناعية',
     phone: '+965 67070814',
     whatsapp: '96567070814',
-    email: 'info@aljawharaplus.com',
+    email: 'info@aljawhara.com',
     workingHours: 'Sunday - Thursday: 9:00 AM - 6:00 PM'
   };
 

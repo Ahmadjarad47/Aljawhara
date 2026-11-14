@@ -14,7 +14,7 @@ import {
   RatingCreateDto,
   InvoicePaymentDto 
 } from './models.order';
-import { combineLatest, map, startWith, catchError, of } from 'rxjs';
+import { combineLatest, map, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { PaymentInitializationStatus } from '../../../core/Models/checkout-payment';
 
@@ -59,12 +59,12 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   selectedOrderDetails = signal<OrderDto | null>(null);
   showDetailsModal = signal(false);
   showRatingModal = signal(false);
-  selectedProductForRating = signal<{ productId: number; productName: string } | null>(null);
+  selectedProductForRating = signal<{ orderId: number; productId: number; productName: string } | null>(null);
   checkingRatings = signal(false);
   productRatings = signal<Map<number, RatingDto>>(new Map());
 
   // Rating form
-  ratingForm = signal<RatingCreateDto>({
+  ratingForm = signal<Omit<RatingCreateDto, 'orderId'>>({
     content: '',
     ratingNumber: 5,
     productId: 0
@@ -161,6 +161,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       shareExperience: 'شارك تجربتك مع هذا المنتج...',
       characters: 'حرف',
       submitRating: 'إرسال التقييم',
+      ratingNotAllowed: 'يمكن تقييم المنتج فقط من طلب تم تسليمه.',
       downloadInvoice: 'تحميل الفاتورة',
       payNow: 'ادفع الآن'
     },
@@ -233,6 +234,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       shareExperience: 'Share your experience with this product...',
       characters: 'characters',
       submitRating: 'Submit Rating',
+      ratingNotAllowed: 'You can only rate a product from a delivered order.',
       downloadInvoice: 'Download Invoice',
       payNow: 'Pay Now'
     }
@@ -305,9 +307,14 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (order) => {
         if (order) {
+          this.closeRatingModal();
+          this.productRatings.set(new Map());
+          this.checkingRatings.set(false);
           this.selectedOrderDetails.set(order);
           this.showDetailsModal.set(true);
-          this.checkProductRatings(order.items);
+          if (this.canRateOrder(order) && order.items.length > 0) {
+            this.checkProductRatings(order);
+          }
         }
         this.isLoading.set(false);
       },
@@ -420,9 +427,13 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     return statusMap[normalizeOrderStatus(status)!] || this.t('unknownStatus');
   }
 
-  checkProductRatings(items: OrderDto['items']): void {
+  canRateOrder(order: OrderDto | null): boolean {
+    return normalizeOrderStatus(order?.status) === OrderStatus.Delivered;
+  }
+
+  private checkProductRatings(order: OrderDto): void {
     this.checkingRatings.set(true);
-    const ratingChecks = items.map(item =>
+    const ratingChecks = order.items.map(item =>
       this.orderService.checkMyProductRating(item.productId).pipe(
         map(rating => ({ productId: item.productId, rating })),
         catchError(() => of({ productId: item.productId, rating: null }))
@@ -431,6 +442,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
     combineLatest(ratingChecks).subscribe({
       next: (results) => {
+        if (this.selectedOrderDetails() !== order) return;
         const ratingsMap = new Map<number, RatingDto>();
         results.forEach(({ productId, rating }) => {
           if (rating) {
@@ -441,13 +453,9 @@ export class UserOrderComponent implements OnInit, OnDestroy {
         this.checkingRatings.set(false);
       },
       error: () => {
-        this.checkingRatings.set(false);
+        if (this.selectedOrderDetails() === order) this.checkingRatings.set(false);
       }
     });
-  }
-
-  hasRatedProduct(productId: number): boolean {
-    return this.productRatings().has(productId);
   }
 
   getProductRating(productId: number): RatingDto | undefined {
@@ -455,7 +463,12 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   }
 
   openRatingModal(productId: number, productName: string): void {
-    this.selectedProductForRating.set({ productId, productName });
+    const order = this.selectedOrderDetails();
+    if (!order || !this.canRateOrder(order) || !order.items.some(item => item.productId === productId)) {
+      return;
+    }
+
+    this.selectedProductForRating.set({ orderId: order.id, productId, productName });
     this.ratingForm.set({
       content: '',
       ratingNumber: 5,
@@ -480,15 +493,18 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
   submitRating(): void {
     const form = this.ratingForm();
-    if (!form.content.trim()) {
+    const selection = this.selectedProductForRating();
+    const order = this.selectedOrderDetails();
+    if (this.isLoading() || !form.content.trim() || !selection || !order ||
+        selection.orderId !== order.id || selection.productId !== form.productId || !this.canRateOrder(order)) {
       return;
     }
 
     this.isLoading.set(true);
-    this.orderService.addProductRating(form).pipe(
+    this.orderService.addProductRating({ ...form, orderId: selection.orderId }).pipe(
       catchError(error => {
         console.error('Error submitting rating:', error);
-        this.toastService.error('خطأ', 'فشل إرسال التقييم');
+        this.toastService.error('خطأ', error.status === 403 ? this.t('ratingNotAllowed') : 'فشل إرسال التقييم');
         return of(null);
       })
     ).subscribe({

@@ -136,11 +136,6 @@ export class TransactionService {
     return this.http.put<TransactionAdvancedDto>(`${this.api}/${transaction.id}`, transaction);
   }
 
-  // Delete transaction
-  deleteTransaction(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/${id}`);
-  }
-
   // Process payment
   processPayment(payment: PaymentProcessingDto): Observable<TransactionAdvancedDto> {
     return this.http.post<TransactionAdvancedDto>(`${this.api}/process-payment`, payment);

@@ -103,6 +103,7 @@ export interface RatingCreateDto {
     content: string;
     ratingNumber: number;
     productId: number;
+    orderId: number;
 }
 
 export interface InvoicePaymentDto {

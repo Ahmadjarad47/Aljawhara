@@ -64,4 +64,5 @@ export interface ApiResponseDto<T = any> {
     message: string;
     data?: T;
     errors?: string[];
+    fieldErrors?: Record<string, string[]>;
 }

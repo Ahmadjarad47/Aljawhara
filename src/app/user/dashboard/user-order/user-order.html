@@ -347,13 +347,12 @@
                                         <strong><bdi>{{item.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</bdi></strong>
                                     </div>
                                 </div>
-                                <div class="order-product-rating">
-                                    @if (checkingRatings()) {
-                                        <span class="loading loading-spinner loading-xs" role="status" [attr.aria-label]="t('rating')"></span>
-                                    } @else {
-                                        @if (hasRatedProduct(item.productId)) {
-                                            @let rating = getProductRating(item.productId);
-                                            @if (rating) {
+                                @if (canRateOrder(selectedOrderDetails())) {
+                                    <div class="order-product-rating">
+                                        @if (checkingRatings()) {
+                                            <span class="loading loading-spinner loading-xs" role="status" [attr.aria-label]="t('rating')"></span>
+                                        } @else {
+                                            @if (getProductRating(item.productId); as rating) {
                                                 <div class="order-rated">
                                                     <span class="order-stars" [attr.aria-label]="t('rating') + ': ' + rating.ratingNumber + ' ' + t('outOfStars')">
                                                         @for (star of [1, 2, 3, 4, 5]; track star) {
@@ -363,14 +362,14 @@
                                                     <span class="text-xs text-base-content/60">{{t('rated')}}</span>
                                                 </div>
                                                 @if (rating.content) { <p class="order-review">{{rating.content}}</p> }
+                                            } @else {
+                                                <button class="btn btn-ghost order-rate" (click)="openRatingModal(item.productId, item.name)" [disabled]="isLoading()">
+                                                    <span aria-hidden="true">☆</span> {{t('rateProduct')}}
+                                                </button>
                                             }
-                                        } @else {
-                                            <button class="btn btn-ghost order-rate" (click)="openRatingModal(item.productId, item.name)" [disabled]="isLoading()">
-                                                <span aria-hidden="true">☆</span> {{t('rateProduct')}}
-                                            </button>
                                         }
-                                    }
-                                </div>
+                                    </div>
+                                }
                             </article>
                         }
                     </div>
@@ -444,7 +443,7 @@
     }
 
     <!-- Rating Modal -->
-    @if (showRatingModal() && selectedProductForRating()) {
+    @if (showRatingModal() && selectedProductForRating() && canRateOrder(selectedOrderDetails())) {
         <dialog #ratingDialog class="modal orders-modal" aria-labelledby="order-rating-title" (cancel)="onRatingCancel($event)" (close)="closeRatingModal()">
             <div class="modal-box orders-rating-box">
                 <h3 id="order-rating-title" class="font-bold text-base sm:text-lg mb-4 break-words">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>

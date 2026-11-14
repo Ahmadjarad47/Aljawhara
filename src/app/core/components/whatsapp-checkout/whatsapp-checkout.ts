@@ -10,7 +10,7 @@ import { normalizePhone } from '../../phone/phone-number';
     <section dir="rtl" aria-labelledby="checkout-whatsapp-title">
       <h3 id="checkout-whatsapp-title">فاتورة واتساب (اختياري)</h3>
       <label><input type="checkbox" [ngModel]="checked()" (ngModelChange)="toggle($event)" [disabled]="!phone()" [ngModelOptions]="{standalone:true}" />
-        أوافق على استلام تأكيد الدفع وفاتورة الطلب عبر واتساب على رقم هاتفي المسجّل لدى الجوهرة بلس.
+        أوافق على استلام تأكيد الدفع وفاتورة الطلب عبر واتساب على رقم هاتفي المسجّل لدى الجوهرة .
       </label>
       <p>رقم واتساب هو رقم التوصيل: <bdi>{{phone() || 'أدخل رقم توصيل صالحاً واختر دولته أولاً'}}</bdi></p>
       <p role="status">{{accountStatus()}}</p>

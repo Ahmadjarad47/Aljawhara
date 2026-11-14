@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ServiceAuth } from '../service-auth';
-import { RegisterDto } from '../auth.models';
+import { ApiResponseDto, RegisterDto } from '../auth.models';
+import { USERNAME_PATTERN, usernameErrorKey } from '../username-validation';
 import { ToastService } from '../../services/toast.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 
@@ -56,13 +57,21 @@ export class RegisterComponent implements OnInit, OnDestroy {
       registerFailedGeneric: 'حدث خطأ أثناء إنشاء الحساب',
       // Validation
       usernameRequired: 'اسم المستخدم مطلوب',
+      usernameInvalid: 'استخدم حروفاً أو أرقاماً، ويمكنك إضافة مسافة واحدة بين الكلمات أو الرموز ‎- . _ @ +‎.',
+      usernameTaken: 'اسم المستخدم مستخدم بالفعل',
+      usernameLength: 'اسم المستخدم يجب أن يكون بين 3 و50 حرفاً',
       emailRequired: 'البريد الإلكتروني مطلوب',
       phoneRequired: 'رقم الهاتف مطلوب',
       phoneInvalid: 'يجب إدخال أرقام فقط',
       passwordRequired: 'كلمة المرور مطلوبة',
       confirmPasswordRequired: 'تأكيد كلمة المرور مطلوب',
       emailInvalid: 'يجب إدخال بريد إلكتروني صالح',
-      passwordMinLength: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
+      passwordMinLength: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
+      passwordDigit: 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل',
+      passwordLower: 'كلمة المرور يجب أن تحتوي على حرف إنكليزي صغير',
+      passwordUpper: 'كلمة المرور يجب أن تحتوي على حرف إنكليزي كبير',
+      passwordSpecial: 'كلمة المرور يجب أن تحتوي على رمز خاص',
+      passwordInvalid: 'كلمة المرور لا تستوفي الشروط',
       invalidLength: 'الطول غير صالح',
       passwordsDoNotMatch: 'كلمتا المرور غير متطابقتين'
     },
@@ -92,13 +101,21 @@ export class RegisterComponent implements OnInit, OnDestroy {
       registerFailedGeneric: 'An error occurred during registration',
       // Validation
       usernameRequired: 'Username is required',
+      usernameInvalid: 'Use letters, digits, single spaces between words, or these symbols: - . _ @ +.',
+      usernameTaken: 'This username is already taken',
+      usernameLength: 'Username must be between 3 and 50 characters',
       emailRequired: 'Email is required',
       phoneRequired: 'Phone number is required',
       phoneInvalid: 'Only numbers are allowed',
       passwordRequired: 'Password is required',
       confirmPasswordRequired: 'Confirm password is required',
       emailInvalid: 'Valid email is required',
-      passwordMinLength: 'Password must be at least 6 characters',
+      passwordMinLength: 'Password must be at least 8 characters',
+      passwordDigit: 'Password must contain at least one digit',
+      passwordLower: 'Password must contain a lowercase English letter',
+      passwordUpper: 'Password must contain an uppercase English letter',
+      passwordSpecial: 'Password must contain a special character',
+      passwordInvalid: 'Password does not meet the requirements',
       invalidLength: 'Invalid length',
       passwordsDoNotMatch: 'Passwords do not match'
     }
@@ -110,93 +127,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
     return this.translations[lang][key as keyof (typeof this.translations)['ar']] || key;
   }
 
-  // Map backend Identity error messages to localized (mainly Arabic) messages
-  private translateServerError(error: string): string {
-    if (!error) return error;
-
-    const description = error;
-    const msg = description.toLowerCase();
-
-    // ===== نفس منطق IdentityErrorTranslator في الباكند (TranslateByPattern) =====
-
-    // Password length: "at least X characters"
-    if (msg.includes('at least') && msg.includes('characters')) {
-      const match = description.match(/at least\s+(\d+)\s+characters?/i);
-      if (match && match[1]) {
-        return `كلمة المرور يجب أن تكون على الأقل ${match[1]} أحرف`;
-      }
-    }
-
-    // Password requirements
-    if (msg.includes('digit')) {
-      return 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل';
-    }
-    if (msg.includes('lowercase')) {
-      return 'كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل';
-    }
-    if (msg.includes('uppercase')) {
-      return 'كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل';
-    }
-    if (msg.includes('non alphanumeric') || msg.includes('special')) {
-      return 'كلمة المرور يجب أن تحتوي على حرف خاص واحد على الأقل';
-    }
-
-    // Duplicate / already taken errors
-    // خاص بالرسالة: "User with this email already exists"
-    if (msg.includes('email') && msg.includes('already exists')) {
-      return 'البريد الإلكتروني مستخدم بالفعل';
-    }
-
-    if (msg.includes('already taken') || msg.includes('is already taken') || msg.includes('already in use')) {
-      if (msg.includes('email')) {
-        return 'البريد الإلكتروني مستخدم بالفعل';
-      }
-      if (msg.includes('user name') || msg.includes('username') || msg.includes('user')) {
-        return 'اسم المستخدم مستخدم بالفعل';
-      }
-      return 'هذه البيانات مستخدمة بالفعل';
-    }
-
-    // Invalid errors
-    if (msg.includes('invalid')) {
-      if (msg.includes('email')) {
-        return 'البريد الإلكتروني غير صحيح';
-      }
-      if (msg.includes('token')) {
-        return 'رمز التحقق غير صحيح';
-      }
-      if (msg.includes('password')) {
-        return 'كلمة المرور غير صحيحة';
-      }
-    }
-
-    // ===== رسائل تحقق حقول النموذج (ModelState) =====
-    if (msg.includes('the email field is required') || msg.includes('email is required')) {
-      return this.t('emailRequired');
-    }
-    if (msg.includes('the user name field is required') || msg.includes('username is required')) {
-      return this.t('usernameRequired');
-    }
-    if (msg.includes('phone') && msg.includes('required')) {
-      return this.t('phoneRequired');
-    }
-
-    if (msg.includes('invalid email') || msg.includes('email is not valid')) {
-      return this.t('emailInvalid');
-    }
-
-    // Fallback: return original error for AR (أفضل من لا شيء)
-    return description;
-  }
-
   registerForm: FormGroup;
 
   constructor() {
     this.registerForm = this.formBuilder.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50), Validators.pattern(USERNAME_PATTERN)]],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, {
       validators: this.passwordMatchValidator()
@@ -260,53 +198,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const registerDto: RegisterDto = this.registerForm.value;
 
     this.authService.register(registerDto).subscribe({
-      next: (response: any) => {
+      next: response => {
         this.isLoading.set(false);
-
-        if (response.success) {
-          this.toastService.success(
-            this.t('registerSuccessTitle'),
-            this.t('registerSuccessMessage')
-          );
-          this.router.navigate(['/auth/verify'], { queryParams: { email: registerDto.email } });
-        } else {
-          const rawMessage = response.message || this.t('registerFailedGeneric');
-          const translated = this.translateServerError(rawMessage);
-
-          this.toastService.error(
-            this.t('registerFailedTitle'),
-            translated
-          );
-
-          // حاول وضع الرسالة تحت الحقل المناسب إذا كان الرد عام فقط مثل: "Username is already taken"
-          this.applyFieldErrorFromMessage(rawMessage);
-
-          if (Array.isArray(response.errors) && response.errors.length) {
-            this.setErrorsFromResponse(response.errors);
-          }
+        if (!response.success) {
+          this.showRegistrationError(response);
+          return;
         }
+        this.toastService.success(this.t('registerSuccessTitle'), this.t('registerSuccessMessage'));
+        this.router.navigate(['/auth/verify'], { queryParams: { email: registerDto.email } });
       },
-      error: (error) => {
+      error: error => {
         this.isLoading.set(false);
-
-        const apiError = error?.error;
-        const rawMessage =
-          (apiError && apiError.message) ||
-          error?.message ||
-          this.t('registerFailedGeneric');
-        const translated = this.translateServerError(rawMessage);
-
-        this.toastService.error(
-          this.t('registerFailedTitle'),
-          translated
-        );
-
-        // حاول أيضاً ربط الرسالة بحقل معيّن إن أمكن
-        this.applyFieldErrorFromMessage(rawMessage);
-
-        if (apiError && Array.isArray(apiError.errors) && apiError.errors.length) {
-          this.setErrorsFromResponse(apiError.errors);
-        }
+        this.showRegistrationError(error?.error);
       }
     });
   }
@@ -317,45 +220,57 @@ export class RegisterComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setErrorsFromResponse(errors: string[]) {
-    errors.forEach((error: string) => {
-      const match = error.match(/^(\w+):\s*(.+)$/);
-      if (match) {
-        const translated = this.translateServerError(match[2]);
-        this.registerForm.get(match[1])?.setErrors({ serverError: translated });
-      } else {
-        // If error is not in "Field: message" format, show it as general toast (translated)
-        const translated = this.translateServerError(error);
-        this.toastService.error(this.t('registerFailedTitle'), translated);
+  private showRegistrationError(response?: Partial<Omit<ApiResponseDto, 'errors'>> & { errors?: Record<string, string[]> | string[] }): void {
+    const messages: string[] = [];
+    const setFieldError = (field: string, codes: string[], localized: boolean) => {
+      const control = Object.keys(this.registerForm.controls)
+        .find(key => key.toLowerCase() === field.toLowerCase());
+      if (!control) return;
+      const message = codes.map(code => localized ? this.translateFieldError(control, code) : code)
+        .filter(Boolean).join(' ');
+      if (!message) return;
+      const input = this.registerForm.get(control)!;
+      input.setErrors({ ...input.errors, serverError: message });
+      messages.push(message);
+    };
+
+    for (const [field, codes] of Object.entries(response?.fieldErrors ?? {})) {
+      setFieldError(field, codes, true);
+    }
+
+    // ASP.NET model validation returns a dictionary of field names and messages.
+    if (response?.errors && !Array.isArray(response.errors)) {
+      for (const [field, errors] of Object.entries(response.errors)) {
+        setFieldError(field, errors, false);
       }
-    });
+    }
+
+    // Support the older API during deployment without guessing from words like "digits".
+    if (messages.length === 0 && response?.message) {
+      if (/^(?:registration failed: )?user ?name '.+' is invalid\b/i.test(response.message)) {
+        setFieldError('username', ['InvalidUserName'], true);
+      } else if (/^username is already taken$/i.test(response.message)) {
+        setFieldError('username', ['DuplicateUserName'], true);
+      }
+    }
+
+    this.toastService.error(this.t('registerFailedTitle'), messages[0] || this.t('registerFailedGeneric'));
   }
 
-  // يحاول استنتاج الحقل من رسالة عامة من السيرفر مثل "Username is already taken"
-  private applyFieldErrorFromMessage(message: string) {
-    if (!message) return;
-
-    const msg = message.toLowerCase();
-    const translated = this.translateServerError(message);
-
-    if (msg.includes('user name') || msg.includes('username')) {
-      this.registerForm.get('username')?.setErrors({ serverError: translated });
-      return;
+  private translateFieldError(field: string, code: string): string {
+    if (field === 'username') {
+      const key = usernameErrorKey(code);
+      return key ? this.t(key) : this.t('usernameInvalid');
     }
-
-    if (msg.includes('email')) {
-      this.registerForm.get('email')?.setErrors({ serverError: translated });
-      return;
-    }
-
-    if (msg.includes('phone')) {
-      this.registerForm.get('phoneNumber')?.setErrors({ serverError: translated });
-      return;
-    }
-
-    if (msg.includes('password')) {
-      this.registerForm.get('password')?.setErrors({ serverError: translated });
-    }
+    if (field === 'email') return this.t('emailInvalid');
+    const passwordKeys: Record<string, string> = {
+      PasswordTooShort: 'passwordMinLength',
+      PasswordRequiresDigit: 'passwordDigit',
+      PasswordRequiresLower: 'passwordLower',
+      PasswordRequiresUpper: 'passwordUpper',
+      PasswordRequiresNonAlphanumeric: 'passwordSpecial',
+    };
+    return field === 'password' ? this.t(passwordKeys[code] || 'passwordInvalid') : '';
   }
 
   getError(fieldName: string): string | null {
@@ -372,6 +287,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
         if (fieldName === 'confirmPassword') return this.t('confirmPasswordRequired');
       }
       if (control.hasError('email')) return this.t('emailInvalid');
+      if (fieldName === 'username') {
+        if (control.hasError('minlength') || control.hasError('maxlength')) return this.t('usernameLength');
+        if (control.hasError('pattern')) return this.t('usernameInvalid');
+      }
       if (control.hasError('pattern') && fieldName === 'phoneNumber') {
         return this.t('phoneInvalid');
       }

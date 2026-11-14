@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ServiceAuth } from '../service-auth';
 import { ResetPasswordDto } from '../auth.models';
 import { ToastService } from '../../services/toast.service';
@@ -17,7 +18,6 @@ import { ToastComponent } from '../../core/components/toast/toast.component';
 export class ResetPasswordComponent implements OnInit, OnDestroy {
   private authService = inject(ServiceAuth);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
   private formBuilder = inject(FormBuilder);
 
@@ -51,13 +51,16 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       resetSuccessMessage: 'تمت إعادة تعيين كلمة المرور بنجاح',
       resetFailedTitle: 'فشل إعادة التعيين',
       resetFailedGeneric: 'تعذر إعادة تعيين كلمة المرور',
+      resetCodeRejected: 'رمز التحقق غير صالح أو منتهي الصلاحية. راجع الرمز أو اطلب رمزاً جديداً.',
+      resetRateLimited: 'تم إجراء محاولات كثيرة. يرجى الانتظار قبل المحاولة مجدداً.',
+      requestNewCode: 'طلب رمز جديد',
       // Validation
       emailRequired: 'البريد الإلكتروني مطلوب',
       emailInvalid: 'يجب إدخال بريد إلكتروني صالح',
       otpRequired: 'رمز التحقق مطلوب',
       otpInvalid: 'يرجى إدخال رمز تحقق مكون من 6 أرقام',
       newPasswordRequired: 'كلمة المرور الجديدة مطلوبة',
-      newPasswordMinLength: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
+      newPasswordMinLength: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
       confirmNewPasswordRequired: 'تأكيد كلمة المرور الجديدة مطلوب',
       invalidLength: 'الطول غير صالح',
       passwordsDoNotMatch: 'كلمتا المرور غير متطابقتين'
@@ -84,13 +87,16 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       resetSuccessMessage: 'Your password has been reset successfully',
       resetFailedTitle: 'Reset Failed',
       resetFailedGeneric: 'Could not reset your password',
+      resetCodeRejected: 'This code is invalid or expired. Check the code or request a new one.',
+      resetRateLimited: 'Too many attempts. Wait before trying again.',
+      requestNewCode: 'Request a new code',
       // Validation
       emailRequired: 'Email is required',
       emailInvalid: 'Valid email is required',
       otpRequired: 'OTP is required',
       otpInvalid: 'Please enter a valid 6-digit OTP',
       newPasswordRequired: 'New password is required',
-      newPasswordMinLength: 'Password must be at least 6 characters',
+      newPasswordMinLength: 'Password must be at least 8 characters',
       confirmNewPasswordRequired: 'Confirm new password is required',
       invalidLength: 'Invalid length',
       passwordsDoNotMatch: 'Passwords do not match'
@@ -109,7 +115,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.resetPasswordForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       otp: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
       confirmNewPassword: ['', [Validators.required]]
     }, {
       validators: this.passwordMatchValidator()
@@ -143,24 +149,6 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       }
     }, 500);
 
-    // Extract token and userId from URL query parameters
-    this.route.queryParams.subscribe(params => {
-      const token = params['token'];
-      const userId = params['userId'];
-      
-      if (token) {
-        // Pre-fill the OTP field with the token from URL
-        this.resetPasswordForm.patchValue({
-          otp: token
-        });
-      }
-      
-      // Store userId if needed (can be used for API calls or validation)
-      if (userId) {
-        // You can store userId in a property if needed for the API call
-        // For now, we'll just extract it from the URL
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -183,6 +171,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (this.isLoading()) return;
     if (this.resetPasswordForm.invalid) {
       this.markAllFieldsAsTouched();
       return;
@@ -200,6 +189,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.isLoading.set(false);
         if (response.success) {
+          this.resetPasswordForm.reset();
           this.toastService.success(
             this.t('resetSuccessTitle'),
             this.t('resetSuccessMessage')
@@ -215,13 +205,15 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
         this.isLoading.set(false);
-        this.toastService.error(
-          this.t('resetFailedTitle'),
-          this.t('resetFailedGeneric')
-        );
-        console.error('Reset password error:', error);
+        let message = this.t('resetFailedGeneric');
+        if (error.status === 429) message = this.t('resetRateLimited');
+        if (error.status === 400 && error.error?.message === 'Invalid or expired reset code') {
+          message = this.t('resetCodeRejected');
+          this.resetPasswordForm.get('otp')?.reset('');
+        }
+        this.toastService.error(this.t('resetFailedTitle'), message);
       }
     });
   }
@@ -260,6 +252,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
           ? this.t('newPasswordMinLength')
           : this.t('invalidLength');
       }
+      if (control.hasError('maxlength')) return this.t('invalidLength');
     }
     return null;
   }

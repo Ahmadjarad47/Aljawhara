@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../../core/components/toast/toast.component';
 import { ToastService } from '../../../services/toast.service';
 import { UserResponseDto } from '../../../auth/auth.models';
+import { USERNAME_PATTERN, usernameErrorKey } from '../../../auth/username-validation';
 import { SettingService } from './setting.service';
 import { CreateAddressDto, UpdateAddressDto, UserAddressDto } from './setting.models';
 import { AddressAutocompleteComponent } from '../../../core/components/address-autocomplete/address-autocomplete';
@@ -129,6 +130,8 @@ export class Setting implements OnInit, OnDestroy {
       failedToLoadUser: 'فشل تحميل بيانات المستخدم',
       validation: 'التحقق',
       usernameMinLength: 'يجب أن يكون اسم المستخدم 3 أحرف على الأقل',
+      usernameInvalid: 'اسم المستخدم غير صالح. يمكنك استخدام حروف عربية أو إنكليزية وأرقام.',
+      usernameTaken: 'اسم المستخدم مستخدم بالفعل',
       updating: 'جاري التحديث',
       updatingUsername: 'جاري تحديث اسم المستخدم...',
       success: 'نجح',
@@ -216,6 +219,8 @@ export class Setting implements OnInit, OnDestroy {
       failedToLoadUser: 'Failed to load user details',
       validation: 'Validation',
       usernameMinLength: 'Username must be at least 3 characters',
+      usernameInvalid: 'Enter a valid username using letters or digits.',
+      usernameTaken: 'This username is already taken',
       updating: 'Updating',
       updatingUsername: 'Updating username...',
       success: 'Success',
@@ -340,6 +345,10 @@ export class Setting implements OnInit, OnDestroy {
       this.toastService.warning(this.t('validation'), this.t('usernameMinLength'));
       return;
     }
+    if (this.updateUsernameModel.username.length > 50 || !USERNAME_PATTERN.test(this.updateUsernameModel.username)) {
+      this.toastService.warning(this.t('validation'), this.t('usernameInvalid'));
+      return;
+    }
     const toastId = this.toastService.loading(this.t('updating'), this.t('updatingUsername'));
     this.isSavingUsername.set(true);
     this.settingService.updateUsername({ username: this.updateUsernameModel.username }).pipe(
@@ -353,8 +362,10 @@ export class Setting implements OnInit, OnDestroy {
           this.toastService.updateToError(toastId, this.t('error'), res.message || this.t('failedToUpdateUsername'));
         }
       },
-      error: () => {
-        this.toastService.updateToError(toastId, this.t('error'), this.t('failedToUpdateUsername'));
+      error: error => {
+        const code = error?.error?.fieldErrors?.username?.[0];
+        this.toastService.updateToError(toastId, this.t('error'),
+          this.t(usernameErrorKey(code) ?? 'failedToUpdateUsername'));
       }
     });
   }

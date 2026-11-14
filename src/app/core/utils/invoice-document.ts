@@ -68,10 +68,8 @@ export function createInvoiceHTML(invoice: InvoiceDocumentData, logoUrl: string)
       .invoice-page::before { content: ''; position: absolute; top: 0; right: 44px; left: 44px;
         height: 6px; background: #084c42; border-radius: 0 0 4px 4px; }
       .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-      .brand { display: flex; gap: 14px; align-items: center; }
-      .logo { width: 76px; height: 76px; object-fit: contain; }
-      .brand-name { font-size: 25px; font-weight: bold; color: #084c42; }
-      .brand-en { font: 10px/1.8 Arial, sans-serif; letter-spacing: 2.5px; color: #778783; }
+      .brand { display: flex; align-items: center; }
+      .logo { width: 190px; height: 82px; object-fit: contain; object-position: right center; }
       .document-title { text-align: left; }
       h1 { font-size: 30px; line-height: 1.5; margin: 0; color: #084c42; }
       .eyebrow { font: 10px/1.8 Arial, sans-serif; letter-spacing: 3px; color: #a27b3f; }
@@ -132,8 +130,7 @@ export function createInvoiceHTML(invoice: InvoiceDocumentData, logoUrl: string)
         .invoice-page:last-child { page-break-after: auto; } }
     </style></head><body>
     <template id="page-template"><article class="invoice-page">
-      <header class="header"><div class="brand"><img class="logo" src="${escapeHtml(logoUrl)}" alt="">
-        <div><div class="brand-name">الجوهرة</div><div class="brand-en" dir="ltr">ALJAWHARA</div></div></div>
+      <header class="header"><div class="brand"><img class="logo" src="${escapeHtml(logoUrl)}" alt="شعار الجوهرة"></div>
         <div class="document-title"><div class="eyebrow">INVOICE</div><h1>فاتورة</h1></div></header>
       <div class="meta"><div class="meta-cell"><div class="label">رقم الفاتورة / الطلب</div>
         <div class="meta-value reference" dir="ltr">${escapeHtml(invoice.orderNumber)}</div></div>
