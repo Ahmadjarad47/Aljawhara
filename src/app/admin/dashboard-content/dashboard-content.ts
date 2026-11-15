@@ -108,7 +108,8 @@ export class DashboardContent implements OnInit {
       totalOrders: 'إجمالي الطلبات',
       transactions: 'المعاملات',
       totalSales: 'إجمالي المبيعات',
-      vsLastMonth: 'مقارنة بالشهر الماضي',
+      newLastMonth: 'جديد خلال الشهر الماضي',
+      inLastMonth: 'خلال الشهر الماضي',
       increase: 'ارتفاع',
       decrease: 'انخفاض',
       noChange: 'بدون تغيير',
@@ -176,7 +177,8 @@ export class DashboardContent implements OnInit {
       totalOrders: 'Total orders',
       transactions: 'Transactions',
       totalSales: 'Total sales',
-      vsLastMonth: 'vs last month',
+      newLastMonth: 'new last month',
+      inLastMonth: 'last month',
       increase: 'up',
       decrease: 'down',
       noChange: 'no change',
@@ -474,59 +476,55 @@ export class DashboardContent implements OnInit {
   readonly totalTransactions = computed(() => this.summary()?.transactions.total ?? 0);
   readonly totalSales = computed(() => this.summary()?.sales.total ?? 0);
 
-  private growth(total: number | undefined, lastMonth: number | undefined): number {
-    if (!total || !lastMonth) return 0;
-    return Math.round(((total - lastMonth) / lastMonth) * 100);
-  }
+  /**
+   * The summary endpoint returns an unfiltered all-time `total` alongside a
+   * `lastMonth` that counts only records created inside last calendar month
+   * (AnalyticsService.GetDashboardSummaryAsync). Those two cannot produce a
+   * month-over-month rate — the old `(total - lastMonth) / lastMonth` measured
+   * how many times the all-time total exceeds one month's intake and rendered
+   * it as "+N% vs last month". A real MoM needs the month before last, which
+   * this payload does not carry, so the tile states last month's figure
+   * plainly instead of implying a trend.
+   */
+  readonly kpis = computed(() => {
+    const summary = this.summary();
+    const since = this.t('newLastMonth');
 
-  readonly userGrowth = computed(() =>
-    this.growth(this.summary()?.users.total, this.summary()?.users.lastMonth)
-  );
-  readonly orderGrowth = computed(() =>
-    this.growth(this.summary()?.orders.total, this.summary()?.orders.lastMonth)
-  );
-  readonly transactionGrowth = computed(() =>
-    this.growth(this.summary()?.transactions.total, this.summary()?.transactions.lastMonth)
-  );
-  readonly salesGrowth = computed(() =>
-    this.growth(this.summary()?.sales.total, this.summary()?.sales.lastMonth)
-  );
-
-  /** KPI tiles, as data, so the template stays a single loop. */
-  readonly kpis = computed(() => [
-    {
-      key: 'users',
-      label: this.t('totalUsers'),
-      value: this.formatNumber(this.totalUsers()),
-      delta: this.userGrowth(),
-      link: '/admin/user-management',
-      accent: 'users' as const,
-    },
-    {
-      key: 'orders',
-      label: this.t('totalOrders'),
-      value: this.formatNumber(this.totalOrders()),
-      delta: this.orderGrowth(),
-      link: '/admin/order',
-      accent: 'orders' as const,
-    },
-    {
-      key: 'transactions',
-      label: this.t('transactions'),
-      value: this.formatNumber(this.totalTransactions()),
-      delta: this.transactionGrowth(),
-      link: '/admin/transaction',
-      accent: 'transactions' as const,
-    },
-    {
-      key: 'sales',
-      label: this.t('totalSales'),
-      value: this.formatCurrency(this.totalSales()),
-      delta: this.salesGrowth(),
-      link: '/admin/transaction',
-      accent: 'sales' as const,
-    },
-  ]);
+    return [
+      {
+        key: 'users',
+        label: this.t('totalUsers'),
+        value: this.formatNumber(this.totalUsers()),
+        sub: `${this.formatNumber(summary?.users.lastMonth ?? 0)} ${since}`,
+        link: '/admin/user-management',
+        accent: 'users' as const,
+      },
+      {
+        key: 'orders',
+        label: this.t('totalOrders'),
+        value: this.formatNumber(this.totalOrders()),
+        sub: `${this.formatNumber(summary?.orders.lastMonth ?? 0)} ${since}`,
+        link: '/admin/order',
+        accent: 'orders' as const,
+      },
+      {
+        key: 'transactions',
+        label: this.t('transactions'),
+        value: this.formatNumber(this.totalTransactions()),
+        sub: `${this.formatNumber(summary?.transactions.lastMonth ?? 0)} ${since}`,
+        link: '/admin/transaction',
+        accent: 'transactions' as const,
+      },
+      {
+        key: 'sales',
+        label: this.t('totalSales'),
+        value: this.formatCurrency(this.totalSales()),
+        sub: `${this.formatCurrency(summary?.sales.lastMonth ?? 0)} ${this.t('inLastMonth')}`,
+        link: '/admin/transaction',
+        accent: 'sales' as const,
+      },
+    ];
+  });
 
   // ------------------------------------------------------------ chart summary
 

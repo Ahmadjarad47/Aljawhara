@@ -109,50 +109,12 @@
                 {{ kpi.value }}
               </span>
 
-              <span class="mt-2 flex items-center gap-1.5 text-xs">
-                <span
-                  class="inline-flex items-center gap-1 font-semibold"
-                  [class.text-success]="kpi.delta > 0"
-                  [class.text-error]="kpi.delta < 0"
-                  [class.text-base-content]="kpi.delta === 0"
-                >
-                  @if (kpi.delta > 0) {
-                    <svg
-                      class="h-3.5 w-3.5 stroke-current"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M12 19V5m0 0l-6 6m6-6l6 6"
-                      />
-                    </svg>
-                  } @else if (kpi.delta < 0) {
-                    <svg
-                      class="h-3.5 w-3.5 stroke-current"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2.5"
-                        d="M12 5v14m0 0l6-6m-6 6l-6-6"
-                      />
-                    </svg>
-                  }
-                  <!-- Direction is stated in words too, so the sign never relies on color -->
-                  <span class="visually-hidden">{{ deltaLabel(kpi.delta) }}</span>
-                  {{ kpi.delta > 0 ? '+' : '' }}{{ kpi.delta }}%
-                </span>
-                <span class="text-base-content/60">{{ t('vsLastMonth') }}</span>
-              </span>
+              <!--
+                Last month's own figure, stated plainly. The payload carries no
+                prior-month baseline, so there is no direction to show here and
+                no arrow or up/down color that would imply one.
+              -->
+              <span class="mt-2 block text-xs text-base-content/60">{{ kpi.sub }}</span>
             </a>
           }
         </div>
