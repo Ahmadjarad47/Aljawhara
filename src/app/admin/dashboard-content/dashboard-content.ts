@@ -8,6 +8,7 @@ import {
   computed,
   inject,
   signal,
+  viewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -115,7 +116,6 @@ export class DashboardContent implements OnInit {
       revenueAnalytics: 'الإيرادات',
       transactionRevenue: 'قيمة المعاملات خلال الفترة المحددة',
       growth: 'نمو',
-      vsFirstPeriod: 'من بداية الفترة',
       recentRegistrations: 'أحدث التسجيلات',
       latestUserSignups: 'آخر المستخدمين المسجلين',
       noRecentUsers: 'لا يوجد مستخدمون جدد',
@@ -127,9 +127,11 @@ export class DashboardContent implements OnInit {
       latestJobOpportunities: 'آخر الطلبات الواردة',
       noRecentOrders: 'لا توجد طلبات حديثة',
       items: 'عنصر',
-      firstPeriod: 'بداية الفترة',
-      latestPeriod: 'نهاية الفترة',
-      growthRate: 'معدل النمو',
+      newInRange: 'مستخدمون جدد',
+      totalInRange: 'إجمالي الفترة',
+      dailyAverage: 'المتوسط اليومي',
+      trend: 'الاتجاه',
+      trendHint: 'النصف الثاني مقابل الأول',
       totalUsersLabel: 'المستخدمون',
       revenue: 'الإيرادات',
       unknownUser: 'مستخدم غير معروف',
@@ -182,7 +184,6 @@ export class DashboardContent implements OnInit {
       revenueAnalytics: 'Revenue',
       transactionRevenue: 'Transaction value over the selected range',
       growth: 'growth',
-      vsFirstPeriod: 'since range start',
       recentRegistrations: 'Recent registrations',
       latestUserSignups: 'Newest registered users',
       noRecentUsers: 'No new users',
@@ -194,9 +195,11 @@ export class DashboardContent implements OnInit {
       latestJobOpportunities: 'Latest incoming orders',
       noRecentOrders: 'No recent orders',
       items: 'items',
-      firstPeriod: 'Range start',
-      latestPeriod: 'Range end',
-      growthRate: 'Growth rate',
+      newInRange: 'New users',
+      totalInRange: 'Range total',
+      dailyAverage: 'Daily average',
+      trend: 'Trend',
+      trendHint: '2nd half vs 1st',
       totalUsersLabel: 'Users',
       revenue: 'Revenue',
       unknownUser: 'Unknown user',
@@ -233,9 +236,13 @@ export class DashboardContent implements OnInit {
     return dict[key] ?? key;
   }
 
-  /** Locale for dates. Numbers force Latin digits so metrics and axes stay aligned. */
+  /**
+   * Arabic keeps its month names but uses Latin digits, matching the metrics.
+   * Mixing Arabic-Indic digits on the axes with Latin digits in the KPI tiles
+   * made the same quantities look like two different number systems.
+   */
   private get dateLocale(): string {
-    return this.currentLanguage() === 'ar' ? 'ar-SA' : 'en-US';
+    return this.currentLanguage() === 'ar' ? 'ar-u-nu-latn' : 'en-US';
   }
   private get numberLocale(): string {
     return this.currentLanguage() === 'ar' ? 'ar-u-nu-latn' : 'en-US';
@@ -286,11 +293,38 @@ export class DashboardContent implements OnInit {
 
   // ---------------------------------------------------------------- lifecycle
 
+  private readonly charts = viewChildren(BaseChartDirective);
+
   ngOnInit(): void {
     this.detectLanguage();
     this.watchDocument();
     this.watchMediaPreferences();
+    this.watchContainerResize();
     this.loadAll();
+  }
+
+  /**
+   * Chart.js can keep a stale canvas width when the card is resized by
+   * something other than the window — collapsing the admin drawer, or crossing
+   * the xl breakpoint — which pushes the y-axis labels outside the card.
+   * Re-measuring on container resize keeps the canvas inside its frame.
+   */
+  private watchContainerResize(): void {
+    if (!this.isBrowser || typeof ResizeObserver === 'undefined') return;
+
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        for (const chart of this.charts()) chart.chart?.resize();
+      });
+    });
+    observer.observe(this.host.nativeElement);
+
+    this.destroyRef.onDestroy(() => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    });
   }
 
   /**
@@ -494,28 +528,45 @@ export class DashboardContent implements OnInit {
     return this.usersSeries().map((point) => (running += point.count));
   });
 
-  readonly usersGrowthRate = computed(() => {
-    const values = this.usersCumulative();
-    if (values.length < 2) return 0;
-    const first = values[0];
-    return first === 0 ? 0 : Math.round(((values[values.length - 1] - first) / first) * 100);
-  });
+  /**
+   * Trend compares the second half of the range against the first half.
+   *
+   * Comparing the first data point to the last one (what this page used to do)
+   * is not a growth rate: on a cumulative series it reports day one against the
+   * running total, and on a daily series it compares two arbitrary single days.
+   * Half-over-half is stable and actually answers "is this picking up?".
+   */
+  private halfOverHalf(values: readonly number[]): number {
+    if (values.length < 4) return 0;
+    const mid = Math.floor(values.length / 2);
+    const sum = (slice: readonly number[]) => slice.reduce((a, b) => a + b, 0);
+    const first = sum(values.slice(0, mid));
+    if (first === 0) return 0;
+    return Math.round(((sum(values.slice(mid)) - first) / first) * 100);
+  }
 
-  readonly usersLatestTotal = computed(() => {
+  /** New signups across the whole range (the cumulative line's end value). */
+  readonly usersNewInRange = computed(() => {
     const values = this.usersCumulative();
     return values.length ? values[values.length - 1] : 0;
   });
 
-  readonly revenueFirstValue = computed(() => this.revenueSeries()[0]?.count ?? 0);
-  readonly revenueLastValue = computed(() => {
+  readonly usersTrend = computed(() =>
+    this.halfOverHalf(this.usersSeries().map((point) => point.count))
+  );
+
+  readonly revenueTotal = computed(() =>
+    this.revenueSeries().reduce((sum, point) => sum + point.count, 0)
+  );
+
+  readonly revenueDailyAverage = computed(() => {
     const series = this.revenueSeries();
-    return series.length ? series[series.length - 1].count : 0;
+    return series.length ? Math.round(this.revenueTotal() / series.length) : 0;
   });
-  readonly revenueGrowthRate = computed(() => {
-    const first = this.revenueFirstValue();
-    if (!first) return 0;
-    return Math.round(((this.revenueLastValue() - first) / first) * 100);
-  });
+
+  readonly revenueTrend = computed(() =>
+    this.halfOverHalf(this.revenueSeries().map((point) => point.count))
+  );
 
   /** Table-view twin rows — every charted value is readable without hovering. */
   readonly usersTableRows = computed(() => {
@@ -535,13 +586,33 @@ export class DashboardContent implements OnInit {
 
   // -------------------------------------------------------------- chart theme
 
+  /**
+   * Relative luminance of the card the charts actually sit on. Driving the
+   * palette off the rendered surface keeps marks legible no matter how the
+   * theme is applied (data-theme, OS preference, or neither).
+   */
+  private isDarkSurface(): boolean {
+    const probe = this.host.nativeElement.querySelector('.surface-probe');
+    if (!probe) return false;
+
+    const parts = getComputedStyle(probe).backgroundColor.match(/[\d.]+/g);
+    if (!parts || parts.length < 3) return false;
+
+    const [r, g, b] = parts.slice(0, 3).map((part) => {
+      const channel = Number(part) / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.35;
+  }
+
   private readonly chartTheme = computed<ChartTheme>(() => {
     this.themeVersion();
     if (!this.isBrowser) return CHART_THEME_FALLBACK;
 
     const styles = getComputedStyle(this.host.nativeElement);
+    const suffix = this.isDarkSurface() ? '-dark' : '-light';
     const read = (name: string, fallback: string) =>
-      styles.getPropertyValue(name).trim() || fallback;
+      styles.getPropertyValue(`${name}${suffix}`).trim() || fallback;
 
     return {
       users: read('--chart-users', CHART_THEME_FALLBACK.users),
@@ -710,28 +781,30 @@ export class DashboardContent implements OnInit {
   });
 
   /** Spoken summary so the canvas is not an unlabelled image. */
+  private range(series: readonly TimeSeriesPointDto[]): string {
+    return `${this.formatDate(series[0].date)} – ${this.formatDate(
+      series[series.length - 1].date
+    )}`;
+  }
+
   readonly usersChartAria = computed(() => {
     const series = this.usersSeries();
     if (!series.length) return this.t('chartSummaryUsers');
-    return `${this.t('chartSummaryUsers')}. ${this.formatDate(series[0].date)} – ${this.formatDate(
-      series[series.length - 1].date
-    )}. ${this.t('latestPeriod')}: ${this.formatNumber(this.usersLatestTotal())}. ${this.t(
-      'growth'
-    )}: ${this.usersGrowthRate()}%.`;
+    return `${this.t('chartSummaryUsers')}. ${this.range(series)}. ${this.t(
+      'newInRange'
+    )}: ${this.formatNumber(this.usersNewInRange())}. ${this.t('trend')}: ${this.usersTrend()}%.`;
   });
 
   readonly revenueChartAria = computed(() => {
     const series = this.revenueSeries();
     if (!series.length) return this.t('chartSummaryRevenue');
-    return `${this.t('chartSummaryRevenue')}. ${this.formatDate(
-      series[0].date
-    )} – ${this.formatDate(series[series.length - 1].date)}. ${this.t(
-      'firstPeriod'
-    )}: ${this.formatCurrency(this.revenueFirstValue())}. ${this.t(
-      'latestPeriod'
-    )}: ${this.formatCurrency(this.revenueLastValue())}. ${this.t(
-      'growthRate'
-    )}: ${this.revenueGrowthRate()}%.`;
+    return `${this.t('chartSummaryRevenue')}. ${this.range(series)}. ${this.t(
+      'totalInRange'
+    )}: ${this.formatCurrency(this.revenueTotal())}. ${this.t(
+      'dailyAverage'
+    )}: ${this.formatCurrency(this.revenueDailyAverage())}. ${this.t(
+      'trend'
+    )}: ${this.revenueTrend()}%.`;
   });
 
   // --------------------------------------------------------------- formatting

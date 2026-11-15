@@ -248,21 +248,24 @@
 
           <dl class="mt-3 flex items-center justify-between gap-4 border-t border-base-300 pt-3">
             <div>
-              <dt class="text-xs text-base-content/60">{{ t('latestPeriod') }}</dt>
+              <dt class="text-xs text-base-content/60">{{ t('newInRange') }}</dt>
               <dd class="tabular text-sm font-semibold text-base-content">
-                {{ formatNumber(usersLatestTotal()) }}
+                {{ formatNumber(usersNewInRange()) }}
               </dd>
             </div>
             <div class="text-end">
-              <dt class="text-xs text-base-content/60">{{ t('vsFirstPeriod') }}</dt>
+              <dt class="text-xs text-base-content/60">
+                {{ t('trend') }}
+                <span class="text-base-content/50">· {{ t('trendHint') }}</span>
+              </dt>
               <dd
                 class="tabular text-sm font-semibold"
-                [class.text-success]="usersGrowthRate() > 0"
-                [class.text-error]="usersGrowthRate() < 0"
-                [class.text-base-content]="usersGrowthRate() === 0"
+                [class.text-success]="usersTrend() > 0"
+                [class.text-error]="usersTrend() < 0"
+                [class.text-base-content]="usersTrend() === 0"
               >
-                <span class="visually-hidden">{{ deltaLabel(usersGrowthRate()) }}</span>
-                {{ usersGrowthRate() > 0 ? '+' : '' }}{{ usersGrowthRate() }}%
+                <span class="visually-hidden">{{ deltaLabel(usersTrend()) }}</span>
+                {{ usersTrend() > 0 ? '+' : '' }}{{ usersTrend() }}%
               </dd>
             </div>
           </dl>
@@ -352,27 +355,30 @@
 
           <dl class="mt-3 grid grid-cols-3 gap-3 border-t border-base-300 pt-3">
             <div>
-              <dt class="text-xs text-base-content/60">{{ t('firstPeriod') }}</dt>
+              <dt class="text-xs text-base-content/60">{{ t('totalInRange') }}</dt>
               <dd class="tabular text-sm font-semibold text-base-content">
-                {{ formatCurrency(revenueFirstValue()) }}
+                {{ formatCurrency(revenueTotal()) }}
               </dd>
             </div>
             <div>
-              <dt class="text-xs text-base-content/60">{{ t('latestPeriod') }}</dt>
+              <dt class="text-xs text-base-content/60">{{ t('dailyAverage') }}</dt>
               <dd class="tabular text-sm font-semibold text-base-content">
-                {{ formatCurrency(revenueLastValue()) }}
+                {{ formatCurrency(revenueDailyAverage()) }}
               </dd>
             </div>
             <div class="text-end">
-              <dt class="text-xs text-base-content/60">{{ t('growthRate') }}</dt>
+              <dt class="text-xs text-base-content/60">
+                {{ t('trend') }}
+                <span class="text-base-content/50">· {{ t('trendHint') }}</span>
+              </dt>
               <dd
                 class="tabular text-sm font-semibold"
-                [class.text-success]="revenueGrowthRate() > 0"
-                [class.text-error]="revenueGrowthRate() < 0"
-                [class.text-base-content]="revenueGrowthRate() === 0"
+                [class.text-success]="revenueTrend() > 0"
+                [class.text-error]="revenueTrend() < 0"
+                [class.text-base-content]="revenueTrend() === 0"
               >
-                <span class="visually-hidden">{{ deltaLabel(revenueGrowthRate()) }}</span>
-                {{ revenueGrowthRate() > 0 ? '+' : '' }}{{ revenueGrowthRate() }}%
+                <span class="visually-hidden">{{ deltaLabel(revenueTrend()) }}</span>
+                {{ revenueTrend() > 0 ? '+' : '' }}{{ revenueTrend() }}%
               </dd>
             </div>
           </dl>

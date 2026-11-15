@@ -24,41 +24,39 @@
   --space-5: 1.5rem; /* 24px */
   --space-6: 2rem; /* 32px */
 
-  /* Chart tokens - light */
-  --chart-users: #1570c4;
-  --chart-users-fill: rgba(21, 112, 196, 0.12);
-  --chart-revenue: #157f57;
-  --chart-grid: #e3e8ef;
-  --chart-tick: #56637a;
-  --chart-surface: #ffffff;
-  --chart-tooltip-bg: #0d1529;
-  --chart-tooltip-fg: #f7f9fa;
+  /* Chart tokens, light surfaces */
+  --chart-users-light: #1570c4;
+  --chart-users-fill-light: rgba(21, 112, 196, 0.12);
+  --chart-revenue-light: #157f57;
+  --chart-grid-light: #e3e8ef;
+  --chart-tick-light: #56637a;
+  --chart-surface-light: #ffffff;
+  --chart-tooltip-bg-light: #0d1529;
+  --chart-tooltip-fg-light: #f7f9fa;
+
+  /* Chart tokens, dark surfaces - stepped against the dark surface, not flipped */
+  --chart-users-dark: #3899e2;
+  --chart-users-fill-dark: rgba(56, 153, 226, 0.16);
+  --chart-revenue-dark: #37ab6b;
+  --chart-grid-dark: #24313b;
+  --chart-tick-dark: #93a7bc;
+  --chart-surface-dark: #121c22;
+  --chart-tooltip-bg-dark: #e8eef5;
+  --chart-tooltip-fg-dark: #0d1529;
 }
 
-/* Chart tokens - dark, selected against the dark surface (not a flip of light) */
-@media (prefers-color-scheme: dark) {
-  :host-context(html:not([data-theme='light']):not([data-theme='light-admin'])) {
-    --chart-users: #3899e2;
-    --chart-users-fill: rgba(56, 153, 226, 0.16);
-    --chart-revenue: #37ab6b;
-    --chart-grid: #24313b;
-    --chart-tick: #93a7bc;
-    --chart-surface: #121c22;
-    --chart-tooltip-bg: #e8eef5;
-    --chart-tooltip-fg: #0d1529;
-  }
-}
-
-:host-context([data-theme='dark']),
-:host-context([data-theme='dark-admin']) {
-  --chart-users: #3899e2;
-  --chart-users-fill: rgba(56, 153, 226, 0.16);
-  --chart-revenue: #37ab6b;
-  --chart-grid: #24313b;
-  --chart-tick: #93a7bc;
-  --chart-surface: #121c22;
-  --chart-tooltip-bg: #e8eef5;
-  --chart-tooltip-fg: #0d1529;
+/*
+ * Which set applies is decided in TypeScript from the card's ACTUAL rendered
+ * background, not from `prefers-color-scheme`. This app ships light/dark and
+ * *-admin DaisyUI themes but currently renders light even when the OS prefers
+ * dark, so keying off the media query painted dark marks onto a white card.
+ * Measuring the surface stays correct however the theme ends up being applied.
+ */
+.surface-probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  background-color: var(--color-base-100, #fff);
 }
 
 /* ----------------------------------------------------------------- surfaces */
