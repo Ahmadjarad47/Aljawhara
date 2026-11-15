@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  afterNextRender,
   ElementRef,
   OnInit,
   PLATFORM_ID,
@@ -294,6 +295,12 @@ export class DashboardContent implements OnInit {
   // ---------------------------------------------------------------- lifecycle
 
   private readonly charts = viewChildren(BaseChartDirective);
+
+  constructor() {
+    // The surface probe can only be measured once the view exists, so re-read
+    // the palette after the first render.
+    afterNextRender(() => this.themeVersion.update((v) => v + 1));
+  }
 
   ngOnInit(): void {
     this.detectLanguage();
@@ -595,11 +602,26 @@ export class DashboardContent implements OnInit {
     const probe = this.host.nativeElement.querySelector('.surface-probe');
     if (!probe) return false;
 
-    const parts = getComputedStyle(probe).backgroundColor.match(/[\d.]+/g);
-    if (!parts || parts.length < 3) return false;
+    const color = getComputedStyle(probe).backgroundColor;
+    if (!color) return false;
 
-    const [r, g, b] = parts.slice(0, 3).map((part) => {
-      const channel = Number(part) / 255;
+    // Paint the color and read the pixel back rather than parsing the string:
+    // DaisyUI themes serialize as `oklch(...)`, which no simple regex handles.
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return false;
+
+    ctx.fillStyle = '#ffffff'; // kept if `color` is not a value the browser accepts
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 1, 1);
+
+    const [red, green, blue, alpha] = ctx.getImageData(0, 0, 1, 1).data;
+    if (alpha === 0) return false; // transparent surface: assume the light default
+
+    const [r, g, b] = [red, green, blue].map((byte) => {
+      const channel = byte / 255;
       return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
     });
     return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.35;
@@ -627,6 +649,10 @@ export class DashboardContent implements OnInit {
   });
 
   private readonly animationDuration = computed(() => (this.prefersReducedMotion() ? 0 : 420));
+
+  /** Series colors for the legend dots, so they always match the rendered marks. */
+  readonly usersColor = computed(() => this.chartTheme().users);
+  readonly revenueColor = computed(() => this.chartTheme().revenue);
 
   private readonly chartLabels = computed(() =>
     this.usersSeries().map((point) => this.formatDate(point.date))

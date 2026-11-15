@@ -56,11 +56,6 @@ const siteRoutes: Routes = [
         loadComponent: () => import('./core/components/checkout-success/checkout-success').then(m => m.CheckoutSuccessComponent)
     },
     {
-        // TEMPORARY design-review route. Remove with dev-dashboard-preview.ts.
-        path: 'dev-dashboard',
-        loadComponent: () => import('./dev-dashboard-preview').then(m => m.DevDashboardPreview)
-    },
-    {
         path: 'admin',
         canActivate:[adminGuard],
         loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)

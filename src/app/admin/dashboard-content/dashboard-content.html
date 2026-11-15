@@ -1,4 +1,7 @@
 <div class="min-h-full bg-base-200/40 p-4 md:p-6 lg:p-8">
+  <!-- Reads the card surface so the chart palette matches the active theme -->
+  <span class="surface-probe" aria-hidden="true"></span>
+
   <div class="mx-auto flex max-w-[1600px] flex-col gap-6">
     <!-- ================================================================ header -->
     <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -196,7 +199,7 @@
               <!-- One series: the heading names it, so no legend box is needed -->
               <span
                 class="me-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
-                style="background-color: var(--chart-users)"
+                [style.background-color]="usersColor()"
                 aria-hidden="true"
               ></span>
               {{ t('userGrowthAnalytics') }}
@@ -303,7 +306,7 @@
             <h3 id="revenue-chart-heading" class="text-base font-semibold text-base-content">
               <span
                 class="me-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
-                style="background-color: var(--chart-revenue)"
+                [style.background-color]="revenueColor()"
                 aria-hidden="true"
               ></span>
               {{ t('revenueAnalytics') }}
