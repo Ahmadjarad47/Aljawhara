@@ -1,653 +1,312 @@
-/* Dashboard Content Styles */
+/* ===========================================================================
+   Admin dashboard
 
-/* Custom Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+   Surfaces use DaisyUI semantic tokens (base-100/200/300, base-content) so the
+   page follows whichever theme is active instead of hardcoding white overlays.
+
+   Chart marks do NOT use the brand tokens: the admin themes put primary at
+   ~82% lightness, which measures 1.4-1.8:1 against the page surface and is
+   effectively invisible as a line or bar. The series colors below are stepped
+   from the same blue/green ramps and pass the six palette checks (lightness
+   band, chroma floor, CVD separation, normal-vision floor, contrast >= 3:1)
+   against all four surfaces this app can render on: light-admin (#F7F9FA),
+   DaisyUI light (#FFFFFF), dark-admin (#121C22) and DaisyUI dark (#1D232A).
+   =========================================================================== */
+
+:host {
+  display: block;
+
+  /* Spacing scale - dense/dashboard density */
+  --space-1: 0.25rem; /*  4px */
+  --space-2: 0.5rem; /*  8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+
+  /* Chart tokens - light */
+  --chart-users: #1570c4;
+  --chart-users-fill: rgba(21, 112, 196, 0.12);
+  --chart-revenue: #157f57;
+  --chart-grid: #e3e8ef;
+  --chart-tick: #56637a;
+  --chart-surface: #ffffff;
+  --chart-tooltip-bg: #0d1529;
+  --chart-tooltip-fg: #f7f9fa;
 }
 
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Chart tokens - dark, selected against the dark surface (not a flip of light) */
+@media (prefers-color-scheme: dark) {
+  :host-context(html:not([data-theme='light']):not([data-theme='light-admin'])) {
+    --chart-users: #3899e2;
+    --chart-users-fill: rgba(56, 153, 226, 0.16);
+    --chart-revenue: #37ab6b;
+    --chart-grid: #24313b;
+    --chart-tick: #93a7bc;
+    --chart-surface: #121c22;
+    --chart-tooltip-bg: #e8eef5;
+    --chart-tooltip-fg: #0d1529;
+  }
 }
 
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+:host-context([data-theme='dark']),
+:host-context([data-theme='dark-admin']) {
+  --chart-users: #3899e2;
+  --chart-users-fill: rgba(56, 153, 226, 0.16);
+  --chart-revenue: #37ab6b;
+  --chart-grid: #24313b;
+  --chart-tick: #93a7bc;
+  --chart-surface: #121c22;
+  --chart-tooltip-bg: #e8eef5;
+  --chart-tooltip-fg: #0d1529;
 }
 
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+/* ----------------------------------------------------------------- surfaces */
+
+.panel {
+  background-color: var(--color-base-100, #fff);
+  border: 1px solid var(--color-base-300, #e5e7eb);
+  border-radius: var(--radius-box, 0.75rem);
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
+/* KPI tile: a 3px top rule is the only decoration, and it is per-metric. */
+.kpi {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-@keyframes pulse-glow {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(var(--fallback-p,oklch(var(--p))), 0.4);
-    }
-    50% {
-        box-shadow: 0 0 0 8px rgba(var(--fallback-p,oklch(var(--p))), 0);
-    }
+.kpi::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background-color: var(--kpi-accent, var(--color-base-300));
 }
 
-@keyframes bounce {
-    0%, 20%, 53%, 80%, 100% {
-        transform: translate3d(0,0,0);
-    }
-    40%, 43% {
-        transform: translate3d(0, -8px, 0);
-    }
-    70% {
-        transform: translate3d(0, -4px, 0);
-    }
-    90% {
-        transform: translate3d(0, -2px, 0);
-    }
+.kpi:hover {
+  border-color: var(--kpi-accent, var(--color-base-300));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.06);
 }
 
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
+.kpi-users {
+  --kpi-accent: var(--chart-users);
+}
+.kpi-orders {
+  --kpi-accent: var(--color-info);
+}
+.kpi-transactions {
+  --kpi-accent: var(--color-accent);
+}
+.kpi-sales {
+  --kpi-accent: var(--chart-revenue);
 }
 
-@keyframes glow {
-    0%, 100% {
-        filter: brightness(1);
-    }
-    50% {
-        filter: brightness(1.2);
-    }
+/* Proportional figures on display-size numbers; tabular only in tables. */
+.metric {
+  font-variant-numeric: proportional-nums;
+  letter-spacing: -0.01em;
 }
 
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
-    }
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes gradient-shift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+/* --------------------------------------------------------------- list rows */
+
+.row-item {
+  border-radius: var(--radius-field, 0.5rem);
+  transition: background-color 160ms ease;
 }
 
-/* Animation Classes */
-.animate-fade-in {
-    animation: fadeIn 0.6s ease-out;
+.row-item:hover {
+  background-color: var(--color-base-200, #f3f4f6);
 }
 
-.animate-slide-in-up {
-    animation: slideInUp 0.8s ease-out;
+/* ------------------------------------------------------------------- charts */
+
+/* Height covers the plot AND the x-axis band, so the card never nests a
+   scrollbar around a clipped axis. */
+.chart-frame {
+  position: relative;
+  height: 288px;
+  width: 100%;
 }
 
-.animate-slide-in-left {
-    animation: slideInLeft 0.8s ease-out;
+.chart-frame canvas {
+  display: block;
 }
 
-.animate-slide-in-right {
-    animation: slideInRight 0.8s ease-out;
+/* A refetch holds the previous render at reduced opacity - no skeleton flash,
+   no layout jump. */
+.is-stale {
+  opacity: 0.45;
+  transition: opacity 160ms ease;
+  pointer-events: none;
 }
 
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.table-view {
+  max-height: 232px;
+  overflow-y: auto;
 }
 
-.animate-pulse-glow {
-    animation: pulse-glow 2s infinite;
+/* ---------------------------------------------------------------- skeletons */
+
+.skeleton-block {
+  background-color: var(--color-base-200, #f3f4f6);
+  border-radius: var(--radius-field, 0.5rem);
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
 }
 
-.animate-bounce {
-    animation: bounce 1s infinite;
-}
-
-.animate-float {
-    animation: float 3s ease-in-out infinite;
-}
-
-.animate-glow {
-    animation: glow 2s ease-in-out infinite;
-}
-
-.animate-gradient-shift {
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-}
-
-/* Staggered animations for cards */
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-.chart-card:nth-child(1) { animation-delay: 0.5s; }
-.chart-card:nth-child(2) { animation-delay: 0.6s; }
-
-.activity-card:nth-child(1) { animation-delay: 0.7s; }
-.activity-card:nth-child(2) { animation-delay: 0.8s; }
-
-/* Stat Cards */
-.stat-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(78, 78, 78, 0.151);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(109, 109, 109, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInUp 0.6s ease-out forwards;
-    opacity: 0;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.stat-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.stat-card:hover::before {
+@keyframes skeleton-pulse {
+  0%,
+  100% {
     opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
-.stat-card:hover::after {
-    opacity: 1;
+/* ------------------------------------------------------------------ a11y */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
+/* Never remove the focus ring - restyle it. */
+:is(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+  border-radius: var(--radius-field, 0.5rem);
 }
 
-.stat-card:focus {
-    outline: 2px solid var(--fallback-p,oklch(var(--p)));
-    outline-offset: 2px;
+/* Segmented date-range control, built on native radios */
+.segmented {
+  display: inline-flex;
+  padding: var(--space-1);
+  gap: var(--space-1);
+  background-color: var(--color-base-200, #f3f4f6);
+  border: 1px solid var(--color-base-300, #e5e7eb);
+  border-radius: var(--radius-field, 0.5rem);
 }
 
-/* Chart Cards */
-.chart-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 1rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInUp 0.8s ease-out forwards;
-    opacity: 0;
+.segment {
+  display: block;
+  cursor: pointer;
 }
 
-.chart-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Visually hidden, but still focusable and operable by keyboard */
+.segment-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
-.chart-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
+.segment-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2.75rem;
+  padding-inline: var(--space-3);
+  border-radius: calc(var(--radius-field, 0.5rem) - 0.125rem);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-base-content, #1f2937);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
-.chart-card:hover::before {
-    opacity: 1;
+.segment-input:not(:checked) + .segment-label:hover {
+  background-color: var(--color-base-300, #e5e7eb);
 }
 
-.chart-card:hover::after {
-    opacity: 1;
+.segment-input:checked + .segment-label {
+  background-color: var(--color-base-100, #fff);
+  color: var(--color-primary, #2563eb);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
-.chart-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
+/* The ring follows the hidden input onto its visible label */
+.segment-input:focus-visible + .segment-label {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
 }
 
-/* Activity Cards */
-.activity-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 1rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInUp 1s ease-out forwards;
-    opacity: 0;
+/* Touch devices get full-size targets; a mouse-driven admin stays dense */
+@media (pointer: coarse) {
+  .segment-label,
+  .btn {
+    min-height: 2.75rem;
+  }
 }
 
-.activity-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--fallback-p,oklch(var(--p))) 0%, var(--fallback-s,oklch(var(--s))) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.activity-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.activity-card:hover::before {
-    opacity: 1;
-}
-
-.activity-card:hover::after {
-    opacity: 1;
-}
-
-.activity-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
-}
-
-/* Activity Items */
-.activity-item {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 0.75rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.activity-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.activity-item:hover::before {
-    left: 100%;
-}
-
-.activity-item:hover {
-    background-color: rgba(var(--fallback-b2,oklch(var(--b2))), 0.5);
-    transform: translateX(4px) scale(1.01);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Chart Container */
-.chart-container {
-    position: relative;
-    height: 320px;
-    width: 100%;
-    border-radius: 0.75rem;
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-}
-
-canvas {
-    max-height: 320px;
-    border-radius: 0.5rem;
-    transition: transform 0.3s ease;
-}
-
-.chart-container:hover canvas {
-    transform: scale(1.02);
-}
-
-/* Card Body */
-.card-body {
-    padding: 2rem;
-    position: relative;
-    z-index: 10;
-}
-
-/* Enhanced Button Styles */
-.btn {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.btn:hover::before {
-    left: 100%;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(var(--fallback-b2,oklch(var(--b2))), 0.1);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, rgba(var(--fallback-p,oklch(var(--p))), 0.3), rgba(var(--fallback-s,oklch(var(--s))), 0.3));
-    border-radius: 4px;
-    transition: background 0.3s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, rgba(var(--fallback-p,oklch(var(--p))), 0.5), rgba(var(--fallback-s,oklch(var(--s))), 0.5));
-}
-
-::-webkit-scrollbar-corner {
-    background: rgba(var(--fallback-b2,oklch(var(--b2))), 0.1);
-}
-
-/* Loading States */
-.loading-shimmer {
-    background: linear-gradient(90deg, 
-        rgba(var(--fallback-b2,oklch(var(--b2))), 0.1) 25%, 
-        rgba(var(--fallback-b2,oklch(var(--b2))), 0.2) 50%, 
-        rgba(var(--fallback-b2,oklch(var(--b2))), 0.1) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-}
-
-.skeleton-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    animation: pulse 2s infinite;
-}
-
-/* Focus States for Accessibility */
-.stat-card:focus-visible,
-.chart-card:focus-visible,
-.activity-card:focus-visible {
-    outline: 2px solid var(--fallback-p,oklch(var(--p)));
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(var(--fallback-p,oklch(var(--p))), 0.2);
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-    .stat-card,
-    .chart-card,
-    .activity-card {
-        border: 2px solid var(--fallback-bc,oklch(var(--bc)));
-        background: var(--fallback-b1,oklch(var(--b1)));
-    }
-    
-    .stat-card:hover,
-    .chart-card:hover,
-    .activity-card:hover {
-        border-color: var(--fallback-p,oklch(var(--p)));
-        background: var(--fallback-b2,oklch(var(--b2)));
-    }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-    .stat-card,
-    .chart-card,
-    .activity-card,
-    .activity-item,
-    .btn {
-        animation: none;
-        transition: none;
-    }
-    
-    .stat-card:hover,
-    .chart-card:hover,
-    .activity-card:hover,
-    .activity-item:hover,
-    .btn:hover {
-        transform: none;
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .stat-card {
-        padding: 1.25rem;
-    }
-    
-    .chart-container {
-        height: 280px;
-    }
-    
-    .card-body {
-        padding: 1.5rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .stat-card {
-        padding: 1rem;
-        animation-delay: 0s !important;
-    }
-    
-    .chart-container {
-        height: 250px;
-    }
-    
-    .card-body {
-        padding: 1rem;
-    }
-    
-    .activity-item {
-        padding: 0.75rem;
-    }
-    
-    .stat-value {
-        font-size: 2rem !important;
-    }
-    
-    .card-title {
-        font-size: 1.125rem !important;
-    }
-}
+/* --------------------------------------------------------------- responsive */
 
 @media (max-width: 640px) {
-    .stat-card {
-        padding: 0.75rem;
-    }
-    
-    .chart-container {
-        height: 200px;
-    }
-    
-    .card-body {
-        padding: 0.75rem;
-    }
-    
-    .activity-item {
-        padding: 0.5rem;
-    }
-    
-    .stat-value {
-        font-size: 1.75rem !important;
-    }
-    
-    .card-title {
-        font-size: 1rem !important;
-    }
-    
-    .btn {
-        font-size: 0.875rem;
-        padding: 0.5rem 0.75rem;
-    }
+  .chart-frame {
+    height: 232px;
+  }
+  .segmented {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .segment {
+    flex: 1 1 0;
+  }
+  .segment-label {
+    min-width: 0;
+    padding-inline: var(--space-2);
+  }
 }
 
-@media (max-width: 480px) {
-    .stat-card {
-        padding: 0.5rem;
-    }
-    
-    .chart-container {
-        height: 180px;
-    }
-    
-    .card-body {
-        padding: 0.5rem;
-    }
-    
-    .stat-value {
-        font-size: 1.5rem !important;
-    }
-    
-    .card-title {
-        font-size: 0.875rem !important;
-    }
-    
-    .btn {
-        font-size: 0.75rem;
-        padding: 0.375rem 0.5rem;
-    }
+/* ------------------------------------------------------- user preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .kpi,
+  .row-item,
+  .is-stale,
+  .segment-label {
+    transition: none;
+  }
+  .skeleton-block {
+    animation: none;
+  }
 }
 
-/* Dark mode enhancements */
-[data-theme="dark-admin"] .stat-card,
-[data-theme="dark-admin"] .chart-card,
-[data-theme="dark-admin"] .activity-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-    border-color: rgba(255,255,255,0.1);
+@media (prefers-contrast: more) {
+  .panel {
+    border-width: 2px;
+    border-color: var(--color-base-content, #111827);
+  }
 }
 
-[data-theme="dark-admin"] .stat-card::after,
-[data-theme="dark-admin"] .chart-card::after,
-[data-theme="dark-admin"] .activity-card::after {
-    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
-}
-
-[data-theme="dark-admin"] .activity-item:hover {
-    background-color: rgba(255,255,255,0.05);
-}
-
-[data-theme="dark-admin"] .chart-container {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-}
-
-/* Print Styles */
 @media print {
-    .stat-card,
-    .chart-card,
-    .activity-card {
-        background: white !important;
-        border: 1px solid #ccc !important;
-        box-shadow: none !important;
-        break-inside: avoid;
-    }
-    
-    .btn {
-        display: none !important;
-    }
-    
-    .chart-container {
-        height: 200px !important;
-    }
+  .panel {
+    border: 1px solid #ccc;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .chart-frame {
+    height: 220px;
+  }
 }
