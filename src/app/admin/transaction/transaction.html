@@ -599,10 +599,10 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="newTransaction.status">
-                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
-                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
-                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
-                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
+                            <option [ngValue]="TransactionStatus.Pending">Pending</option>
+                            <option [ngValue]="TransactionStatus.Paid">Paid</option>
+                            <option [ngValue]="TransactionStatus.Failed">Failed</option>
+                            <option [ngValue]="TransactionStatus.Cancelled">Cancelled</option>
                         </select>
                     </div>
 
@@ -668,11 +668,11 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="editTransaction.status">
-                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
-                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
-                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
-                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
-                            <option [value]="TransactionStatus.Refunded.toString()">Refunded</option>
+                            <option [ngValue]="TransactionStatus.Pending">Pending</option>
+                            <option [ngValue]="TransactionStatus.Paid">Paid</option>
+                            <option [ngValue]="TransactionStatus.Failed">Failed</option>
+                            <option [ngValue]="TransactionStatus.Cancelled">Cancelled</option>
+                            <option [ngValue]="TransactionStatus.Refunded">Refunded</option>
                         </select>
                     </div>
 
@@ -805,11 +805,11 @@
                             <span class="label-text">Status *</span>
                         </label>
                         <select class="select select-bordered" [(ngModel)]="statusUpdate.status">
-                            <option [value]="TransactionStatus.Pending.toString()">Pending</option>
-                            <option [value]="TransactionStatus.Paid.toString()">Paid</option>
-                            <option [value]="TransactionStatus.Failed.toString()">Failed</option>
-                            <option [value]="TransactionStatus.Cancelled.toString()">Cancelled</option>
-                            <option [value]="TransactionStatus.Refunded.toString()">Refunded</option>
+                            <option [ngValue]="TransactionStatus.Pending">Pending</option>
+                            <option [ngValue]="TransactionStatus.Paid">Paid</option>
+                            <option [ngValue]="TransactionStatus.Failed">Failed</option>
+                            <option [ngValue]="TransactionStatus.Cancelled">Cancelled</option>
+                            <option [ngValue]="TransactionStatus.Refunded">Refunded</option>
                         </select>
                     </div>
 

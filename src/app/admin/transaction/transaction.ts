@@ -51,7 +51,7 @@ ChartJS.register(
 );
 
 interface UpdateTransactionStatusDto {
-  status: string;
+  status: TransactionStatus;
   gatewayResponse?: string;
 }
 
@@ -192,7 +192,7 @@ export class Transaction implements OnInit {
     orderId: 0,
     amount: 0,
     paymentMethod: PaymentMethod.Card,
-    status: TransactionStatus.Pending.toString(),
+    status: TransactionStatus.Pending,
     transactionReference: null,
     paymentGatewayResponse: null,
     notes: null
@@ -200,7 +200,7 @@ export class Transaction implements OnInit {
 
   editTransaction: TransactionUpdateDto = {
     id: 0,
-    status: '',
+    status: TransactionStatus.Pending,
     transactionReference: null,
     paymentGatewayResponse: null,
     notes: null
@@ -214,7 +214,7 @@ export class Transaction implements OnInit {
   };
 
   statusUpdate: UpdateTransactionStatusDto = {
-    status: '',
+    status: TransactionStatus.Pending,
     gatewayResponse: ''
   };
 
@@ -376,7 +376,7 @@ export class Transaction implements OnInit {
   }
 
   updateTransaction() {
-    if (!this.editTransaction.status) {
+    if (this.editTransaction.status === null || this.editTransaction.status === undefined) {
       this.toastService.warning('Validation Error', 'Status is required');
       return;
     }
@@ -443,14 +443,14 @@ export class Transaction implements OnInit {
     this.selectedTransaction.set(transaction);
     const statusNum = typeof transaction.status === 'string' ? parseInt(transaction.status, 10) : transaction.status;
     this.statusUpdate = {
-      status: statusNum.toString(),
+      status: statusNum,
       gatewayResponse: transaction.paymentGatewayResponse || ''
     };
     this.showStatusModal.set(true);
   }
 
   updateStatus() {
-    if (!this.statusUpdate.status) {
+    if (this.statusUpdate.status === null || this.statusUpdate.status === undefined) {
       this.toastService.warning('Validation Error', 'Status is required');
       return;
     }
@@ -618,7 +618,7 @@ export class Transaction implements OnInit {
       orderId: 0,
       amount: 0,
       paymentMethod: PaymentMethod.Card,
-      status: TransactionStatus.Pending.toString(),
+      status: TransactionStatus.Pending,
       transactionReference: null,
       paymentGatewayResponse: null,
       notes: null

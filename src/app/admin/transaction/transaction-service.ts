@@ -13,7 +13,8 @@ import {
   TransactionTrendDto,
   TransactionSummaryDto,
   PaymentProcessingDto,
-  PaymentMethod
+  PaymentMethod,
+  TransactionStatus
 } from './transaction.models';
 
 export interface PagedResult<T> {
@@ -147,7 +148,7 @@ export class TransactionService {
   }
 
   // Update transaction status
-  updateTransactionStatus(id: number, status: string, gatewayResponse?: string): Observable<any> {
+  updateTransactionStatus(id: number, status: TransactionStatus, gatewayResponse?: string): Observable<any> {
     const body: any = { status };
     if (gatewayResponse) {
       body.gatewayResponse = gatewayResponse;

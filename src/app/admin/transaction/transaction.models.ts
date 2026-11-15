@@ -9,7 +9,7 @@ export interface TransactionAdvancedDto {
     amount: number;
     paymentMethod: PaymentMethod;
     paymentMethodName: string;
-    status: number;
+    status: TransactionStatus;
     transactionDate: string;
     processedDate: string | null;
     transactionReference: string | null;
@@ -39,7 +39,7 @@ export interface TransactionCreateAdvancedDto {
     orderId: number;
     amount: number;
     paymentMethod: PaymentMethod;
-    status: string;
+    status: TransactionStatus;
     transactionReference: string | null;
     paymentGatewayResponse: string | null;
     notes: string | null;
@@ -47,7 +47,7 @@ export interface TransactionCreateAdvancedDto {
 
 export interface TransactionUpdateDto {
     id: number;
-    status: any;
+    status: TransactionStatus;
     transactionReference: string | null;
     paymentGatewayResponse: string | null;
     notes: string | null;
@@ -106,7 +106,7 @@ export interface TransactionSummaryDto {
     customerName: string;
     amount: number;
     paymentMethod: string;
-    status: string;
+    status: TransactionStatus;
     transactionDate: string;
     isRefunded: boolean;
     isActive: boolean;
