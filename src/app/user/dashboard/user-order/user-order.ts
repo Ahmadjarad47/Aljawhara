@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ElementRef, afterRenderEffect, viewChild, inject, signal, computed } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import arabicLocale from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +17,7 @@ import {
 import { combineLatest, map, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { PaymentInitializationStatus } from '../../../core/Models/checkout-payment';
+import { LanguageService } from '../../../services/language.service';
 
 declare const window: any;
 
@@ -24,22 +25,22 @@ registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-user-order',
-  standalone: true,
   imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './user-order.html',
-  styleUrl: './user-order.css'
+  styleUrls: ['../account-page.css', './user-order.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserOrderComponent implements OnInit, OnDestroy {
+export class UserOrderComponent implements OnInit {
   private router = inject(Router);
   private orderService = inject(UserOrderService);
   public toastService = inject(ToastService);
-  private languageCheckInterval?: ReturnType<typeof setInterval>;
   private detailsDialog = viewChild<ElementRef<HTMLDialogElement>>('detailsDialog');
   private ratingDialog = viewChild<ElementRef<HTMLDialogElement>>('ratingDialog');
+  private cancelDialog = viewChild<ElementRef<HTMLDialogElement>>('cancelDialog');
 
   constructor() {
     afterRenderEffect(() => {
-      for (const dialog of [this.detailsDialog(), this.ratingDialog()]) {
+      for (const dialog of [this.detailsDialog(), this.ratingDialog(), this.cancelDialog()]) {
         if (dialog && !dialog.nativeElement.open) dialog.nativeElement.showModal();
       }
     });
@@ -48,11 +49,25 @@ export class UserOrderComponent implements OnInit, OnDestroy {
   // Expose OrderStatus enum to template
   OrderStatus = OrderStatus;
 
-  // Language management
-  currentLanguage = signal<'ar' | 'en'>('ar');
+  readonly currentLanguage = inject(LanguageService).current;
+
+  readonly stars = [1, 2, 3, 4, 5] as const;
+
+  /** Shipping address lines, rendered as a list instead of 14 copies of the same markup. */
+  readonly shippingFields = [
+    { key: 'street', label: 'addressLine' },
+    { key: 'alQataa', label: 'block' },
+    { key: 'alSharee', label: 'street' },
+    { key: 'alJada', label: 'avenue' },
+    { key: 'alManzil', label: 'house' },
+    { key: 'alDor', label: 'floor' },
+    { key: 'alShakka', label: 'apartment' }
+  ] as const;
 
   // State signals
   isLoading = signal(false);
+  loadError = signal(false);
+  pendingCancelId = signal<number | null>(null);
   orders = signal<OrderSummaryDto[]>([]);
   searchTerm = signal('');
   statusFilter = signal<OrderStatus | null>(null);
@@ -163,7 +178,25 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       submitRating: 'إرسال التقييم',
       ratingNotAllowed: 'يمكن تقييم المنتج فقط من طلب تم تسليمه.',
       downloadInvoice: 'تحميل الفاتورة',
-      payNow: 'ادفع الآن'
+      payNow: 'ادفع الآن',
+      error: 'خطأ',
+      success: 'نجح',
+      retry: 'إعادة المحاولة',
+      addressLine: 'العنوان',
+      failedToLoadOrders: 'فشل تحميل الطلبات',
+      loadErrorTitle: 'تعذّر تحميل الطلبات',
+      loadErrorHint: 'تحقّق من اتصالك بالإنترنت ثم أعد المحاولة.',
+      failedToLoadDetails: 'فشل تحميل تفاصيل الطلب',
+      failedToCancelOrder: 'فشل إلغاء الطلب',
+      orderCancelled: 'تم إلغاء الطلب بنجاح',
+      confirmCancelTitle: 'إلغاء هذا الطلب؟',
+      confirmCancelBody: 'لا يمكن التراجع عن إلغاء الطلب. إذا كنت قد دفعت، تتم معالجة الاسترداد وفق سياسة المتجر.',
+      keepOrder: 'الاحتفاظ بالطلب',
+      failedToSubmitRating: 'فشل إرسال التقييم',
+      ratingSubmitted: 'تم إرسال التقييم بنجاح',
+      failedToLoadInvoice: 'فشل تحميل بيانات الفاتورة',
+      invoiceDownloaded: 'تم تحميل الفاتورة بنجاح',
+      failedToGeneratePdf: 'فشل إنشاء ملف PDF'
     },
     en: {
       myOrders: 'My Orders',
@@ -236,7 +269,25 @@ export class UserOrderComponent implements OnInit, OnDestroy {
       submitRating: 'Submit Rating',
       ratingNotAllowed: 'You can only rate a product from a delivered order.',
       downloadInvoice: 'Download Invoice',
-      payNow: 'Pay Now'
+      payNow: 'Pay Now',
+      error: 'Error',
+      success: 'Done',
+      retry: 'Try again',
+      addressLine: 'Address',
+      failedToLoadOrders: 'Could not load your orders',
+      loadErrorTitle: 'We could not load your orders',
+      loadErrorHint: 'Check your internet connection and try again.',
+      failedToLoadDetails: 'Could not load the order details',
+      failedToCancelOrder: 'Could not cancel the order',
+      orderCancelled: 'Order cancelled',
+      confirmCancelTitle: 'Cancel this order?',
+      confirmCancelBody: 'Cancelling an order cannot be undone. If you have already paid, the refund follows the store policy.',
+      keepOrder: 'Keep order',
+      failedToSubmitRating: 'Could not submit your rating',
+      ratingSubmitted: 'Rating submitted',
+      failedToLoadInvoice: 'Could not load the invoice data',
+      invoiceDownloaded: 'Invoice downloaded',
+      failedToGeneratePdf: 'Could not generate the PDF'
     }
   } as const;
 
@@ -247,29 +298,16 @@ export class UserOrderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadOrders();
-    this.checkLanguage();
-    this.languageCheckInterval = setInterval(() => this.checkLanguage(), 1000);
-  }
-
-  ngOnDestroy(): void {
-    if (this.languageCheckInterval) {
-      clearInterval(this.languageCheckInterval);
-    }
-  }
-
-  checkLanguage(): void {
-    const lang = (localStorage.getItem('language') as 'ar' | 'en' | null) ?? 'ar';
-    if (lang !== this.currentLanguage()) {
-      this.currentLanguage.set(lang);
-    }
   }
 
   loadOrders(): void {
     this.isLoading.set(true);
+    this.loadError.set(false);
     this.orderService.getMyOrders().pipe(
       catchError(error => {
         console.error('Error loading orders:', error);
-        this.toastService.error('خطأ', 'فشل تحميل الطلبات');
+        this.loadError.set(true);
+        this.toastService.error(this.t('error'), this.t('failedToLoadOrders'));
         return of([]);
       })
     ).subscribe({
@@ -301,7 +339,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     this.orderService.getOrderById(orderId).pipe(
       catchError(error => {
         console.error('Error loading order details:', error);
-        this.toastService.error('خطأ', 'فشل تحميل تفاصيل الطلب');
+        this.toastService.error(this.t('error'), this.t('failedToLoadDetails'));
         return of(null);
       })
     ).subscribe({
@@ -372,21 +410,37 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     // Inspect the existing attempt before opening payment or offering a terminal retry.
     this.router.navigate(['/checkout/success'], { queryParams: { orderId, prepare: '1' } });
   }
-  cancelOrder(orderId: number): void {
-    if (!confirm(this.currentLanguage() === 'ar' ? 'هل أنت متأكد من إلغاء هذا الطلب؟' : 'Are you sure you want to cancel this order?')) {
-      return;
-    }
+  /** Cancelling is irreversible, so it goes through a confirmation step. */
+  requestCancel(orderId: number): void {
+    this.pendingCancelId.set(orderId);
+  }
 
+  closeCancelConfirm(event?: Event): void {
+    event?.preventDefault();
+    if (this.isLoading()) return;
+    this.cancelDialog()?.nativeElement.close();
+    this.pendingCancelId.set(null);
+  }
+
+  confirmCancel(): void {
+    const orderId = this.pendingCancelId();
+    if (orderId === null || this.isLoading()) return;
+    this.cancelDialog()?.nativeElement.close();
+    this.pendingCancelId.set(null);
+    this.cancelOrder(orderId);
+  }
+
+  private cancelOrder(orderId: number): void {
     this.isLoading.set(true);
     this.orderService.cancelOrder(orderId).pipe(
       catchError(error => {
         console.error('Error cancelling order:', error);
-        this.toastService.error('خطأ', 'فشل إلغاء الطلب');
+        this.toastService.error(this.t('error'), this.t('failedToCancelOrder'));
         return of(null);
       })
     ).subscribe({
       next: () => {
-        this.toastService.success('نجح', 'تم إلغاء الطلب بنجاح');
+        this.toastService.success(this.t('success'), this.t('orderCancelled'));
         this.loadOrders();
         if (this.selectedOrderDetails()?.id === orderId) {
           this.closeDetailsModal();
@@ -504,7 +558,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     this.orderService.addProductRating({ ...form, orderId: selection.orderId }).pipe(
       catchError(error => {
         console.error('Error submitting rating:', error);
-        this.toastService.error('خطأ', error.status === 403 ? this.t('ratingNotAllowed') : 'فشل إرسال التقييم');
+        this.toastService.error(this.t('error'), error.status === 403 ? this.t('ratingNotAllowed') : this.t('failedToSubmitRating'));
         return of(null);
       })
     ).subscribe({
@@ -514,7 +568,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
             map.set(form.productId, rating);
             return new Map(map);
           });
-          this.toastService.success('نجح', 'تم إرسال التقييم بنجاح');
+          this.toastService.success(this.t('success'), this.t('ratingSubmitted'));
           this.closeRatingModal();
         }
         this.isLoading.set(false);
@@ -535,7 +589,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     this.orderService.getInvoicePaymentData(orderId).pipe(
       catchError(error => {
         console.error('Error loading invoice data:', error);
-        this.toastService.error('خطأ', 'فشل تحميل بيانات الفاتورة');
+        this.toastService.error(this.t('error'), this.t('failedToLoadInvoice'));
         this.isLoading.set(false);
         return of(null);
       })
@@ -544,7 +598,7 @@ export class UserOrderComponent implements OnInit, OnDestroy {
         if (invoiceData && invoiceData.success) {
           await this.generatePDF(invoiceData);
         } else {
-          this.toastService.error('خطأ', invoiceData?.message || 'فشل تحميل بيانات الفاتورة');
+          this.toastService.error(this.t('error'), invoiceData?.message || this.t('failedToLoadInvoice'));
         }
         this.isLoading.set(false);
       },
@@ -559,10 +613,10 @@ export class UserOrderComponent implements OnInit, OnDestroy {
     try {
       const { downloadInvoicePDF } = await import('../../../core/utils/invoice-pdf');
       await downloadInvoicePDF(invoice);
-      this.toastService.success('نجح', 'تم تحميل الفاتورة بنجاح');
+      this.toastService.success(this.t('success'), this.t('invoiceDownloaded'));
     } catch (error) {
       console.error('Error generating PDF:', error);
-      this.toastService.error('خطأ', 'فشل إنشاء ملف PDF');
+      this.toastService.error(this.t('error'), this.t('failedToGeneratePdf'));
     }
   }
 

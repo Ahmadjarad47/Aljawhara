@@ -1,521 +1,508 @@
-<div class="orders-page" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
-    <!-- Header -->
-    <div class="orders-header">
-        <div class="orders-heading">
-            <div class="orders-title-row">
-                <h1>{{t('myOrders')}}</h1>
-                <span class="orders-count">{{orders().length}}</span>
-            </div>
-            <p>{{t('viewAndManage')}}</p>
-        </div>
-        <button (click)="loadOrders()" [disabled]="isLoading()" class="btn btn-ghost orders-refresh">
-            @if (isLoading()) {
-                <span class="loading loading-spinner loading-xs"></span>
-            } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            }
-            {{t('refresh')}}
-        </button>
+<div class="account-page orders-page" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
+  <header class="account-header">
+    <div>
+      <div class="account-title-row">
+        <h1>{{ t('myOrders') }}</h1>
+        @if (orders().length) {
+          <span class="account-count">{{ orders().length }}</span>
+        }
+      </div>
+      <p>{{ t('viewAndManage') }}</p>
     </div>
+    <button type="button" class="btn btn-outline orders-refresh" (click)="loadOrders()" [disabled]="isLoading()">
+      @if (isLoading()) {
+        <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
+      } @else {
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+      }
+      {{ t('refresh') }}
+    </button>
+  </header>
 
-    <!-- Search and Filters -->
-    <div class="orders-filters" role="search" [attr.aria-label]="t('searchPlaceholder')">
-                <label class="orders-search">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input type="search" [placeholder]="t('searchPlaceholder')" [attr.aria-label]="t('searchPlaceholder')"
-                        [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
-                </label>
-                <div class="orders-filter-row">
-                    <select class="select select-bordered orders-status-filter" [attr.aria-label]="t('status')"
-                        [ngModel]="statusFilter()"
-                        (ngModelChange)="onStatusFilterChange($event)">
-                        <option [ngValue]="null">{{t('allStatus')}}</option>
-                        <option [ngValue]="OrderStatus.Pending">{{t('pending')}}</option>
-                        <option [ngValue]="OrderStatus.Processing">{{t('processing')}}</option>
-                        <option [ngValue]="OrderStatus.Shipped">{{t('shipped')}}</option>
-                        <option [ngValue]="OrderStatus.Delivered">{{t('delivered')}}</option>
-                        <option [ngValue]="OrderStatus.Cancelled">{{t('cancelled')}}</option>
-                        <option [ngValue]="OrderStatus.Refunded">{{t('refunded')}}</option>
-                        <option [ngValue]="OrderStatus.Expired">{{t('expired')}}</option>
-                        <option [ngValue]="OrderStatus.RequiresReconciliation">{{t('requiresReconciliation')}}</option>
-                    </select>
-                    @if (searchTerm() || statusFilter() !== null) {
-                        <button (click)="clearFilters()" [disabled]="isLoading()" class="btn btn-ghost orders-clear">
-                            {{t('clearFilters')}}
-                        </button>
-                    }
-                </div>
+  <form class="account-toolbar" role="search" (ngSubmit)="onSearch()">
+    <label class="account-search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m21 21-5-5"/><circle cx="10" cy="10" r="7"/></svg>
+      <input
+        type="search"
+        name="orderSearch"
+        [placeholder]="t('searchPlaceholder')"
+        [attr.aria-label]="t('searchPlaceholder')"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
+    </label>
+    <div class="account-field orders-status-field">
+      <label class="sr-only" for="orders-status">{{ t('status') }}</label>
+      <select
+        id="orders-status"
+        name="status"
+        class="select orders-status-filter"
+        [ngModel]="statusFilter()"
+        (ngModelChange)="onStatusFilterChange($event)"
+      >
+        <option [ngValue]="null">{{ t('allStatus') }}</option>
+        <option [ngValue]="OrderStatus.Pending">{{ t('pending') }}</option>
+        <option [ngValue]="OrderStatus.Processing">{{ t('processing') }}</option>
+        <option [ngValue]="OrderStatus.Shipped">{{ t('shipped') }}</option>
+        <option [ngValue]="OrderStatus.Delivered">{{ t('delivered') }}</option>
+        <option [ngValue]="OrderStatus.Cancelled">{{ t('cancelled') }}</option>
+        <option [ngValue]="OrderStatus.Refunded">{{ t('refunded') }}</option>
+        <option [ngValue]="OrderStatus.Expired">{{ t('expired') }}</option>
+        <option [ngValue]="OrderStatus.RequiresReconciliation">{{ t('requiresReconciliation') }}</option>
+      </select>
     </div>
-
-    <!-- Orders List -->
-    <div class="orders-results" [attr.aria-busy]="isLoading()">
-        <div>
-            @if (isLoading()) {
-                <div class="orders-loading" role="status">
-                    <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
-                    <span>{{t('loadingOrders')}}</span>
-                </div>
-            } @else {
-                <!-- Desktop / tablet table view -->
-                <div class="orders-desktop">
-                    <div class="overflow-x-auto">
-                        <table class="table table-zebra">
-                            <thead>
-                                <tr>
-                                    <th>{{t('orderNumber')}}</th>
-                                    <th>{{t('customer')}}</th>
-                                    <th>{{t('items')}}</th>
-                                    <th>{{t('total')}}</th>
-                                    <th>{{t('status')}}</th>
-                                    <th>{{t('paymentStatus')}}</th>
-                                    <th>{{t('orderDate')}}</th>
-                                    <th>{{t('actions')}}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (order of filteredOrders$(); track order.id) {
-                                    <tr>
-                                        <td>
-                                            <div class="font-semibold text-primary">{{order.orderNumber}}</div>
-                                        </td>
-                                        <td>
-                                            <div class="font-medium">{{order.customerName}}</div>
-                                        </td>
-                                        <td>
-                                            <div class="badge badge-outline">{{order.itemCount}} {{t('items')}}</div>
-                                        </td>
-                                        <td>
-                                            <div class="font-semibold">{{order.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</div>
-                                        </td>
-                                        <td>
-                                            <div class="badge" [class]="getOrderStatusClass(order.status)">
-                                                {{getOrderStatusText(order.status)}}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if (order.isPaid) {
-                                                <div class="badge badge-success">{{t('paid')}}</div>
-                                            } @else {
-                                                <span class="text-base-content/50">—</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <div class="text-sm">{{order.createdAt | date:'dd MMM yyyy':undefined:currentLanguage()}}</div>
-                                        </td>
-                                        <td>
-                                            <div class="flex gap-1">
-                                                <button
-                                                    (click)="viewOrderDetails(order.id)"
-                                                    [disabled]="isLoading()"
-                                                    class="btn btn-ghost btn-xs">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                    {{t('view')}}
-                                                </button>
-                                                @if (canPayOrder(order)) {
-                                                    <button
-                                                        (click)="payOrder(order.id)"
-                                                        [disabled]="isLoading()"
-                                                        class="btn btn-ghost btn-xs btn-success">
-                                                        {{t('payNow')}}
-                                                    </button>
-                                                }
-                                                @if (canCancelOrder(order)) {
-                                                    <button
-                                                        (click)="cancelOrder(order.id)"
-                                                        [disabled]="isLoading()"
-                                                        class="btn btn-ghost btn-xs btn-error">
-                                                        {{t('cancel')}}
-                                                    </button>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                } @empty {
-                                    <tr>
-                                        <td colspan="8" class="text-center py-8 text-base-content/50">
-                                            {{t('noOrdersFound')}}
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Mobile card view -->
-                <div class="orders-mobile">
-                    @for (order of filteredOrders$(); track order.id) {
-                        <article class="order-card">
-                                <div class="order-card-header">
-                                    <div class="order-identity">
-                                        <span class="order-label">{{t('orderNumber')}}</span>
-                                        <h2><bdi>{{order.orderNumber}}</bdi></h2>
-                                        <time [attr.datetime]="order.createdAt">{{order.createdAt | date:'dd MMM yyyy' : undefined : (currentLanguage() === 'ar' ? 'ar' : 'en')}}</time>
-                                    </div>
-                                    <div class="order-status">
-                                        <span class="sr-only">{{t('status')}}</span>
-                                        <div class="badge" [class]="getOrderStatusClass(order.status)">
-                                            {{getOrderStatusText(order.status)}}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="order-card-meta">
-                                    <span class="order-customer">{{order.customerName}}</span>
-                                    <span class="order-item-count">{{order.itemCount}} {{t('items')}}</span>
-                                </div>
-                                <div class="order-card-summary">
-                                    <div class="order-amount">
-                                        <span class="order-label">{{t('total')}}</span>
-                                        <strong><bdi>{{order.total | number:'1.3-3'}} <small>{{t('currency')}}</small></bdi></strong>
-                                    </div>
-                                    <div class="order-payment">
-                                        <span class="order-label">{{t('paymentStatus')}}</span>
-                                        @if (order.isPaid) {
-                                            <div class="badge badge-success">{{t('paid')}}</div>
-                                        } @else {
-                                            <span class="text-base-content/50">—</span>
-                                        }
-                                    </div>
-                                </div>
-
-                                <div class="order-card-actions">
-                                    <button
-                                        (click)="viewOrderDetails(order.id)"
-                                        [disabled]="isLoading()"
-                                        class="btn order-view" [attr.aria-label]="t('orderDetails') + ' ' + order.orderNumber">
-                                        {{t('orderDetails')}}
-                                        <svg class="order-view-arrow" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" /></svg>
-                                    </button>
-                                    @if (canPayOrder(order)) {
-                                        <button
-                                            (click)="payOrder(order.id)"
-                                            [disabled]="isLoading()"
-                                            class="btn btn-primary order-pay">
-                                            {{t('payNow')}}
-                                        </button>
-                                    }
-                                    @if (canCancelOrder(order)) {
-                                        <button
-                                            (click)="cancelOrder(order.id)"
-                                            [disabled]="isLoading()"
-                                            class="btn btn-ghost order-cancel">
-                                            {{t('cancel')}}
-                                        </button>
-                                    }
-                                </div>
-                        </article>
-                    } @empty {
-                        <div class="orders-empty">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 7 3-4h12l3 4v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Zm0 0h18M8 10a4 4 0 0 0 8 0" /></svg>
-                            <h2>{{t('noOrdersFound')}}</h2>
-                            <p>{{searchTerm() || statusFilter() !== null ? t('tryOtherFilters') : t('ordersAppearHere')}}</p>
-                            @if (searchTerm() || statusFilter() !== null) {
-                                <button class="btn btn-outline" (click)="clearFilters()">{{t('clearFilters')}}</button>
-                            }
-                        </div>
-                    }
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Order Details Modal -->
-    @if (showDetailsModal() && selectedOrderDetails()) {
-        <dialog #detailsDialog class="modal orders-modal" aria-labelledby="order-details-title" (cancel)="onDetailsCancel($event)" (close)="closeDetailsModal()">
-            <div class="modal-box orders-details-box">
-                <div class="orders-modal-header">
-                    <div><h2 id="order-details-title">{{t('orderDetails')}}</h2><p><bdi>{{selectedOrderDetails()!.orderNumber}}</bdi></p></div>
-                    <button class="btn btn-ghost orders-modal-close" (click)="closeDetailsModal()" [disabled]="isLoading()" [attr.aria-label]="t('close')"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6" /></svg></button>
-                </div>
-                <div class="orders-modal-content">
-
-                <!-- Order Status -->
-                <div class="mb-4">
-                    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-                        <div class="flex items-center flex-wrap gap-2">
-                            <span class="text-xs sm:text-sm text-base-content/70">{{t('status')}}:</span>
-                            <div class="badge badge-sm sm:badge-lg ml-2" [class]="getOrderStatusClass(selectedOrderDetails()!.status)">
-                                {{getOrderStatusText(selectedOrderDetails()!.status)}}
-                            </div>
-                        </div>
-                        <div class="flex items-center flex-wrap gap-2">
-                            <span class="text-xs sm:text-sm text-base-content/70">{{t('paymentStatus')}}:</span>
-                            @if (selectedOrderDetails()!.isPaid) {
-                                <div class="badge badge-success badge-sm sm:badge-lg">{{t('paid')}}</div>
-                            } @else {
-                                <span class="text-base-content/50">—</span>
-                            }
-                        </div>
-                        <div class="flex items-center flex-wrap gap-2">
-                            <span class="text-xs sm:text-sm text-base-content/70">{{t('orderDateLabel')}}:</span>
-                            <span class="font-medium text-xs sm:text-sm ml-2">{{selectedOrderDetails()!.createdAt | date:'dd MMM yyyy, HH:mm':undefined:currentLanguage()}}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- Shipping Address -->
-                <div class="mb-4">
-                    <h4 class="font-semibold mb-2 text-sm sm:text-base">{{t('shippingAddress')}}</h4>
-                    <div class="bg-base-200 p-3 sm:p-4 rounded-lg space-y-1">
-                        <p class="font-medium text-sm sm:text-base break-words">
-                            <span class="text-base-content/70">{{t('fullName')}}:</span> {{selectedOrderDetails()!.shippingAddress.fullName}}
-                        </p>
-                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">{{t('phone')}}:</span> {{selectedOrderDetails()!.shippingAddress.phone}}
-                        </p>
-                        @if (selectedOrderDetails()!.shippingAddress.street) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('street')}}:</span> {{selectedOrderDetails()!.shippingAddress.street}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alQataa) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('block')}}:</span> {{selectedOrderDetails()!.shippingAddress.alQataa}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alSharee) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('street')}}:</span> {{selectedOrderDetails()!.shippingAddress.alSharee}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alJada) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('avenue')}}:</span> {{selectedOrderDetails()!.shippingAddress.alJada}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alManzil) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('house')}}:</span> {{selectedOrderDetails()!.shippingAddress.alManzil}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alDor) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('floor')}}:</span> {{selectedOrderDetails()!.shippingAddress.alDor}}
-                            </p>
-                        }
-                        @if (selectedOrderDetails()!.shippingAddress.alShakka) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('apartment')}}:</span> {{selectedOrderDetails()!.shippingAddress.alShakka}}
-                            </p>
-                        }
-                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">{{t('city')}}:</span> {{selectedOrderDetails()!.shippingAddress.city}}
-                        </p>
-                        @if (selectedOrderDetails()!.shippingAddress.state) {
-                            <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                                <span class="font-medium">{{t('state')}}:</span> {{selectedOrderDetails()!.shippingAddress.state}}
-                            </p>
-                        }
-                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">{{t('postalCode')}}:</span> {{selectedOrderDetails()!.shippingAddress.postalCode || '—'}}
-                        </p>
-                        <p class="text-xs sm:text-sm text-base-content/70 break-words">
-                            <span class="font-medium">{{t('country')}}:</span> {{selectedOrderDetails()!.shippingAddress.country}}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- Order Items -->
-                <section class="order-items-section">
-                    <h3>{{t('orderItems')}} <span>({{selectedOrderDetails()!.items.length}})</span></h3>
-                    <div class="order-items-list">
-                        @for (item of selectedOrderDetails()!.items; track item.id) {
-                            <article class="order-product">
-                                <div class="order-product-main">
-                                    <div class="order-product-image">
-                                        @if (item.image) {
-                                            <img [src]="item.image" [alt]="item.name" loading="lazy" />
-                                        } @else {
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10" /></svg>
-                                        }
-                                    </div>
-                                    <div class="order-product-info">
-                                        <h4>{{item.name}}</h4>
-                                        <p>{{t('quantity')}}: {{item.quantity}} <span aria-hidden="true">·</span> <bdi>{{item.price | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</bdi></p>
-                                        <strong><bdi>{{item.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</bdi></strong>
-                                    </div>
-                                </div>
-                                @if (canRateOrder(selectedOrderDetails())) {
-                                    <div class="order-product-rating">
-                                        @if (checkingRatings()) {
-                                            <span class="loading loading-spinner loading-xs" role="status" [attr.aria-label]="t('rating')"></span>
-                                        } @else {
-                                            @if (getProductRating(item.productId); as rating) {
-                                                <div class="order-rated">
-                                                    <span class="order-stars" [attr.aria-label]="t('rating') + ': ' + rating.ratingNumber + ' ' + t('outOfStars')">
-                                                        @for (star of [1, 2, 3, 4, 5]; track star) {
-                                                            <span [class.order-star-filled]="star <= rating.ratingNumber" aria-hidden="true">★</span>
-                                                        }
-                                                    </span>
-                                                    <span class="text-xs text-base-content/60">{{t('rated')}}</span>
-                                                </div>
-                                                @if (rating.content) { <p class="order-review">{{rating.content}}</p> }
-                                            } @else {
-                                                <button class="btn btn-ghost order-rate" (click)="openRatingModal(item.productId, item.name)" [disabled]="isLoading()">
-                                                    <span aria-hidden="true">☆</span> {{t('rateProduct')}}
-                                                </button>
-                                            }
-                                        }
-                                    </div>
-                                }
-                            </article>
-                        }
-                    </div>
-                </section>
-
-                <!-- Order Summary -->
-                <div class="order-totals">
-                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
-                        <span class="text-base-content/70">{{t('subtotal')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.subtotal | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
-                    </div>
-                    @if (selectedOrderDetails()!.couponDiscountAmount && selectedOrderDetails()!.couponDiscountAmount! > 0) {
-                        <div class="flex justify-between mb-2 text-success text-xs sm:text-sm">
-                            <span>{{t('discount')}} ({{selectedOrderDetails()!.couponCode}}):</span>
-                            <span class="font-medium">-{{selectedOrderDetails()!.couponDiscountAmount! | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
-                        </div>
-                    }
-                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
-                        <span class="text-base-content/70">{{t('shipping')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.shipping | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
-                    </div>
-                    <div class="flex justify-between mb-2 text-xs sm:text-sm">
-                        <span class="text-base-content/70">{{t('tax')}}:</span>
-                        <span class="font-medium">{{selectedOrderDetails()!.tax | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
-                    </div>
-                    <div class="divider my-2"></div>
-                    <div class="flex justify-between text-base sm:text-lg font-bold">
-                        <span>{{t('total')}}:</span>
-                        <span>{{selectedOrderDetails()!.total | currency:'KWD':t('currency'):'1.3-3':currentLanguage()}}</span>
-                    </div>
-                </div>
-
-                </div>
-                <div class="modal-action orders-details-actions">
-                    @if (canPayOrder(selectedOrderDetails()!)) {
-                        <button
-                            (click)="payOrder(selectedOrderDetails()!.id)"
-                            [disabled]="isLoading()"
-                            class="btn btn-success w-full sm:w-auto">
-                            <span class="text-xs sm:text-sm">{{t('payNow')}}</span>
-                        </button>
-                    }
-                    <button
-                        (click)="downloadInvoice(selectedOrderDetails()!.id)"
-                        [disabled]="isLoading()"
-                        class="btn btn-primary w-full sm:w-auto">
-                        @if (isLoading()) {
-                            <span class="loading loading-spinner loading-sm"></span>
-                        } @else {
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        }
-                        <span class="text-xs sm:text-sm">{{t('downloadInvoice')}}</span>
-                    </button>
-                    @if (canCancelOrder(selectedOrderDetails()!)) {
-                        <button
-                            (click)="cancelOrder(selectedOrderDetails()!.id)"
-                            [disabled]="isLoading()"
-                            class="btn btn-error w-full sm:w-auto">
-                            @if (isLoading()) {
-                                <span class="loading loading-spinner loading-sm"></span>
-                            }
-                            <span class="text-xs sm:text-sm">{{t('cancelOrder')}}</span>
-                        </button>
-                    }
-                    <button (click)="closeDetailsModal()" [disabled]="isLoading()" class="btn w-full sm:w-auto text-xs sm:text-sm">{{t('close')}}</button>
-                </div>
-            </div>
-        </dialog>
+    @if (searchTerm() || statusFilter() !== null) {
+      <button type="button" class="btn btn-ghost orders-clear" (click)="clearFilters()" [disabled]="isLoading()">
+        {{ t('clearFilters') }}
+      </button>
     }
+  </form>
 
-    <!-- Rating Modal -->
-    @if (showRatingModal() && selectedProductForRating() && canRateOrder(selectedOrderDetails())) {
-        <dialog #ratingDialog class="modal orders-modal" aria-labelledby="order-rating-title" (cancel)="onRatingCancel($event)" (close)="closeRatingModal()">
-            <div class="modal-box orders-rating-box">
-                <h3 id="order-rating-title" class="font-bold text-base sm:text-lg mb-4 break-words">{{t('rateProduct')}}: {{selectedProductForRating()!.productName}}</h3>
-
-                <!-- Rating Stars -->
-                <div class="mb-4">
-                    <label class="label py-2">
-                        <span class="label-text font-semibold text-sm sm:text-base">{{t('yourRating')}}</span>
-                    </label>
-                    <div class="rating rating-md sm:rating-lg justify-center sm:justify-start">
-                        @for (star of [1, 2, 3, 4, 5]; track star) {
-                            <input
-                                type="radio"
-                                name="rating"
-                                [attr.aria-label]="star + ' ' + t('outOfStars')"
-                                class="mask mask-star-2 bg-orange-400"
-                                [checked]="ratingForm().ratingNumber === star"
-                                (change)="updateRatingNumber(star)" />
+  <section [attr.aria-label]="t('myOrders')" [attr.aria-busy]="isLoading()">
+    @if (isLoading()) {
+      <div class="account-loading" role="status">
+        <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
+        <span>{{ t('loadingOrders') }}</span>
+      </div>
+    } @else if (loadError()) {
+      <div class="account-error" role="alert">
+        <span class="account-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5"/><path d="M12 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        </span>
+        <h2>{{ t('loadErrorTitle') }}</h2>
+        <p>{{ t('loadErrorHint') }}</p>
+        <button type="button" class="btn btn-outline" (click)="loadOrders()">{{ t('retry') }}</button>
+      </div>
+    } @else {
+      @let visibleOrders = filteredOrders$();
+      @if (visibleOrders.length) {
+        <!-- Desktop / tablet table -->
+        <div class="account-table">
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>{{ t('orderNumber') }}</th>
+                  <th>{{ t('customer') }}</th>
+                  <th>{{ t('items') }}</th>
+                  <th>{{ t('total') }}</th>
+                  <th>{{ t('status') }}</th>
+                  <th>{{ t('paymentStatus') }}</th>
+                  <th>{{ t('orderDate') }}</th>
+                  <th>{{ t('actions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of visibleOrders; track order.id) {
+                  <tr>
+                    <td><strong><bdi>{{ order.orderNumber }}</bdi></strong></td>
+                    <td>{{ order.customerName }}</td>
+                    <td>{{ order.itemCount }} {{ t('items') }}</td>
+                    <td class="orders-table-amount">
+                      <bdi>{{ order.total | number: '1.3-3' }} {{ t('currency') }}</bdi>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="getOrderStatusClass(order.status)">{{ getOrderStatusText(order.status) }}</span>
+                    </td>
+                    <td>
+                      @if (order.isPaid) {
+                        <span class="badge badge-success">{{ t('paid') }}</span>
+                      } @else {
+                        <span class="account-hint">—</span>
+                      }
+                    </td>
+                    <td>{{ order.createdAt | date: 'dd MMM yyyy' : undefined : currentLanguage() }}</td>
+                    <td>
+                      <div class="orders-row-actions">
+                        <button
+                          type="button"
+                          class="btn btn-outline"
+                          (click)="viewOrderDetails(order.id)"
+                          [disabled]="isLoading()"
+                          [attr.aria-label]="t('orderDetails') + ' ' + order.orderNumber"
+                        >
+                          {{ t('view') }}
+                        </button>
+                        @if (canPayOrder(order)) {
+                          <button type="button" class="btn btn-primary" (click)="payOrder(order.id)" [disabled]="isLoading()">
+                            {{ t('payNow') }}
+                          </button>
                         }
-                    </div>
-                    <div class="label py-1">
-                        <span class="label-text-alt text-xs sm:text-sm text-base-content/70">
-                            {{t('selectedStars')}}: {{ratingForm().ratingNumber}} {{t('outOfStars')}}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Review Comment -->
-                <div class="form-control mb-4">
-                    <label class="label py-2" for="order-review">
-                        <span class="label-text font-semibold text-sm sm:text-base">{{t('yourReview')}}</span>
-                        <span class="label-text-alt text-xs sm:text-sm text-base-content/70">{{t('required')}}</span>
-                    </label>
-                    <textarea id="order-review"
-                        class="textarea textarea-bordered h-24 sm:h-32 text-sm"
-                        [placeholder]="t('shareExperience')"
-                        [ngModel]="ratingForm().content"
-                        (ngModelChange)="updateRatingContent($event)"
-                        maxlength="1000">
-                    </textarea>
-                    <label class="label py-1">
-                        <span class="label-text-alt text-xs text-base-content/70">
-                            {{ratingForm().content.length}} / 1000 {{t('characters')}}
-                        </span>
-                    </label>
-                </div>
-
-                <div class="modal-action flex-col sm:flex-row gap-2">
-                    <button
-                        (click)="closeRatingModal()"
-                        [disabled]="isLoading()"
-                        class="btn btn-ghost w-full sm:w-auto text-xs sm:text-sm">
-                        {{t('cancel')}}
-                    </button>
-                    <button
-                        (click)="submitRating()"
-                        [disabled]="isLoading() || !ratingForm().content.trim()"
-                        class="btn btn-primary w-full sm:w-auto">
-                        @if (isLoading()) {
-                            <span class="loading loading-spinner loading-sm"></span>
+                        @if (canCancelOrder(order)) {
+                          <button
+                            type="button"
+                            class="btn btn-ghost orders-cancel-action"
+                            (click)="requestCancel(order.id)"
+                            [disabled]="isLoading()"
+                            [attr.aria-label]="t('cancelOrder') + ' ' + order.orderNumber"
+                          >
+                            {{ t('cancel') }}
+                          </button>
                         }
-                        <span class="text-xs sm:text-sm">{{t('submitRating')}}</span>
-                    </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile / tablet cards -->
+        <div class="account-card-list">
+          @for (order of visibleOrders; track order.id) {
+            <article class="account-card order-card">
+              <div class="order-card-header">
+                <div class="order-identity">
+                  <span class="account-label">{{ t('orderNumber') }}</span>
+                  <h2><bdi>{{ order.orderNumber }}</bdi></h2>
+                  <time [attr.datetime]="order.createdAt">
+                    {{ order.createdAt | date: 'dd MMM yyyy' : undefined : currentLanguage() }}
+                  </time>
                 </div>
-            </div>
-        </dialog>
+                <div class="order-status">
+                  <span class="sr-only">{{ t('status') }}</span>
+                  <span class="badge" [class]="getOrderStatusClass(order.status)">{{ getOrderStatusText(order.status) }}</span>
+                </div>
+              </div>
+
+              <div class="order-card-meta">
+                <span class="order-customer">{{ order.customerName }}</span>
+                <span class="order-item-count">{{ order.itemCount }} {{ t('items') }}</span>
+              </div>
+
+              <div class="order-card-summary">
+                <div class="order-amount">
+                  <span class="account-label">{{ t('total') }}</span>
+                  <strong><bdi>{{ order.total | number: '1.3-3' }} <small>{{ t('currency') }}</small></bdi></strong>
+                </div>
+                <div class="order-payment">
+                  <span class="account-label">{{ t('paymentStatus') }}</span>
+                  @if (order.isPaid) {
+                    <span class="badge badge-success">{{ t('paid') }}</span>
+                  } @else {
+                    <span class="account-hint">—</span>
+                  }
+                </div>
+              </div>
+
+              <div class="order-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-outline order-view"
+                  (click)="viewOrderDetails(order.id)"
+                  [disabled]="isLoading()"
+                  [attr.aria-label]="t('orderDetails') + ' ' + order.orderNumber"
+                >
+                  {{ t('orderDetails') }}
+                  <svg class="order-view-arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
+                </button>
+                @if (canPayOrder(order)) {
+                  <button type="button" class="btn btn-primary order-pay" (click)="payOrder(order.id)" [disabled]="isLoading()">
+                    {{ t('payNow') }}
+                  </button>
+                }
+                @if (canCancelOrder(order)) {
+                  <button
+                    type="button"
+                    class="btn btn-ghost order-cancel"
+                    (click)="requestCancel(order.id)"
+                    [disabled]="isLoading()"
+                    [attr.aria-label]="t('cancelOrder') + ' ' + order.orderNumber"
+                  >
+                    {{ t('cancel') }}
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="account-empty">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m3 7 3-4h12l3 4v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Zm0 0h18M8 10a4 4 0 0 0 8 0"/></svg>
+          <h2>{{ t('noOrdersFound') }}</h2>
+          <p>{{ searchTerm() || statusFilter() !== null ? t('tryOtherFilters') : t('ordersAppearHere') }}</p>
+          @if (searchTerm() || statusFilter() !== null) {
+            <button type="button" class="btn btn-outline" (click)="clearFilters()">{{ t('clearFilters') }}</button>
+          }
+        </div>
+      }
     }
+  </section>
 
-    <!-- Toast Component -->
-    <app-toast
-        [toasts]="toasts"
-        (close)="onToastClose($event)">
-    </app-toast>
+  <!-- Order details -->
+  @if (showDetailsModal() && selectedOrderDetails(); as order) {
+    @let address = order.shippingAddress;
+    <dialog #detailsDialog class="modal account-modal orders-details-modal" aria-labelledby="order-details-title" (cancel)="onDetailsCancel($event)" (close)="closeDetailsModal()">
+      <div class="modal-box">
+        <header class="account-modal-header">
+          <div>
+            <h2 id="order-details-title">{{ t('orderDetails') }}</h2>
+            <p><bdi>{{ order.orderNumber }}</bdi></p>
+          </div>
+          <button type="button" class="btn btn-ghost account-modal-close" (click)="closeDetailsModal()" [disabled]="isLoading()" [attr.aria-label]="t('close')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6"/></svg>
+          </button>
+        </header>
 
+        <div class="account-modal-body">
+          <dl class="order-facts">
+            <div>
+              <dt>{{ t('status') }}</dt>
+              <dd><span class="badge" [class]="getOrderStatusClass(order.status)">{{ getOrderStatusText(order.status) }}</span></dd>
+            </div>
+            <div>
+              <dt>{{ t('paymentStatus') }}</dt>
+              <dd>
+                @if (order.isPaid) {
+                  <span class="badge badge-success">{{ t('paid') }}</span>
+                } @else {
+                  <span class="account-hint">—</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>{{ t('orderDateLabel') }}</dt>
+              <dd>{{ order.createdAt | date: 'dd MMM yyyy, HH:mm' : undefined : currentLanguage() }}</dd>
+            </div>
+          </dl>
+
+          <section class="order-block">
+            <h3>{{ t('shippingAddress') }}</h3>
+            <dl class="order-address">
+              <div>
+                <dt>{{ t('fullName') }}</dt>
+                <dd>{{ address.fullName }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('phone') }}</dt>
+                <dd><bdi>{{ address.phone }}</bdi></dd>
+              </div>
+              @for (field of shippingFields; track field.key) {
+                @if (address[field.key]) {
+                  <div>
+                    <dt>{{ t(field.label) }}</dt>
+                    <dd>{{ address[field.key] }}</dd>
+                  </div>
+                }
+              }
+              <div>
+                <dt>{{ t('city') }}</dt>
+                <dd>{{ address.city }}</dd>
+              </div>
+              @if (address.state) {
+                <div>
+                  <dt>{{ t('state') }}</dt>
+                  <dd>{{ address.state }}</dd>
+                </div>
+              }
+              <div>
+                <dt>{{ t('postalCode') }}</dt>
+                <dd>{{ address.postalCode || '—' }}</dd>
+              </div>
+              <div>
+                <dt>{{ t('country') }}</dt>
+                <dd>{{ address.country }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="order-block order-items-section">
+            <h3>{{ t('orderItems') }} <span>({{ order.items.length }})</span></h3>
+            <div class="order-items-list">
+              @for (item of order.items; track item.id) {
+                <article class="order-product">
+                  <div class="order-product-main">
+                    <div class="order-product-image">
+                      @if (item.image) {
+                        <img [src]="item.image" [alt]="item.name" loading="lazy" />
+                      } @else {
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10"/></svg>
+                      }
+                    </div>
+                    <div class="order-product-info">
+                      <h4>{{ item.name }}</h4>
+                      <p>
+                        {{ t('quantity') }}: {{ item.quantity }}
+                        <span aria-hidden="true">·</span>
+                        <bdi>{{ item.price | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</bdi>
+                      </p>
+                      <strong><bdi>{{ item.total | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</bdi></strong>
+                    </div>
+                  </div>
+                  @if (canRateOrder(order)) {
+                    <div class="order-product-rating">
+                      @if (checkingRatings()) {
+                        <span class="loading loading-spinner loading-xs" role="status" [attr.aria-label]="t('rating')"></span>
+                      } @else if (getProductRating(item.productId); as rating) {
+                        <div class="order-rated">
+                          <span class="order-stars" [attr.aria-label]="t('rating') + ': ' + rating.ratingNumber + ' ' + t('outOfStars')">
+                            @for (star of stars; track star) {
+                              <span [class.order-star-filled]="star <= rating.ratingNumber" aria-hidden="true">★</span>
+                            }
+                          </span>
+                          <span class="account-hint">{{ t('rated') }}</span>
+                        </div>
+                        @if (rating.content) {
+                          <p class="order-review">{{ rating.content }}</p>
+                        }
+                      } @else {
+                        <button type="button" class="btn btn-ghost order-rate" (click)="openRatingModal(item.productId, item.name)" [disabled]="isLoading()">
+                          <span aria-hidden="true">☆</span> {{ t('rateProduct') }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          </section>
+
+          <dl class="order-totals">
+            <div>
+              <dt>{{ t('subtotal') }}</dt>
+              <dd>{{ order.subtotal | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</dd>
+            </div>
+            @if (order.couponDiscountAmount && order.couponDiscountAmount > 0) {
+              <div class="order-total-discount">
+                <dt>{{ t('discount') }} <bdi>({{ order.couponCode }})</bdi></dt>
+                <dd>-{{ order.couponDiscountAmount | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</dd>
+              </div>
+            }
+            <div>
+              <dt>{{ t('shipping') }}</dt>
+              <dd>{{ order.shipping | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('tax') }}</dt>
+              <dd>{{ order.tax | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</dd>
+            </div>
+            <div class="order-total-grand">
+              <dt>{{ t('total') }}</dt>
+              <dd>{{ order.total | currency: 'KWD' : t('currency') : '1.3-3' : currentLanguage() }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <footer class="account-modal-footer orders-details-footer">
+          <button type="button" class="btn btn-primary" (click)="downloadInvoice(order.id)" [disabled]="isLoading()">
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+            } @else {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+            }
+            {{ t('downloadInvoice') }}
+          </button>
+          @if (canPayOrder(order)) {
+            <button type="button" class="btn btn-success" (click)="payOrder(order.id)" [disabled]="isLoading()">
+              {{ t('payNow') }}
+            </button>
+          }
+          @if (canCancelOrder(order)) {
+            <button type="button" class="btn btn-outline orders-cancel-action" (click)="requestCancel(order.id)" [disabled]="isLoading()">
+              {{ t('cancelOrder') }}
+            </button>
+          }
+          <button type="button" class="btn btn-outline" (click)="closeDetailsModal()" [disabled]="isLoading()">{{ t('close') }}</button>
+        </footer>
+      </div>
+    </dialog>
+  }
+
+  <!-- Cancel confirmation -->
+  @if (pendingCancelId() !== null) {
+    <dialog #cancelDialog class="modal account-modal account-confirm" aria-labelledby="order-cancel-title" (cancel)="closeCancelConfirm($event)" (close)="pendingCancelId.set(null)">
+      <div class="modal-box">
+        <header class="account-modal-header">
+          <div><h2 id="order-cancel-title">{{ t('confirmCancelTitle') }}</h2></div>
+          <button type="button" class="btn btn-ghost account-modal-close" (click)="closeCancelConfirm()" [disabled]="isLoading()" [attr.aria-label]="t('close')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6"/></svg>
+          </button>
+        </header>
+        <div class="account-modal-body">
+          <p>{{ t('confirmCancelBody') }}</p>
+        </div>
+        <footer class="account-modal-footer">
+          <button type="button" class="btn btn-outline" (click)="closeCancelConfirm()" [disabled]="isLoading()">{{ t('keepOrder') }}</button>
+          <button type="button" class="btn btn-error" (click)="confirmCancel()" [disabled]="isLoading()">
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+            }
+            {{ t('cancelOrder') }}
+          </button>
+        </footer>
+      </div>
+    </dialog>
+  }
+
+  <!-- Rate a product -->
+  @if (showRatingModal() && selectedProductForRating(); as selection) {
+    @if (canRateOrder(selectedOrderDetails())) {
+      <dialog #ratingDialog class="modal account-modal" aria-labelledby="order-rating-title" (cancel)="onRatingCancel($event)" (close)="closeRatingModal()">
+        <form class="modal-box" (ngSubmit)="submitRating()">
+          <header class="account-modal-header">
+            <div>
+              <h2 id="order-rating-title">{{ t('rateProduct') }}</h2>
+              <p>{{ selection.productName }}</p>
+            </div>
+            <button type="button" class="btn btn-ghost account-modal-close" (click)="closeRatingModal()" [disabled]="isLoading()" [attr.aria-label]="t('close')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m6 6 12 12M6 18 18 6"/></svg>
+            </button>
+          </header>
+
+          <div class="account-modal-body">
+            <fieldset class="order-rating-field" [disabled]="isLoading()">
+              <legend>{{ t('yourRating') }}</legend>
+              <div class="rating rating-lg">
+                @for (star of stars; track star) {
+                  <input
+                    type="radio"
+                    name="rating"
+                    class="mask mask-star-2"
+                    [attr.aria-label]="star + ' ' + t('outOfStars')"
+                    [checked]="ratingForm().ratingNumber === star"
+                    (change)="updateRatingNumber(star)"
+                  />
+                }
+              </div>
+              <p class="account-hint" aria-live="polite">
+                {{ t('selectedStars') }}: {{ ratingForm().ratingNumber }} {{ t('outOfStars') }}
+              </p>
+            </fieldset>
+
+            <div class="account-field order-review-field">
+              <label for="order-review">{{ t('yourReview') }} <span class="account-hint">({{ t('required') }})</span></label>
+              <textarea
+                id="order-review"
+                name="review"
+                class="textarea"
+                rows="4"
+                maxlength="1000"
+                required
+                [placeholder]="t('shareExperience')"
+                [ngModel]="ratingForm().content"
+                (ngModelChange)="updateRatingContent($event)"
+                aria-describedby="order-review-count"
+              ></textarea>
+              <span id="order-review-count" class="account-hint">
+                {{ ratingForm().content.length }} / 1000 {{ t('characters') }}
+              </span>
+            </div>
+          </div>
+
+          <footer class="account-modal-footer">
+            <button type="button" class="btn btn-outline" (click)="closeRatingModal()" [disabled]="isLoading()">{{ t('cancel') }}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading() || !ratingForm().content.trim()">
+              @if (isLoading()) {
+                <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+              }
+              {{ t('submitRating') }}
+            </button>
+          </footer>
+        </form>
+      </dialog>
+    }
+  }
+
+  <app-toast [toasts]="toasts" (close)="onToastClose($event)"></app-toast>
 </div>
