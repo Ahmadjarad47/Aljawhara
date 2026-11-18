@@ -19,13 +19,28 @@
 <div class="account-shell" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
   <a class="shell-skip-link" href="#account-content">{{ t('skipToContent') }}</a>
 
-  <!-- Mobile header -->
-  <header class="shell-topbar">
-    <a class="shell-brand" routerLink="/" dir="ltr" [attr.aria-label]="t('homepage')">
-      <img src="/logo.png" alt="Al Jawhara" width="132" height="40" />
-    </a>
-    <span class="shell-topbar-title">{{ t('dashboard') }}</span>
-  </header>
+  <!-- Mobile header + section tabs (the store's own bottom nav stays the primary nav) -->
+  <div class="shell-mobile-nav">
+    <header class="shell-topbar">
+      <a class="shell-brand" routerLink="/" dir="ltr" [attr.aria-label]="t('homepage')">
+        <img src="/logo.png" alt="Al Jawhara" width="132" height="40" />
+      </a>
+      <span class="shell-topbar-title">{{ t('dashboard') }}</span>
+    </header>
+    <nav class="shell-section-tabs" [attr.aria-label]="t('accountSections')">
+      @for (item of navItems; track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="is-active"
+          #rlaTab="routerLinkActive"
+          [attr.aria-current]="rlaTab.isActive ? 'page' : null"
+        >
+          <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
+          <span>{{ t(item.key) }}</span>
+        </a>
+      }
+    </nav>
+  </div>
 
   <!-- Desktop sidebar -->
   <aside class="shell-sidebar">
@@ -60,23 +75,4 @@
   <main id="account-content" class="shell-content" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
-
-  <!-- Mobile bottom navigation -->
-  <nav class="shell-bottom-nav" [attr.aria-label]="t('accountSections')">
-    @for (item of navItems; track item.link) {
-      <a
-        [routerLink]="item.link"
-        routerLinkActive="is-active"
-        #rlaBottom="routerLinkActive"
-        [attr.aria-current]="rlaBottom.isActive ? 'page' : null"
-      >
-        <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
-        <span>{{ t(item.key) }}</span>
-      </a>
-    }
-    <a routerLink="/">
-      <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: 'home' }"></ng-container>
-      <span>{{ t('homepage') }}</span>
-    </a>
-  </nav>
 </div>

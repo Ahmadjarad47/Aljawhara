@@ -135,21 +135,22 @@
 .shell-nav a:focus-visible,
 .shell-store-link:focus-visible,
 .shell-brand:focus-visible,
-.shell-bottom-nav a:focus-visible {
+.shell-section-tabs a:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .shell-content {
   min-width: 0;
+  /* same tint as .account-page, so short pages don't leave a seam */
+  background: color-mix(in srgb, var(--color-base-200) 35%, var(--color-base-100));
 }
 .shell-content:focus {
   outline: none;
 }
 
 /* Mobile chrome is hidden on desktop */
-.shell-topbar,
-.shell-bottom-nav {
+.shell-mobile-nav {
   display: none;
 }
 
@@ -160,75 +161,78 @@
   .shell-sidebar {
     display: none;
   }
+  /* The store's own mobile bottom bar stays the primary navigation, so the
+     account sections sit in a tab strip under the header rather than in a
+     second bottom bar. */
+  .shell-mobile-nav {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--shell-line);
+    background: var(--color-base-100);
+  }
   .shell-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 20;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--shell-line);
-    background: var(--color-base-100);
   }
   .shell-topbar-title {
     font-size: 14px;
     font-weight: 650;
   }
   .shell-content {
-    /* room for the bottom nav */
-    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+    /* clear the store's fixed mobile bottom bar */
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
-  .shell-bottom-nav {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    z-index: 30;
-    padding-bottom: env(safe-area-inset-bottom);
-    border-top: 1px solid var(--shell-line);
-    background: var(--color-base-100);
-  }
-  .shell-bottom-nav a {
+  .shell-section-tabs {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: 4px;
-    min-height: 60px;
-    padding: 8px 4px;
+    padding: 0 10px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .shell-section-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .shell-section-tabs a {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1 0 auto;
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: 11px;
     color: var(--shell-muted);
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 550;
-    line-height: 1.3;
-    text-align: center;
+    white-space: nowrap;
     text-decoration: none;
   }
-  .shell-bottom-nav a svg {
-    width: 21px;
-    height: 21px;
+  .shell-section-tabs a svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
   }
-  .shell-bottom-nav a span {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .shell-bottom-nav a.is-active {
+  .shell-section-tabs a.is-active {
     position: relative;
-    color: var(--color-primary);
+    border-color: var(--shell-line);
+    background: var(--color-base-200);
+    color: var(--color-base-content);
     font-weight: 700;
   }
-  /* Active marker — not colour alone */
-  .shell-bottom-nav a.is-active::before {
+  /* underline marker, so the active tab does not read by colour alone */
+  .shell-section-tabs a.is-active::after {
     content: '';
     position: absolute;
-    top: 0;
-    inset-inline: 22%;
+    inset-inline: 14px;
+    bottom: 5px;
     height: 3px;
-    border-radius: 0 0 3px 3px;
+    border-radius: 3px;
     background: var(--color-primary);
   }
 }
