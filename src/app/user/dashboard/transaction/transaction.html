@@ -9,7 +9,7 @@
     </div>
   </header>
 
-  <form class="transaction-toolbar" role="search" (ngSubmit)="onSearch()">
+  <form class="account-toolbar" role="search" (ngSubmit)="onSearch()">
     <label class="account-search">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="m21 21-5-5"/><circle cx="10" cy="10" r="7"/></svg>
       <input type="search" name="orderSearch" [placeholder]="t('searchOrders')" [attr.aria-label]="t('searchOrders')" [ngModel]="orderNumber()" (ngModelChange)="orderNumber.set($event)" />
@@ -30,10 +30,16 @@
   <section [attr.aria-label]="t('myTransactions')" [attr.aria-busy]="isLoading()">
     @if (isLoading()) {
       <div class="account-loading" role="status"><span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span><span>{{t('loadingTransactions')}}</span></div>
+    } @else if (loadError()) {
+      <div class="account-error" role="alert">
+        <span class="account-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5"/><path d="M12 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <h2>{{t('loadErrorTitle')}}</h2><p>{{t('loadErrorHint')}}</p>
+        <button type="button" class="btn btn-outline" (click)="retry()">{{t('retry')}}</button>
+      </div>
     } @else {
       @let transactions = (transactions$ | async) ?? [];
       @if (transactions.length) {
-        <div class="transactions-desktop">
+        <div class="account-table">
           <div class="overflow-x-auto">
             <table class="table table-zebra">
               <thead><tr><th>{{t('order')}}</th><th>{{t('customer')}}</th><th>{{t('amount')}}</th><th>{{t('paymentMethod')}}</th><th>{{t('status')}}</th><th>{{t('transactionDate')}}</th><th>{{t('processed')}}</th><th>{{t('reference')}}</th><th>{{t('refunded')}}</th></tr></thead>
@@ -55,7 +61,7 @@
             </table>
           </div>
         </div>
-        <div class="transactions-mobile">
+        <div class="account-card-list">
           @for (transaction of transactions; track transaction.id) {
             <article class="account-card transaction-card">
               <div class="transaction-card-header">
@@ -98,7 +104,7 @@
   </section>
 
   @if (getTotalPages() > 1) {
-    <nav class="transaction-pagination" [attr.aria-label]="t('pages')">
+    <nav class="account-pagination" [attr.aria-label]="t('pages')">
       <button class="btn btn-outline" (click)="onPageChange(getCurrentPage() - 1)" [disabled]="getCurrentPage() <= 1 || isLoading()">{{t('previous')}}</button>
       <span aria-live="polite">{{getCurrentPage()}} <span class="account-hint">{{t('of')}}</span> {{getTotalPages()}}</span>
       <button class="btn btn-outline" (click)="onPageChange(getCurrentPage() + 1)" [disabled]="getCurrentPage() >= getTotalPages() || isLoading()">{{t('next')}}</button>
@@ -120,7 +126,7 @@
             <div class="account-field"><label for="transaction-end-date">{{t('endDate')}}</label><input id="transaction-end-date" name="endDate" type="date" class="input" [ngModel]="endDate()" (ngModelChange)="endDate.set($event || null)" /></div>
             <div class="account-field"><label for="transaction-min-amount">{{t('minAmount')}}</label><input id="transaction-min-amount" name="minAmount" type="number" inputmode="decimal" min="0" step="0.001" class="input" [ngModel]="minAmount()" (ngModelChange)="minAmount.set($event)" /></div>
             <div class="account-field"><label for="transaction-max-amount">{{t('maxAmount')}}</label><input id="transaction-max-amount" name="maxAmount" type="number" inputmode="decimal" min="0" step="0.001" class="input" [ngModel]="maxAmount()" (ngModelChange)="maxAmount.set($event)" /></div>
-            <div class="account-field"><label for="transaction-status">{{t('status')}}</label><input id="transaction-status" name="status" class="input" [ngModel]="status()" (ngModelChange)="status.set($event)" /></div>
+            <div class="account-field"><label for="transaction-status">{{t('status')}}</label><select id="transaction-status" name="status" class="select" [ngModel]="status()" (ngModelChange)="status.set($event)"><option value="">{{t('all')}}</option>@for (option of statusOptions; track option) { <option [value]="option">{{getStatusText(option)}}</option> }</select></div>
             <div class="account-field"><label for="transaction-refunded">{{t('refunded')}}</label><select id="transaction-refunded" name="refunded" class="select" [ngModel]="isRefunded()" (ngModelChange)="isRefunded.set($event)"><option [ngValue]="null">{{t('all')}}</option><option [ngValue]="true">{{t('yes')}}</option><option [ngValue]="false">{{t('no')}}</option></select></div>
           </div>
           <details class="transaction-advanced">

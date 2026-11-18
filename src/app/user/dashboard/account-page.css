@@ -499,6 +499,9 @@
   .account-toolbar {
     flex-wrap: wrap;
   }
+  .account-search {
+    flex-basis: 100%;
+  }
 }
 
 @media (max-width: 599px) {

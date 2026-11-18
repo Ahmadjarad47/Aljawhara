@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, afterRenderEffect, viewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import arabicLocale from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
@@ -7,23 +7,25 @@ import { ToastService } from '../../../services/toast.service';
 import { ServiceTransaction } from './service-transaction';
 import { Observable, map } from 'rxjs';
 import { PaymentMethod, TransactionAdvancedDto, TransactionFilterDto, PagedResult } from './transaction.models';
+import { LanguageService } from '../../../services/language.service';
 
 registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-transaction',
-  standalone: true,
+
   imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './transaction.html',
-  styleUrls: ['../account-page.css', './transaction.css']
+  styleUrls: ['../account-page.css', './transaction.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Transaction implements OnInit, OnDestroy {
+export class Transaction {
   public service = inject(ServiceTransaction);
   public toastService = inject(ToastService);
-  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
 
   // Language management
-  currentLanguage = signal<'ar' | 'en'>('ar');
+  readonly currentLanguage = inject(LanguageService).current;
 
   // Translations object
   translations = {
@@ -80,7 +82,10 @@ export class Transaction implements OnInit, OnDestroy {
       reference: 'المرجع',
       noTransactionsFound: 'لم يتم العثور على معاملات',
       error: 'خطأ',
-      failedToLoad: 'فشل تحميل المعاملات'
+      failedToLoad: 'فشل تحميل المعاملات',
+      retry: 'إعادة المحاولة',
+      loadErrorTitle: 'تعذّر تحميل المعاملات',
+      loadErrorHint: 'تحقّق من اتصالك بالإنترنت ثم أعد المحاولة.'
     },
     en: {
       myTransactions: 'My Transactions',
@@ -135,7 +140,10 @@ export class Transaction implements OnInit, OnDestroy {
       reference: 'Reference',
       noTransactionsFound: 'No transactions found',
       error: 'Error',
-      failedToLoad: 'Failed to load transactions'
+      failedToLoad: 'Failed to load transactions',
+      retry: 'Try again',
+      loadErrorTitle: 'We could not load your transactions',
+      loadErrorHint: 'Check your internet connection and try again.'
     }
   };
 
@@ -209,7 +217,11 @@ export class Transaction implements OnInit, OnDestroy {
 
   // UI state
   isLoading = signal(false);
+  loadError = signal(false);
   showFilters = signal(false);
+
+  /** Values the API accepts for the status filter (see normalizeStatus). */
+  readonly statusOptions = ['Succeeded', 'Pending', 'Failed', 'Cancelled'] as const;
   private filtersDialog = viewChild<ElementRef<HTMLDialogElement>>('filtersDialog');
   private appliedFilters = signal<TransactionFilterDto>({ pageSize: 10, sortBy: 'TransactionDate', sortDirection: 'desc' });
   activeFilterCount = computed(() => Object.entries(this.appliedFilters())
@@ -265,47 +277,22 @@ export class Transaction implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    // Load saved language
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang) {
-      this.currentLanguage.set(savedLang);
-    }
-
-    // Listen for language changes from other tabs/windows
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language') {
-        const newLang = e.newValue as 'ar' | 'en' | null;
-        if (newLang) {
-          this.currentLanguage.set(newLang);
-        }
-      }
-    });
-
-    // Poll for language changes in the same window
-    this.languageCheckInterval = setInterval(() => {
-      const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (savedLang && savedLang !== this.currentLanguage()) {
-        this.currentLanguage.set(savedLang);
-      }
-    }, 100);
-  }
-
-  ngOnDestroy(): void {
-    if (this.languageCheckInterval) {
-      clearInterval(this.languageCheckInterval);
-    }
-  }
-
   loadTransactions(filters: TransactionFilterDto) {
     this.isLoading.set(true);
+    this.loadError.set(false);
     return this.service.getTransactions(filters).subscribe({
       next: (_result: PagedResult<TransactionAdvancedDto>) => this.isLoading.set(false),
       error: () => {
         this.isLoading.set(false);
+        this.loadError.set(true);
         this.toastService.error(this.t('error'), this.t('failedToLoad'));
       }
     });
+  }
+
+  /** Re-runs the current query after a failed load. */
+  retry(): void {
+    this.loadTransactions(this.filters$());
   }
 
   getCurrentPage(): number {
