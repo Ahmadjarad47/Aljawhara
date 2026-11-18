@@ -1,67 +1,82 @@
-<div class="drawer lg:drawer-open">
-    <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content">
-      <!-- Mobile top bar with menu button -->
-      <div class="flex items-center justify-between px-3 py-2 bg-base-100 border-b border-base-300 lg:hidden">
-        <label for="my-drawer-4" class="btn btn-ghost btn-circle drawer-button" [attr.aria-label]="t('open')">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-5 my-1.5">
-            <path d="M4 6h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 18h16"></path>
-          </svg>
-        </label>
-        <span class="font-semibold text-sm">{{t('dashboard')}}</span>
-      </div>
-      <!-- Page content here -->
-      <router-outlet></router-outlet>
-    </div>
-  
-    <div class="drawer-side is-drawer-close:overflow-visible">
-      <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-      <div class="is-drawer-close:w-14 is-drawer-open:w-64 bg-base-200 flex flex-col items-start min-h-full">
-       <img src="logo.png" alt="logo" class="w-full h-12 object-contain">
-        <ul class="menu w-full grow">
-  
-          <!-- Homepage -->
-          <li>
-            <button (click)="navigateHome()" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" [attr.data-tip]="t('homepage')">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-4 my-1.5"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-              <span class="is-drawer-close:hidden">{{t('homepage')}}</span>
-            </button>
-          </li>
+<!-- Icon set, used by both the sidebar and the mobile bottom nav -->
+<ng-template #navIcon let-icon>
+  @switch (icon) {
+    @case ('home') {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    }
+    @case ('orders') {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    }
+    @case ('transactions') {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+    }
+    @case ('settings') {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+    }
+  }
+</ng-template>
 
-          <!-- My Orders -->
-          <li>
-            <button (click)="navigateTo('orders')" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" [attr.data-tip]="t('myOrders')" routerLinkActive="active">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-4 my-1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-              <span class="is-drawer-close:hidden">{{t('myOrders')}}</span>
-            </button>
-          </li>
+<div class="account-shell" [dir]="currentLanguage() === 'ar' ? 'rtl' : 'ltr'" [attr.lang]="currentLanguage()">
+  <a class="shell-skip-link" href="#account-content">{{ t('skipToContent') }}</a>
 
-          <!-- My Transactions -->
+  <!-- Mobile header -->
+  <header class="shell-topbar">
+    <a class="shell-brand" routerLink="/" dir="ltr" [attr.aria-label]="t('homepage')">
+      <img src="/logo.png" alt="Al Jawhara" width="132" height="40" />
+    </a>
+    <span class="shell-topbar-title">{{ t('dashboard') }}</span>
+  </header>
+
+  <!-- Desktop sidebar -->
+  <aside class="shell-sidebar">
+    <a class="shell-brand" routerLink="/" dir="ltr" [attr.aria-label]="t('homepage')">
+      <img src="/logo.png" alt="Al Jawhara" width="160" height="48" />
+    </a>
+
+    <nav class="shell-nav" [attr.aria-label]="t('accountSections')">
+      <ul>
+        @for (item of navItems; track item.link) {
           <li>
-            <button (click)="navigateTo('transactions')" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" [attr.data-tip]="t('myTransactions')" routerLinkActive="active">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-4 my-1.5"><path d="M12 1v22"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              <span class="is-drawer-close:hidden">{{t('myTransactions')}}</span>
-            </button>
+            <a
+              [routerLink]="item.link"
+              routerLinkActive="is-active"
+              #rla="routerLinkActive"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
+            >
+              <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
+              <span>{{ t(item.key) }}</span>
+            </a>
           </li>
-  
-          <!-- Settings -->
-          <li>
-            <button (click)="navigateTo('settings')" class="is-drawer-close:tooltip is-drawer-close:tooltip-right" [attr.data-tip]="t('settings')">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-4 my-1.5"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
-              <span class="is-drawer-close:hidden">{{t('settings')}}</span>
-            </button>
-          </li>
-        </ul>
-  
-        <!-- button to open/close drawer -->
-        <div class="m-2 is-drawer-close:tooltip is-drawer-close:tooltip-right" [attr.data-tip]="t('open')">
-          <label for="my-drawer-4" class="btn btn-ghost btn-circle drawer-button is-drawer-open:rotate-y-180">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="inline-block size-4 my-1.5"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
-          </label>
-        </div>
-  
-      </div>
-    </div>
-  </div>
+        }
+      </ul>
+    </nav>
+
+    <a class="shell-store-link" routerLink="/">
+      <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: 'home' }"></ng-container>
+      <span>{{ t('backToStore') }}</span>
+    </a>
+  </aside>
+
+  <main id="account-content" class="shell-content" tabindex="-1">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Mobile bottom navigation -->
+  <nav class="shell-bottom-nav" [attr.aria-label]="t('accountSections')">
+    @for (item of navItems; track item.link) {
+      <a
+        [routerLink]="item.link"
+        routerLinkActive="is-active"
+        #rlaBottom="routerLinkActive"
+        [attr.aria-current]="rlaBottom.isActive ? 'page' : null"
+      >
+        <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: item.icon }"></ng-container>
+        <span>{{ t(item.key) }}</span>
+      </a>
+    }
+    <a routerLink="/">
+      <ng-container [ngTemplateOutlet]="navIcon" [ngTemplateOutletContext]="{ $implicit: 'home' }"></ng-container>
+      <span>{{ t('homepage') }}</span>
+    </a>
+  </nav>
+</div>
