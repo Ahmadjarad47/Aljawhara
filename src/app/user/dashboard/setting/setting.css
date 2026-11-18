@@ -1,6 +1,4 @@
-.account-tabs { display: flex; gap: 6px; width: min(100%, 460px); padding: 5px; margin-bottom: 22px; border: 1px solid var(--account-line); border-radius: 14px; background: var(--color-base-200); }
-.account-tabs button { display: flex; align-items: center; justify-content: center; flex: 1; gap: 8px; min-width: 0; min-height: 46px; padding: 10px 8px; border: 1px solid transparent; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 550; color: var(--account-muted); cursor: pointer; }
-.account-tabs .is-active { border-color: var(--account-line); background: var(--color-base-100); color: var(--color-base-content); box-shadow: 0 2px 5px rgb(0 0 0 / 4%); }
+/* Settings-specific styles. Tabs, cards, fields, modals and states come from account-page.css. */
 .settings-profile-layout { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr); gap: 22px; align-items: start; }
 .profile-identity { display: flex; align-items: center; gap: 14px; padding-bottom: 24px; }
 .profile-identity > div { min-width: 0; }
@@ -46,7 +44,6 @@
   .profile-edit-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 @media (max-width: 599px) {
-  .account-tabs { width: 100%; margin-bottom: 18px; }
   .settings-profile-layout, .profile-edit-sections, .settings-address-list { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .profile-identity { gap: 12px; padding-bottom: 18px; }
   .profile-avatar { width: 50px; height: 50px; border-radius: 15px; font-size: 23px; }

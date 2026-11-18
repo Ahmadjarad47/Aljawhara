@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, afterRenderEffect, viewChild, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ElementRef, afterRenderEffect, viewChild, inject, signal } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import arabicLocale from '@angular/common/locales/ar';
 import { finalize } from 'rxjs';
@@ -16,28 +16,32 @@ import { ADDRESS_DETAIL_FIELDS, createAddressForm, isShippingAddressValid, toAdd
 import { PhoneInputComponent } from '../../../core/phone/phone-input';
 import { normalizePhone } from '../../../core/phone/phone-number';
 import { CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js/max';
+import { LanguageService } from '../../../services/language.service';
 
 registerLocaleData(arabicLocale);
 
 @Component({
   selector: 'app-setting',
-  standalone: true,
+
   imports: [CommonModule, FormsModule, ToastComponent, AddressAutocompleteComponent, PhoneInputComponent],
   templateUrl: './setting.html',
-  styleUrls: ['../account-page.css', './setting.css']
+  styleUrls: ['../account-page.css', './setting.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Setting implements OnInit, OnDestroy {
+export class Setting implements OnInit {
   private settingService = inject(SettingService);
   public toastService = inject(ToastService);
-  private languageCheckInterval?: ReturnType<typeof setInterval>;
+
   private addressDialog = viewChild<ElementRef<HTMLDialogElement>>('addressDialog');
+  private deleteDialog = viewChild<ElementRef<HTMLDialogElement>>('deleteDialog');
   isSavingUsername = signal(false);
   isSavingPhone = signal(false);
 
   constructor() {
     afterRenderEffect(() => {
-      const dialog = this.addressDialog()?.nativeElement;
-      if (dialog && !dialog.open) dialog.showModal();
+      for (const dialog of [this.addressDialog(), this.deleteDialog()]) {
+        if (dialog && !dialog.nativeElement.open) dialog.nativeElement.showModal();
+      }
     });
   }
 
@@ -66,7 +70,7 @@ export class Setting implements OnInit, OnDestroy {
   }
 
   // Language management
-  currentLanguage = signal<'ar' | 'en'>('ar');
+  readonly currentLanguage = inject(LanguageService).current;
 
   // Translations object
   translations = {
@@ -156,6 +160,11 @@ export class Setting implements OnInit, OnDestroy {
       deletingAddress: 'جاري حذف العنوان...',
       addressDeleted: 'تم حذف العنوان',
       failedToDeleteAddress: 'فشل حذف العنوان',
+      confirmDeleteTitle: 'حذف هذا العنوان؟',
+      confirmDeleteBody: 'سيُحذف هذا العنوان نهائياً ولا يمكن التراجع عن ذلك.',
+      keepAddress: 'الاحتفاظ بالعنوان',
+      addressesErrorTitle: 'تعذّر تحميل العناوين',
+      addressesErrorHint: 'تحقّق من اتصالك بالإنترنت ثم أعد المحاولة.',
       selectCity: 'اختر المنطقة',
       selectState: 'اختر المحافظة'
     },
@@ -245,6 +254,11 @@ export class Setting implements OnInit, OnDestroy {
       deletingAddress: 'Deleting address...',
       addressDeleted: 'Address deleted',
       failedToDeleteAddress: 'Failed to delete address',
+      confirmDeleteTitle: 'Delete this address?',
+      confirmDeleteBody: 'This address will be removed permanently and cannot be recovered.',
+      keepAddress: 'Keep address',
+      addressesErrorTitle: 'We could not load your addresses',
+      addressesErrorHint: 'Check your internet connection and try again.',
       selectCity: 'Select Area',
       selectState: 'Select Governorate'
     }
@@ -279,44 +293,17 @@ export class Setting implements OnInit, OnDestroy {
 
   // Addresses
   isLoadingAddresses = signal(false);
+  addressesError = signal(false);
   addresses = signal<UserAddressDto[]>([]);
   showAddAddress = signal(false);
   showEditAddress = signal(false);
+  pendingDelete = signal<UserAddressDto | null>(null);
+  isDeletingAddress = signal(false);
   newAddress: CreateAddressDto = { ...createAddressForm(), isDefault: false };
   editAddress: UpdateAddressDto = { ...createAddressForm(), id: 0 };
   ngOnInit(): void {
-    // Load saved language
-    const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-    if (savedLang) {
-      this.currentLanguage.set(savedLang);
-    }
-
-    // Listen for language changes from other tabs/windows
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language') {
-        const newLang = e.newValue as 'ar' | 'en' | null;
-        if (newLang) {
-          this.currentLanguage.set(newLang);
-        }
-      }
-    });
-
-    // Poll for language changes in the same window
-    this.languageCheckInterval = setInterval(() => {
-      const savedLang = localStorage.getItem('language') as 'ar' | 'en' | null;
-      if (savedLang && savedLang !== this.currentLanguage()) {
-        this.currentLanguage.set(savedLang);
-      }
-    }, 100);
-
     this.loadUser();
     this.loadAddresses();
-  }
-
-  ngOnDestroy(): void {
-    if (this.languageCheckInterval) {
-      clearInterval(this.languageCheckInterval);
-    }
   }
 
   // User methods
@@ -398,15 +385,19 @@ export class Setting implements OnInit, OnDestroy {
   // Address methods
   loadAddresses() {
     this.isLoadingAddresses.set(true);
+    this.addressesError.set(false);
     this.settingService.getAddresses().subscribe({
       next: (res) => {
         if (res.success) {
           this.addresses.set(res.data || []);
+        } else {
+          this.addressesError.set(true);
         }
         this.isLoadingAddresses.set(false);
       },
       error: () => {
         this.isLoadingAddresses.set(false);
+        this.addressesError.set(true);
         this.toastService.error(this.t('error'), this.t('failedToLoadAddresses'));
       }
     });
@@ -480,9 +471,32 @@ export class Setting implements OnInit, OnDestroy {
     });
   }
 
-  deleteAddress(addressId: number) {
+  /** Deleting an address cannot be undone, so it goes through a confirmation step. */
+  requestDeleteAddress(address: UserAddressDto): void {
+    this.pendingDelete.set(address);
+  }
+
+  closeDeleteConfirm(event?: Event): void {
+    event?.preventDefault();
+    if (this.isDeletingAddress()) return;
+    this.deleteDialog()?.nativeElement.close();
+    this.pendingDelete.set(null);
+  }
+
+  confirmDeleteAddress(): void {
+    const address = this.pendingDelete();
+    if (!address || this.isDeletingAddress()) return;
+    this.deleteDialog()?.nativeElement.close();
+    this.pendingDelete.set(null);
+    this.deleteAddress(address.id);
+  }
+
+  private deleteAddress(addressId: number) {
+    this.isDeletingAddress.set(true);
     const toastId = this.toastService.loading(this.t('deleting'), this.t('deletingAddress'));
-    this.settingService.deleteAddress(addressId).subscribe({
+    this.settingService.deleteAddress(addressId).pipe(
+      finalize(() => this.isDeletingAddress.set(false))
+    ).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastService.updateToSuccess(toastId, this.t('success'), this.t('addressDeleted'));
