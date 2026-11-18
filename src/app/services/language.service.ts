@@ -1,4 +1,4 @@
-import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export type AppLanguage = 'ar' | 'en';
@@ -17,15 +17,29 @@ export class LanguageService {
 
   constructor() {
     if (!this.isBrowser) return;
+
     this.read();
-    window.addEventListener('languagechange', () => this.read());
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'language') this.read();
+    const onLanguageChange = () => this.read();
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === 'language') this.read();
+    };
+    window.addEventListener('languagechange', onLanguageChange);
+    window.addEventListener('storage', onStorage);
+
+    inject(DestroyRef).onDestroy(() => {
+      window.removeEventListener('languagechange', onLanguageChange);
+      window.removeEventListener('storage', onStorage);
     });
   }
 
   private read(): void {
-    const lang = localStorage.getItem('language');
+    // Storage can be blocked (private mode, blocked site data).
+    let lang: string | null = null;
+    try {
+      lang = localStorage.getItem('language');
+    } catch {
+      return;
+    }
     if (lang === 'ar' || lang === 'en') this.current.set(lang);
   }
 }
